@@ -99,8 +99,19 @@ if not IS_VERCEL:
 @app.route("/")
 def home():
     data = load_jobs()
-    featured = data.get("jobs", [])[:6]
-    return render_template("index.html", featured_jobs=featured, last_updated=data.get("last_updated"))
+    jobs = data.get("jobs", [])
+    featured = jobs[:6]
+    # Stats for the homepage
+    companies = set(j.get("company", "") for j in jobs)
+    cities = set(j.get("location_city", "") for j in jobs if j.get("location_city"))
+    return render_template(
+        "index.html",
+        featured_jobs=featured,
+        last_updated=data.get("last_updated"),
+        total_jobs=len(jobs),
+        total_companies=len(companies),
+        total_cities=len(cities),
+    )
 
 
 @app.route("/jobs")
@@ -354,6 +365,121 @@ def api_locations():
     # Convert sets to sorted lists
     result = {k: sorted(v) for k, v in sorted(country_cities.items())}
     return jsonify(result)
+
+
+@app.route("/api/autocomplete/locations")
+def api_autocomplete_locations():
+    """Return a flat list of all unique cities, states, countries for autocomplete."""
+    # Comprehensive Indian cities – always available even without scraped jobs
+    INDIAN_CITIES = [
+        # Andhra Pradesh
+        "Visakhapatnam", "Vijayawada", "Guntur", "Tirupati", "Rajahmundry",
+        "Kakinada", "Nellore", "Amaravati",
+        # Arunachal Pradesh
+        "Itanagar",
+        # Assam
+        "Guwahati", "Dibrugarh", "Silchar",
+        # Bihar
+        "Patna", "Gaya", "Muzaffarpur", "Bhagalpur",
+        # Chhattisgarh
+        "Raipur", "Bhilai", "Bilaspur",
+        # Delhi
+        "Delhi NCR", "New Delhi",
+        # Goa
+        "Panaji", "Margao", "Vasco da Gama",
+        # Gujarat
+        "Ahmedabad", "Surat", "Vadodara", "Rajkot", "Gandhinagar", "Bhavnagar",
+        # Haryana
+        "Gurugram", "Faridabad", "Karnal", "Ambala", "Hisar", "Panipat", "Rohtak",
+        # Himachal Pradesh
+        "Shimla", "Dharamshala", "Manali",
+        # Jharkhand
+        "Ranchi", "Jamshedpur", "Dhanbad", "Bokaro",
+        # Karnataka
+        "Bangalore", "Mysore", "Hubli", "Mangalore", "Belgaum", "Davangere",
+        # Kerala
+        "Kochi", "Thiruvananthapuram", "Kozhikode", "Thrissur", "Kollam",
+        "Palakkad", "Kannur",
+        # Madhya Pradesh
+        "Indore", "Bhopal", "Jabalpur", "Gwalior", "Ujjain",
+        # Maharashtra
+        "Mumbai", "Pune", "Nagpur", "Nashik", "Aurangabad", "Thane",
+        "Navi Mumbai", "Solapur", "Kolhapur",
+        # Manipur
+        "Imphal",
+        # Meghalaya
+        "Shillong",
+        # Mizoram
+        "Aizawl",
+        # Nagaland
+        "Kohima", "Dimapur",
+        # Odisha
+        "Bhubaneswar", "Cuttack", "Rourkela",
+        # Punjab
+        "Chandigarh", "Ludhiana", "Amritsar", "Jalandhar", "Patiala",
+        "Bathinda", "Mohali",
+        # Rajasthan
+        "Jaipur", "Jodhpur", "Udaipur", "Kota", "Ajmer", "Bikaner",
+        # Sikkim
+        "Gangtok",
+        # Tamil Nadu
+        "Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem",
+        "Tirunelveli", "Erode", "Vellore", "Thoothukudi", "Dindigul",
+        "Thanjavur", "Hosur", "Nagercoil", "Kanchipuram", "Kumbakonam",
+        "Karur", "Tirupur", "Sivakasi",
+        # Telangana
+        "Hyderabad", "Warangal", "Karimnagar", "Nizamabad",
+        # Tripura
+        "Agartala",
+        # Uttar Pradesh
+        "Noida", "Lucknow", "Greater Noida", "Kanpur", "Agra", "Varanasi",
+        "Prayagraj", "Meerut", "Ghaziabad", "Bareilly",
+        # Uttarakhand
+        "Dehradun", "Haridwar", "Rishikesh",
+        # West Bengal
+        "Kolkata", "Howrah", "Durgapur", "Siliguri", "Asansol",
+        # Union Territories
+        "Pondicherry", "Puducherry", "Karaikal", "Port Blair", "Daman",
+        "Silvassa", "Srinagar", "Jammu", "Leh",
+        # Remote
+        "Remote",
+    ]
+
+    INDIAN_STATES = [
+        "Andhra Pradesh", "Arunachal Pradesh", "Assam", "Bihar", "Chhattisgarh",
+        "Delhi", "Goa", "Gujarat", "Haryana", "Himachal Pradesh", "Jharkhand",
+        "Karnataka", "Kerala", "Madhya Pradesh", "Maharashtra", "Manipur",
+        "Meghalaya", "Mizoram", "Nagaland", "Odisha", "Punjab", "Rajasthan",
+        "Sikkim", "Tamil Nadu", "Telangana", "Tripura", "Uttar Pradesh",
+        "Uttarakhand", "West Bengal", "Puducherry", "Jammu & Kashmir", "Ladakh",
+        "Andaman & Nicobar", "Chandigarh", "Lakshadweep",
+        "Dadra & Nagar Haveli and Daman & Diu",
+    ]
+
+    data = load_jobs()
+    jobs = data.get("jobs", [])
+    suggestions = set(INDIAN_CITIES + INDIAN_STATES)
+    for j in jobs:
+        city = j.get("location_city", "").strip()
+        state = j.get("location_state", "").strip()
+        country = j.get("location_country", "").strip()
+        loc = j.get("location", "").strip()
+        if city:
+            suggestions.add(city)
+        if state:
+            suggestions.add(state)
+        if country:
+            suggestions.add(country)
+        if loc and loc not in ("Remote",):
+            suggestions.add(loc)
+    q = request.args.get("q", "").strip().lower()
+    results = sorted(suggestions)
+    if q:
+        # Prioritize starts-with, then contains
+        starts = [s for s in results if s.lower().startswith(q)]
+        contains = [s for s in results if q in s.lower() and s not in starts]
+        results = starts + contains
+    return jsonify(results[:20])
 
 
 # ── Error Handlers ─────────────────────────────────────────────────────

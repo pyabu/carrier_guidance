@@ -8,7 +8,7 @@
     <div class="container">
         <div class="hero-content" data-aos="fade-up">
             <span class="section-badge">🚀 #1 Career Platform for Indian Students & Professionals</span>
-            <h1>Find Your Dream <span>Career in India</span></h1>
+            <h1>Find Your Dream <span id="typedTitle">Career in India</span><span class="typed-cursor">|</span></h1>
             <p>Discover thousands of job opportunities across Bangalore, Mumbai, Delhi NCR, Hyderabad & more. Get AI-powered career guidance, build your resume, and connect with top Indian & MNC employers — all in one place.</p>
             
             <div class="hero-search" data-aos="fade-up" data-aos-delay="200">
@@ -18,7 +18,7 @@
                 </div>
                 <div class="search-field">
                     <i class="fas fa-map-marker-alt"></i>
-                    <input type="text" id="heroLocation" placeholder="Bangalore, Mumbai, Remote..." />
+                    <input type="text" id="heroLocation" placeholder="Bangalore, Mumbai, Remote..." data-autocomplete="location" autocomplete="off" />
                 </div>
                 <button class="btn btn-primary" onclick="heroSearch()">
                     <i class="fas fa-search"></i> Search Jobs
@@ -27,16 +27,16 @@
 
             <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
                 <div class="stat">
-                    <div class="stat-number" id="totalJobs">10,000+</div>
+                    <div class="stat-number" id="totalJobs">{{ total_jobs or '10,000' }}+</div>
                     <div class="stat-label">Active Jobs in India</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">500+</div>
+                    <div class="stat-number">{{ total_companies or '500' }}+</div>
                     <div class="stat-label">Indian & MNC Companies</div>
                 </div>
                 <div class="stat">
-                    <div class="stat-number">50,000+</div>
-                    <div class="stat-label">Indian Career Seekers</div>
+                    <div class="stat-number">{{ total_cities or '50' }}+</div>
+                    <div class="stat-label">Cities Covered</div>
                 </div>
                 <div class="stat">
                     <div class="stat-number">95%</div>

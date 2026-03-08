@@ -1,6 +1,6 @@
 /* ════════════════════════════════════════════════════════════════════════
    CareerPath Pro – Main JavaScript
-   Handles: Dark/Light Mode, Navbar, Animations, Toast, Search, etc.
+   Handles: Autocomplete, Dark/Light Mode, Navbar, Animations, etc.
    ════════════════════════════════════════════════════════════════════════ */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -8,6 +8,8 @@ document.addEventListener('DOMContentLoaded', () => {
     initNavbar();
     initAOS();
     initMobileMenu();
+    initAutocomplete();
+    initScrollProgress();
 });
 
 /* ── Dark / Light Theme Toggle ───────────────────────────────────────── */
@@ -16,7 +18,6 @@ function initTheme() {
     const toggle = document.getElementById('themeToggle');
     const saved = localStorage.getItem('theme') || 'light';
     setTheme(saved);
-
     toggle?.addEventListener('click', () => {
         const current = document.documentElement.getAttribute('data-theme');
         const next = current === 'dark' ? 'light' : 'dark';
@@ -28,9 +29,7 @@ function initTheme() {
 function setTheme(theme) {
     document.documentElement.setAttribute('data-theme', theme);
     const icon = document.querySelector('#themeToggle i');
-    if (icon) {
-        icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-    }
+    if (icon) icon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
 }
 
 /* ── Navbar Scroll Effect ────────────────────────────────────────────── */
@@ -38,15 +37,27 @@ function setTheme(theme) {
 function initNavbar() {
     const navbar = document.getElementById('navbar');
     let lastScroll = 0;
-
     window.addEventListener('scroll', () => {
-        const currentScroll = window.scrollY;
-        if (currentScroll > 50) {
-            navbar?.classList.add('scrolled');
-        } else {
-            navbar?.classList.remove('scrolled');
-        }
-        lastScroll = currentScroll;
+        const cur = window.scrollY;
+        if (cur > 50) navbar?.classList.add('scrolled');
+        else navbar?.classList.remove('scrolled');
+        if (cur > 300) {
+            if (cur > lastScroll + 10) navbar?.classList.add('nav-hidden');
+            else if (cur < lastScroll - 10) navbar?.classList.remove('nav-hidden');
+        } else { navbar?.classList.remove('nav-hidden'); }
+        lastScroll = cur;
+    });
+}
+
+/* ── Scroll Progress Bar ─────────────────────────────────────────────── */
+
+function initScrollProgress() {
+    const bar = document.createElement('div');
+    bar.className = 'scroll-progress';
+    document.body.appendChild(bar);
+    window.addEventListener('scroll', () => {
+        const pct = document.documentElement.scrollHeight - window.innerHeight;
+        bar.style.width = pct > 0 ? ((window.scrollY / pct) * 100) + '%' : '0%';
     });
 }
 
@@ -55,80 +66,173 @@ function initNavbar() {
 function initMobileMenu() {
     const toggle = document.getElementById('navToggle');
     const menu = document.getElementById('navMenu');
-
     toggle?.addEventListener('click', () => {
         menu?.classList.toggle('open');
         toggle.classList.toggle('active');
-
-        // Animate hamburger
         const spans = toggle.querySelectorAll('span');
         if (menu?.classList.contains('open')) {
             spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
             spans[1].style.opacity = '0';
             spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
+            document.body.style.overflow = 'hidden';
         } else {
             spans[0].style.transform = 'none';
             spans[1].style.opacity = '1';
             spans[2].style.transform = 'none';
+            document.body.style.overflow = '';
         }
     });
-
-    // Mobile dropdown toggle
     document.querySelectorAll('.nav-dropdown > .nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) {
-                e.preventDefault();
-                link.parentElement.classList.toggle('open');
-            }
+            if (window.innerWidth <= 768) { e.preventDefault(); link.parentElement.classList.toggle('open'); }
         });
     });
-
-    // Close menu on link click
     document.querySelectorAll('.dropdown-menu a').forEach(a => {
-        a.addEventListener('click', () => {
-            menu?.classList.remove('open');
+        a.addEventListener('click', () => { menu?.classList.remove('open'); document.body.style.overflow = ''; });
+    });
+}
+
+/* ── AOS Init ────────────────────────────────────────────────────────── */
+
+function initAOS() {
+    if (typeof AOS !== 'undefined') {
+        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 60 });
+    }
+}
+
+/* ════════════════════════════════════════════════════════════════════════
+   LOCATION AUTOCOMPLETE
+   ════════════════════════════════════════════════════════════════════════ */
+
+let acDebounce = null;
+
+function initAutocomplete() {
+    const inputs = document.querySelectorAll('[data-autocomplete="location"]');
+    inputs.forEach(input => {
+        const wrapper = document.createElement('div');
+        wrapper.className = 'ac-wrapper';
+        input.parentNode.insertBefore(wrapper, input);
+        wrapper.appendChild(input);
+
+        const dropdown = document.createElement('div');
+        dropdown.className = 'ac-dropdown';
+        wrapper.appendChild(dropdown);
+
+        input.addEventListener('input', () => {
+            clearTimeout(acDebounce);
+            acDebounce = setTimeout(() => fetchSuggestions(input, dropdown), 180);
+        });
+
+        input.addEventListener('focus', () => {
+            if (input.value.trim().length > 0) fetchSuggestions(input, dropdown);
+            else showPopularCities(dropdown, input);
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!wrapper.contains(e.target)) dropdown.classList.remove('show');
+        });
+
+        input.addEventListener('keydown', (e) => {
+            const items = dropdown.querySelectorAll('.ac-item');
+            let idx = [...items].findIndex(i => i.classList.contains('ac-active'));
+            if (e.key === 'ArrowDown') {
+                e.preventDefault();
+                items[idx]?.classList.remove('ac-active');
+                idx = Math.min(idx + 1, items.length - 1);
+                items[idx]?.classList.add('ac-active');
+                items[idx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'ArrowUp') {
+                e.preventDefault();
+                items[idx]?.classList.remove('ac-active');
+                idx = Math.max(idx - 1, 0);
+                items[idx]?.classList.add('ac-active');
+                items[idx]?.scrollIntoView({ block: 'nearest' });
+            } else if (e.key === 'Enter' && idx >= 0) {
+                e.preventDefault();
+                items[idx]?.click();
+            } else if (e.key === 'Escape') {
+                dropdown.classList.remove('show');
+            }
         });
     });
 }
 
-/* ── AOS (Animate On Scroll) Init ────────────────────────────────────── */
+async function fetchSuggestions(input, dropdown) {
+    const q = input.value.trim();
+    if (q.length === 0) { showPopularCities(dropdown, input); return; }
+    try {
+        const res = await fetch(`/api/autocomplete/locations?q=${encodeURIComponent(q)}`);
+        const suggestions = await res.json();
+        renderSuggestions(dropdown, suggestions, input, q);
+    } catch (e) { dropdown.classList.remove('show'); }
+}
 
-function initAOS() {
-    if (typeof AOS !== 'undefined') {
-        AOS.init({
-            duration: 600,
-            easing: 'ease-out-cubic',
-            once: true,
-            offset: 50,
-        });
+function showPopularCities(dropdown, input) {
+    const popular = [
+        { name: 'Bangalore', icon: 'fa-fire', tag: 'Top IT Hub' },
+        { name: 'Chennai', icon: 'fa-industry', tag: 'Tamil Nadu' },
+        { name: 'Mumbai', icon: 'fa-building', tag: 'Financial Capital' },
+        { name: 'Delhi NCR', icon: 'fa-landmark', tag: 'NCR Region' },
+        { name: 'Hyderabad', icon: 'fa-microchip', tag: 'Cyberabad' },
+        { name: 'Pune', icon: 'fa-graduation-cap', tag: 'IT & Education' },
+        { name: 'Coimbatore', icon: 'fa-cogs', tag: 'Tamil Nadu' },
+        { name: 'Kolkata', icon: 'fa-city', tag: 'West Bengal' },
+        { name: 'Madurai', icon: 'fa-gopuram', tag: 'Tamil Nadu' },
+        { name: 'Pondicherry', icon: 'fa-umbrella-beach', tag: 'Puducherry' },
+        { name: 'Kochi', icon: 'fa-ship', tag: 'Kerala' },
+        { name: 'Remote', icon: 'fa-laptop-house', tag: 'Work from Home' },
+    ];
+    dropdown.innerHTML = `<div class="ac-header"><i class="fas fa-star"></i> Popular Cities in India</div>` +
+        popular.map(c => `
+            <div class="ac-item ac-popular" data-value="${c.name}">
+                <i class="fas ${c.icon} ac-icon"></i>
+                <div class="ac-text">
+                    <span class="ac-name">${c.name}</span>
+                    <span class="ac-tag">${c.tag}</span>
+                </div>
+            </div>`).join('');
+    bindAcItems(dropdown, input);
+    dropdown.classList.add('show');
+}
+
+function renderSuggestions(dropdown, suggestions, input, query) {
+    if (!suggestions.length) {
+        dropdown.innerHTML = '<div class="ac-empty"><i class="fas fa-map-marker-alt"></i> No locations found</div>';
+        dropdown.classList.add('show');
+        return;
     }
+    dropdown.innerHTML = suggestions.map(s => {
+        const idx = s.toLowerCase().indexOf(query.toLowerCase());
+        let hl = s;
+        if (idx >= 0) hl = s.substring(0, idx) + '<strong>' + s.substring(idx, idx + query.length) + '</strong>' + s.substring(idx + query.length);
+        return `<div class="ac-item" data-value="${s}"><i class="fas fa-map-marker-alt ac-icon"></i><span class="ac-name">${hl}</span></div>`;
+    }).join('');
+    bindAcItems(dropdown, input);
+    dropdown.classList.add('show');
+}
+
+function bindAcItems(dropdown, input) {
+    dropdown.querySelectorAll('.ac-item').forEach(item => {
+        item.addEventListener('click', () => {
+            input.value = item.dataset.value;
+            dropdown.classList.remove('show');
+            if (typeof heroSearch === 'function' && input.id === 'heroLocation') heroSearch();
+            if (typeof searchJobs === 'function' && input.id === 'searchLocation') searchJobs();
+        });
+    });
 }
 
 /* ── Toast Notifications ─────────────────────────────────────────────── */
 
 function showToast(message, type = 'success') {
-    // Remove existing toast
     document.querySelector('.toast')?.remove();
-
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
-    toast.innerHTML = `
-        <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-circle'}" 
-           style="color:var(--${type === 'success' ? 'success' : 'danger'});font-size:1.2rem;"></i>
-        <span>${message}</span>
-    `;
+    const icons = { success: 'check-circle', error: 'exclamation-circle', info: 'info-circle', warning: 'exclamation-triangle' };
+    toast.innerHTML = `<i class="fas fa-${icons[type] || icons.success}"></i><span>${message}</span><button class="toast-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>`;
     document.body.appendChild(toast);
-
-    // Trigger animation
-    requestAnimationFrame(() => {
-        toast.classList.add('show');
-    });
-
-    // Auto-remove
-    setTimeout(() => {
-        toast.classList.remove('show');
-        setTimeout(() => toast.remove(), 300);
-    }, 4000);
+    requestAnimationFrame(() => toast.classList.add('show'));
+    setTimeout(() => { toast.classList.remove('show'); setTimeout(() => toast.remove(), 300); }, 4000);
 }
 
 /* ── Save/Bookmark Jobs ──────────────────────────────────────────────── */
@@ -136,7 +240,6 @@ function showToast(message, type = 'success') {
 function toggleSave(btn) {
     const icon = btn.querySelector('i');
     const isSaved = icon.classList.contains('fas');
-
     if (isSaved) {
         icon.classList.replace('fas', 'far');
         btn.classList.remove('saved');
@@ -148,75 +251,68 @@ function toggleSave(btn) {
     }
 }
 
-/* ── Smooth Scroll for Anchor Links ──────────────────────────────────── */
+/* ── Smooth Scroll ───────────────────────────────────────────────────── */
 
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
         const target = document.querySelector(this.getAttribute('href'));
-        if (target) {
-            e.preventDefault();
-            target.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
+        if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
     });
 });
 
-/* ── Counter Animation (for stats) ───────────────────────────────────── */
+/* ── Counter Animation ───────────────────────────────────────────────── */
 
 function animateCounters() {
-    const counters = document.querySelectorAll('.stat-number');
-    counters.forEach(counter => {
+    document.querySelectorAll('.stat-number').forEach(counter => {
+        if (counter.dataset.animated) return;
+        counter.dataset.animated = '1';
         const text = counter.textContent;
         const match = text.match(/(\d[\d,]*)/);
         if (!match) return;
-        
         const target = parseInt(match[1].replace(/,/g, ''));
         const suffix = text.replace(match[0], '');
         let current = 0;
-        const increment = Math.ceil(target / 60);
-        const duration = 1500;
-        const stepTime = duration / (target / increment);
-
+        const increment = Math.ceil(target / 50);
         const timer = setInterval(() => {
             current += increment;
-            if (current >= target) {
-                counter.textContent = text;
-                clearInterval(timer);
-            } else {
-                counter.textContent = current.toLocaleString() + suffix;
-            }
-        }, stepTime);
+            if (current >= target) { counter.textContent = text; clearInterval(timer); }
+            else counter.textContent = current.toLocaleString() + suffix;
+        }, 30);
     });
 }
 
-// Trigger counter animation when visible
 const statsObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if (entry.isIntersecting) {
-            animateCounters();
-            statsObserver.disconnect();
-        }
-    });
-});
-
+    entries.forEach(entry => { if (entry.isIntersecting) animateCounters(); });
+}, { threshold: 0.3 });
 const statsEl = document.querySelector('.hero-stats');
 if (statsEl) statsObserver.observe(statsEl);
 
 /* ── Keyboard shortcuts ──────────────────────────────────────────────── */
 
 document.addEventListener('keydown', (e) => {
-    // Ctrl+K or Cmd+K → Focus search
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         const search = document.getElementById('heroKeyword') || document.getElementById('searchKeyword');
         search?.focus();
     }
-
-    // Escape → Close mobile menu
     if (e.key === 'Escape') {
         document.getElementById('navMenu')?.classList.remove('open');
-        document.getElementById('postJobModal')?.style.setProperty('display', 'none');
+        document.querySelectorAll('.ac-dropdown').forEach(d => d.classList.remove('show'));
+        document.body.style.overflow = '';
     }
 });
+
+/* ── Back to Top Button ──────────────────────────────────────────────── */
+
+(function() {
+    const btn = document.createElement('button');
+    btn.className = 'back-to-top';
+    btn.innerHTML = '<i class="fas fa-arrow-up"></i>';
+    btn.title = 'Back to top';
+    document.body.appendChild(btn);
+    btn.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+    window.addEventListener('scroll', () => btn.classList.toggle('visible', window.scrollY > 500));
+})();
 
 /* ── Last Update Time ────────────────────────────────────────────────── */
 
@@ -225,9 +321,40 @@ async function fetchLastUpdate() {
         const res = await fetch('/api/stats');
         const data = await res.json();
         const el = document.getElementById('lastUpdate');
-        if (el && data.last_updated) {
-            el.textContent = `Jobs last updated: ${data.last_updated}`;
-        }
+        if (el && data.last_updated) el.textContent = `Jobs last updated: ${data.last_updated}`;
+        const totalEl = document.getElementById('totalJobs');
+        if (totalEl && data.total_jobs) totalEl.textContent = data.total_jobs.toLocaleString() + '+';
     } catch (e) { /* silent */ }
 }
 fetchLastUpdate();
+
+/* ── Typed Text Effect for Hero ──────────────────────────────────────── */
+
+(function() {
+    const el = document.getElementById('typedTitle');
+    if (!el) return;
+    const words = ['Career in India', 'Tech Job', 'Dream Company', 'Future'];
+    let wordIdx = 0, charIdx = 0, isDeleting = false;
+    function type() {
+        const word = words[wordIdx];
+        if (isDeleting) { el.textContent = word.substring(0, --charIdx); }
+        else { el.textContent = word.substring(0, ++charIdx); }
+        let speed = isDeleting ? 40 : 80;
+        if (!isDeleting && charIdx === word.length) { speed = 2000; isDeleting = true; }
+        else if (isDeleting && charIdx === 0) { isDeleting = false; wordIdx = (wordIdx + 1) % words.length; speed = 500; }
+        setTimeout(type, speed);
+    }
+    setTimeout(type, 800);
+})();
+
+/* ── Card Tilt Effect ────────────────────────────────────────────────── */
+
+document.querySelectorAll('.ai-feature-card, .category-card').forEach(card => {
+    card.addEventListener('mousemove', (e) => {
+        const rect = card.getBoundingClientRect();
+        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
+        const y = ((e.clientY - rect.top) / rect.height - 0.5) * -6;
+        card.style.transform = `perspective(800px) rotateX(${y}deg) rotateY(${x}deg) translateY(-6px)`;
+    });
+    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
+});

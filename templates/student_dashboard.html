@@ -133,9 +133,55 @@
         <div class="dashboard-section">
             <h3><i class="fas fa-heart text-accent"></i> Saved Jobs</h3>
             <div class="jobs-grid" id="savedJobsGrid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
-                <p class="text-muted">Your saved jobs will appear here. <a href="/jobs">Browse jobs</a> to get started!</p>
+                <div class="loading-spinner"><div class="spinner"></div></div>
+            </div>
+        </div>
+
+        <!-- Recommended Jobs (fetched live from API) -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-star text-accent"></i> Recommended for You</h3>
+            <div class="jobs-grid" id="recommendedJobsGrid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
+                <div class="loading-spinner"><div class="spinner"></div></div>
             </div>
         </div>
     </div>
 </section>
+
+<script>
+// Load recommended jobs from API
+document.addEventListener('DOMContentLoaded', async () => {
+    // Load recommended jobs
+    try {
+        const res = await fetch('/api/jobs?per_page=6&keyword=developer');
+        const data = await res.json();
+        const grid = document.getElementById('recommendedJobsGrid');
+        if (data.jobs && data.jobs.length > 0) {
+            grid.innerHTML = data.jobs.map(j => {
+                const logo = j.company_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.company)}&background=667eea&color=fff&size=50`;
+                return `<div class="job-card" onclick="window.location='/job/${j.id}'">
+                    <div class="job-card-header">
+                        <img src="${logo}" alt="${j.company}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'">
+                        <div class="job-card-info"><h3>${j.title}</h3><span class="job-card-company">${j.company}</span></div>
+                    </div>
+                    <div class="job-card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> ${j.location || 'Remote'}</span>
+                        <span><i class="fas fa-briefcase"></i> ${j.type}</span>
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="job-salary">${j.salary_min || ''} – ${j.salary_max || ''}</span>
+                        <a href="/job/${j.id}" class="btn-apply">View</a>
+                    </div>
+                </div>`;
+            }).join('');
+        } else {
+            grid.innerHTML = '<p class="text-muted">No recommendations yet. <a href="/jobs">Browse jobs</a> to get started!</p>';
+        }
+    } catch(e) {
+        document.getElementById('recommendedJobsGrid').innerHTML = '<p class="text-muted">Could not load recommendations.</p>';
+    }
+
+    // Saved jobs placeholder
+    document.getElementById('savedJobsGrid').innerHTML = '<p class="text-muted" style="padding:20px;">No saved jobs yet. Click the <i class="far fa-heart"></i> icon on any job to save it. <a href="/jobs">Browse jobs now &rarr;</a></p>';
+});
+</script>
 {% endblock %}
