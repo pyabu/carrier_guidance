@@ -1,0 +1,232 @@
+{% extends "base.html" %}
+{% block title %}Career Guidance{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Career Guidance</div>
+        <h1>🧭 Career Guidance Hub</h1>
+        <p>Expert roadmaps, interview tips, skill resources, and everything you need to build your dream career</p>
+    </div>
+</div>
+
+<!-- ═══════════ CAREER ROADMAPS ═══════════ -->
+<section id="roadmaps">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">📍 Career Roadmaps</span>
+            <h2>Choose Your Career Path</h2>
+            <p class="section-subtitle">Step-by-step learning roadmaps created by industry experts</p>
+        </div>
+        <div class="roadmap-grid">
+            <div class="roadmap-card ai" data-aos="fade-up" data-aos-delay="100">
+                <div class="roadmap-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI / Machine Learning</h3>
+                <p>Build intelligent systems that learn and adapt</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> Python & Mathematics Fundamentals</li>
+                    <li><i class="fas fa-check-circle"></i> Statistics & Probability</li>
+                    <li><i class="fas fa-check-circle"></i> Machine Learning Algorithms</li>
+                    <li><i class="fas fa-check-circle"></i> Deep Learning & Neural Networks</li>
+                    <li><i class="fas fa-check-circle"></i> NLP / Computer Vision</li>
+                    <li><i class="fas fa-check-circle"></i> MLOps & Deployment</li>
+                </ul>
+                <a href="/jobs?keyword=ai" class="btn btn-outline btn-sm">View AI Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="roadmap-card web" data-aos="fade-up" data-aos-delay="200">
+                <div class="roadmap-icon"><i class="fas fa-code"></i></div>
+                <h3>Full Stack Web Development</h3>
+                <p>Build modern web applications end to end</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> HTML, CSS, JavaScript</li>
+                    <li><i class="fas fa-check-circle"></i> React / Vue / Angular</li>
+                    <li><i class="fas fa-check-circle"></i> Node.js / Python Backend</li>
+                    <li><i class="fas fa-check-circle"></i> Databases (SQL & NoSQL)</li>
+                    <li><i class="fas fa-check-circle"></i> REST APIs & GraphQL</li>
+                    <li><i class="fas fa-check-circle"></i> DevOps & Deployment</li>
+                </ul>
+                <a href="/jobs?keyword=developer" class="btn btn-outline btn-sm">View Dev Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="roadmap-card data" data-aos="fade-up" data-aos-delay="300">
+                <div class="roadmap-icon"><i class="fas fa-chart-bar"></i></div>
+                <h3>Data Science & Analytics</h3>
+                <p>Turn data into actionable insights</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> Python / R Programming</li>
+                    <li><i class="fas fa-check-circle"></i> SQL & Data Wrangling</li>
+                    <li><i class="fas fa-check-circle"></i> Statistical Analysis</li>
+                    <li><i class="fas fa-check-circle"></i> Data Visualization (Tableau/Power BI)</li>
+                    <li><i class="fas fa-check-circle"></i> Machine Learning Basics</li>
+                    <li><i class="fas fa-check-circle"></i> Big Data Tools (Spark, Hadoop)</li>
+                </ul>
+                <a href="/jobs?keyword=data" class="btn btn-outline btn-sm">View Data Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="roadmap-card cloud" data-aos="fade-up" data-aos-delay="400">
+                <div class="roadmap-icon"><i class="fas fa-cloud"></i></div>
+                <h3>Cloud & DevOps</h3>
+                <p>Architect and manage cloud infrastructure</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> Linux & Networking Basics</li>
+                    <li><i class="fas fa-check-circle"></i> AWS / Azure / GCP Fundamentals</li>
+                    <li><i class="fas fa-check-circle"></i> Docker & Kubernetes</li>
+                    <li><i class="fas fa-check-circle"></i> CI/CD Pipelines</li>
+                    <li><i class="fas fa-check-circle"></i> Infrastructure as Code (Terraform)</li>
+                    <li><i class="fas fa-check-circle"></i> Monitoring & Security</li>
+                </ul>
+                <a href="/jobs?keyword=cloud" class="btn btn-outline btn-sm">View Cloud Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="roadmap-card mobile" data-aos="fade-up" data-aos-delay="500">
+                <div class="roadmap-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Mobile App Development</h3>
+                <p>Create apps for iOS and Android</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> Dart / Swift / Kotlin</li>
+                    <li><i class="fas fa-check-circle"></i> Flutter / React Native</li>
+                    <li><i class="fas fa-check-circle"></i> UI/UX for Mobile</li>
+                    <li><i class="fas fa-check-circle"></i> State Management</li>
+                    <li><i class="fas fa-check-circle"></i> APIs & Backend Integration</li>
+                    <li><i class="fas fa-check-circle"></i> App Store Deployment</li>
+                </ul>
+                <a href="/jobs?keyword=mobile" class="btn btn-outline btn-sm">View Mobile Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+
+            <div class="roadmap-card cyber" data-aos="fade-up" data-aos-delay="600">
+                <div class="roadmap-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Cybersecurity</h3>
+                <p>Protect systems and data from threats</p>
+                <ul class="roadmap-steps">
+                    <li><i class="fas fa-check-circle"></i> Networking & OS Fundamentals</li>
+                    <li><i class="fas fa-check-circle"></i> Security Concepts & Frameworks</li>
+                    <li><i class="fas fa-check-circle"></i> Ethical Hacking & Pen Testing</li>
+                    <li><i class="fas fa-check-circle"></i> SIEM & Incident Response</li>
+                    <li><i class="fas fa-check-circle"></i> Cloud Security</li>
+                    <li><i class="fas fa-check-circle"></i> Certifications (CEH, CISSP)</li>
+                </ul>
+                <a href="/jobs?keyword=security" class="btn btn-outline btn-sm">View Security Jobs <i class="fas fa-arrow-right"></i></a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ INTERVIEW TIPS ═══════════ -->
+<section class="section-alt" id="interview">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🎤 Interview Prep</span>
+            <h2>Crack Any Interview</h2>
+            <p class="section-subtitle">Proven strategies and tips to ace technical and behavioral interviews</p>
+        </div>
+        <div class="guidance-grid">
+            <div class="guidance-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="guidance-card-img" style="background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-laptop-code" style="font-size:4rem;color:white;"></i>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Technical Interview Guide</h3>
+                    <p><strong>Data Structures & Algorithms:</strong> Master arrays, trees, graphs, DP. Practice on LeetCode, HackerRank.<br><br>
+                    <strong>System Design:</strong> Learn scalability, databases, caching, load balancing. Read "Designing Data-Intensive Apps".<br><br>
+                    <strong>Coding Tips:</strong> Always clarify requirements, think aloud, test edge cases, optimize iteratively.</p>
+                </div>
+            </div>
+            <div class="guidance-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="guidance-card-img" style="background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-comments" style="font-size:4rem;color:white;"></i>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Behavioral Interview Guide</h3>
+                    <p><strong>STAR Method:</strong> Structure answers as Situation → Task → Action → Result.<br><br>
+                    <strong>Common Questions:</strong> "Tell me about yourself", "Why this company?", "Greatest strength/weakness?"<br><br>
+                    <strong>Tips:</strong> Research the company, prepare 5-7 stories, show enthusiasm, ask thoughtful questions.</p>
+                </div>
+            </div>
+            <div class="guidance-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="guidance-card-img" style="background:linear-gradient(135deg,#34c759,#00b4d8);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-chalkboard-teacher" style="font-size:4rem;color:white;"></i>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Interview Day Checklist</h3>
+                    <p>✅ Research the company and interviewer<br>
+                    ✅ Review the job description thoroughly<br>
+                    ✅ Prepare questions to ask them<br>
+                    ✅ Test your tech setup (for virtual interviews)<br>
+                    ✅ Dress professionally<br>
+                    ✅ Arrive 10 minutes early<br>
+                    ✅ Bring copies of your resume<br>
+                    ✅ Follow up with a thank-you email</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ SKILL RESOURCES ═══════════ -->
+<section id="skills">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">📚 Learning Resources</span>
+            <h2>Top Platforms to Learn Skills</h2>
+            <p class="section-subtitle">Curated free and paid resources to accelerate your learning journey</p>
+        </div>
+        <div class="categories-grid">
+            <a href="https://www.coursera.org" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-graduation-cap"></i></div>
+                <h3>Coursera</h3>
+                <p>University courses from Stanford, MIT, Google</p>
+            </a>
+            <a href="https://www.udemy.com" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-play-circle"></i></div>
+                <h3>Udemy</h3>
+                <p>Affordable practical courses on every topic</p>
+            </a>
+            <a href="https://leetcode.com" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-code"></i></div>
+                <h3>LeetCode</h3>
+                <p>Coding problems for interview preparation</p>
+            </a>
+            <a href="https://www.freecodecamp.org" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-laptop-code"></i></div>
+                <h3>freeCodeCamp</h3>
+                <p>Free web dev & data science certifications</p>
+            </a>
+            <a href="https://www.youtube.com" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fab fa-youtube"></i></div>
+                <h3>YouTube</h3>
+                <p>Free tutorials from top educators worldwide</p>
+            </a>
+            <a href="https://github.com" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fab fa-github"></i></div>
+                <h3>GitHub</h3>
+                <p>Open-source projects and portfolio building</p>
+            </a>
+            <a href="https://roadmap.sh" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-route"></i></div>
+                <h3>roadmap.sh</h3>
+                <p>Community-driven developer roadmaps</p>
+            </a>
+            <a href="https://www.kaggle.com" target="_blank" class="category-card" data-aos="fade-up">
+                <div class="category-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Kaggle</h3>
+                <p>Data science competitions & datasets</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- CTA -->
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Build Your Resume Now</h2>
+        <p>Use our free resume builder to create a professional, ATS-friendly resume in minutes.</p>
+        <div class="cta-buttons">
+            <a href="/resume-builder" class="btn btn-white btn-lg"><i class="fas fa-file-alt"></i> Resume Builder</a>
+            <a href="/jobs" class="btn btn-outline btn-lg" style="border-color:white;color:white"><i class="fas fa-search"></i> Find Jobs</a>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}Student Dashboard{% endblock %}
+
+{% block content %}
+<section class="dashboard">
+    <div class="container">
+        <div class="dashboard-header">
+            <div>
+                <h2>👋 Welcome, Career Seeker!</h2>
+                <p class="text-muted">Track your job search, manage applications, and build your profile</p>
+            </div>
+            <div class="d-flex gap-2" style="gap:10px;">
+                <a href="/resume-builder" class="btn btn-primary"><i class="fas fa-file-alt"></i> Build Resume</a>
+                <a href="/jobs" class="btn btn-outline"><i class="fas fa-search"></i> Find Jobs</a>
+            </div>
+        </div>
+
+        <!-- Stats Cards -->
+        <div class="dashboard-grid">
+            <div class="stat-card">
+                <div class="stat-card-icon blue"><i class="fas fa-paper-plane"></i></div>
+                <div class="stat-card-content">
+                    <h3>12</h3>
+                    <p>Applications Sent</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon green"><i class="fas fa-check-circle"></i></div>
+                <div class="stat-card-content">
+                    <h3>3</h3>
+                    <p>Interview Calls</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon orange"><i class="fas fa-heart"></i></div>
+                <div class="stat-card-content">
+                    <h3>8</h3>
+                    <p>Saved Jobs</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-card-icon red"><i class="fas fa-eye"></i></div>
+                <div class="stat-card-content">
+                    <h3>45</h3>
+                    <p>Profile Views</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-user text-accent"></i> My Profile</h3>
+            <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;">
+                <div class="text-center">
+                    <div style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;">U</div>
+                    <button class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Change Photo</button>
+                </div>
+                <div>
+                    <form>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                            <div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="User Name"></div>
+                            <div class="form-group"><label>Email</label><input type="email" class="form-control" value="user@email.com"></div>
+                            <div class="form-group"><label>Phone</label><input type="tel" class="form-control" value="+91 98765 43210"></div>
+                            <div class="form-group"><label>Location</label><input type="text" class="form-control" value="Bangalore, India"></div>
+                            <div class="form-group"><label>Current Role</label><input type="text" class="form-control" value="Student / Fresher"></div>
+                            <div class="form-group"><label>Skills</label><input type="text" class="form-control" value="Python, React, SQL"></div>
+                        </div>
+                        <div class="form-group"><label>Bio</label><textarea class="form-control" rows="3">Passionate computer science student looking for software engineering opportunities...</textarea></div>
+                        <div style="display:flex;gap:12px;">
+                            <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile</button>
+                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload Resume</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Applied Jobs Table -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-paper-plane text-accent"></i> Applied Jobs</h3>
+            <table class="data-table">
+                <thead>
+                    <tr><th>Job Title</th><th>Company</th><th>Applied Date</th><th>Status</th><th>Action</th></tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>Frontend Developer</strong></td><td>Google</td><td>Mar 5, 2026</td>
+                        <td><span class="status-badge active">Interview Scheduled</span></td>
+                        <td><a href="#" class="text-accent">View</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Software Engineer Intern</strong></td><td>Microsoft</td><td>Mar 3, 2026</td>
+                        <td><span class="status-badge pending">Under Review</span></td>
+                        <td><a href="#" class="text-accent">View</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Data Analyst</strong></td><td>Amazon</td><td>Feb 28, 2026</td>
+                        <td><span class="status-badge closed">Rejected</span></td>
+                        <td><a href="#" class="text-accent">View</a></td>
+                    </tr>
+                    <tr>
+                        <td><strong>Full Stack Developer</strong></td><td>Flipkart</td><td>Feb 25, 2026</td>
+                        <td><span class="status-badge active">Offer Received</span></td>
+                        <td><a href="#" class="text-accent">View</a></td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- AI Career Recommendations -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-magic text-accent"></i> AI Career Recommendations</h3>
+            <div class="guidance-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));">
+                <div class="category-card">
+                    <div class="category-icon"><i class="fas fa-code"></i></div>
+                    <h3>Full Stack Developer</h3>
+                    <p>94% match based on your skills</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon"><i class="fas fa-database"></i></div>
+                    <h3>Data Engineer</h3>
+                    <p>87% match based on your skills</p>
+                </div>
+                <div class="category-card">
+                    <div class="category-icon"><i class="fas fa-cloud"></i></div>
+                    <h3>Cloud Developer</h3>
+                    <p>82% match based on your skills</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Saved Jobs -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-heart text-accent"></i> Saved Jobs</h3>
+            <div class="jobs-grid" id="savedJobsGrid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
+                <p class="text-muted">Your saved jobs will appear here. <a href="/jobs">Browse jobs</a> to get started!</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

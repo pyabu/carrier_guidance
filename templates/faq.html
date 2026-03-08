@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% block title %}FAQ{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> FAQ</div>
+        <h1>❓ Frequently Asked Questions</h1>
+        <p>Find answers to the most common questions about CareerPath Pro</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="faq-list">
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What is CareerPath Pro?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>CareerPath Pro is an all-in-one career guidance and job portal that helps students, job seekers, and employers. We provide job listings (scraped daily), career roadmaps, resume building tools, interview preparation guides, and AI-powered career recommendations — all completely free.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is CareerPath Pro free to use?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes! All core features including job browsing, career guidance, resume builder, and career roadmaps are completely free. Employers can post jobs for free as well. We plan to offer premium features like AI resume analysis and advanced analytics in the future.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How often are job listings updated?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Our AI-powered job scraper runs every 24 hours, pulling fresh job listings from multiple sources including company career pages, job boards, and API feeds. This ensures you always see the latest opportunities.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How do I apply for a job?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>When you find a job you're interested in, click the "Apply Now" button on the job card or detail page. This will redirect you to the company's official application page where you can submit your application directly. We recommend using our Resume Builder to create an ATS-friendly resume first!</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Can employers post jobs on this platform?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Absolutely! Employers can use our Employer Dashboard to post job listings, manage their postings, view applicants, and shortlist candidates. Simply navigate to "For Employers" in the navigation bar to get started.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What career roadmaps are available?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>We offer detailed career roadmaps for: AI/Machine Learning, Full Stack Web Development, Data Science & Analytics, Cloud & DevOps, Mobile App Development, and Cybersecurity. Each roadmap includes step-by-step learning paths, recommended resources, and related job opportunities.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How does the AI Career Suggestion feature work?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Our AI analyzes your skills, interests, and current market trends to provide personalized career recommendations. It matches your profile against thousands of job roles to show you career paths with the highest compatibility scores.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is my data safe and private?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, we take data privacy seriously. Your personal information is encrypted and never shared with third parties without your consent. You can read our full <a href="/privacy">Privacy Policy</a> for detailed information about how we handle your data.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How can I contact support?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>You can reach us through our <a href="/contact">Contact page</a>, email us at support@careerpathpro.com, or call us at +91 98765 43210. We respond to all inquiries within 24 hours during business hours (Mon-Fri, 9AM-6PM IST).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Still have questions?</h2>
+        <p>Our support team is always here to help you.</p>
+        <a href="/contact" class="btn btn-white btn-lg"><i class="fas fa-envelope"></i> Contact Support</a>
+    </div>
+</section>
+
+<script>
+function toggleFaq(btn) {
+    const item = btn.parentElement;
+    const wasActive = item.classList.contains('active');
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+    // Toggle clicked
+    if (!wasActive) item.classList.add('active');
+}
+</script>
+{% endblock %}

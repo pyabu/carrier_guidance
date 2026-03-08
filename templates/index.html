@@ -1,0 +1,347 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content" data-aos="fade-up">
+            <span class="section-badge">🚀 #1 Career Platform for Students & Professionals</span>
+            <h1>Find Your Dream <span>Career Path</span></h1>
+            <p>Discover thousands of job opportunities, get AI-powered career guidance, build your resume, and connect with top employers — all in one place.</p>
+            
+            <div class="hero-search" data-aos="fade-up" data-aos-delay="200">
+                <div class="search-field">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="heroKeyword" placeholder="Job title, skill, or company" />
+                </div>
+                <div class="search-field">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="heroLocation" placeholder="City or Remote" />
+                </div>
+                <button class="btn btn-primary" onclick="heroSearch()">
+                    <i class="fas fa-search"></i> Search Jobs
+                </button>
+            </div>
+
+            <div class="hero-stats" data-aos="fade-up" data-aos-delay="400">
+                <div class="stat">
+                    <div class="stat-number" id="totalJobs">10,000+</div>
+                    <div class="stat-label">Active Jobs</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">500+</div>
+                    <div class="stat-label">Top Companies</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">50,000+</div>
+                    <div class="stat-label">Career Seekers</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Success Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ FEATURED JOBS ═══════════ -->
+<section class="section-alt" id="featuredJobs">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🔥 Hot Openings</span>
+            <h2>Featured Job Listings</h2>
+            <p class="section-subtitle">Handpicked opportunities from top companies, updated daily via our AI scraper</p>
+        </div>
+
+        <div class="jobs-grid" id="featuredJobsGrid">
+            {% if featured_jobs %}
+                {% for job in featured_jobs %}
+                <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='/job/{{ job.id }}'">
+                    <div class="job-card-header">
+                        <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
+                        <div class="job-card-info">
+                            <h3>{{ job.title }}</h3>
+                            <span class="job-card-company">{{ job.company }}</span>
+                        </div>
+                    </div>
+                    <div class="job-card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                        <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
+                        <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
+                    </div>
+                    <div class="job-card-skills">
+                        {% for skill in job.skills[:4] %}
+                        <span class="skill-tag">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
+                        <div class="job-card-actions">
+                            <button class="btn-save" onclick="event.stopPropagation(); toggleSave(this)" title="Save Job">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <a href="{{ job.apply_url }}" class="btn-apply" target="_blank" onclick="event.stopPropagation()">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Skeleton loaders while loading -->
+                {% for i in range(6) %}
+                <div class="skeleton skeleton-card"></div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-4" data-aos="fade-up">
+            <a href="/jobs" class="btn btn-primary btn-lg">
+                <i class="fas fa-th-list"></i> Browse All Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ JOB CATEGORIES ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">📂 Explore By Category</span>
+            <h2>Popular Job Categories</h2>
+            <p class="section-subtitle">Find your perfect role across diverse industries and career paths</p>
+        </div>
+        <div class="categories-grid">
+            <a href="/jobs?keyword=software" class="category-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="category-icon"><i class="fas fa-code"></i></div>
+                <h3>Software Development</h3>
+                <p>2,500+ openings</p>
+            </a>
+            <a href="/jobs?keyword=data" class="category-card" data-aos="fade-up" data-aos-delay="150">
+                <div class="category-icon"><i class="fas fa-database"></i></div>
+                <h3>Data Science & AI</h3>
+                <p>1,800+ openings</p>
+            </a>
+            <a href="/jobs?keyword=design" class="category-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="category-icon"><i class="fas fa-paint-brush"></i></div>
+                <h3>UI/UX Design</h3>
+                <p>900+ openings</p>
+            </a>
+            <a href="/jobs?keyword=marketing" class="category-card" data-aos="fade-up" data-aos-delay="250">
+                <div class="category-icon"><i class="fas fa-bullhorn"></i></div>
+                <h3>Digital Marketing</h3>
+                <p>1,200+ openings</p>
+            </a>
+            <a href="/jobs?keyword=cloud" class="category-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="category-icon"><i class="fas fa-cloud"></i></div>
+                <h3>Cloud & DevOps</h3>
+                <p>1,400+ openings</p>
+            </a>
+            <a href="/jobs?keyword=product" class="category-card" data-aos="fade-up" data-aos-delay="350">
+                <div class="category-icon"><i class="fas fa-tasks"></i></div>
+                <h3>Product Management</h3>
+                <p>700+ openings</p>
+            </a>
+            <a href="/jobs?keyword=cyber" class="category-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="category-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Cybersecurity</h3>
+                <p>800+ openings</p>
+            </a>
+            <a href="/jobs?keyword=mobile" class="category-card" data-aos="fade-up" data-aos-delay="450">
+                <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Mobile Development</h3>
+                <p>600+ openings</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CAREER GUIDANCE ═══════════ -->
+<section class="section-alt">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🧭 Career Guidance</span>
+            <h2>Navigate Your Career Path</h2>
+            <p class="section-subtitle">Expert-curated roadmaps, tips, and resources to accelerate your career growth</p>
+        </div>
+        <div class="guidance-grid">
+            <a href="/career-guidance" class="guidance-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #667eea, #764ba2)">
+                    <div class="overlay"><span>📍 Roadmaps</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Career Roadmaps</h3>
+                    <p>Step-by-step learning paths for AI, Web Dev, Data Science, Cloud, and more.</p>
+                    <span class="read-more">Explore Roadmaps <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            <a href="/resume-builder" class="guidance-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #f093fb, #f5576c)">
+                    <div class="overlay"><span>📝 Resume</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Resume Builder & Tips</h3>
+                    <p>Build ATS-friendly resumes with our builder and get expert advice on standing out.</p>
+                    <span class="read-more">Build Resume <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            <a href="/career-guidance#interview" class="guidance-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #34c759, #00b4d8)">
+                    <div class="overlay"><span>🎤 Interview</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Interview Preparation</h3>
+                    <p>Crack technical and behavioral interviews with curated questions and strategies.</p>
+                    <span class="read-more">Prepare Now <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ AI FEATURES ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">⚡ AI-Powered</span>
+            <h2>Smart Career Tools</h2>
+            <p class="section-subtitle">Leverage artificial intelligence to supercharge your job search and career</p>
+        </div>
+        <div class="ai-features-grid">
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="ai-feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI Career Suggestion</h3>
+                <p>Get personalized career recommendations based on your skills, interests, and market trends.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="ai-feature-icon"><i class="fas fa-file-alt"></i></div>
+                <h3>Resume Analyzer</h3>
+                <p>Upload your resume and get instant AI feedback on improvements, ATS scoring, and formatting.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="ai-feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Skill Gap Analysis</h3>
+                <p>Identify missing skills for your dream job and get curated learning resource recommendations.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="ai-feature-icon"><i class="fas fa-magic"></i></div>
+                <h3>Job Recommendations</h3>
+                <p>Smart matching algorithm pairs you with the most relevant opportunities automatically.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TOP COMPANIES ═══════════ -->
+<section class="section-alt">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🏢 Top Employers</span>
+            <h2>Companies That Hire Here</h2>
+            <p class="section-subtitle">Leading companies trust CareerPath Pro to find top talent</p>
+        </div>
+        <div class="companies-grid" data-aos="fade-up" data-aos-delay="200">
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/google.com" alt="Google" onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
+                <h4>Google</h4>
+                <p>120+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft" onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
+                <h4>Microsoft</h4>
+                <p>95+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon" onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
+                <h4>Amazon</h4>
+                <p>200+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/meta.com" alt="Meta" onerror="this.src='https://ui-avatars.com/api/?name=M&background=0668E1&color=fff'">
+                <h4>Meta</h4>
+                <p>80+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/apple.com" alt="Apple" onerror="this.src='https://ui-avatars.com/api/?name=A&background=000&color=fff'">
+                <h4>Apple</h4>
+                <p>75+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys" onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
+                <h4>Infosys</h4>
+                <p>150+ openings</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TESTIMONIALS ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">💬 Success Stories</span>
+            <h2>What Our Users Say</h2>
+            <p class="section-subtitle">Real stories from students and professionals who transformed their careers</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <p>CareerPath Pro helped me land my dream job at Google. The career roadmap and resume tips were game-changers!</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">AK</div>
+                    <div>
+                        <h4>Arjun Kumar</h4>
+                        <span>Software Engineer at Google</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <p>As a fresher, I was lost. The career guidance section gave me a clear path — from learning Python to cracking my first Data Science role.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">SP</div>
+                    <div>
+                        <h4>Sneha Patel</h4>
+                        <span>Data Analyst at Amazon</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                <p>We posted 5 positions and got 200+ quality applicants within a week. The platform's reach is impressive for employers.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">RM</div>
+                    <div>
+                        <h4>Rajesh Mehta</h4>
+                        <span>HR Director at TCS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Ready to Launch Your Career?</h2>
+        <p>Join 50,000+ professionals already using CareerPath Pro to advance their careers.</p>
+        <div class="cta-buttons">
+            <a href="/jobs" class="btn btn-white btn-lg"><i class="fas fa-search"></i> Find Jobs</a>
+            <a href="/career-guidance" class="btn btn-outline btn-lg" style="border-color:white; color:white"><i class="fas fa-compass"></i> Career Guidance</a>
+        </div>
+    </div>
+</section>
+
+<script>
+function heroSearch() {
+    const keyword = document.getElementById('heroKeyword').value;
+    const location = document.getElementById('heroLocation').value;
+    let url = '/jobs?';
+    if (keyword) url += `keyword=${encodeURIComponent(keyword)}&`;
+    if (location) url += `location=${encodeURIComponent(location)}`;
+    window.location.href = url;
+}
+document.getElementById('heroKeyword')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
+document.getElementById('heroLocation')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
+</script>
+
+{% endblock %}

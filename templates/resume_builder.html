@@ -1,0 +1,273 @@
+{% extends "base.html" %}
+{% block title %}Resume Builder{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Resume Builder</div>
+        <h1>📝 Free Resume Builder</h1>
+        <p>Create a professional, ATS-friendly resume in minutes. Fill in your details and download instantly.</p>
+    </div>
+</div>
+
+<section class="resume-builder">
+    <div class="container">
+        <div class="resume-grid">
+            <!-- Form -->
+            <div class="resume-form">
+                <h3 style="margin-bottom:24px;"><i class="fas fa-edit text-accent"></i> Enter Your Details</h3>
+
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" class="form-control" id="rName" placeholder="John Doe" oninput="updatePreview()">
+                </div>
+                <div class="form-group">
+                    <label>Professional Title</label>
+                    <input type="text" class="form-control" id="rTitle" placeholder="Full Stack Developer" oninput="updatePreview()">
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" id="rEmail" placeholder="john@email.com" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone</label>
+                        <input type="tel" class="form-control" id="rPhone" placeholder="+1 234-567-8900" oninput="updatePreview()">
+                    </div>
+                </div>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div class="form-group">
+                        <label>Location</label>
+                        <input type="text" class="form-control" id="rLocation" placeholder="San Francisco, CA" oninput="updatePreview()">
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn / Portfolio URL</label>
+                        <input type="url" class="form-control" id="rLinkedin" placeholder="linkedin.com/in/johndoe" oninput="updatePreview()">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Professional Summary</label>
+                    <textarea class="form-control" id="rSummary" rows="3" placeholder="Experienced software engineer with 5+ years in full-stack development..." oninput="updatePreview()"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label>Skills (comma-separated)</label>
+                    <input type="text" class="form-control" id="rSkills" placeholder="Python, JavaScript, React, Node.js, AWS, Docker" oninput="updatePreview()">
+                </div>
+
+                <h4 style="margin:24px 0 16px;"><i class="fas fa-briefcase text-accent"></i> Work Experience</h4>
+                <div id="experienceFields">
+                    <div class="experience-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Job Title</label><input type="text" class="form-control exp-title" placeholder="Senior Developer" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Company</label><input type="text" class="form-control exp-company" placeholder="Google" oninput="updatePreview()"></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Duration</label><input type="text" class="form-control exp-duration" placeholder="2022 – Present" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Location</label><input type="text" class="form-control exp-location" placeholder="San Francisco, CA" oninput="updatePreview()"></div>
+                        </div>
+                        <div class="form-group"><label>Description</label><textarea class="form-control exp-desc" rows="2" placeholder="Led development of microservices architecture..." oninput="updatePreview()"></textarea></div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="addExperience()"><i class="fas fa-plus"></i> Add Experience</button>
+
+                <h4 style="margin:24px 0 16px;"><i class="fas fa-graduation-cap text-accent"></i> Education</h4>
+                <div id="educationFields">
+                    <div class="education-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Degree</label><input type="text" class="form-control edu-degree" placeholder="B.Tech Computer Science" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Institution</label><input type="text" class="form-control edu-school" placeholder="MIT" oninput="updatePreview()"></div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div class="form-group"><label>Year</label><input type="text" class="form-control edu-year" placeholder="2018 – 2022" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>GPA / Score</label><input type="text" class="form-control edu-gpa" placeholder="3.8 / 4.0" oninput="updatePreview()"></div>
+                        </div>
+                    </div>
+                </div>
+                <button class="btn btn-ghost btn-sm" onclick="addEducation()"><i class="fas fa-plus"></i> Add Education</button>
+
+                <div style="margin-top:24px;display:flex;gap:12px;">
+                    <button class="btn btn-primary btn-lg" onclick="downloadResume()"><i class="fas fa-download"></i> Download PDF</button>
+                    <button class="btn btn-outline" onclick="resetForm()"><i class="fas fa-redo"></i> Reset</button>
+                </div>
+            </div>
+
+            <!-- Preview -->
+            <div class="resume-preview" id="resumePreview">
+                <h2 id="prevName">Your Name</h2>
+                <p id="prevTitle" style="color:#667eea;font-weight:600;font-size:1rem;margin-bottom:4px;">Professional Title</p>
+                <p id="prevContact" style="font-size:0.82rem;color:#888;">email@example.com | +1 234-567-8900 | City, State</p>
+
+                <h3>PROFESSIONAL SUMMARY</h3>
+                <p id="prevSummary">Your professional summary will appear here as you type...</p>
+
+                <h3>SKILLS</h3>
+                <div id="prevSkills" style="display:flex;flex-wrap:wrap;gap:6px;">
+                    <span style="background:#f0f2f5;padding:4px 10px;border-radius:4px;font-size:0.82rem;color:#333;">Your skills here</span>
+                </div>
+
+                <h3>EXPERIENCE</h3>
+                <div id="prevExperience">
+                    <p style="font-style:italic;color:#aaa;">Add your work experience...</p>
+                </div>
+
+                <h3>EDUCATION</h3>
+                <div id="prevEducation">
+                    <p style="font-style:italic;color:#aaa;">Add your education...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tips Section -->
+<section class="section-alt">
+    <div class="container">
+        <div class="section-header"><span class="section-badge">💡 Pro Tips</span><h2>Resume Writing Tips</h2></div>
+        <div class="categories-grid">
+            <div class="category-card">
+                <div class="category-icon"><i class="fas fa-bullseye"></i></div>
+                <h3>Use Keywords</h3>
+                <p>Match job description keywords for ATS compatibility</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon"><i class="fas fa-chart-bar"></i></div>
+                <h3>Quantify Results</h3>
+                <p>Use numbers: "Increased sales by 30%" instead of vague claims</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon"><i class="fas fa-file-alt"></i></div>
+                <h3>Keep It Concise</h3>
+                <p>One page for < 5 years experience, two pages for senior roles</p>
+            </div>
+            <div class="category-card">
+                <div class="category-icon"><i class="fas fa-spell-check"></i></div>
+                <h3>Proofread</h3>
+                <p>Zero typos. Ask a friend to review before submitting</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+function updatePreview() {
+    document.getElementById('prevName').textContent = document.getElementById('rName').value || 'Your Name';
+    document.getElementById('prevTitle').textContent = document.getElementById('rTitle').value || 'Professional Title';
+    
+    const email = document.getElementById('rEmail').value || 'email@example.com';
+    const phone = document.getElementById('rPhone').value || '+1 234-567-8900';
+    const loc = document.getElementById('rLocation').value || 'City, State';
+    const linkedin = document.getElementById('rLinkedin').value;
+    document.getElementById('prevContact').textContent = `${email} | ${phone} | ${loc}${linkedin ? ' | ' + linkedin : ''}`;
+
+    document.getElementById('prevSummary').textContent = document.getElementById('rSummary').value || 'Your professional summary will appear here...';
+
+    const skills = document.getElementById('rSkills').value;
+    const skillsDiv = document.getElementById('prevSkills');
+    if (skills) {
+        skillsDiv.innerHTML = skills.split(',').map(s => s.trim()).filter(s => s).map(s =>
+            `<span style="background:#eef;padding:4px 10px;border-radius:4px;font-size:0.82rem;color:#667eea;font-weight:500;">${s}</span>`).join('');
+    } else {
+        skillsDiv.innerHTML = '<span style="background:#f0f2f5;padding:4px 10px;border-radius:4px;font-size:0.82rem;color:#333;">Your skills here</span>';
+    }
+
+    // Experience
+    const expDiv = document.getElementById('prevExperience');
+    const exps = document.querySelectorAll('.experience-entry');
+    let expHTML = '';
+    exps.forEach(e => {
+        const title = e.querySelector('.exp-title')?.value;
+        const company = e.querySelector('.exp-company')?.value;
+        const dur = e.querySelector('.exp-duration')?.value;
+        const desc = e.querySelector('.exp-desc')?.value;
+        if (title || company) {
+            expHTML += `<div style="margin-bottom:12px;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <strong style="color:#1a1d23;">${title || 'Job Title'}</strong>
+                    <span style="font-size:0.8rem;color:#888;">${dur || ''}</span>
+                </div>
+                <div style="color:#667eea;font-size:0.88rem;font-weight:500;">${company || 'Company'}</div>
+                <p style="font-size:0.85rem;margin-top:4px;">${desc || ''}</p>
+            </div>`;
+        }
+    });
+    expDiv.innerHTML = expHTML || '<p style="font-style:italic;color:#aaa;">Add your work experience...</p>';
+
+    // Education
+    const eduDiv = document.getElementById('prevEducation');
+    const edus = document.querySelectorAll('.education-entry');
+    let eduHTML = '';
+    edus.forEach(e => {
+        const deg = e.querySelector('.edu-degree')?.value;
+        const school = e.querySelector('.edu-school')?.value;
+        const yr = e.querySelector('.edu-year')?.value;
+        const gpa = e.querySelector('.edu-gpa')?.value;
+        if (deg || school) {
+            eduHTML += `<div style="margin-bottom:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                    <strong style="color:#1a1d23;">${deg || 'Degree'}</strong>
+                    <span style="font-size:0.8rem;color:#888;">${yr || ''}</span>
+                </div>
+                <div style="color:#667eea;font-size:0.88rem;">${school || 'Institution'}${gpa ? ' | GPA: ' + gpa : ''}</div>
+            </div>`;
+        }
+    });
+    eduDiv.innerHTML = eduHTML || '<p style="font-style:italic;color:#aaa;">Add your education...</p>';
+}
+
+function addExperience() {
+    const html = `<div class="experience-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Job Title</label><input type="text" class="form-control exp-title" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Company</label><input type="text" class="form-control exp-company" oninput="updatePreview()"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Duration</label><input type="text" class="form-control exp-duration" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Location</label><input type="text" class="form-control exp-location" oninput="updatePreview()"></div>
+        </div>
+        <div class="form-group"><label>Description</label><textarea class="form-control exp-desc" rows="2" oninput="updatePreview()"></textarea></div>
+        <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove(); updatePreview();" style="color:var(--danger);"><i class="fas fa-trash"></i> Remove</button>
+    </div>`;
+    document.getElementById('experienceFields').insertAdjacentHTML('beforeend', html);
+}
+
+function addEducation() {
+    const html = `<div class="education-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Degree</label><input type="text" class="form-control edu-degree" oninput="updatePreview()"></div>
+            <div class="form-group"><label>Institution</label><input type="text" class="form-control edu-school" oninput="updatePreview()"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+            <div class="form-group"><label>Year</label><input type="text" class="form-control edu-year" oninput="updatePreview()"></div>
+            <div class="form-group"><label>GPA</label><input type="text" class="form-control edu-gpa" oninput="updatePreview()"></div>
+        </div>
+        <button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove(); updatePreview();" style="color:var(--danger);"><i class="fas fa-trash"></i> Remove</button>
+    </div>`;
+    document.getElementById('educationFields').insertAdjacentHTML('beforeend', html);
+}
+
+function downloadResume() {
+    const el = document.getElementById('resumePreview');
+    // Simple print-based PDF download
+    const win = window.open('', '_blank');
+    win.document.write(`<html><head><title>Resume - ${document.getElementById('rName').value || 'Resume'}</title>
+        <style>body{font-family:'Inter',Arial,sans-serif;padding:40px;color:#1a1d23;line-height:1.6;}
+        h2{font-size:24px;border-bottom:2px solid #667eea;padding-bottom:8px;margin-bottom:8px;}
+        h3{color:#667eea;font-size:13px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;}
+        p{font-size:13px;color:#444;}strong{color:#1a1d23;}
+        </style></head><body>${el.innerHTML}</body></html>`);
+    win.document.close();
+    win.print();
+}
+
+function resetForm() {
+    document.querySelectorAll('.resume-form input, .resume-form textarea').forEach(el => el.value = '');
+    const expFields = document.getElementById('experienceFields');
+    const eduFields = document.getElementById('educationFields');
+    expFields.innerHTML = expFields.children[0]?.outerHTML || '';
+    eduFields.innerHTML = eduFields.children[0]?.outerHTML || '';
+    updatePreview();
+}
+</script>
+{% endblock %}

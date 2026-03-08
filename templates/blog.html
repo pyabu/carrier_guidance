@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+{% block title %}Blog{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Blog</div>
+        <h1>📰 Career Blog & Articles</h1>
+        <p>Latest insights, tips, and trends in careers, technology, and professional development</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <!-- Featured Article -->
+        <div class="guidance-card mb-4" data-aos="fade-up" style="display:grid;grid-template-columns:1fr 1fr;overflow:hidden;">
+            <div class="guidance-card-img" style="height:100%;min-height:300px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
+                <i class="fas fa-star" style="font-size:5rem;color:rgba(255,255,255,0.3);"></i>
+            </div>
+            <div style="padding:40px;">
+                <span class="section-badge">⭐ Featured</span>
+                <h2 style="margin:12px 0;">Top 10 Tech Skills to Learn in 2026</h2>
+                <p class="text-muted" style="line-height:1.8;margin-bottom:20px;">The tech landscape is evolving rapidly. From AI and machine learning to quantum computing and edge AI, discover which skills will be most in-demand and how to start learning them today.</p>
+                <div class="blog-card-meta mb-3">
+                    <span><i class="fas fa-calendar"></i> Mar 5, 2026</span>
+                    <span><i class="fas fa-clock"></i> 8 min read</span>
+                </div>
+                <a href="#" class="btn btn-primary"><i class="fas fa-book-open"></i> Read Article</a>
+            </div>
+        </div>
+
+        <div class="blog-grid">
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-file-alt" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">Resume Tips</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>How to Write an ATS-Friendly Resume in 2026</h3>
+                    <p>Beat the applicant tracking systems with these proven resume formatting and keyword strategies.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Mar 3, 2026</span>
+                        <span>5 min read</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#34c759,#00b4d8);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-comments" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">Interview</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>Cracking the FAANG Interview: A Complete Guide</h3>
+                    <p>From data structures to system design — everything you need to land a job at top tech companies.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Mar 1, 2026</span>
+                        <span>12 min read</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#ff9f0a,#ff6b6b);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-laptop-house" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">Remote Work</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>The Future of Remote Work: Trends & Predictions</h3>
+                    <p>How remote work is reshaping careers, and what it means for job seekers and employers in 2026.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Feb 28, 2026</span>
+                        <span>6 min read</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#007aff,#00d4ff);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-brain" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">AI Careers</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>Getting Started with AI/ML: A Beginner's Roadmap</h3>
+                    <p>A comprehensive guide to breaking into AI — from prerequisites to landing your first ML role.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Feb 25, 2026</span>
+                        <span>10 min read</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#764ba2,#667eea);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-graduation-cap" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">Students</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>From Campus to Career: A Guide for Fresh Graduates</h3>
+                    <p>Essential advice for students transitioning into the workforce — networking, skills, and strategy.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Feb 22, 2026</span>
+                        <span>7 min read</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="blog-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="blog-card-image" style="background:linear-gradient(135deg,#ff3b30,#ff9f0a);display:flex;align-items:center;justify-content:center;">
+                    <i class="fas fa-chart-line" style="font-size:3rem;color:rgba(255,255,255,0.4);"></i>
+                    <span class="blog-category">Career Growth</span>
+                </div>
+                <div class="blog-card-body">
+                    <h3>Salary Negotiation: How to Get What You Deserve</h3>
+                    <p>Proven techniques and scripts for negotiating salary offers at any career stage.</p>
+                    <div class="blog-card-meta">
+                        <span><i class="fas fa-calendar"></i> Feb 20, 2026</span>
+                        <span>6 min read</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
