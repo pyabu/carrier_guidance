@@ -1,0 +1,2002 @@
+{
+  "generated_at": "2026-03-09 00:35:28",
+  "total_jobs": 407,
+  "skills": {
+    "top_25": [
+      {
+        "skill": "Problem Solving",
+        "count": 156,
+        "percentage": 38.3
+      },
+      {
+        "skill": "Communication",
+        "count": 156,
+        "percentage": 38.3
+      },
+      {
+        "skill": "Go",
+        "count": 124,
+        "percentage": 30.5
+      },
+      {
+        "skill": "RAG",
+        "count": 69,
+        "percentage": 17.0
+      },
+      {
+        "skill": "Excel",
+        "count": 68,
+        "percentage": 16.7
+      },
+      {
+        "skill": "AWS",
+        "count": 67,
+        "percentage": 16.5
+      },
+      {
+        "skill": "Git",
+        "count": 52,
+        "percentage": 12.8
+      },
+      {
+        "skill": "Rust",
+        "count": 47,
+        "percentage": 11.5
+      },
+      {
+        "skill": "support",
+        "count": 21,
+        "percentage": 5.2
+      },
+      {
+        "skill": "technical",
+        "count": 16,
+        "percentage": 3.9
+      },
+      {
+        "skill": "manager",
+        "count": 15,
+        "percentage": 3.7
+      },
+      {
+        "skill": "Machine Learning",
+        "count": 15,
+        "percentage": 3.7
+      },
+      {
+        "skill": "Python",
+        "count": 13,
+        "percentage": 3.2
+      },
+      {
+        "skill": "design",
+        "count": 10,
+        "percentage": 2.5
+      },
+      {
+        "skill": "security",
+        "count": 10,
+        "percentage": 2.5
+      },
+      {
+        "skill": "financial",
+        "count": 10,
+        "percentage": 2.5
+      },
+      {
+        "skill": "senior",
+        "count": 8,
+        "percentage": 2.0
+      },
+      {
+        "skill": "growth",
+        "count": 8,
+        "percentage": 2.0
+      },
+      {
+        "skill": "React",
+        "count": 8,
+        "percentage": 2.0
+      },
+      {
+        "skill": "SQL",
+        "count": 8,
+        "percentage": 2.0
+      },
+      {
+        "skill": "software",
+        "count": 7,
+        "percentage": 1.7
+      },
+      {
+        "skill": "cloud",
+        "count": 7,
+        "percentage": 1.7
+      },
+      {
+        "skill": "training",
+        "count": 7,
+        "percentage": 1.7
+      },
+      {
+        "skill": "management",
+        "count": 7,
+        "percentage": 1.7
+      },
+      {
+        "skill": "system",
+        "count": 6,
+        "percentage": 1.5
+      }
+    ],
+    "by_job_type": {
+      "Remote": [
+        {
+          "skill": "Go",
+          "count": 53
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 34
+        },
+        {
+          "skill": "Communication",
+          "count": 34
+        },
+        {
+          "skill": "Excel",
+          "count": 32
+        },
+        {
+          "skill": "Rust",
+          "count": 27
+        },
+        {
+          "skill": "RAG",
+          "count": 24
+        },
+        {
+          "skill": "AWS",
+          "count": 22
+        },
+        {
+          "skill": "support",
+          "count": 21
+        },
+        {
+          "skill": "Git",
+          "count": 17
+        },
+        {
+          "skill": "technical",
+          "count": 16
+        }
+      ],
+      "Full-time": [
+        {
+          "skill": "Problem Solving",
+          "count": 104
+        },
+        {
+          "skill": "Communication",
+          "count": 104
+        },
+        {
+          "skill": "Go",
+          "count": 65
+        },
+        {
+          "skill": "RAG",
+          "count": 45
+        },
+        {
+          "skill": "AWS",
+          "count": 45
+        },
+        {
+          "skill": "Excel",
+          "count": 36
+        },
+        {
+          "skill": "Git",
+          "count": 29
+        },
+        {
+          "skill": "Rust",
+          "count": 20
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 8
+        },
+        {
+          "skill": "Agile",
+          "count": 4
+        }
+      ],
+      "Part-time": [
+        {
+          "skill": "Problem Solving",
+          "count": 3
+        },
+        {
+          "skill": "Communication",
+          "count": 3
+        }
+      ],
+      "Internship": [
+        {
+          "skill": "Problem Solving",
+          "count": 15
+        },
+        {
+          "skill": "Communication",
+          "count": 15
+        },
+        {
+          "skill": "Python",
+          "count": 6
+        },
+        {
+          "skill": "Go",
+          "count": 6
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 6
+        },
+        {
+          "skill": "Git",
+          "count": 6
+        },
+        {
+          "skill": "C#",
+          "count": 1
+        }
+      ]
+    },
+    "by_experience": {
+      "Mid Level": [
+        {
+          "skill": "Problem Solving",
+          "count": 95
+        },
+        {
+          "skill": "Communication",
+          "count": 95
+        },
+        {
+          "skill": "Go",
+          "count": 87
+        },
+        {
+          "skill": "Excel",
+          "count": 54
+        },
+        {
+          "skill": "RAG",
+          "count": 52
+        },
+        {
+          "skill": "AWS",
+          "count": 41
+        },
+        {
+          "skill": "Rust",
+          "count": 38
+        },
+        {
+          "skill": "Git",
+          "count": 24
+        },
+        {
+          "skill": "support",
+          "count": 21
+        },
+        {
+          "skill": "technical",
+          "count": 16
+        }
+      ],
+      "Senior": [
+        {
+          "skill": "AWS",
+          "count": 18
+        },
+        {
+          "skill": "Go",
+          "count": 17
+        },
+        {
+          "skill": "Git",
+          "count": 15
+        },
+        {
+          "skill": "RAG",
+          "count": 10
+        },
+        {
+          "skill": "Excel",
+          "count": 10
+        },
+        {
+          "skill": "Rust",
+          "count": 8
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 4
+        },
+        {
+          "skill": "Communication",
+          "count": 4
+        },
+        {
+          "skill": "GCP",
+          "count": 3
+        },
+        {
+          "skill": "React",
+          "count": 3
+        }
+      ],
+      "Entry Level": [
+        {
+          "skill": "Problem Solving",
+          "count": 55
+        },
+        {
+          "skill": "Communication",
+          "count": 55
+        },
+        {
+          "skill": "Go",
+          "count": 18
+        },
+        {
+          "skill": "Git",
+          "count": 13
+        },
+        {
+          "skill": "AWS",
+          "count": 8
+        },
+        {
+          "skill": "RAG",
+          "count": 7
+        },
+        {
+          "skill": "Python",
+          "count": 6
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 6
+        },
+        {
+          "skill": "Excel",
+          "count": 4
+        },
+        {
+          "skill": "C++",
+          "count": 1
+        }
+      ],
+      "Lead": [
+        {
+          "skill": "Problem Solving",
+          "count": 2
+        },
+        {
+          "skill": "Communication",
+          "count": 2
+        },
+        {
+          "skill": "Go",
+          "count": 2
+        }
+      ]
+    },
+    "by_country": {
+      "United States": [
+        {
+          "skill": "Problem Solving",
+          "count": 71
+        },
+        {
+          "skill": "Communication",
+          "count": 71
+        },
+        {
+          "skill": "Go",
+          "count": 27
+        },
+        {
+          "skill": "Rust",
+          "count": 10
+        },
+        {
+          "skill": "Excel",
+          "count": 9
+        },
+        {
+          "skill": "AWS",
+          "count": 9
+        },
+        {
+          "skill": "RAG",
+          "count": 8
+        },
+        {
+          "skill": "Git",
+          "count": 5
+        },
+        {
+          "skill": "technical",
+          "count": 4
+        },
+        {
+          "skill": "cloud",
+          "count": 4
+        }
+      ],
+      "Worldwide": [
+        {
+          "skill": "Problem Solving",
+          "count": 35
+        },
+        {
+          "skill": "Communication",
+          "count": 35
+        },
+        {
+          "skill": "support",
+          "count": 16
+        },
+        {
+          "skill": "manager",
+          "count": 11
+        },
+        {
+          "skill": "technical",
+          "count": 9
+        },
+        {
+          "skill": "Go",
+          "count": 8
+        },
+        {
+          "skill": "design",
+          "count": 7
+        },
+        {
+          "skill": "financial",
+          "count": 7
+        },
+        {
+          "skill": "training",
+          "count": 5
+        },
+        {
+          "skill": "senior",
+          "count": 5
+        }
+      ],
+      "Canada": [
+        {
+          "skill": "Go",
+          "count": 2
+        },
+        {
+          "skill": "Excel",
+          "count": 2
+        },
+        {
+          "skill": "RAG",
+          "count": 2
+        },
+        {
+          "skill": "system",
+          "count": 1
+        },
+        {
+          "skill": "technical",
+          "count": 1
+        },
+        {
+          "skill": "support",
+          "count": 1
+        },
+        {
+          "skill": "software",
+          "count": 1
+        },
+        {
+          "skill": "financial",
+          "count": 1
+        },
+        {
+          "skill": "finance",
+          "count": 1
+        },
+        {
+          "skill": "Rust",
+          "count": 1
+        }
+      ],
+      "Singapore": [
+        {
+          "skill": "system",
+          "count": 1
+        },
+        {
+          "skill": "security",
+          "count": 1
+        },
+        {
+          "skill": "software",
+          "count": 1
+        },
+        {
+          "skill": "devops",
+          "count": 1
+        },
+        {
+          "skill": "operations",
+          "count": 1
+        },
+        {
+          "skill": "operational",
+          "count": 1
+        },
+        {
+          "skill": "support",
+          "count": 1
+        },
+        {
+          "skill": "content",
+          "count": 1
+        },
+        {
+          "skill": "Excel",
+          "count": 1
+        },
+        {
+          "skill": "Git",
+          "count": 1
+        }
+      ],
+      "Other": [
+        {
+          "skill": "Go",
+          "count": 55
+        },
+        {
+          "skill": "AWS",
+          "count": 46
+        },
+        {
+          "skill": "RAG",
+          "count": 44
+        },
+        {
+          "skill": "Excel",
+          "count": 35
+        },
+        {
+          "skill": "Git",
+          "count": 23
+        },
+        {
+          "skill": "Rust",
+          "count": 22
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 19
+        },
+        {
+          "skill": "Communication",
+          "count": 19
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 6
+        },
+        {
+          "skill": "Agile",
+          "count": 5
+        }
+      ],
+      "United Kingdom": [
+        {
+          "skill": "Go",
+          "count": 19
+        },
+        {
+          "skill": "Excel",
+          "count": 13
+        },
+        {
+          "skill": "RAG",
+          "count": 11
+        },
+        {
+          "skill": "Rust",
+          "count": 10
+        },
+        {
+          "skill": "AWS",
+          "count": 8
+        },
+        {
+          "skill": "Git",
+          "count": 8
+        },
+        {
+          "skill": "Tableau",
+          "count": 2
+        },
+        {
+          "skill": "React",
+          "count": 1
+        },
+        {
+          "skill": "Spark",
+          "count": 1
+        },
+        {
+          "skill": "SQL",
+          "count": 1
+        }
+      ],
+      "France": [
+        {
+          "skill": "Excel",
+          "count": 3
+        },
+        {
+          "skill": "Git",
+          "count": 3
+        },
+        {
+          "skill": "Go",
+          "count": 2
+        },
+        {
+          "skill": "Rust",
+          "count": 1
+        },
+        {
+          "skill": "RAG",
+          "count": 1
+        }
+      ],
+      "Ireland": [
+        {
+          "skill": "SQL",
+          "count": 1
+        },
+        {
+          "skill": "Excel",
+          "count": 1
+        }
+      ],
+      "Netherlands": [
+        {
+          "skill": "Go",
+          "count": 2
+        },
+        {
+          "skill": "Rust",
+          "count": 2
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 1
+        },
+        {
+          "skill": "Terraform",
+          "count": 1
+        },
+        {
+          "skill": "CI/CD",
+          "count": 1
+        },
+        {
+          "skill": "Git",
+          "count": 1
+        },
+        {
+          "skill": "AWS",
+          "count": 1
+        },
+        {
+          "skill": "Excel",
+          "count": 1
+        },
+        {
+          "skill": "RAG",
+          "count": 1
+        }
+      ],
+      "Germany": [
+        {
+          "skill": "Go",
+          "count": 1
+        },
+        {
+          "skill": "Rust",
+          "count": 1
+        },
+        {
+          "skill": "AWS",
+          "count": 1
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 1
+        },
+        {
+          "skill": "Terraform",
+          "count": 1
+        },
+        {
+          "skill": "CI/CD",
+          "count": 1
+        },
+        {
+          "skill": "account management",
+          "count": 1
+        },
+        {
+          "skill": "R",
+          "count": 1
+        },
+        {
+          "skill": "REST",
+          "count": 1
+        },
+        {
+          "skill": "cloud",
+          "count": 1
+        }
+      ]
+    },
+    "total_unique": 193
+  },
+  "roles": {
+    "top_20": [
+      {
+        "role": "DevOps Engineer",
+        "count": 9
+      },
+      {
+        "role": "Product Manager",
+        "count": 7
+      },
+      {
+        "role": "Data Scientist",
+        "count": 4
+      },
+      {
+        "role": "Senior DevOps Engineer",
+        "count": 3
+      },
+      {
+        "role": "Pharmacy Technician",
+        "count": 3
+      },
+      {
+        "role": "Data Scientist I, Integrity",
+        "count": 3
+      },
+      {
+        "role": "Software Engineer",
+        "count": 2
+      },
+      {
+        "role": "Front End Engineer",
+        "count": 2
+      },
+      {
+        "role": "Retail Team Member - Cart Attendant",
+        "count": 2
+      },
+      {
+        "role": "Senior Product Designer",
+        "count": 2
+      },
+      {
+        "role": "Shopify Engineer",
+        "count": 2
+      },
+      {
+        "role": "Software Engineer, Fullstack, Early Career",
+        "count": 2
+      },
+      {
+        "role": "Software Engineer, Backend",
+        "count": 2
+      },
+      {
+        "role": "Machine Learning Engineer",
+        "count": 2
+      },
+      {
+        "role": "Registered Dietitian",
+        "count": 2
+      },
+      {
+        "role": "FT Administrative Specialist - Work From Home",
+        "count": 2
+      },
+      {
+        "role": "Engineering Manager Accelerator Platform",
+        "count": 1
+      },
+      {
+        "role": "Associate Vice President Direct Mail Content",
+        "count": 1
+      },
+      {
+        "role": "Staff Revenue Manager",
+        "count": 1
+      },
+      {
+        "role": "Senior Actuary Analyst",
+        "count": 1
+      }
+    ],
+    "by_experience": {
+      "Mid Level": [
+        {
+          "role": "DevOps Engineer",
+          "count": 9
+        },
+        {
+          "role": "Product Manager",
+          "count": 7
+        },
+        {
+          "role": "Data Scientist",
+          "count": 4
+        },
+        {
+          "role": "Senior DevOps Engineer",
+          "count": 3
+        },
+        {
+          "role": "Data Scientist I, Integrity",
+          "count": 3
+        }
+      ],
+      "Senior": [
+        {
+          "role": "Pharmacy Technician",
+          "count": 3
+        },
+        {
+          "role": "Retail Manager - Tire and Battery Center",
+          "count": 1
+        },
+        {
+          "role": "Product Operation Specialist - Comprehensive Search Operation",
+          "count": 1
+        },
+        {
+          "role": "(USA) Manager, Apparel Designer",
+          "count": 1
+        },
+        {
+          "role": "Software Engineer - Product (Technical Leadership)",
+          "count": 1
+        }
+      ],
+      "Entry Level": [
+        {
+          "role": "FT Administrative Specialist - Work From Home",
+          "count": 2
+        },
+        {
+          "role": "Merchandising Internship Program | Summer 2026 | Framingham, MA",
+          "count": 1
+        },
+        {
+          "role": "Spring 2026 Intern - Electronics (Masters), C++",
+          "count": 1
+        },
+        {
+          "role": "Maintenance/Janitorial Associate",
+          "count": 1
+        },
+        {
+          "role": "Pharmacy Intern - Grad",
+          "count": 1
+        }
+      ],
+      "Lead": [
+        {
+          "role": "Manager Employee Experience",
+          "count": 1
+        },
+        {
+          "role": "Nurse Manager I, Care at Home - Home Health",
+          "count": 1
+        },
+        {
+          "role": "Business Development Director - Institutions",
+          "count": 1
+        },
+        {
+          "role": "Brand Sales Director - Remote US - PST/MST/CST",
+          "count": 1
+        }
+      ]
+    },
+    "total_unique": 374
+  },
+  "companies": {
+    "top_30": [
+      {
+        "company": "Startup",
+        "open_positions": 52,
+        "categories": [
+          "Internship",
+          "Technology",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Walmart",
+        "open_positions": 29,
+        "categories": [
+          "Business",
+          "Technology"
+        ]
+      },
+      {
+        "company": "Meta",
+        "open_positions": 10,
+        "categories": [
+          "Management",
+          "Technology"
+        ]
+      },
+      {
+        "company": "CVS Health",
+        "open_positions": 8,
+        "categories": [
+          "Technology",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Tinder",
+        "open_positions": 6,
+        "categories": [
+          "Technology",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "AHU Technologies",
+        "open_positions": 5,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Kroger",
+        "open_positions": 4,
+        "categories": [
+          "Technology",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Netflix",
+        "open_positions": 4,
+        "categories": [
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Kraken",
+        "open_positions": 3,
+        "categories": [
+          "Management",
+          "Design",
+          "Marketing"
+        ]
+      },
+      {
+        "company": "Deel",
+        "open_positions": 3,
+        "categories": [
+          "Finance",
+          "Technology"
+        ]
+      },
+      {
+        "company": "Voyage Priv\u00e9",
+        "open_positions": 3,
+        "categories": [
+          "Marketing",
+          "Finance"
+        ]
+      },
+      {
+        "company": "GitLab",
+        "open_positions": 3,
+        "categories": [
+          "Finance",
+          "Sales",
+          "Technology"
+        ]
+      },
+      {
+        "company": "TikTok",
+        "open_positions": 3,
+        "categories": [
+          "Management",
+          "Technology"
+        ]
+      },
+      {
+        "company": "ChowNow",
+        "open_positions": 2,
+        "categories": [
+          "Technology",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Eleventh Hour Games",
+        "open_positions": 2,
+        "categories": [
+          "Design",
+          "Technology"
+        ]
+      },
+      {
+        "company": "RWS TrainAI",
+        "open_positions": 2,
+        "categories": [
+          "Marketing"
+        ]
+      },
+      {
+        "company": "Bloomreach",
+        "open_positions": 2,
+        "categories": [
+          "Marketing",
+          "Technology"
+        ]
+      },
+      {
+        "company": "Remote",
+        "open_positions": 2,
+        "categories": [
+          "Sales",
+          "Technology"
+        ]
+      },
+      {
+        "company": "Skillsoft",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "UpBound",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Smartsheet",
+        "open_positions": 2,
+        "categories": [
+          "Management",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "BD",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "DaVita",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Schneider Electric",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "XXIX",
+        "open_positions": 2,
+        "categories": [
+          "Design"
+        ]
+      },
+      {
+        "company": "Lemon.io",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Nebulab",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Coalition Technologies",
+        "open_positions": 2,
+        "categories": [
+          "Marketing"
+        ]
+      },
+      {
+        "company": "A.Team",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      },
+      {
+        "company": "Mitre Media",
+        "open_positions": 2,
+        "categories": [
+          "Technology"
+        ]
+      }
+    ],
+    "total_unique": 262
+  },
+  "locations": {
+    "top_cities": [
+      {
+        "city": "Remote",
+        "count": 100
+      },
+      {
+        "city": "United States",
+        "count": 64
+      },
+      {
+        "city": "India",
+        "count": 52
+      },
+      {
+        "city": "USA",
+        "count": 16
+      },
+      {
+        "city": "UK",
+        "count": 14
+      },
+      {
+        "city": "New York",
+        "count": 12
+      },
+      {
+        "city": "San Francisco",
+        "count": 10
+      },
+      {
+        "city": "Los Angeles",
+        "count": 7
+      },
+      {
+        "city": "Singapore",
+        "count": 3
+      },
+      {
+        "city": "EMEA",
+        "count": 3
+      },
+      {
+        "city": "France",
+        "count": 3
+      },
+      {
+        "city": "Reston, VA",
+        "count": 2
+      },
+      {
+        "city": "Portugal",
+        "count": 2
+      },
+      {
+        "city": "Netherlands",
+        "count": 2
+      },
+      {
+        "city": "Germany",
+        "count": 2
+      },
+      {
+        "city": "Czechia",
+        "count": 2
+      },
+      {
+        "city": "T\u00fcrkiye",
+        "count": 2
+      },
+      {
+        "city": "Fayetteville, AR",
+        "count": 2
+      },
+      {
+        "city": "Menlo Park, CA",
+        "count": 2
+      },
+      {
+        "city": "Alpharetta, GA",
+        "count": 2
+      }
+    ],
+    "top_countries": [
+      {
+        "country": "United States",
+        "count": 122
+      },
+      {
+        "country": "Worldwide",
+        "count": 100
+      },
+      {
+        "country": "Other",
+        "count": 94
+      },
+      {
+        "country": "India",
+        "count": 54
+      },
+      {
+        "country": "United Kingdom",
+        "count": 20
+      },
+      {
+        "country": "Canada",
+        "count": 4
+      },
+      {
+        "country": "Singapore",
+        "count": 3
+      },
+      {
+        "country": "France",
+        "count": 3
+      },
+      {
+        "country": "Germany",
+        "count": 3
+      },
+      {
+        "country": "Netherlands",
+        "count": 2
+      },
+      {
+        "country": "Ireland",
+        "count": 1
+      },
+      {
+        "country": "UAE",
+        "count": 1
+      }
+    ],
+    "remote_percentage": 44.0,
+    "total_remote": 179
+  },
+  "categories": {
+    "distribution": [
+      {
+        "category": "Technology",
+        "count": 224,
+        "percentage": 55.0
+      },
+      {
+        "category": "Data Science",
+        "count": 44,
+        "percentage": 10.8
+      },
+      {
+        "category": "Internship",
+        "count": 34,
+        "percentage": 8.4
+      },
+      {
+        "category": "Management",
+        "count": 29,
+        "percentage": 7.1
+      },
+      {
+        "category": "Design",
+        "count": 18,
+        "percentage": 4.4
+      },
+      {
+        "category": "Finance",
+        "count": 15,
+        "percentage": 3.7
+      },
+      {
+        "category": "Customer Service",
+        "count": 14,
+        "percentage": 3.4
+      },
+      {
+        "category": "Marketing",
+        "count": 13,
+        "percentage": 3.2
+      },
+      {
+        "category": "Sales",
+        "count": 12,
+        "percentage": 2.9
+      },
+      {
+        "category": "Business",
+        "count": 4,
+        "percentage": 1.0
+      }
+    ],
+    "by_country": {
+      "United States": [
+        {
+          "category": "Technology",
+          "count": 67
+        },
+        {
+          "category": "Data Science",
+          "count": 17
+        },
+        {
+          "category": "Management",
+          "count": 12
+        },
+        {
+          "category": "Customer Service",
+          "count": 10
+        },
+        {
+          "category": "Finance",
+          "count": 6
+        }
+      ],
+      "Worldwide": [
+        {
+          "category": "Technology",
+          "count": 61
+        },
+        {
+          "category": "Management",
+          "count": 11
+        },
+        {
+          "category": "Design",
+          "count": 11
+        },
+        {
+          "category": "Data Science",
+          "count": 6
+        },
+        {
+          "category": "Marketing",
+          "count": 5
+        }
+      ],
+      "Canada": [
+        {
+          "category": "Technology",
+          "count": 3
+        },
+        {
+          "category": "Customer Service",
+          "count": 1
+        }
+      ],
+      "Singapore": [
+        {
+          "category": "Technology",
+          "count": 2
+        },
+        {
+          "category": "Marketing",
+          "count": 1
+        }
+      ],
+      "Other": [
+        {
+          "category": "Technology",
+          "count": 71
+        },
+        {
+          "category": "Data Science",
+          "count": 11
+        },
+        {
+          "category": "Design",
+          "count": 2
+        },
+        {
+          "category": "Sales",
+          "count": 2
+        },
+        {
+          "category": "Customer Service",
+          "count": 2
+        }
+      ],
+      "United Kingdom": [
+        {
+          "category": "Technology",
+          "count": 5
+        },
+        {
+          "category": "Management",
+          "count": 4
+        },
+        {
+          "category": "Design",
+          "count": 3
+        },
+        {
+          "category": "Data Science",
+          "count": 2
+        },
+        {
+          "category": "Sales",
+          "count": 2
+        }
+      ],
+      "France": [
+        {
+          "category": "Finance",
+          "count": 2
+        },
+        {
+          "category": "Marketing",
+          "count": 1
+        }
+      ],
+      "Ireland": [
+        {
+          "category": "Marketing",
+          "count": 1
+        }
+      ],
+      "Netherlands": [
+        {
+          "category": "Technology",
+          "count": 1
+        },
+        {
+          "category": "Finance",
+          "count": 1
+        }
+      ],
+      "Germany": [
+        {
+          "category": "Technology",
+          "count": 1
+        },
+        {
+          "category": "Sales",
+          "count": 1
+        },
+        {
+          "category": "Data Science",
+          "count": 1
+        }
+      ]
+    }
+  },
+  "sources": {
+    "distribution": [
+      {
+        "source": "The Muse",
+        "count": 60,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "Himalayas",
+        "count": 60,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "LinkedIn",
+        "count": 57,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "We Work Remotely",
+        "count": 55,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "Internshala",
+        "count": 52,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "RemoteOK",
+        "count": 50,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "Jobicy",
+        "count": 50,
+        "avg_quality": 50.0
+      },
+      {
+        "source": "Remotive",
+        "count": 23,
+        "avg_quality": 50.0
+      }
+    ]
+  },
+  "salary_insights": {
+    "jobs_with_salary": 84,
+    "salary_transparency": 20.6,
+    "by_experience": {
+      "Mid Level": {
+        "count": 32,
+        "sample": [
+          "$42,000",
+          "$75,000",
+          "$40,000"
+        ]
+      },
+      "Senior": {
+        "count": 4,
+        "sample": [
+          "USD 50,000",
+          "USD 85,000",
+          "USD 114,300"
+        ]
+      },
+      "Entry Level": {
+        "count": 45,
+        "sample": [
+          "USD 42,640",
+          "USD 31,200",
+          "USD 47,840"
+        ]
+      },
+      "Lead": {
+        "count": 3,
+        "sample": [
+          "USD 204,000",
+          "USD 82,080",
+          "USD 110,000"
+        ]
+      }
+    }
+  },
+  "freshness": {
+    "today": 0,
+    "this_week": 286,
+    "this_month": 69,
+    "older": 52
+  },
+  "career_paths": [
+    {
+      "name": "Full Stack Developer",
+      "stages": [
+        {
+          "level": "Intern",
+          "role": "Software Engineering Intern",
+          "skills": [
+            "HTML",
+            "CSS",
+            "JavaScript",
+            "Git"
+          ],
+          "available_jobs": 30
+        },
+        {
+          "level": "Junior",
+          "role": "Junior Developer",
+          "skills": [
+            "React",
+            "Node.js",
+            "SQL",
+            "REST APIs"
+          ],
+          "available_jobs": 35
+        },
+        {
+          "level": "Mid",
+          "role": "Full Stack Developer",
+          "skills": [
+            "TypeScript",
+            "Docker",
+            "MongoDB",
+            "CI/CD"
+          ],
+          "available_jobs": 14
+        },
+        {
+          "level": "Senior",
+          "role": "Senior Full Stack Developer",
+          "skills": [
+            "System Design",
+            "Microservices",
+            "AWS",
+            "Kubernetes"
+          ],
+          "available_jobs": 62
+        },
+        {
+          "level": "Lead",
+          "role": "Tech Lead / Architect",
+          "skills": [
+            "Architecture",
+            "Leadership",
+            "Team Management"
+          ],
+          "available_jobs": 31
+        }
+      ],
+      "avg_salary_progression": [
+        "\u20b93-5 LPA",
+        "\u20b96-12 LPA",
+        "\u20b912-24 LPA",
+        "\u20b924-40 LPA",
+        "\u20b940-60 LPA"
+      ],
+      "total_available_jobs": 172
+    },
+    {
+      "name": "Data Scientist",
+      "stages": [
+        {
+          "level": "Intern",
+          "role": "Data Science Intern",
+          "skills": [
+            "Python",
+            "Statistics",
+            "SQL",
+            "Excel"
+          ],
+          "available_jobs": 28
+        },
+        {
+          "level": "Junior",
+          "role": "Data Analyst",
+          "skills": [
+            "Pandas",
+            "Tableau",
+            "A/B Testing",
+            "SQL"
+          ],
+          "available_jobs": 35
+        },
+        {
+          "level": "Mid",
+          "role": "Data Scientist",
+          "skills": [
+            "Machine Learning",
+            "scikit-learn",
+            "Deep Learning",
+            "NLP"
+          ],
+          "available_jobs": 27
+        },
+        {
+          "level": "Senior",
+          "role": "Senior Data Scientist",
+          "skills": [
+            "PyTorch",
+            "MLOps",
+            "Feature Engineering",
+            "Research"
+          ],
+          "available_jobs": 73
+        },
+        {
+          "level": "Lead",
+          "role": "ML Engineering Manager",
+          "skills": [
+            "Team Leadership",
+            "Strategy",
+            "MLOps",
+            "Product Sense"
+          ],
+          "available_jobs": 13
+        }
+      ],
+      "avg_salary_progression": [
+        "\u20b93-6 LPA",
+        "\u20b98-15 LPA",
+        "\u20b915-30 LPA",
+        "\u20b930-50 LPA",
+        "\u20b950-80 LPA"
+      ],
+      "total_available_jobs": 176
+    },
+    {
+      "name": "DevOps / Cloud Engineer",
+      "stages": [
+        {
+          "level": "Intern",
+          "role": "IT / Cloud Intern",
+          "skills": [
+            "Linux",
+            "Git",
+            "Bash",
+            "Networking"
+          ],
+          "available_jobs": 76
+        },
+        {
+          "level": "Junior",
+          "role": "Junior DevOps Engineer",
+          "skills": [
+            "Docker",
+            "CI/CD",
+            "AWS Basics",
+            "Terraform"
+          ],
+          "available_jobs": 31
+        },
+        {
+          "level": "Mid",
+          "role": "DevOps Engineer",
+          "skills": [
+            "Kubernetes",
+            "Prometheus",
+            "Ansible",
+            "IaC"
+          ],
+          "available_jobs": 87
+        },
+        {
+          "level": "Senior",
+          "role": "Senior DevOps / SRE",
+          "skills": [
+            "Multi-Cloud",
+            "Security",
+            "SLOs",
+            "Incident Management"
+          ],
+          "available_jobs": 67
+        },
+        {
+          "level": "Lead",
+          "role": "Platform Architect",
+          "skills": [
+            "Architecture",
+            "Cost Optimization",
+            "Team Leadership"
+          ],
+          "available_jobs": 6
+        }
+      ],
+      "avg_salary_progression": [
+        "\u20b93-5 LPA",
+        "\u20b97-14 LPA",
+        "\u20b914-28 LPA",
+        "\u20b928-45 LPA",
+        "\u20b945-70 LPA"
+      ],
+      "total_available_jobs": 267
+    },
+    {
+      "name": "AI / ML Engineer",
+      "stages": [
+        {
+          "level": "Intern",
+          "role": "ML Intern",
+          "skills": [
+            "Python",
+            "NumPy",
+            "Pandas",
+            "Linear Algebra"
+          ],
+          "available_jobs": 19
+        },
+        {
+          "level": "Junior",
+          "role": "ML Engineer",
+          "skills": [
+            "scikit-learn",
+            "TensorFlow",
+            "Feature Engineering",
+            "SQL"
+          ],
+          "available_jobs": 88
+        },
+        {
+          "level": "Mid",
+          "role": "ML Engineer",
+          "skills": [
+            "PyTorch",
+            "NLP",
+            "Computer Vision",
+            "MLOps"
+          ],
+          "available_jobs": 88
+        },
+        {
+          "level": "Senior",
+          "role": "Senior ML Engineer / GenAI",
+          "skills": [
+            "LLMs",
+            "RAG",
+            "Fine-tuning",
+            "Distributed Training"
+          ],
+          "available_jobs": 57
+        },
+        {
+          "level": "Lead",
+          "role": "AI Lead / Research Scientist",
+          "skills": [
+            "Research",
+            "Publications",
+            "Team Building",
+            "Strategy"
+          ],
+          "available_jobs": 59
+        }
+      ],
+      "avg_salary_progression": [
+        "\u20b94-7 LPA",
+        "\u20b910-18 LPA",
+        "\u20b918-35 LPA",
+        "\u20b935-60 LPA",
+        "\u20b960-1Cr+"
+      ],
+      "total_available_jobs": 311
+    },
+    {
+      "name": "Product Manager",
+      "stages": [
+        {
+          "level": "Intern",
+          "role": "PM Intern / APM",
+          "skills": [
+            "Market Research",
+            "User Interviews",
+            "Wireframing",
+            "Analytics"
+          ],
+          "available_jobs": 31
+        },
+        {
+          "level": "Junior",
+          "role": "Associate PM",
+          "skills": [
+            "PRDs",
+            "Agile",
+            "SQL",
+            "A/B Testing"
+          ],
+          "available_jobs": 35
+        },
+        {
+          "level": "Mid",
+          "role": "Product Manager",
+          "skills": [
+            "Roadmapping",
+            "Strategy",
+            "Stakeholder Management",
+            "Metrics"
+          ],
+          "available_jobs": 64
+        },
+        {
+          "level": "Senior",
+          "role": "Senior PM",
+          "skills": [
+            "P&L Ownership",
+            "Team Leadership",
+            "Go-to-Market",
+            "OKRs"
+          ],
+          "available_jobs": 67
+        },
+        {
+          "level": "Lead",
+          "role": "VP Product / CPO",
+          "skills": [
+            "Vision",
+            "Board Presentation",
+            "Multi-Product Strategy"
+          ],
+          "available_jobs": 25
+        }
+      ],
+      "avg_salary_progression": [
+        "\u20b94-8 LPA",
+        "\u20b910-18 LPA",
+        "\u20b918-35 LPA",
+        "\u20b935-55 LPA",
+        "\u20b955-1Cr+"
+      ],
+      "total_available_jobs": 222
+    }
+  ],
+  "hot_combinations": [
+    {
+      "combination": "Communication + Problem Solving",
+      "demand": 156
+    },
+    {
+      "combination": "Go + RAG",
+      "demand": 61
+    },
+    {
+      "combination": "AWS + Go",
+      "demand": 56
+    },
+    {
+      "combination": "Excel + Go",
+      "demand": 56
+    },
+    {
+      "combination": "AWS + RAG",
+      "demand": 39
+    },
+    {
+      "combination": "Go + Rust",
+      "demand": 39
+    },
+    {
+      "combination": "AWS + Excel",
+      "demand": 36
+    },
+    {
+      "combination": "Excel + RAG",
+      "demand": 36
+    },
+    {
+      "combination": "Git + Go",
+      "demand": 32
+    },
+    {
+      "combination": "Excel + Rust",
+      "demand": 27
+    },
+    {
+      "combination": "RAG + Rust",
+      "demand": 24
+    },
+    {
+      "combination": "AWS + Git",
+      "demand": 22
+    },
+    {
+      "combination": "Excel + Git",
+      "demand": 20
+    },
+    {
+      "combination": "AWS + Rust",
+      "demand": 17
+    },
+    {
+      "combination": "Git + RAG",
+      "demand": 15
+    }
+  ]
+}

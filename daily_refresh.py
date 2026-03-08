@@ -102,6 +102,33 @@ def main():
             json.dump(payload, f, indent=2)
         logger.info(f"\n✅ Saved {total} jobs to {JOBS_FILE}")
 
+        # ── Run Trend Analysis ─────────────────────────────────────
+        try:
+            from scraper.trend_analyzer import TrendAnalyzer
+            analyzer = TrendAnalyzer(DATA_DIR)
+            trends = analyzer.analyze(jobs)
+            logger.info(f"\n📊 TREND ANALYSIS")
+            top_skills = trends.get("skills", {}).get("top_25", [])[:10]
+            if top_skills:
+                logger.info(f"   🔥 Top Skills:")
+                for s in top_skills:
+                    logger.info(f"      {s['skill']:20s} → {s['count']} jobs ({s['percentage']}%)")
+
+            career_paths = trends.get("career_paths", [])
+            if career_paths:
+                logger.info(f"\n   🛤️  Career Paths:")
+                for path in career_paths:
+                    logger.info(f"      {path['name']:25s} → {path['total_available_jobs']} available jobs")
+
+            hot_combos = trends.get("hot_combinations", [])[:5]
+            if hot_combos:
+                logger.info(f"\n   🔥 Hot Skill Combos:")
+                for combo in hot_combos:
+                    logger.info(f"      {combo['combination']:35s} → {combo['demand']} jobs")
+
+        except Exception as e:
+            logger.warning(f"\n⚠️  Trend analysis failed: {e}")
+
         # Keep a daily backup
         backup_dir = os.path.join(DATA_DIR, "backups")
         os.makedirs(backup_dir, exist_ok=True)

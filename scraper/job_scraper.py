@@ -636,6 +636,24 @@ class JobScraper:
             job["location_state"]   = loc["state"]
             job["location_country"] = loc["country"]
 
+        # ── AI Processing Pipeline ────────────────────────────────────
+        try:
+            from scraper.ai_processor import AIJobProcessor
+            ai = AIJobProcessor()
+            unique = ai.process_jobs(unique)
+            logger.info("🤖 AI processing complete")
+        except Exception as e:
+            logger.warning(f"⚠️  AI processing skipped: {e}")
+
+        # ── Company Enrichment ────────────────────────────────────────
+        try:
+            from scraper.company_scraper import CompanyScraper
+            company_scraper = CompanyScraper()
+            unique = company_scraper.enrich_jobs_with_company_data(unique)
+            logger.info("🏢 Company enrichment complete")
+        except Exception as e:
+            logger.warning(f"⚠️  Company enrichment skipped: {e}")
+
         return unique
 
     # ──────────────────────────────────────────────────────────────────

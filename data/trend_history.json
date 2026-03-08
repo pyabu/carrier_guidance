@@ -1,0 +1,21 @@
+[
+  {
+    "date": "2026-03-09",
+    "total_jobs": 407,
+    "top_5_skills": [
+      "Problem Solving",
+      "Communication",
+      "Go",
+      "RAG",
+      "Excel"
+    ],
+    "top_5_companies": [
+      "Startup",
+      "Walmart",
+      "Meta",
+      "CVS Health",
+      "Tinder"
+    ],
+    "remote_percentage": 44.0
+  }
+]

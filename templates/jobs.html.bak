@@ -1,0 +1,587 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Jobs</div>
+        <h1><i class="fas fa-robot" style="color:#667eea;"></i> AI-Powered Job Search</h1>
+        <p>Real-time jobs from 17+ sources — scraped daily from LinkedIn, Indeed, Naukri, Remotive & more. AI-ranked for relevance.</p>
+        <div id="refreshStatus" style="font-size:.78rem;opacity:0.7;margin-top:4px;"></div>
+    </div>
+</div>
+
+<!-- Trending Skills Bar -->
+<div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0;overflow:hidden;">
+    <div class="container">
+        <div style="display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;">
+            <span style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;"><i class="fas fa-fire"></i> Trending:</span>
+            <div id="trendingSkills" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;">
+                <span style="background:rgba(255,255,255,0.2);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem;white-space:nowrap;">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <!-- AI Search Mode Toggle -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <label style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;color:var(--text-secondary);">
+                <input type="checkbox" id="aiSearchMode" checked style="accent-color:#667eea;">
+                <i class="fas fa-robot" style="color:#667eea;"></i> AI Smart Search
+            </label>
+            <span style="font-size:.72rem;color:var(--text-secondary);">(understands location aliases, skill synonyms & role expansions)</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="hero-search mb-4" style="max-width:100%;">
+            <div class="search-field">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchKeyword" placeholder="Job title, skill, or company (e.g. SDE, Data Analyst, TCS)" />
+            </div>
+            <div class="search-field">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="searchLocation" placeholder="Bangalore, Mumbai, Hyderabad, Remote..." data-autocomplete="location" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" onclick="searchJobs()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        <!-- AI Insights Panel (collapsible) -->
+        <div id="aiInsightsPanel" style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h4 style="margin:0;font-size:.9rem;"><i class="fas fa-brain" style="color:#667eea;"></i> AI Insights</h4>
+                <button onclick="document.getElementById('aiInsightsPanel').style.display='none'" style="background:none;border:none;cursor:pointer;color:var(--text-secondary);"><i class="fas fa-times"></i></button>
+            </div>
+            <div id="aiInsightsContent" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;font-size:.82rem;"></div>
+        </div>
+
+        <!-- Active Filters Bar -->
+        <div id="activeFilters" class="active-filters mb-3" style="display:none;">
+            <span class="text-muted" style="font-size:.85rem;"><i class="fas fa-filter"></i> Active filters:</span>
+            <div id="filterTags"></div>
+            <button class="btn btn-ghost btn-sm" onclick="clearFilters()" style="font-size:.8rem;padding:4px 10px;">
+                Clear All
+            </button>
+        </div>
+
+        <div class="jobs-layout">
+            <!-- Filters Sidebar -->
+            <aside class="filter-sidebar">
+                <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+
+                <!-- Country Filter -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-globe"></i> Country</h4>
+                    <select class="form-control" id="filterCountry" onchange="onCountryChange(); searchJobs();">
+                        <option value="">All Countries</option>
+                    </select>
+                </div>
+
+                <!-- City Filter (dynamic based on country) -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-city"></i> City</h4>
+                    <select class="form-control" id="filterCity" onchange="searchJobs();">
+                        <option value="">All Cities</option>
+                    </select>
+                </div>
+
+                <!-- Job Source -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-rss"></i> Source</h4>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="LinkedIn" onchange="searchJobs()"> LinkedIn
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Indeed" onchange="searchJobs()"> Indeed
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Naukri.com" onchange="searchJobs()"> Naukri.com
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Internshala" onchange="searchJobs()"> Internshala
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="TimesJobs" onchange="searchJobs()"> TimesJobs
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Foundit" onchange="searchJobs()"> Foundit
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Remotive" onchange="searchJobs()"> Remotive
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="RemoteOK" onchange="searchJobs()"> RemoteOK
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Arbeitnow" onchange="searchJobs()"> Arbeitnow
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="The Muse" onchange="searchJobs()"> The Muse
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Himalayas" onchange="searchJobs()"> Himalayas
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="We Work Remotely" onchange="searchJobs()"> We Work Remotely
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Freshersworld" onchange="searchJobs()"> Freshersworld
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="FindWork" onchange="searchJobs()"> FindWork
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="source" value="Jobicy" onchange="searchJobs()"> Jobicy
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h4><i class="fas fa-briefcase"></i> Job Type</h4>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Full-time" onchange="searchJobs()"> Full-time
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Remote" onchange="searchJobs()"> Remote
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Part-time" onchange="searchJobs()"> Part-time
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Internship" onchange="searchJobs()"> Internship
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Contract" onchange="searchJobs()"> Contract
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Hybrid" onchange="searchJobs()"> Hybrid
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="type" value="Fresher" onchange="searchJobs()"> Fresher
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h4><i class="fas fa-layer-group"></i> Experience Level</h4>
+                    <label class="filter-option">
+                        <input type="checkbox" name="exp" value="Entry Level" onchange="searchJobs()"> Entry Level
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="exp" value="Junior" onchange="searchJobs()"> Junior
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="exp" value="Mid Level" onchange="searchJobs()"> Mid Level
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="exp" value="Senior" onchange="searchJobs()"> Senior
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="exp" value="Lead" onchange="searchJobs()"> Lead
+                    </label>
+                </div>
+
+                <div class="filter-group">
+                    <h4><i class="fas fa-th-large"></i> Category</h4>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Technology" onchange="searchJobs()"> Technology
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Data Science" onchange="searchJobs()"> Data Science
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Design" onchange="searchJobs()"> Design
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Marketing" onchange="searchJobs()"> Marketing
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Management" onchange="searchJobs()"> Management
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Human Resources" onchange="searchJobs()"> Human Resources
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Finance" onchange="searchJobs()"> Finance
+                    </label>
+                    <label class="filter-option">
+                        <input type="checkbox" name="cat" value="Internship" onchange="searchJobs()"> Internship
+                    </label>
+                </div>
+
+                <button class="btn btn-ghost" onclick="clearFilters()" style="width:100%;">
+                    <i class="fas fa-times"></i> Clear All Filters
+                </button>
+            </aside>
+
+            <!-- Job Results -->
+            <div>
+                <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3">
+                    <div>
+                        <p id="resultsCount" class="text-muted" style="margin-bottom:2px;">Loading jobs...</p>
+                        <p id="sourceInfo" class="text-muted" style="font-size:.78rem;opacity:0.7;margin:0;"></p>
+                    </div>
+                    <select class="form-control" id="sortBy" onchange="searchJobs()" style="width:auto;min-width:180px;">
+                        <option value="newest">Sort: Newest First</option>
+                        <option value="oldest">Sort: Oldest First</option>
+                        <option value="quality">Sort: AI Quality ⭐</option>
+                        <option value="title">Sort: Title A-Z</option>
+                        <option value="company">Sort: Company A-Z</option>
+                    </select>
+                </div>
+                <div class="jobs-grid" id="jobsGrid">
+                    <div class="loading-spinner"><div class="spinner"></div></div>
+                </div>
+                <div id="loadMoreWrap" class="text-center mt-4" style="display:none;">
+                    <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()">
+                        <i class="fas fa-plus"></i> Load More Jobs
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script>
+let allJobs = [];
+let displayedCount = 0;
+const PAGE_SIZE = 12;
+let locationData = {};  // country → [cities]
+
+// Read URL params
+const params = new URLSearchParams(window.location.search);
+if (params.get('keyword')) document.getElementById('searchKeyword').value = params.get('keyword');
+if (params.get('location')) document.getElementById('searchLocation').value = params.get('location');
+if (params.get('type')) {
+    document.querySelectorAll('input[name="type"]').forEach(cb => {
+        if (cb.value.toLowerCase() === params.get('type').toLowerCase()) cb.checked = true;
+    });
+}
+if (params.get('country')) {
+    // Will be set after locations load
+    window._presetCountry = params.get('country');
+}
+
+// ── Load trending skills ──────────────────────────────────────────
+async function loadTrending() {
+    try {
+        const resp = await fetch('/api/trending');
+        const data = await resp.json();
+        const container = document.getElementById('trendingSkills');
+        const skills = data.skills?.top_25?.slice(0, 12) || data.top_skills?.slice(0, 12) || [];
+        if (skills.length) {
+            container.innerHTML = skills.map(s =>
+                `<span onclick="document.getElementById('searchKeyword').value='${s.skill}'; searchJobs();"
+                       style="background:rgba(255,255,255,0.2);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem;white-space:nowrap;cursor:pointer;transition:background 0.2s;"
+                       onmouseover="this.style.background='rgba(255,255,255,0.35)'"
+                       onmouseout="this.style.background='rgba(255,255,255,0.2)'"
+                 >${s.skill} <small>(${s.count})</small></span>`
+            ).join('');
+        }
+    } catch (e) {
+        console.warn('Trending load failed:', e);
+    }
+}
+
+// ── Load refresh status ───────────────────────────────────────────
+async function loadRefreshStatus() {
+    try {
+        const resp = await fetch('/api/refresh-status');
+        const data = await resp.json();
+        const el = document.getElementById('refreshStatus');
+        const freshIcon = data.is_fresh ? '🟢' : '🟡';
+        el.textContent = `${freshIcon} Last updated: ${data.last_updated || 'Never'} | ${data.total_jobs} jobs from ${Object.keys(data.sources || {}).length} sources across ${data.countries_covered || 0} countries`;
+    } catch(e) {}
+}
+
+// ── Load location data for dropdowns ──────────────────────────────
+async function loadLocations() {
+    try {
+        const resp = await fetch('/api/locations');
+        locationData = await resp.json();
+        const sel = document.getElementById('filterCountry');
+        Object.keys(locationData).sort().forEach(country => {
+            const count = locationData[country].length;
+            const opt = document.createElement('option');
+            opt.value = country;
+            opt.textContent = `${country} (${count} cities)`;
+            sel.appendChild(opt);
+        });
+        // Set preset country if from URL
+        if (window._presetCountry) {
+            sel.value = window._presetCountry;
+            onCountryChange();
+        }
+    } catch(e) {
+        console.warn('Could not load locations:', e);
+    }
+}
+
+function onCountryChange() {
+    const country = document.getElementById('filterCountry').value;
+    const citySel = document.getElementById('filterCity');
+    citySel.innerHTML = '<option value="">All Cities</option>';
+    if (country && locationData[country]) {
+        locationData[country].forEach(city => {
+            const opt = document.createElement('option');
+            opt.value = city;
+            opt.textContent = city;
+            citySel.appendChild(opt);
+        });
+    }
+}
+
+// ── Fetch and render ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', () => {
+    loadTrending();
+    loadRefreshStatus();
+    loadLocations().then(() => searchJobs());
+});
+
+async function searchJobs() {
+    const keyword = document.getElementById('searchKeyword').value.trim();
+    const location = document.getElementById('searchLocation').value.trim();
+    const country = document.getElementById('filterCountry').value;
+    const city = document.getElementById('filterCity').value;
+    const aiMode = document.getElementById('aiSearchMode')?.checked;
+
+    // Use AI smart search if enabled and there's a keyword
+    if (aiMode && keyword) {
+        try {
+            const aiQuery = keyword + (location ? ` ${location}` : '') + (city ? ` ${city}` : '') + (country ? ` ${country}` : '');
+            const res = await fetch(`/api/smart-search?q=${encodeURIComponent(aiQuery)}&top_k=200`);
+            const data = await res.json();
+            allJobs = data.results || [];
+
+            // Show AI insights
+            if (data.ai_powered) {
+                showAIInsights(data, allJobs);
+            }
+        } catch (e) {
+            console.warn('AI search failed, falling back:', e);
+            await fallbackSearch(keyword, location, country, city);
+            return;
+        }
+    } else {
+        await fallbackSearch(keyword, location, country, city);
+        return;
+    }
+
+    // Client-side checkbox filters
+    applyClientFilters();
+    renderResults();
+}
+
+async function fallbackSearch(keyword, location, country, city) {
+    let url = `/api/jobs?keyword=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}`;
+    if (country) url += `&country=${encodeURIComponent(country)}`;
+    if (city) url += `&city=${encodeURIComponent(city)}`;
+
+    try {
+        const res = await fetch(url);
+        const data = await res.json();
+        allJobs = data.jobs || [];
+    } catch(e) {
+        document.getElementById('jobsGrid').innerHTML = `<div class="no-results"><i class="fas fa-exclamation-circle"></i><h3>Failed to load jobs</h3><p>Please try again later.</p></div>`;
+        return;
+    }
+
+    applyClientFilters();
+    renderResults();
+}
+
+function applyClientFilters() {
+    const typeFilters = [...document.querySelectorAll('input[name="type"]:checked')].map(c=>c.value.toLowerCase());
+    const expFilters = [...document.querySelectorAll('input[name="exp"]:checked')].map(c=>c.value.toLowerCase());
+    const catFilters = [...document.querySelectorAll('input[name="cat"]:checked')].map(c=>c.value.toLowerCase());
+    const srcFilters = [...document.querySelectorAll('input[name="source"]:checked')].map(c=>c.value.toLowerCase());
+
+    if (typeFilters.length) allJobs = allJobs.filter(j=> typeFilters.some(f=> (j.type||'').toLowerCase().includes(f)));
+    if (expFilters.length) allJobs = allJobs.filter(j=> expFilters.some(f=> (j.experience||'').toLowerCase().includes(f)));
+    if (catFilters.length) allJobs = allJobs.filter(j=> catFilters.some(f=> (j.category||'').toLowerCase().includes(f)));
+    if (srcFilters.length) allJobs = allJobs.filter(j=> srcFilters.some(f=> (j.source||'').toLowerCase().includes(f)));
+
+    // Sort
+    const sort = document.getElementById('sortBy').value;
+    if (sort==='newest') allJobs.sort((a,b)=> (b.posted_date||'').localeCompare(a.posted_date||''));
+    else if (sort==='oldest') allJobs.sort((a,b)=> (a.posted_date||'').localeCompare(b.posted_date||''));
+    else if (sort==='title') allJobs.sort((a,b)=> a.title.localeCompare(b.title));
+    else if (sort==='company') allJobs.sort((a,b)=> a.company.localeCompare(b.company));
+    else if (sort==='quality') allJobs.sort((a,b)=> (b.quality_score||0) - (a.quality_score||0));
+}
+
+function renderResults() {
+    displayedCount = 0;
+    document.getElementById('jobsGrid').innerHTML = '';
+    document.getElementById('resultsCount').textContent = `${allJobs.length} jobs found`;
+
+    // Source breakdown
+    const srcCount = {};
+    allJobs.forEach(j => { srcCount[j.source] = (srcCount[j.source]||0) + 1; });
+    const srcParts = Object.entries(srcCount).sort((a,b)=>b[1]-a[1]).map(([s,c])=>`${s}: ${c}`);
+    document.getElementById('sourceInfo').textContent = srcParts.length ? `Sources: ${srcParts.join(' · ')}` : '';
+
+    updateActiveFilters();
+    loadMore();
+}
+
+function loadMore() {
+    const grid = document.getElementById('jobsGrid');
+    const batch = allJobs.slice(displayedCount, displayedCount + PAGE_SIZE);
+    batch.forEach(job => {
+        grid.innerHTML += renderJobCard(job);
+    });
+    displayedCount += batch.length;
+    document.getElementById('loadMoreWrap').style.display = displayedCount < allJobs.length ? 'block' : 'none';
+    if (allJobs.length === 0 && displayedCount === 0) {
+        grid.innerHTML = `<div class="no-results" style="grid-column: 1/-1"><i class="fas fa-search"></i><h3>No jobs found</h3><p>Try adjusting your search or filters.</p></div>`;
+    }
+}
+
+function renderJobCard(job) {
+    const logoFallback = `https://ui-avatars.com/api/?name=${encodeURIComponent(job.company)}&background=667eea&color=fff&size=50`;
+    const sourceColor = {
+        'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Remotive': '#00D4AA',
+        'RemoteOK': '#00D4AA', 'Arbeitnow': '#FF6B35', 'The Muse': '#7B68EE',
+        'FindWork': '#20C997', 'Jobicy': '#FF4081', 'CareerPath Pro': '#667eea',
+        'Naukri.com': '#2196F3', 'Foundit': '#FF5722', 'Shine.com': '#4CAF50',
+        'Freshersworld': '#FF9800', 'TimesJobs': '#9C27B0', 'Internshala': '#00BCD4',
+        'We Work Remotely': '#6366f1', 'FlexJobs': '#10b981', 'Himalayas': '#8b5cf6',
+    };
+    const srcClr = sourceColor[job.source] || '#667eea';
+    const qualityBadge = job.quality_score >= 80 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:4px;" title="High quality listing">★ Top</span>' :
+                         job.quality_score >= 60 ? '' : '';
+    const trendBadge = job.is_trending ? '<span style="background:#f59e0b;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:4px;" title="Uses trending skills">🔥 Hot</span>' : '';
+    const aiSummary = job.ai_summary ? `<p style="font-size:.75rem;color:var(--text-secondary);margin:6px 0 4px;line-height:1.4;"><i class="fas fa-robot" style="color:#667eea;font-size:.65rem;"></i> ${job.ai_summary.substring(0, 120)}${job.ai_summary.length > 120 ? '...' : ''}</p>` : '';
+
+    return `
+    <div class="job-card fade-in" onclick="window.location='/job/${job.id}'">
+        <div class="job-card-header">
+            <img src="${job.company_logo || logoFallback}" alt="${job.company}" class="job-card-logo" onerror="this.src='${logoFallback}'">
+            <div class="job-card-info">
+                <h3>${job.title}${qualityBadge}${trendBadge}</h3>
+                <span class="job-card-company">${job.company}</span>
+            </div>
+        </div>
+        ${aiSummary}
+        <div class="job-card-meta">
+            <span><i class="fas fa-map-marker-alt"></i> ${job.location || 'Remote'}</span>
+            <span><i class="fas fa-briefcase"></i> ${job.type}</span>
+            <span><i class="fas fa-layer-group"></i> ${job.experience || 'Mid Level'}</span>
+        </div>
+        <div class="job-card-skills">
+            ${(job.skills||[]).slice(0,4).map(s=>`<span class="skill-tag">${s}</span>`).join('')}
+            ${(job.trending_skills||[]).length > 0 ? '<span class="skill-tag" style="background:#f59e0b22;color:#f59e0b;border-color:#f59e0b;">🔥 Trending</span>' : ''}
+        </div>
+        <div class="job-card-footer">
+            <span class="job-salary">${job.salary_min}${job.salary_max ? ' – '+job.salary_max : ''}</span>
+            <div class="job-card-actions">
+                <span class="source-badge" style="background:${srcClr};color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:6px;">${job.source}</span>
+                <button class="btn-save" onclick="event.stopPropagation(); toggleSave(this)" title="Save Job"><i class="far fa-heart"></i></button>
+                <a href="${job.apply_url}" class="btn-apply" target="_blank" onclick="event.stopPropagation()">Apply</a>
+            </div>
+        </div>
+    </div>`;
+}
+
+function showAIInsights(data, jobs) {
+    const panel = document.getElementById('aiInsightsPanel');
+    const content = document.getElementById('aiInsightsContent');
+
+    // Compute quick insights
+    const srcCount = {};
+    const locCount = {};
+    const skillCount = {};
+    jobs.forEach(j => {
+        srcCount[j.source] = (srcCount[j.source]||0) + 1;
+        if (j.location_city) locCount[j.location_city] = (locCount[j.location_city]||0) + 1;
+        (j.skills||[]).forEach(s => { skillCount[s] = (skillCount[s]||0) + 1; });
+    });
+
+    const topSkills = Object.entries(skillCount).sort((a,b)=>b[1]-a[1]).slice(0,5).map(([s,c])=>`${s} (${c})`).join(', ');
+    const topLocs = Object.entries(locCount).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([l,c])=>`${l} (${c})`).join(', ');
+    const remoteCount = jobs.filter(j => (j.type||'').toLowerCase().includes('remote')).length;
+    const avgQuality = jobs.length ? Math.round(jobs.reduce((s,j) => s + (j.quality_score||50), 0) / jobs.length) : 0;
+
+    content.innerHTML = `
+        <div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px;">
+            <strong style="font-size:.75rem;color:#667eea;">🎯 Top Skills</strong><br>
+            <span style="font-size:.78rem;">${topSkills || 'N/A'}</span>
+        </div>
+        <div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px;">
+            <strong style="font-size:.75rem;color:#667eea;">📍 Top Locations</strong><br>
+            <span style="font-size:.78rem;">${topLocs || 'N/A'}</span>
+        </div>
+        <div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px;">
+            <strong style="font-size:.75rem;color:#667eea;">🏠 Remote Jobs</strong><br>
+            <span style="font-size:.78rem;">${remoteCount} (${jobs.length ? Math.round(remoteCount/jobs.length*100) : 0}%)</span>
+        </div>
+        <div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px;">
+            <strong style="font-size:.75rem;color:#667eea;">⭐ Avg Quality</strong><br>
+            <span style="font-size:.78rem;">${avgQuality}/100</span>
+        </div>
+    `;
+    panel.style.display = 'block';
+}
+
+function updateActiveFilters() {
+    const container = document.getElementById('filterTags');
+    const wrap = document.getElementById('activeFilters');
+    container.innerHTML = '';
+    let hasFilters = false;
+
+    const keyword = document.getElementById('searchKeyword').value.trim();
+    const location = document.getElementById('searchLocation').value.trim();
+    const country = document.getElementById('filterCountry').value;
+    const city = document.getElementById('filterCity').value;
+
+    if (keyword) { addFilterTag(container, 'Keyword', keyword); hasFilters = true; }
+    if (location) { addFilterTag(container, 'Location', location); hasFilters = true; }
+    if (country) { addFilterTag(container, 'Country', country); hasFilters = true; }
+    if (city) { addFilterTag(container, 'City', city); hasFilters = true; }
+
+    document.querySelectorAll('.filter-sidebar input[type="checkbox"]:checked').forEach(cb => {
+        addFilterTag(container, cb.name, cb.value);
+        hasFilters = true;
+    });
+    wrap.style.display = hasFilters ? 'flex' : 'none';
+}
+
+function addFilterTag(container, label, value) {
+    const tag = document.createElement('span');
+    tag.className = 'filter-tag';
+    tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:var(--primary);color:#fff;padding:3px 10px;border-radius:20px;font-size:.78rem;';
+    tag.innerHTML = `${value} <i class="fas fa-times" style="cursor:pointer;opacity:0.8;" onclick="removeFilter('${label}','${value}')"></i>`;
+    container.appendChild(tag);
+}
+
+function removeFilter(label, value) {
+    if (label === 'Keyword') document.getElementById('searchKeyword').value = '';
+    else if (label === 'Location') document.getElementById('searchLocation').value = '';
+    else if (label === 'Country') { document.getElementById('filterCountry').value = ''; onCountryChange(); }
+    else if (label === 'City') document.getElementById('filterCity').value = '';
+    else {
+        document.querySelectorAll(`input[name="${label}"]`).forEach(cb => {
+            if (cb.value === value) cb.checked = false;
+        });
+    }
+    searchJobs();
+}
+
+function clearFilters() {
+    document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(c=>c.checked=false);
+    document.getElementById('searchKeyword').value = '';
+    document.getElementById('searchLocation').value = '';
+    document.getElementById('filterCountry').value = '';
+    document.getElementById('filterCity').value = '';
+    onCountryChange();
+    searchJobs();
+}
+
+document.getElementById('searchKeyword')?.addEventListener('keypress', (e) => { if(e.key==='Enter') searchJobs(); });
+document.getElementById('searchLocation')?.addEventListener('keypress', (e) => { if(e.key==='Enter') searchJobs(); });
+</script>
+
+{% endblock %}
