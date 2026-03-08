@@ -1,16 +1,19 @@
 """
 CareerPath Pro – Flask Application
 Complete career guidance and job portal backend
+Works both locally and on Vercel (serverless).
 """
 
 import os
 import json
+import shutil
 import logging
 from datetime import datetime
 from flask import Flask, render_template, jsonify, request, abort
 from flask_cors import CORS
-from apscheduler.schedulers.background import BackgroundScheduler
-from scraper.job_scraper import JobScraper
+
+# ── Vercel detection ───────────────────────────────────────────────────
+IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 
 # ── App Configuration ──────────────────────────────────────────────────
 app = Flask(__name__, template_folder="templates", static_folder="static")
@@ -19,16 +22,30 @@ CORS(app)
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
+# On Vercel the filesystem is read-only except /tmp
+if IS_VERCEL:
+    DATA_DIR = "/tmp/data"
+else:
+    DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 os.makedirs(DATA_DIR, exist_ok=True)
 
 JOBS_FILE = os.path.join(DATA_DIR, "jobs.json")
 
+# Seed file shipped with the repo (used as fallback on Vercel cold-start)
+SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
+
 # ── Helpers ────────────────────────────────────────────────────────────
 
 def load_jobs():
-    """Load cached jobs from JSON file."""
+    """Load cached jobs from JSON file, falling back to seed on Vercel."""
     if os.path.exists(JOBS_FILE):
+        with open(JOBS_FILE, "r") as f:
+            return json.load(f)
+    # On Vercel cold-start: copy seed file to /tmp
+    if IS_VERCEL and os.path.exists(SEED_FILE):
+        os.makedirs(DATA_DIR, exist_ok=True)
+        shutil.copy2(SEED_FILE, JOBS_FILE)
+        logger.info("📦 Copied seed jobs.json to /tmp for Vercel cold-start")
         with open(JOBS_FILE, "r") as f:
             return json.load(f)
     return {"jobs": [], "last_updated": None}
@@ -41,9 +58,10 @@ def save_jobs(data):
 
 
 def refresh_jobs():
-    """Run the scraper and save new results."""
+    """Run the scraper and save new results (lazy-imports scraper)."""
     logger.info("🔄 Refreshing job listings …")
     try:
+        from scraper.job_scraper import JobScraper  # lazy import
         scraper = JobScraper()
         jobs = scraper.scrape_all()
         data = {
@@ -52,19 +70,26 @@ def refresh_jobs():
         }
         save_jobs(data)
         logger.info(f"✅ Saved {len(jobs)} jobs at {data['last_updated']}")
+        return len(jobs)
     except Exception as e:
         logger.error(f"❌ Scraper error: {e}")
+        return 0
 
 
-# ── Scheduler – auto-refresh every 12 h + daily at 6 AM ───────────────
-scheduler = BackgroundScheduler()
-scheduler.add_job(refresh_jobs, "interval", hours=12, id="refresh_12h")
-scheduler.add_job(refresh_jobs, "cron", hour=6, minute=0, id="daily_6am")
-scheduler.start()
+# ── Scheduler – local dev only (Vercel uses cron endpoint instead) ─────
+if not IS_VERCEL:
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        scheduler = BackgroundScheduler()
+        scheduler.add_job(refresh_jobs, "interval", hours=12, id="refresh_12h")
+        scheduler.add_job(refresh_jobs, "cron", hour=6, minute=0, id="daily_6am")
+        scheduler.start()
+    except ImportError:
+        logger.warning("⚠️  APScheduler not installed – scheduler disabled")
 
-# Do initial scrape on boot if cache is empty
-if not os.path.exists(JOBS_FILE):
-    refresh_jobs()
+    # Do initial scrape on boot if cache is empty
+    if not os.path.exists(JOBS_FILE):
+        refresh_jobs()
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -252,8 +277,28 @@ def api_job_detail(job_id):
 @app.route("/api/refresh", methods=["POST"])
 def api_refresh():
     """Manual refresh trigger."""
-    refresh_jobs()
-    return jsonify({"status": "success", "message": "Jobs refreshed successfully"})
+    count = refresh_jobs()
+    return jsonify({"status": "success", "message": f"Refreshed {count} jobs", "count": count})
+
+
+@app.route("/api/cron")
+def api_cron():
+    """
+    Vercel Cron endpoint – called daily by vercel.json cron config.
+    Also callable manually: GET /api/cron?secret=YOUR_SECRET
+    """
+    # Optional secret check
+    expected = os.environ.get("CRON_SECRET", "")
+    provided = request.args.get("secret", "") or request.headers.get("Authorization", "").replace("Bearer ", "")
+    if expected and provided != expected:
+        return jsonify({"error": "Unauthorized"}), 401
+
+    count = refresh_jobs()
+    return jsonify({
+        "status": "success",
+        "jobs_scraped": count,
+        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+    })
 
 
 @app.route("/api/stats")
@@ -327,6 +372,6 @@ def not_found(e):
     """, 404
 
 
-# ── Run ────────────────────────────────────────────────────────────────
+# ── Run (local dev only – Vercel uses the `app` WSGI object) ──────────
 if __name__ == "__main__":
     app.run(debug=True, port=8080)

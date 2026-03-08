@@ -2,6 +2,7 @@ __pycache__/
 *.pyc
 .env
 venv/
-data/*.json
+# Keep data/jobs.json as seed for Vercel (don't ignore it)
+# data/*.json
 *.log
 .DS_Store
