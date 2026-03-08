@@ -91,6 +91,13 @@ COMPANIES = [
     {"name": "Dream11", "logo": "https://logo.clearbit.com/dream11.com", "industry": "Gaming / Sports", "hq": "Mumbai, India"},
     {"name": "Byju's", "logo": "https://logo.clearbit.com/byjus.com", "industry": "EdTech", "hq": "Bangalore, India"},
     {"name": "Unacademy", "logo": "https://logo.clearbit.com/unacademy.com", "industry": "EdTech", "hq": "Bangalore, India"},
+    {"name": "Nykaa", "logo": "https://logo.clearbit.com/nykaa.com", "industry": "E-Commerce", "hq": "Mumbai, India"},
+    {"name": "Groww", "logo": "https://logo.clearbit.com/groww.in", "industry": "Fintech", "hq": "Bangalore, India"},
+    {"name": "ShareChat", "logo": "https://logo.clearbit.com/sharechat.com", "industry": "Social Media", "hq": "Bangalore, India"},
+    {"name": "Ather Energy", "logo": "https://logo.clearbit.com/atherenergy.com", "industry": "EV / Automotive", "hq": "Bangalore, India"},
+    {"name": "Delhivery", "logo": "https://logo.clearbit.com/delhivery.com", "industry": "Logistics", "hq": "Gurugram, India"},
+    {"name": "Pine Labs", "logo": "https://logo.clearbit.com/pinelabs.com", "industry": "Fintech", "hq": "Noida, India"},
+    {"name": "PolicyBazaar", "logo": "https://logo.clearbit.com/policybazaar.com", "industry": "InsurTech", "hq": "Gurugram, India"},
     # US / Global Tech
     {"name": "Tesla", "logo": "https://logo.clearbit.com/tesla.com", "industry": "Automotive / Energy", "hq": "Austin, TX"},
     {"name": "Uber", "logo": "https://logo.clearbit.com/uber.com", "industry": "Transportation", "hq": "San Francisco, CA"},
@@ -225,6 +232,12 @@ LOCATIONS = [
     {"city": "Kochi", "state": "Kerala", "country": "India", "display": "Kochi, India"},
     {"city": "Chandigarh", "state": "Punjab", "country": "India", "display": "Chandigarh, India"},
     {"city": "Coimbatore", "state": "Tamil Nadu", "country": "India", "display": "Coimbatore, India"},
+    {"city": "Lucknow", "state": "UP", "country": "India", "display": "Lucknow, India"},
+    {"city": "Thiruvananthapuram", "state": "Kerala", "country": "India", "display": "Thiruvananthapuram, India"},
+    {"city": "Indore", "state": "Madhya Pradesh", "country": "India", "display": "Indore, India"},
+    {"city": "Visakhapatnam", "state": "Andhra Pradesh", "country": "India", "display": "Visakhapatnam, India"},
+    {"city": "Nagpur", "state": "Maharashtra", "country": "India", "display": "Nagpur, India"},
+    {"city": "Mysore", "state": "Karnataka", "country": "India", "display": "Mysore, India"},
     # United Kingdom
     {"city": "London", "state": "England", "country": "United Kingdom", "display": "London, UK"},
     {"city": "Manchester", "state": "England", "country": "United Kingdom", "display": "Manchester, UK"},
@@ -785,14 +798,25 @@ class JobScraper:
     # ──────────────────────────────────────────────────────────────────
 
     def _generate_realistic_jobs(self, count: int = 150) -> list[dict]:
-        """Generate realistic job listings from 80+ companies."""
+        """Generate realistic job listings from 80+ companies, weighted toward India."""
         jobs = []
         now = datetime.now()
 
+        # Split locations into India vs other for weighted selection
+        india_locations = [l for l in LOCATIONS if l["country"] == "India"]
+        india_companies = [c for c in COMPANIES if "India" in c.get("hq", "")]
+        all_locations = LOCATIONS
+        all_companies = COMPANIES
+
         for _ in range(count):
-            company = random.choice(COMPANIES)
+            # 60% chance of Indian job, 40% other
+            if random.random() < 0.6:
+                company = random.choice(india_companies) if india_companies else random.choice(all_companies)
+                location = random.choice(india_locations) if india_locations else random.choice(all_locations)
+            else:
+                company = random.choice(all_companies)
+                location = random.choice(all_locations)
             role = random.choice(ROLES)
-            location = random.choice(LOCATIONS)
             exp = random.choice(EXPERIENCE_LEVELS)
             job_type = random.choice(JOB_TYPES)
 

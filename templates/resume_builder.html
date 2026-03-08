@@ -19,7 +19,7 @@
 
                 <div class="form-group">
                     <label>Full Name</label>
-                    <input type="text" class="form-control" id="rName" placeholder="John Doe" oninput="updatePreview()">
+                    <input type="text" class="form-control" id="rName" placeholder="Rahul Sharma" oninput="updatePreview()">
                 </div>
                 <div class="form-group">
                     <label>Professional Title</label>
@@ -28,44 +28,44 @@
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
                         <label>Email</label>
-                        <input type="email" class="form-control" id="rEmail" placeholder="john@email.com" oninput="updatePreview()">
+                        <input type="email" class="form-control" id="rEmail" placeholder="rahul@email.com" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
                         <label>Phone</label>
-                        <input type="tel" class="form-control" id="rPhone" placeholder="+1 234-567-8900" oninput="updatePreview()">
+                        <input type="tel" class="form-control" id="rPhone" placeholder="+91 98765 43210" oninput="updatePreview()">
                     </div>
                 </div>
                 <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
                     <div class="form-group">
                         <label>Location</label>
-                        <input type="text" class="form-control" id="rLocation" placeholder="San Francisco, CA" oninput="updatePreview()">
+                        <input type="text" class="form-control" id="rLocation" placeholder="Bangalore, Karnataka" oninput="updatePreview()">
                     </div>
                     <div class="form-group">
                         <label>LinkedIn / Portfolio URL</label>
-                        <input type="url" class="form-control" id="rLinkedin" placeholder="linkedin.com/in/johndoe" oninput="updatePreview()">
+                        <input type="url" class="form-control" id="rLinkedin" placeholder="linkedin.com/in/rahulsharma" oninput="updatePreview()">
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Professional Summary</label>
-                    <textarea class="form-control" id="rSummary" rows="3" placeholder="Experienced software engineer with 5+ years in full-stack development..." oninput="updatePreview()"></textarea>
+                    <textarea class="form-control" id="rSummary" rows="3" placeholder="Experienced software engineer with 3+ years in full-stack development at leading Indian tech companies..." oninput="updatePreview()"></textarea>
                 </div>
 
                 <div class="form-group">
                     <label>Skills (comma-separated)</label>
-                    <input type="text" class="form-control" id="rSkills" placeholder="Python, JavaScript, React, Node.js, AWS, Docker" oninput="updatePreview()">
+                    <input type="text" class="form-control" id="rSkills" placeholder="Python, Java, React, Node.js, AWS, DSA, Spring Boot" oninput="updatePreview()">
                 </div>
 
                 <h4 style="margin:24px 0 16px;"><i class="fas fa-briefcase text-accent"></i> Work Experience</h4>
                 <div id="experienceFields">
                     <div class="experience-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
-                            <div class="form-group"><label>Job Title</label><input type="text" class="form-control exp-title" placeholder="Senior Developer" oninput="updatePreview()"></div>
-                            <div class="form-group"><label>Company</label><input type="text" class="form-control exp-company" placeholder="Google" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Job Title</label><input type="text" class="form-control exp-title" placeholder="Software Engineer" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Company</label><input type="text" class="form-control exp-company" placeholder="Infosys" oninput="updatePreview()"></div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                             <div class="form-group"><label>Duration</label><input type="text" class="form-control exp-duration" placeholder="2022 – Present" oninput="updatePreview()"></div>
-                            <div class="form-group"><label>Location</label><input type="text" class="form-control exp-location" placeholder="San Francisco, CA" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Location</label><input type="text" class="form-control exp-location" placeholder="Bangalore, India" oninput="updatePreview()"></div>
                         </div>
                         <div class="form-group"><label>Description</label><textarea class="form-control exp-desc" rows="2" placeholder="Led development of microservices architecture..." oninput="updatePreview()"></textarea></div>
                     </div>
@@ -77,11 +77,11 @@
                     <div class="education-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                             <div class="form-group"><label>Degree</label><input type="text" class="form-control edu-degree" placeholder="B.Tech Computer Science" oninput="updatePreview()"></div>
-                            <div class="form-group"><label>Institution</label><input type="text" class="form-control edu-school" placeholder="MIT" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>Institution</label><input type="text" class="form-control edu-school" placeholder="IIT Bangalore / NIT Trichy" oninput="updatePreview()"></div>
                         </div>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
                             <div class="form-group"><label>Year</label><input type="text" class="form-control edu-year" placeholder="2018 – 2022" oninput="updatePreview()"></div>
-                            <div class="form-group"><label>GPA / Score</label><input type="text" class="form-control edu-gpa" placeholder="3.8 / 4.0" oninput="updatePreview()"></div>
+                            <div class="form-group"><label>CGPA / Percentage</label><input type="text" class="form-control edu-gpa" placeholder="8.5 / 10 CGPA" oninput="updatePreview()"></div>
                         </div>
                     </div>
                 </div>
@@ -97,7 +97,7 @@
             <div class="resume-preview" id="resumePreview">
                 <h2 id="prevName">Your Name</h2>
                 <p id="prevTitle" style="color:#667eea;font-weight:600;font-size:1rem;margin-bottom:4px;">Professional Title</p>
-                <p id="prevContact" style="font-size:0.82rem;color:#888;">email@example.com | +1 234-567-8900 | City, State</p>
+                <p id="prevContact" style="font-size:0.82rem;color:#888;">email@example.com | +91 98765 43210 | Bangalore, Karnataka</p>
 
                 <h3>PROFESSIONAL SUMMARY</h3>
                 <p id="prevSummary">Your professional summary will appear here as you type...</p>
@@ -156,8 +156,8 @@ function updatePreview() {
     document.getElementById('prevTitle').textContent = document.getElementById('rTitle').value || 'Professional Title';
     
     const email = document.getElementById('rEmail').value || 'email@example.com';
-    const phone = document.getElementById('rPhone').value || '+1 234-567-8900';
-    const loc = document.getElementById('rLocation').value || 'City, State';
+    const phone = document.getElementById('rPhone').value || '+91 98765 43210';
+    const loc = document.getElementById('rLocation').value || 'Bangalore, Karnataka';
     const linkedin = document.getElementById('rLinkedin').value;
     document.getElementById('prevContact').textContent = `${email} | ${phone} | ${loc}${linkedin ? ' | ' + linkedin : ''}`;
 

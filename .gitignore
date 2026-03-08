@@ -6,3 +6,4 @@ venv/
 # data/*.json
 *.log
 .DS_Store
+nohup.out
