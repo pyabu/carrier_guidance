@@ -526,8 +526,31 @@ def _dedup_key(job: dict) -> str:
 class JobScraper:
     """
     Production multi-source job scraper.
-    Pulls from 8 real public APIs in parallel, deduplicates,
+    Pulls from 16 real public sources in parallel, deduplicates,
     normalises locations, and supplements with curated data.
+
+    Sources:
+    ── Global / Remote ─────────────────────────────────────────
+    1. Remotive          (Remote jobs API)
+    2. Arbeitnow         (EU & global jobs API)
+    3. RemoteOK          (Remote jobs API)
+    4. Jobicy            (Remote jobs API)
+    5. The Muse          (US companies API)
+    6. FindWork          (Dev jobs API)
+    7. LinkedIn          (Public search scraper)
+    8. Indeed            (RSS feed)
+    ── Indian Portals ──────────────────────────────────────────
+    9. Naukri.com        (India #1 job portal)
+    10. Foundit          (Monster India)
+    11. Shine.com        (HT Media)
+    12. Freshersworld    (Fresher/entry-level)
+    13. TimesJobs        (Times Group)
+    14. Internshala      (Internships & fresher jobs)
+    ── Remote-Focused ──────────────────────────────────────────
+    15. We Work Remotely (Remote jobs RSS)
+    16. FlexJobs         (Flexible & remote)
+    ── Aggregators ─────────────────────────────────────────────
+    17. Himalayas         (104K+ jobs, public JSON API)
     """
 
     def __init__(self):
@@ -549,20 +572,33 @@ class JobScraper:
         Returns list[dict] ready for JSON serialisation.
         """
         scrapers = [
-            ("Remotive",        self._scrape_remotive),
-            ("Arbeitnow",       self._scrape_arbeitnow),
-            ("RemoteOK",        self._scrape_remoteok),
-            ("Jobicy",          self._scrape_jobicy),
-            ("The Muse",        self._scrape_themuse),
-            ("FindWork",        self._scrape_findwork),
-            ("LinkedIn RSS",    self._scrape_linkedin_rss),
-            ("Indeed RSS",      self._scrape_indeed_rss),
+            # ── Global / Remote APIs ──────────────────────────────────
+            ("Remotive",            self._scrape_remotive),
+            ("Arbeitnow",           self._scrape_arbeitnow),
+            ("RemoteOK",            self._scrape_remoteok),
+            ("Jobicy",              self._scrape_jobicy),
+            ("The Muse",            self._scrape_themuse),
+            ("FindWork",            self._scrape_findwork),
+            ("LinkedIn RSS",        self._scrape_linkedin_rss),
+            ("Indeed RSS",          self._scrape_indeed_rss),
+            # ── Indian Job Portals ────────────────────────────────────
+            ("Naukri.com",          self._scrape_naukri),
+            ("Foundit",             self._scrape_foundit),
+            ("Shine.com",           self._scrape_shine),
+            ("Freshersworld",       self._scrape_freshersworld),
+            ("TimesJobs",           self._scrape_timesjobs),
+            ("Internshala",         self._scrape_internshala),
+            # ── Remote Job Sites ──────────────────────────────────────
+            ("We Work Remotely",    self._scrape_weworkremotely),
+            ("FlexJobs",            self._scrape_flexjobs),
+            # ── Aggregators ───────────────────────────────────────────
+            ("Himalayas",           self._scrape_himalayas),
         ]
 
         all_jobs = []
 
-        # Run all scrapers in parallel (max 6 threads)
-        with ThreadPoolExecutor(max_workers=6) as pool:
+        # Run all scrapers in parallel (max 10 threads)
+        with ThreadPoolExecutor(max_workers=10) as pool:
             futures = {pool.submit(fn): name for name, fn in scrapers}
             for future in as_completed(futures):
                 src = futures[future]
@@ -945,6 +981,755 @@ class JobScraper:
                 time.sleep(0.4)
             except Exception as e:
                 logger.debug(f"Indeed RSS ({query}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 9: Naukri.com (India's largest job portal)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_naukri(self) -> list[dict]:
+        """
+        Scrape Naukri.com public search listings for Indian tech jobs.
+        Note: Naukri uses heavy JS rendering + reCAPTCHA.
+        Uses their guest search page which occasionally serves SSR content.
+        """
+        jobs = []
+        search_terms = [
+            "software-developer", "data-scientist", "python-developer",
+            "java-developer", "react-developer", "devops-engineer",
+            "machine-learning", "full-stack-developer", "product-manager",
+            "cloud-engineer", "frontend-developer", "backend-developer",
+        ]
+        headers = {
+            "User-Agent": random.choice(USER_AGENTS),
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9",
+            "Accept-Language": "en-IN,en;q=0.9,hi;q=0.8",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Referer": "https://www.naukri.com/",
+            "Cache-Control": "no-cache",
+        }
+        for term in search_terms:
+            try:
+                url = f"https://www.naukri.com/{term}-jobs"
+                resp = self.session.get(url, timeout=15, headers=headers)
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+
+                # Try multiple selectors — Naukri changes DOM frequently
+                cards = (
+                    soup.find_all("article", class_="jobTuple") or
+                    soup.find_all("div", class_="srp-jobtuple-wrapper") or
+                    soup.find_all("div", class_="cust-job-tuple") or
+                    soup.find_all("div", attrs={"data-job-id": True}) or
+                    soup.find_all("div", class_="jobTupleHeader")
+                )
+
+                # Also try to extract from embedded JSON-LD
+                scripts = soup.find_all("script", type="application/ld+json")
+                for script in scripts:
+                    try:
+                        import json as _json
+                        ld_data = _json.loads(script.string or "")
+                        if isinstance(ld_data, dict) and ld_data.get("@type") == "JobPosting":
+                            ld_data = [ld_data]
+                        if isinstance(ld_data, list):
+                            for item in ld_data:
+                                if item.get("@type") != "JobPosting":
+                                    continue
+                                org = item.get("hiringOrganization", {}) or {}
+                                loc = item.get("jobLocation", {})
+                                if isinstance(loc, list):
+                                    loc = loc[0] if loc else {}
+                                addr = loc.get("address", {}) if isinstance(loc, dict) else {}
+                                if isinstance(addr, list):
+                                    addr = addr[0] if addr else {}
+                                city = addr.get("addressLocality", "India") if isinstance(addr, dict) else "India"
+
+                                sal = item.get("baseSalary", {}) or {}
+                                sal_val = sal.get("value", {}) or {}
+                                sal_str = ""
+                                if isinstance(sal_val, dict):
+                                    mn = sal_val.get("minValue", "")
+                                    mx = sal_val.get("maxValue", "")
+                                    cur = sal.get("currency", "INR")
+                                    if mn and mx:
+                                        sal_str = f"{cur} {mn} - {mx}"
+
+                                jobs.append(self._make_job(
+                                    title=item.get("title", ""),
+                                    company=org.get("name", ""),
+                                    logo=org.get("logo", ""),
+                                    location=city,
+                                    job_type=item.get("employmentType", "Full-time"),
+                                    category=self._map_category(term.replace("-", " ")),
+                                    description=self._clean_html(item.get("description", "")),
+                                    skills=self._extract_skills_from_text(item.get("description", "")),
+                                    apply_url=item.get("url", "#"),
+                                    posted=(item.get("datePosted", "") or "")[:10],
+                                    salary=sal_str,
+                                    source="Naukri.com",
+                                ))
+                    except Exception:
+                        pass
+
+                for card in cards[:8]:
+                    title_el = (
+                        card.find("a", class_="title") or
+                        card.find("a", class_="jobTitle") or
+                        card.find("a", attrs={"class": lambda c: c and "title" in str(c).lower()})
+                    )
+                    company_el = (
+                        card.find("a", class_="subTitle") or
+                        card.find("a", class_="comp-name") or
+                        card.find("span", class_="comp-name")
+                    )
+                    loc_el = (
+                        card.find("li", class_="location") or
+                        card.find("span", class_="loc") or
+                        card.find("span", class_="locWdth") or
+                        card.find("span", attrs={"class": lambda c: c and "loc" in str(c).lower()})
+                    )
+                    exp_el = card.find("li", class_="experience") or card.find("span", class_="expwdth")
+                    sal_el = card.find("li", class_="salary") or card.find("span", class_="sal")
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "India"
+                    experience = exp_el.get_text(strip=True) if exp_el else ""
+                    salary = sal_el.get_text(strip=True) if sal_el else ""
+                    link = title_el.get("href", "#") if title_el else "#"
+
+                    if not title or not company:
+                        continue
+
+                    if "," in location:
+                        location = location.split(",")[0].strip()
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company,
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com",
+                        location=location if location else "India",
+                        job_type="Full-time",
+                        category=self._map_category(term.replace("-", " ")),
+                        description=f"{title} at {company}. {experience} experience required. Found on Naukri.com",
+                        skills=self._extract_skills_from_text(f"{title} {term.replace('-', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.naukri.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary=salary,
+                        source="Naukri.com",
+                        experience=self._map_experience(experience),
+                    ))
+                time.sleep(0.6)
+            except Exception as e:
+                logger.debug(f"Naukri ({term}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 10: Foundit / Monster India
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_foundit(self) -> list[dict]:
+        """Scrape Foundit.in (formerly Monster India) job listings."""
+        jobs = []
+        search_terms = [
+            "software-developer", "data-analyst", "python",
+            "java", "react", "devops", "machine-learning",
+            "product-manager", "frontend", "backend",
+        ]
+        for term in search_terms:
+            try:
+                url = f"https://www.foundit.in/srp/results?searchId=&query={term.replace('-', '+')}&locations=India"
+                resp = self.session.get(url, timeout=15, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-IN,en;q=0.9",
+                    "Referer": "https://www.foundit.in/",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", class_="card-apply-content") or \
+                        soup.find_all("div", class_="srpResultCardHeader") or \
+                        soup.find_all("div", attrs={"class": lambda c: c and "jobCard" in str(c)})
+
+                for card in cards[:8]:
+                    title_el = card.find("a", class_="card-title") or card.find("a", attrs={"class": lambda c: c and "title" in str(c).lower()})
+                    company_el = card.find("span", class_="card-company") or card.find("a", class_="comp-name")
+                    loc_el = card.find("span", class_="card-location") or card.find("span", attrs={"class": lambda c: c and "loc" in str(c).lower()})
+                    exp_el = card.find("span", class_="card-experience")
+                    sal_el = card.find("span", class_="card-salary")
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "India"
+                    experience = exp_el.get_text(strip=True) if exp_el else ""
+                    salary = sal_el.get_text(strip=True) if sal_el else ""
+                    link = title_el.get("href", "#") if title_el else "#"
+
+                    if not title:
+                        continue
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Confidential",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location,
+                        job_type="Full-time",
+                        category=self._map_category(term.replace("-", " ")),
+                        description=f"{title} at {company}. {experience}. Found on Foundit.in",
+                        skills=self._extract_skills_from_text(f"{title} {term.replace('-', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.foundit.in{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary=salary,
+                        source="Foundit",
+                        experience=self._map_experience(experience),
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"Foundit ({term}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 11: Shine.com (HT Media job portal)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_shine(self) -> list[dict]:
+        """Scrape Shine.com for Indian job listings."""
+        jobs = []
+        search_terms = [
+            "python-developer", "java-developer", "react-developer",
+            "data-scientist", "devops-engineer", "product-manager",
+            "machine-learning-engineer", "cloud-engineer", "frontend-developer",
+        ]
+        for term in search_terms:
+            try:
+                url = f"https://www.shine.com/job-search/{term}-jobs"
+                resp = self.session.get(url, timeout=15, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-IN,en;q=0.9",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", class_="result_content") or \
+                        soup.find_all("div", class_="jobCard") or \
+                        soup.find_all("div", attrs={"id": lambda i: i and "job_" in str(i)})
+
+                for card in cards[:8]:
+                    title_el = card.find("a", class_="job_title_anchor") or card.find("a", attrs={"class": lambda c: c and "title" in str(c).lower()})
+                    company_el = card.find("span", class_="comp_name") or card.find("a", class_="companyName")
+                    loc_el = card.find("span", class_="loc") or card.find("span", attrs={"class": lambda c: c and "loc" in str(c).lower()})
+                    exp_el = card.find("span", class_="exp")
+                    sal_el = card.find("span", class_="salary")
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "India"
+                    experience = exp_el.get_text(strip=True) if exp_el else ""
+                    salary = sal_el.get_text(strip=True) if sal_el else ""
+                    link = title_el.get("href", "#") if title_el else "#"
+
+                    if not title:
+                        continue
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Confidential",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location,
+                        job_type="Full-time",
+                        category=self._map_category(term.replace("-", " ")),
+                        description=f"{title} at {company}. {experience}. Found on Shine.com",
+                        skills=self._extract_skills_from_text(f"{title} {term.replace('-', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.shine.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary=salary,
+                        source="Shine.com",
+                        experience=self._map_experience(experience),
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"Shine ({term}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 12: Freshersworld (entry-level / fresher jobs India)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_freshersworld(self) -> list[dict]:
+        """Scrape Freshersworld.com for fresher and entry-level Indian jobs."""
+        jobs = []
+        categories = [
+            "it-software", "data-science", "python", "java",
+            "web-development", "cloud-computing", "machine-learning",
+            "devops", "cyber-security", "testing",
+        ]
+        for cat in categories:
+            try:
+                url = f"https://www.freshersworld.com/jobs/category/{cat}"
+                resp = self.session.get(url, timeout=15, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-IN,en;q=0.9",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", class_="job-container") or \
+                        soup.find_all("div", class_="latest_jobs_in") or \
+                        soup.find_all("div", class_="job-details") or \
+                        soup.find_all("span", class_="wrap-header") or \
+                        soup.find_all("div", attrs={"class": lambda c: c and "job" in str(c).lower() and "card" in str(c).lower()})
+
+                for card in cards[:8]:
+                    title_el = card.find("a") or card.find("span", class_="job-title")
+                    company_el = card.find("h3", class_="company-name") or card.find("span", class_="company-name") or card.find("span", class_="comp_name")
+                    loc_el = card.find("span", class_="job-location") or card.find("span", attrs={"class": lambda c: c and "loc" in str(c).lower()})
+                    qual_el = card.find("span", class_="qualification")
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "India"
+                    link = title_el.get("href", "#") if title_el and title_el.name == "a" else "#"
+
+                    if not title or len(title) < 5:
+                        continue
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Multiple Companies",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location or "India",
+                        job_type="Full-time",
+                        category=self._map_category(cat.replace("-", " ")),
+                        description=f"{title} for freshers at {company}. Found on Freshersworld.com",
+                        skills=self._extract_skills_from_text(f"{title} {cat.replace('-', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.freshersworld.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary="",
+                        source="Freshersworld",
+                        experience="Entry Level",
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"Freshersworld ({cat}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 13: TimesJobs (Times Group job portal)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_timesjobs(self) -> list[dict]:
+        """Scrape TimesJobs.com for Indian job listings."""
+        jobs = []
+        search_terms = [
+            "python", "java", "react", "data+scientist",
+            "devops", "machine+learning", "cloud+engineer",
+            "full+stack", "product+manager", "software+engineer",
+        ]
+        for term in search_terms:
+            try:
+                url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personal498&from=submit&searchTextSrc=&searchTextText=&txtKeywords={term}&txtLocation="
+                resp = self.session.get(url, timeout=15, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-IN,en;q=0.9",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("li", class_="clearfix job-bx") or \
+                        soup.find_all("div", class_="job-bx-title") or \
+                        soup.find_all("div", class_="clearfix job-bx")
+
+                for card in cards[:8]:
+                    title_el = card.find("h2") or card.find("a", class_="title")
+                    if title_el and title_el.find("a"):
+                        title_link = title_el.find("a")
+                        title = title_link.get_text(strip=True)
+                        link = title_link.get("href", "#")
+                    else:
+                        title = title_el.get_text(strip=True) if title_el else ""
+                        link = "#"
+
+                    company_el = card.find("h3", class_="joblist-comp-name") or card.find("h3")
+                    loc_el = card.find("span", class_="loc") or card.find("ul", class_="top-jd-dtl")
+                    exp_el = card.find("li") if card.find("ul", class_="top-jd-dtl") else None
+
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = ""
+                    if loc_el:
+                        location = loc_el.get_text(strip=True)
+                    # Extract from detail list
+                    detail_list = card.find("ul", class_="top-jd-dtl")
+                    if detail_list:
+                        detail_items = detail_list.find_all("li")
+                        for di in detail_items:
+                            icon = di.find("i")
+                            text = di.get_text(strip=True)
+                            if icon and "location" in str(icon.get("class", [])):
+                                location = text
+                            elif not location and any(city in text for city in ["Mumbai", "Delhi", "Bangalore", "Hyderabad", "Chennai", "Pune"]):
+                                location = text
+
+                    experience = ""
+                    if detail_list:
+                        first_li = detail_list.find("li")
+                        if first_li:
+                            experience = first_li.get_text(strip=True)
+
+                    if not title or len(title) < 3:
+                        continue
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Confidential",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location or "India",
+                        job_type="Full-time",
+                        category=self._map_category(term.replace("+", " ")),
+                        description=f"{title} at {company}. Found on TimesJobs.com",
+                        skills=self._extract_skills_from_text(f"{title} {term.replace('+', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.timesjobs.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary="",
+                        source="TimesJobs",
+                        experience=self._map_experience(experience),
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"TimesJobs ({term}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 14: Internshala (internships & fresher jobs)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_internshala(self) -> list[dict]:
+        """Scrape Internshala for internships and fresher jobs in India."""
+        jobs = []
+        categories = [
+            ("internships/computer-science-internship", "Internship"),
+            ("internships/web-development-internship", "Internship"),
+            ("internships/python-django-internship", "Internship"),
+            ("internships/data-science-internship", "Internship"),
+            ("internships/machine-learning-internship", "Internship"),
+            ("internships/graphic-design-internship", "Internship"),
+            ("internships/digital-marketing-internship", "Internship"),
+            ("fresher-jobs/computer-science-jobs", "Full-time"),
+            ("fresher-jobs/web-development-jobs", "Full-time"),
+            ("fresher-jobs/data-science-jobs", "Full-time"),
+        ]
+        for path, default_type in categories:
+            try:
+                url = f"https://internshala.com/{path}"
+                resp = self.session.get(url, timeout=15, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-IN,en;q=0.9",
+                    "X-Requested-With": "XMLHttpRequest",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", class_="individual_internship") or \
+                        soup.find_all("div", class_="internship_meta") or \
+                        soup.find_all("div", attrs={"class": lambda c: c and "internship" in str(c).lower()}) or \
+                        soup.find_all("div", attrs={"class": lambda c: c and "job_" in str(c).lower()})
+
+                for card in cards[:6]:
+                    # Title
+                    title_el = card.find("a", class_="view_detail_button") or \
+                               card.find("h3", class_="heading_4_5") or \
+                               card.find("a", class_="job-title-href") or \
+                               card.find("h3")
+                    company_el = card.find("p", class_="company_name") or \
+                                 card.find("a", class_="link_display_like_text") or \
+                                 card.find("h4")
+                    loc_el = card.find("a", class_="location_link") or \
+                             card.find("p", class_="location") or \
+                             card.find("span", class_="location")
+                    stipend_el = card.find("span", class_="stipend") or \
+                                 card.find("span", class_="desktop-text") or \
+                                 card.find("span", attrs={"class": lambda c: c and "stipend" in str(c).lower()})
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "India"
+                    stipend = stipend_el.get_text(strip=True) if stipend_el else ""
+                    link = title_el.get("href", "#") if title_el and title_el.name == "a" else "#"
+
+                    if not title or len(title) < 3:
+                        continue
+
+                    cat_name = path.split("/")[-1].replace("-internship", "").replace("-jobs", "").replace("-", " ")
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Startup",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location or "India",
+                        job_type=default_type,
+                        category=self._map_category(cat_name) if default_type != "Internship" else "Internship",
+                        description=f"{title} at {company}. {stipend}. Found on Internshala.",
+                        skills=self._extract_skills_from_text(f"{title} {cat_name}"),
+                        apply_url=link if link.startswith("http") else f"https://internshala.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary=stipend,
+                        source="Internshala",
+                        experience="Entry Level",
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"Internshala ({path}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 15: We Work Remotely (remote jobs, RSS feeds)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_weworkremotely(self) -> list[dict]:
+        """Scrape We Work Remotely via their public RSS feeds."""
+        jobs = []
+        rss_feeds = [
+            ("programming", "https://weworkremotely.com/categories/remote-programming-jobs.rss"),
+            ("devops", "https://weworkremotely.com/categories/remote-devops-sysadmin-jobs.rss"),
+            ("design", "https://weworkremotely.com/categories/remote-design-jobs.rss"),
+            ("management", "https://weworkremotely.com/categories/remote-product-jobs.rss"),
+            ("front-end", "https://weworkremotely.com/categories/remote-front-end-programming-jobs.rss"),
+            ("back-end", "https://weworkremotely.com/categories/remote-back-end-programming-jobs.rss"),
+            ("full-stack", "https://weworkremotely.com/categories/remote-full-stack-programming-jobs.rss"),
+        ]
+        for cat, feed_url in rss_feeds:
+            try:
+                resp = self.session.get(feed_url, timeout=12, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "application/rss+xml,application/xml,text/xml",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "xml")
+                items = soup.find_all("item")
+
+                for item in items[:8]:
+                    title_text = item.find("title").get_text(strip=True) if item.find("title") else ""
+                    link = item.find("link").get_text(strip=True) if item.find("link") else "#"
+                    pub_date = item.find("pubDate").get_text(strip=True) if item.find("pubDate") else ""
+                    description = item.find("description").get_text(strip=True) if item.find("description") else ""
+
+                    if not title_text:
+                        continue
+
+                    # Parse company from title (format: "Company: Job Title")
+                    company = ""
+                    title = title_text
+                    if ":" in title_text:
+                        parts = title_text.split(":", 1)
+                        company = parts[0].strip()
+                        title = parts[1].strip()
+
+                    # Parse date
+                    posted = datetime.now().strftime("%Y-%m-%d")
+                    if pub_date:
+                        try:
+                            from email.utils import parsedate_to_datetime
+                            posted = parsedate_to_datetime(pub_date).strftime("%Y-%m-%d")
+                        except Exception:
+                            pass
+
+                    # Clean HTML description
+                    clean_desc = self._clean_html(description)
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Remote Company",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location="Remote",
+                        job_type="Remote",
+                        category=self._map_category(cat),
+                        description=clean_desc or f"{title} at {company}. Remote position via We Work Remotely.",
+                        skills=self._extract_skills_from_text(f"{title} {clean_desc[:200]}"),
+                        apply_url=link,
+                        posted=posted,
+                        salary="",
+                        source="We Work Remotely",
+                    ))
+                time.sleep(0.3)
+            except Exception as e:
+                logger.debug(f"WWR ({cat}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 16: FlexJobs (remote & flexible jobs)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_flexjobs(self) -> list[dict]:
+        """Scrape FlexJobs for remote and flexible job listings."""
+        jobs = []
+        search_terms = [
+            "software-developer", "data-scientist", "python",
+            "devops", "product-manager",
+        ]
+        for term in search_terms:
+            try:
+                url = f"https://www.flexjobs.com/search?search={term.replace('-', '+')}&location="
+                resp = self.session.get(url, timeout=8, headers={
+                    "User-Agent": random.choice(USER_AGENTS),
+                    "Accept": "text/html,application/xhtml+xml",
+                    "Accept-Language": "en-US,en;q=0.9",
+                    "Referer": "https://www.flexjobs.com/",
+                })
+                if resp.status_code != 200:
+                    continue
+
+                soup = BeautifulSoup(resp.text, "html.parser")
+                cards = soup.find_all("div", class_="job-card") or \
+                        soup.find_all("li", class_="job-post") or \
+                        soup.find_all("div", class_="sc-job-card") or \
+                        soup.find_all("a", attrs={"class": lambda c: c and "job" in str(c).lower()})
+
+                for card in cards[:6]:
+                    title_el = card.find("a", class_="job-title") or card.find("h5") or card.find("a")
+                    company_el = card.find("span", class_="company") or card.find("div", class_="company")
+                    loc_el = card.find("span", class_="location") or card.find("li", class_="location")
+                    type_el = card.find("span", class_="job-type") or card.find("li", class_="job-type")
+
+                    title = title_el.get_text(strip=True) if title_el else ""
+                    company = company_el.get_text(strip=True) if company_el else ""
+                    location = loc_el.get_text(strip=True) if loc_el else "Remote"
+                    job_type = type_el.get_text(strip=True) if type_el else "Remote"
+                    link = title_el.get("href", "#") if title_el and title_el.name == "a" else "#"
+
+                    if not title or len(title) < 3:
+                        continue
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company or "Flexible Company",
+                        logo=f"https://logo.clearbit.com/{company.lower().replace(' ', '').replace(',', '')}.com" if company else "",
+                        location=location,
+                        job_type=job_type if job_type in ["Remote", "Part-time", "Freelance", "Hybrid"] else "Remote",
+                        category=self._map_category(term.replace("-", " ")),
+                        description=f"{title} at {company}. Flexible/remote position via FlexJobs.",
+                        skills=self._extract_skills_from_text(f"{title} {term.replace('-', ' ')}"),
+                        apply_url=link if link.startswith("http") else f"https://www.flexjobs.com{link}",
+                        posted=datetime.now().strftime("%Y-%m-%d"),
+                        salary="",
+                        source="FlexJobs",
+                    ))
+                time.sleep(0.5)
+            except Exception as e:
+                logger.debug(f"FlexJobs ({term}): {e}")
+        return jobs
+
+    # ──────────────────────────────────────────────────────────────────
+    # SOURCE 17: Himalayas (104K+ jobs, public JSON API)
+    # ──────────────────────────────────────────────────────────────────
+
+    def _scrape_himalayas(self) -> list[dict]:
+        """
+        Scrape Himalayas.app via their public JSON API.
+        104K+ jobs, excellent data quality with salary, seniority, location.
+        """
+        jobs = []
+        # Fetch multiple pages with offset for broader coverage
+        offsets = [0, 50, 100]
+        for offset in offsets:
+            try:
+                url = f"https://himalayas.app/jobs/api?limit=50&offset={offset}"
+                resp = self.session.get(url, timeout=15, headers={
+                    "Accept": "application/json",
+                    "User-Agent": random.choice(USER_AGENTS),
+                })
+                if resp.status_code != 200:
+                    continue
+
+                data = resp.json()
+                for item in data.get("jobs", []):
+                    title = item.get("title", "")
+                    company = item.get("companyName", "")
+                    logo = item.get("companyLogo", "")
+                    emp_type = item.get("employmentType", "Full Time")
+                    min_sal = item.get("minSalary")
+                    max_sal = item.get("maxSalary")
+                    currency = item.get("currency", "USD")
+                    seniority = item.get("seniority", [])
+                    loc_restrictions = item.get("locationRestrictions", [])
+                    categories = item.get("categories", [])
+                    description = item.get("description", "")
+                    apply_link = item.get("applicationLink", "#")
+                    pub_date = item.get("pubDate")
+
+                    if not title:
+                        continue
+
+                    # Build location string
+                    location = "Remote"
+                    if loc_restrictions:
+                        location = ", ".join(loc_restrictions[:2])
+                        if len(loc_restrictions) > 2:
+                            location += f" +{len(loc_restrictions)-2} more"
+
+                    # Build salary string
+                    sal_str = ""
+                    if min_sal and max_sal:
+                        sal_str = f"{currency} {min_sal:,} – {max_sal:,}"
+                    elif min_sal:
+                        sal_str = f"{currency} {min_sal:,}+"
+
+                    # Parse date from unix timestamp
+                    posted = datetime.now().strftime("%Y-%m-%d")
+                    if pub_date:
+                        try:
+                            posted = datetime.fromtimestamp(pub_date).strftime("%Y-%m-%d")
+                        except Exception:
+                            pass
+
+                    # Map employment type
+                    type_map = {
+                        "Full Time": "Full-time",
+                        "Part Time": "Part-time",
+                        "Contract": "Contract",
+                        "Freelance": "Freelance",
+                        "Internship": "Internship",
+                    }
+                    job_type = type_map.get(emp_type, "Full-time")
+
+                    # Map seniority
+                    exp = "Mid Level"
+                    if seniority:
+                        exp = self._map_experience(seniority[0])
+
+                    # Map category from job categories
+                    cat = self._map_category(", ".join(categories[:3]))
+
+                    jobs.append(self._make_job(
+                        title=title,
+                        company=company,
+                        logo=logo or f"https://ui-avatars.com/api/?name={company[:2]}&background=667eea&color=fff&size=80",
+                        location=location,
+                        job_type=job_type,
+                        category=cat,
+                        description=self._clean_html(description),
+                        skills=self._extract_skills_from_text(description[:500]),
+                        apply_url=apply_link,
+                        posted=posted,
+                        salary=sal_str,
+                        source="Himalayas",
+                        experience=exp,
+                    ))
+                time.sleep(0.3)
+            except Exception as e:
+                logger.debug(f"Himalayas (offset {offset}): {e}")
         return jobs
 
     # ──────────────────────────────────────────────────────────────────
