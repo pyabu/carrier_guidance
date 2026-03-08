@@ -372,6 +372,9 @@ def not_found(e):
     """, 404
 
 
+# ── WSGI alias (some Vercel runtime versions look for `application`) ───
+application = app
+
 # ── Run (local dev only – Vercel uses the `app` WSGI object) ──────────
 if __name__ == "__main__":
     app.run(debug=True, port=8080)
