@@ -177,7 +177,7 @@
 
             <!-- Job Results -->
             <div>
-                <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3">
+                <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3" style="gap:12px;">
                     <div>
                         <p id="resultsCount" class="text-muted" style="margin-bottom:2px;">Loading jobs...</p>
                         <p id="sourceInfo" class="text-muted" style="font-size:.78rem;opacity:0.7;margin:0;"></p>
@@ -281,9 +281,19 @@ async function loadRefreshStatus() {
         var data = await resp.json();
         var el = document.getElementById('refreshStatus');
         var icon = data.is_fresh ? '\ud83d\udfe2' : '\ud83d\udfe1';
-        el.textContent = icon + ' Last updated: ' + (data.last_updated || 'Never') + ' | '
+        var text = icon + ' Last updated: ' + (data.last_updated || 'Never') + ' | '
             + data.total_jobs + ' jobs from ' + Object.keys(data.sources || {}).length
             + ' sources across ' + (data.countries_covered || 0) + ' countries';
+
+        // Show scheduler info
+        if (data.scheduler && data.scheduler.active) {
+            var hrs = data.hours_since_update != null ? data.hours_since_update + 'h ago' : '';
+            text += ' | \u23f0 Auto-refresh: every ' + data.scheduler.refresh_interval_hours + 'h';
+            if (data.scheduler.next_run) {
+                text += ' (next: ' + data.scheduler.next_run + ')';
+            }
+        }
+        el.innerHTML = text;
     } catch(e) {}
 }
 

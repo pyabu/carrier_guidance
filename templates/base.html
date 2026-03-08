@@ -18,6 +18,7 @@
     
     <!-- Main Stylesheet -->
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <style>/* Prevent FOUC */ .main-content { opacity: 0; transition: opacity 0.2s ease; } .main-content.loaded { opacity: 1; }</style>
     
     {% block extra_head %}{% endblock %}
 </head>
@@ -146,6 +147,7 @@
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
     <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>document.querySelector('.main-content')?.classList.add('loaded');</script>
     {% block extra_scripts %}{% endblock %}
 </body>
 </html>

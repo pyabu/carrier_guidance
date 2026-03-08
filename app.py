@@ -8,7 +8,8 @@ import os
 import json
 import shutil
 import logging
-from datetime import datetime
+import threading
+from datetime import datetime, timedelta
 from flask import Flask, render_template, jsonify, request, abort
 from flask_cors import CORS
 
@@ -86,20 +87,157 @@ def refresh_jobs():
         return 0
 
 
-# ── Scheduler – local dev only (Vercel uses cron endpoint instead) ─────
+# ── Scheduler state tracking ───────────────────────────────────────────
+scheduler_info = {
+    "active": False,
+    "type": None,           # "apscheduler" or "threading"
+    "last_refresh": None,
+    "last_refresh_count": 0,
+    "next_run": None,
+    "refresh_history": [],   # last 10 refreshes
+    "errors": [],            # last 5 errors
+    "started_at": None,
+}
+
+REFRESH_INTERVAL_HOURS = 12
+STALE_THRESHOLD_HOURS = 24
+MAX_HISTORY = 10
+MAX_ERRORS = 5
+
+
+def tracked_refresh():
+    """Wrapper around refresh_jobs that tracks timing & history."""
+    start = datetime.now()
+    logger.info(f"⏰ Auto-refresh triggered at {start.strftime('%Y-%m-%d %H:%M:%S')}")
+    try:
+        count = refresh_jobs()
+        end = datetime.now()
+        elapsed = (end - start).total_seconds()
+        entry = {
+            "time": end.strftime("%Y-%m-%d %H:%M:%S"),
+            "jobs": count,
+            "duration_seconds": round(elapsed, 1),
+            "status": "success",
+        }
+        scheduler_info["last_refresh"] = end.strftime("%Y-%m-%d %H:%M:%S")
+        scheduler_info["last_refresh_count"] = count
+        scheduler_info["refresh_history"].append(entry)
+        scheduler_info["refresh_history"] = scheduler_info["refresh_history"][-MAX_HISTORY:]
+        logger.info(f"✅ Auto-refresh done: {count} jobs in {elapsed:.1f}s")
+        return count
+    except Exception as e:
+        err_entry = {
+            "time": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "error": str(e),
+        }
+        scheduler_info["errors"].append(err_entry)
+        scheduler_info["errors"] = scheduler_info["errors"][-MAX_ERRORS:]
+        logger.error(f"❌ Auto-refresh failed: {e}")
+        return 0
+
+
+def is_data_stale():
+    """Check if job data is older than STALE_THRESHOLD_HOURS."""
+    try:
+        data = load_jobs()
+        last_updated = data.get("last_updated")
+        if not last_updated:
+            return True
+        last_dt = datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
+        age_hours = (datetime.now() - last_dt).total_seconds() / 3600
+        return age_hours >= STALE_THRESHOLD_HOURS
+    except Exception:
+        return True
+
+
+# ── Threading-based fallback scheduler ─────────────────────────────────
+class SimpleScheduler:
+    """Lightweight repeating-timer scheduler (zero dependencies)."""
+
+    def __init__(self, interval_hours=12):
+        self.interval = interval_hours * 3600
+        self._timer = None
+        self._running = False
+
+    def _run(self):
+        if self._running:
+            tracked_refresh()
+            self._schedule_next()
+
+    def _schedule_next(self):
+        self._timer = threading.Timer(self.interval, self._run)
+        self._timer.daemon = True
+        self._timer.start()
+        scheduler_info["next_run"] = (
+            datetime.now() + timedelta(seconds=self.interval)
+        ).strftime("%Y-%m-%d %H:%M:%S")
+
+    def start(self):
+        self._running = True
+        self._schedule_next()
+
+    def stop(self):
+        self._running = False
+        if self._timer:
+            self._timer.cancel()
+
+
+# ── Start scheduler – local dev only (Vercel uses cron endpoint) ──────
 if not IS_VERCEL:
+    _scheduler_started = False
+
+    # 1) Try APScheduler (preferred)
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
-        scheduler = BackgroundScheduler()
-        scheduler.add_job(refresh_jobs, "interval", hours=12, id="refresh_12h")
-        scheduler.add_job(refresh_jobs, "cron", hour=6, minute=0, id="daily_6am")
+        scheduler = BackgroundScheduler(daemon=True)
+        scheduler.add_job(
+            tracked_refresh, "interval",
+            hours=REFRESH_INTERVAL_HOURS,
+            id="refresh_interval",
+            next_run_time=datetime.now() + timedelta(minutes=5),  # first run 5 min after boot
+        )
+        scheduler.add_job(
+            tracked_refresh, "cron",
+            hour=6, minute=0,
+            id="daily_6am",
+        )
         scheduler.start()
-    except ImportError:
-        logger.warning("⚠️  APScheduler not installed – scheduler disabled")
+        _scheduler_started = True
+        scheduler_info["active"] = True
+        scheduler_info["type"] = "apscheduler"
+        scheduler_info["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
-    # Do initial scrape on boot if cache is empty
-    if not os.path.exists(JOBS_FILE):
-        refresh_jobs()
+        # Track next run time
+        job = scheduler.get_job("refresh_interval")
+        if job and job.next_run_time:
+            scheduler_info["next_run"] = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
+
+        logger.info(f"🗓️  APScheduler running – every {REFRESH_INTERVAL_HOURS}h + daily 6 AM")
+    except ImportError:
+        logger.warning("⚠️  APScheduler not installed – trying fallback scheduler")
+    except Exception as e:
+        logger.warning(f"⚠️  APScheduler error: {e} – trying fallback scheduler")
+
+    # 2) Fallback to simple threading scheduler
+    if not _scheduler_started:
+        try:
+            _simple = SimpleScheduler(interval_hours=REFRESH_INTERVAL_HOURS)
+            _simple.start()
+            _scheduler_started = True
+            scheduler_info["active"] = True
+            scheduler_info["type"] = "threading"
+            scheduler_info["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            logger.info(f"🗓️  Simple scheduler running – every {REFRESH_INTERVAL_HOURS}h")
+        except Exception as e:
+            logger.error(f"❌ All schedulers failed: {e}")
+
+    # 3) Startup freshness check – refresh immediately if data is stale
+    if is_data_stale():
+        logger.info("📦 Data is stale (>24h) or missing – refreshing on startup …")
+        threading.Thread(target=tracked_refresh, daemon=True).start()
+    else:
+        data = load_jobs()
+        logger.info(f"📦 Data is fresh – {len(data.get('jobs', []))} jobs, last updated {data.get('last_updated', 'N/A')}")
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -338,7 +476,7 @@ def api_job_detail(job_id):
 @app.route("/api/refresh", methods=["POST"])
 def api_refresh():
     """Manual refresh trigger."""
-    count = refresh_jobs()
+    count = tracked_refresh()
     return jsonify({"status": "success", "message": f"Refreshed {count} jobs", "count": count})
 
 
@@ -354,7 +492,7 @@ def api_cron():
     if expected and provided != expected:
         return jsonify({"error": "Unauthorized"}), 401
 
-    count = refresh_jobs()
+    count = tracked_refresh()
     return jsonify({
         "status": "success",
         "jobs_scraped": count,
@@ -784,7 +922,7 @@ def api_location_intelligence():
 
 @app.route("/api/refresh-status")
 def api_refresh_status():
-    """Get the status of the last data refresh."""
+    """Get the status of the last data refresh + scheduler info."""
     data = load_jobs()
     jobs = data.get("jobs", [])
     last_updated = data.get("last_updated", "Never")
@@ -796,22 +934,68 @@ def api_refresh_status():
 
     # Check data freshness
     is_fresh = False
+    hours_since_update = None
     if last_updated and last_updated != "Never":
         try:
             last_dt = datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
-            hours_ago = (datetime.now() - last_dt).total_seconds() / 3600
-            is_fresh = hours_ago < 24
+            hours_since_update = round((datetime.now() - last_dt).total_seconds() / 3600, 1)
+            is_fresh = hours_since_update < STALE_THRESHOLD_HOURS
         except Exception:
             pass
 
     return jsonify({
         "last_updated": last_updated,
+        "hours_since_update": hours_since_update,
         "total_jobs": len(jobs),
         "is_fresh": is_fresh,
         "sources": dict(sources),
         "countries_covered": len(countries),
         "categories": dict(categories),
         "top_countries": dict(countries.most_common(10)),
+        "scheduler": {
+            "active": scheduler_info["active"],
+            "type": scheduler_info["type"],
+            "next_run": scheduler_info["next_run"],
+            "started_at": scheduler_info["started_at"],
+            "refresh_interval_hours": REFRESH_INTERVAL_HOURS,
+        },
+    })
+
+
+@app.route("/api/scheduler-status")
+def api_scheduler_status():
+    """Detailed scheduler status – for admin/debug dashboard."""
+    data = load_jobs()
+    last_updated = data.get("last_updated", "Never")
+
+    # Compute time until next run
+    time_to_next = None
+    if scheduler_info["next_run"]:
+        try:
+            next_dt = datetime.strptime(scheduler_info["next_run"], "%Y-%m-%d %H:%M:%S")
+            delta = next_dt - datetime.now()
+            if delta.total_seconds() > 0:
+                hours = int(delta.total_seconds() // 3600)
+                mins = int((delta.total_seconds() % 3600) // 60)
+                time_to_next = f"{hours}h {mins}m"
+            else:
+                time_to_next = "imminent"
+        except Exception:
+            pass
+
+    return jsonify({
+        "scheduler_active": scheduler_info["active"],
+        "scheduler_type": scheduler_info["type"],
+        "started_at": scheduler_info["started_at"],
+        "refresh_interval_hours": REFRESH_INTERVAL_HOURS,
+        "stale_threshold_hours": STALE_THRESHOLD_HOURS,
+        "next_run": scheduler_info["next_run"],
+        "time_to_next_run": time_to_next,
+        "last_refresh": scheduler_info["last_refresh"],
+        "last_refresh_count": scheduler_info["last_refresh_count"],
+        "data_last_updated": last_updated,
+        "refresh_history": scheduler_info["refresh_history"],
+        "recent_errors": scheduler_info["errors"],
     })
 
 

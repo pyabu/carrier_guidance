@@ -96,7 +96,7 @@ function initMobileMenu() {
 
 function initAOS() {
     if (typeof AOS !== 'undefined') {
-        AOS.init({ duration: 700, easing: 'ease-out-cubic', once: true, offset: 60 });
+        AOS.init({ duration: 600, easing: 'ease-out-cubic', once: true, offset: 50, disable: 'mobile' });
     }
 }
 
@@ -271,13 +271,17 @@ function animateCounters() {
         if (!match) return;
         const target = parseInt(match[1].replace(/,/g, ''));
         const suffix = text.replace(match[0], '');
-        let current = 0;
-        const increment = Math.ceil(target / 50);
-        const timer = setInterval(() => {
-            current += increment;
-            if (current >= target) { counter.textContent = text; clearInterval(timer); }
-            else counter.textContent = current.toLocaleString() + suffix;
-        }, 30);
+        const duration = 1200;
+        const start = performance.now();
+        function step(now) {
+            const progress = Math.min((now - start) / duration, 1);
+            const eased = 1 - Math.pow(1 - progress, 3);
+            const current = Math.round(target * eased);
+            counter.textContent = current.toLocaleString() + suffix;
+            if (progress < 1) requestAnimationFrame(step);
+            else counter.textContent = text;
+        }
+        requestAnimationFrame(step);
     });
 }
 
@@ -349,12 +353,18 @@ fetchLastUpdate();
 
 /* ── Card Tilt Effect ────────────────────────────────────────────────── */
 
-document.querySelectorAll('.ai-feature-card, .category-card').forEach(card => {
-    card.addEventListener('mousemove', (e) => {
-        const rect = card.getBoundingClientRect();
-        const x = ((e.clientX - rect.left) / rect.width - 0.5) * 6;
-        const y = ((e.clientY - rect.top) / rect.height - 0.5) * -6;
-        card.style.transform = `perspective(800px) rotateX(${y}deg) rotateY(${x}deg) translateY(-6px)`;
+if (window.matchMedia('(hover: hover)').matches) {
+    document.querySelectorAll('.ai-feature-card, .category-card').forEach(card => {
+        card.addEventListener('mousemove', (e) => {
+            const rect = card.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width - 0.5) * 4;
+            const y = ((e.clientY - rect.top) / rect.height - 0.5) * -4;
+            card.style.transform = `perspective(800px) rotateX(${y}deg) rotateY(${x}deg)`;
+        });
+        card.addEventListener('mouseleave', () => {
+            card.style.transition = 'transform 0.4s ease';
+            card.style.transform = '';
+            setTimeout(() => { card.style.transition = ''; }, 400);
+        });
     });
-    card.addEventListener('mouseleave', () => { card.style.transform = ''; });
-});
+}
