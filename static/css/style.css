@@ -520,6 +520,7 @@ select.form-control {
     border: 1px solid rgba(255,255,255,0.15);
     position: relative;
     overflow: visible;
+    z-index: 100;
 }
 
 .hero-search .search-field {
@@ -571,6 +572,8 @@ select.form-control {
     justify-content: center;
     gap: 48px;
     margin-top: 40px;
+    position: relative;
+    z-index: 1;
 }
 
 .hero-stats .stat {
