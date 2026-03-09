@@ -1,13 +1,13 @@
 [
   {
     "date": "2026-03-09",
-    "total_jobs": 407,
+    "total_jobs": 398,
     "top_5_skills": [
-      "Problem Solving",
+      "TypeScript",
       "Communication",
+      "Problem Solving",
       "Go",
-      "RAG",
-      "Excel"
+      "Agile"
     ],
     "top_5_companies": [
       "Startup",
@@ -16,6 +16,6 @@
       "CVS Health",
       "Tinder"
     ],
-    "remote_percentage": 44.0
+    "remote_percentage": 43.2
   }
 ]

@@ -100,9 +100,28 @@
                 </div>
 
                 <div class="sidebar-card text-center">
-                    <a href="{{ job.apply_url }}" class="btn btn-primary btn-lg" target="_blank" style="width:100%;justify-content:center;">
+                    <a href="{{ job.apply_url }}" class="btn btn-primary btn-lg" target="_blank" rel="noopener" style="width:100%;justify-content:center;font-size:1rem;padding:14px 20px;">
                         <i class="fas fa-paper-plane"></i> Apply Now
                     </a>
+                    {% if job.get('apply_links') %}
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+                        {% if job.apply_links.get('naukri') %}
+                        <a href="{{ job.apply_links.naukri }}" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:.85rem;border-color:#0059ff;color:#0059ff;">
+                            <i class="fas fa-briefcase"></i> Apply on Naukri
+                        </a>
+                        {% endif %}
+                        {% if job.apply_links.get('linkedin') %}
+                        <a href="{{ job.apply_links.linkedin }}" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:.85rem;border-color:#0077b5;color:#0077b5;">
+                            <i class="fab fa-linkedin"></i> Apply on LinkedIn
+                        </a>
+                        {% endif %}
+                        {% if job.apply_links.get('indeed') %}
+                        <a href="{{ job.apply_links.indeed }}" target="_blank" rel="noopener" class="btn btn-ghost" style="width:100%;justify-content:center;font-size:.85rem;border-color:#2164f3;color:#2164f3;">
+                            <i class="fas fa-search"></i> Apply on Indeed
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
                     <button class="btn btn-ghost mt-2" onclick="toggleSave(this)" style="width:100%;justify-content:center;">
                         <i class="far fa-heart"></i> Save Job
                     </button>
@@ -117,7 +136,7 @@
                             <span class="text-muted" style="font-size:0.82rem;">{{ job.get('industry', 'Technology') }}</span>
                         </div>
                     </div>
-                    <a href="{{ job.apply_url }}" class="text-accent" style="font-size:0.9rem;" target="_blank">
+                    <a href="{{ job.apply_url }}" class="text-accent" style="font-size:0.9rem;" target="_blank" rel="noopener">
                         <i class="fas fa-external-link-alt"></i> Visit Company Careers
                     </a>
                 </div>

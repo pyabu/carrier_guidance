@@ -137,6 +137,60 @@ def main():
             json.dump(payload, f, indent=2)
         logger.info(f"   Backup: {backup_file}")
 
+    # ── Refresh Tamil Nadu & Pondicherry Jobs ──────────────────────
+    tn_jobs_file = os.path.join(DATA_DIR, "tn_jobs.json")
+    try:
+        from scraper.tamilnadu_scraper import TamilNaduJobScraper
+        logger.info("\n🗺️  Refreshing Tamil Nadu & Pondicherry jobs …")
+        tn_scraper = TamilNaduJobScraper()
+        tn_jobs = tn_scraper.scrape_all()
+        for i, j in enumerate(tn_jobs):
+            j["id"] = i + 1
+        tn_payload = {
+            "jobs": tn_jobs,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "region": "Tamil Nadu & Pondicherry",
+            "total": len(tn_jobs),
+        }
+        if not args.dry_run:
+            with open(tn_jobs_file, "w") as f:
+                json.dump(tn_payload, f, indent=2)
+            logger.info(f"✅ Saved {len(tn_jobs)} TN jobs to {tn_jobs_file}")
+        else:
+            logger.info(f"⚠️  DRY RUN – Would save {len(tn_jobs)} TN jobs")
+    except ImportError:
+        logger.warning("⚠️  TN scraper module not found – skipping")
+    except Exception as e:
+        logger.warning(f"⚠️  TN scraper failed: {e}")
+
+    # ── Refresh All-India Jobs ─────────────────────────────────────
+    india_jobs_file = os.path.join(DATA_DIR, "india_jobs.json")
+    try:
+        from scraper.india_scraper import IndiaJobScraper
+        logger.info("\n🇮🇳 Refreshing All-India jobs …")
+        india_scraper = IndiaJobScraper()
+        india_jobs = india_scraper.scrape_all(min_jobs=500)
+        for i, j in enumerate(india_jobs):
+            j["id"] = i + 1
+        india_payload = {
+            "jobs": india_jobs,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "region": "India",
+            "total": len(india_jobs),
+            "states_covered": len(set(j.get("location_state", "") for j in india_jobs if j.get("location_state"))),
+            "cities_covered": len(set(j.get("location_city", "") for j in india_jobs if j.get("location_city"))),
+        }
+        if not args.dry_run:
+            with open(india_jobs_file, "w") as f:
+                json.dump(india_payload, f, indent=2)
+            logger.info(f"✅ Saved {len(india_jobs)} India jobs to {india_jobs_file}")
+        else:
+            logger.info(f"⚠️  DRY RUN – Would save {len(india_jobs)} India jobs")
+    except ImportError:
+        logger.warning("⚠️  India scraper module not found – skipping")
+    except Exception as e:
+        logger.warning(f"⚠️  India scraper failed: {e}")
+
     elapsed = (datetime.now() - start).total_seconds()
     logger.info(f"\n⏱  Completed in {elapsed:.1f} seconds")
     logger.info("=" * 60)

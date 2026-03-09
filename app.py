@@ -31,9 +31,13 @@ else:
 os.makedirs(DATA_DIR, exist_ok=True)
 
 JOBS_FILE = os.path.join(DATA_DIR, "jobs.json")
+TN_JOBS_FILE = os.path.join(DATA_DIR, "tn_jobs.json")
+INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
 
 # Seed file shipped with the repo (used as fallback on Vercel cold-start)
 SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
+TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
+INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
 # ── Helpers ────────────────────────────────────────────────────────────
 
@@ -50,6 +54,46 @@ def load_jobs():
         with open(JOBS_FILE, "r") as f:
             return json.load(f)
     return {"jobs": [], "last_updated": None}
+
+
+def load_tn_jobs():
+    """Load Tamil Nadu & Pondicherry specific jobs."""
+    if os.path.exists(TN_JOBS_FILE):
+        with open(TN_JOBS_FILE, "r") as f:
+            return json.load(f)
+    if IS_VERCEL and os.path.exists(TN_SEED_FILE):
+        os.makedirs(DATA_DIR, exist_ok=True)
+        shutil.copy2(TN_SEED_FILE, TN_JOBS_FILE)
+        logger.info("📦 Copied TN seed to /tmp")
+        with open(TN_JOBS_FILE, "r") as f:
+            return json.load(f)
+    return {"jobs": [], "last_updated": None, "region": "Tamil Nadu & Pondicherry"}
+
+
+def save_tn_jobs(data):
+    """Persist Tamil Nadu jobs to JSON file."""
+    with open(TN_JOBS_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+def load_india_jobs():
+    """Load All-India jobs from JSON file."""
+    if os.path.exists(INDIA_JOBS_FILE):
+        with open(INDIA_JOBS_FILE, "r") as f:
+            return json.load(f)
+    if IS_VERCEL and os.path.exists(INDIA_SEED_FILE):
+        os.makedirs(DATA_DIR, exist_ok=True)
+        shutil.copy2(INDIA_SEED_FILE, INDIA_JOBS_FILE)
+        logger.info("📦 Copied India seed to /tmp")
+        with open(INDIA_JOBS_FILE, "r") as f:
+            return json.load(f)
+    return {"jobs": [], "last_updated": None, "region": "India"}
+
+
+def save_india_jobs(data):
+    """Persist All-India jobs to JSON file."""
+    with open(INDIA_JOBS_FILE, "w") as f:
+        json.dump(data, f, indent=2)
 
 
 def save_jobs(data):
@@ -72,18 +116,121 @@ def refresh_jobs():
         save_jobs(data)
         logger.info(f"✅ Saved {len(jobs)} jobs at {data['last_updated']}")
 
+        # Run Tamil Nadu specific scraper
+        try:
+            tn_count = refresh_tn_jobs()
+            logger.info(f"✅ TN scraper: {tn_count} jobs")
+        except Exception as e:
+            logger.warning(f"⚠️  TN scraper skipped: {e}")
+
+        # Run All-India mega scraper
+        try:
+            india_count = refresh_india_jobs()
+            logger.info(f"✅ India scraper: {india_count} jobs")
+        except Exception as e:
+            logger.warning(f"⚠️  India scraper skipped: {e}")
+
+        # Merge TN jobs into main jobs list (avoid duplicates)
+        try:
+            tn_data = load_tn_jobs()
+            tn_jobs = tn_data.get("jobs", [])
+            existing_keys = set()
+            for j in jobs:
+                key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+                existing_keys.add(key)
+            new_tn = []
+            for j in tn_jobs:
+                key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+                if key not in existing_keys:
+                    existing_keys.add(key)
+                    new_tn.append(j)
+            if new_tn:
+                # Re-assign IDs for merged list
+                merged = jobs + new_tn
+                for i, j in enumerate(merged):
+                    j["id"] = i + 1
+                data["jobs"] = merged
+                data["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                save_jobs(data)
+                logger.info(f"✅ Merged {len(new_tn)} TN jobs → total {len(merged)}")
+        except Exception as e:
+            logger.warning(f"⚠️  TN merge skipped: {e}")
+
         # Run trend analysis after scrape
         try:
             from scraper.trend_analyzer import TrendAnalyzer
             analyzer = TrendAnalyzer(DATA_DIR)
-            analyzer.analyze(jobs)
+            analyzer.analyze(data.get("jobs", jobs))
             logger.info("📊 Trend analysis complete")
         except Exception as e:
             logger.warning(f"⚠️  Trend analysis skipped: {e}")
 
-        return len(jobs)
+        return len(data.get("jobs", jobs))
     except Exception as e:
         logger.error(f"❌ Scraper error: {e}")
+        return 0
+
+
+def refresh_tn_jobs():
+    """Run the Tamil Nadu & Pondicherry dedicated scraper."""
+    logger.info("🔄 Refreshing Tamil Nadu & Pondicherry jobs …")
+    try:
+        from scraper.tamilnadu_scraper import TamilNaduJobScraper
+        tn_scraper = TamilNaduJobScraper()
+        tn_jobs = tn_scraper.scrape_all()
+        # Assign IDs
+        for i, j in enumerate(tn_jobs):
+            j["id"] = i + 1
+        tn_data = {
+            "jobs": tn_jobs,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "region": "Tamil Nadu & Pondicherry",
+            "total": len(tn_jobs),
+        }
+        save_tn_jobs(tn_data)
+        logger.info(f"✅ Saved {len(tn_jobs)} TN jobs")
+        return len(tn_jobs)
+    except Exception as e:
+        logger.error(f"❌ TN Scraper error: {e}")
+        return 0
+
+
+def refresh_india_jobs():
+    """Run the All-India mega scraper with AI organization."""
+    logger.info("🇮🇳 Refreshing All-India job listings …")
+    try:
+        from scraper.india_scraper import IndiaJobScraper, CAREER_URLS
+        import urllib.parse as _urlparse
+        india_scraper = IndiaJobScraper()
+        india_jobs = india_scraper.scrape_all(min_jobs=500)
+        # Assign IDs & fix any generic career page URLs → use real portals
+        for i, j in enumerate(india_jobs):
+            j["id"] = i + 1
+            url = j.get("apply_url", "")
+            company = j.get("company", "")
+            if url and (url.endswith("/jobs") or url.endswith("/careers")):
+                # Use real career portal if available, else Naukri search
+                if company in CAREER_URLS:
+                    j["apply_url"] = CAREER_URLS[company]
+                else:
+                    title = j.get("title", "")
+                    city = j.get("location_city", "")
+                    q = _urlparse.quote_plus(f"{title} {company}")
+                    loc = city.lower().replace(" ", "-") if city else "india"
+                    j["apply_url"] = f"https://www.naukri.com/{_urlparse.quote(title.lower().replace(' ', '-'))}-jobs-in-{_urlparse.quote(loc)}?k={q}"
+        india_data = {
+            "jobs": india_jobs,
+            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "region": "India",
+            "total": len(india_jobs),
+            "states_covered": len(set(j.get("location_state", "") for j in india_jobs if j.get("location_state"))),
+            "cities_covered": len(set(j.get("location_city", "") for j in india_jobs if j.get("location_city"))),
+        }
+        save_india_jobs(india_data)
+        logger.info(f"✅ Saved {len(india_jobs)} All-India jobs")
+        return len(india_jobs)
+    except Exception as e:
+        logger.error(f"❌ India Scraper error: {e}")
         return 0
 
 
@@ -269,9 +416,28 @@ def jobs_page():
 
 @app.route("/job/<int:job_id>")
 def job_detail(job_id):
-    data = load_jobs()
-    jobs = data.get("jobs", [])
-    job = next((j for j in jobs if j.get("id") == job_id), None)
+    """Job detail page — searches main, India, and TN jobs by ID.
+    Accepts optional ?source= param to narrow the search."""
+    source_hint = request.args.get("source", "").lower()
+
+    # Search order based on source hint
+    search_order = []
+    if source_hint == "india":
+        search_order = [(load_india_jobs, "india"), (load_jobs, "main"), (load_tn_jobs, "tamilnadu")]
+    elif source_hint == "tamilnadu":
+        search_order = [(load_tn_jobs, "tamilnadu"), (load_jobs, "main"), (load_india_jobs, "india")]
+    else:
+        search_order = [(load_jobs, "main"), (load_india_jobs, "india"), (load_tn_jobs, "tamilnadu")]
+
+    job = None
+    for loader, src_name in search_order:
+        data = loader()
+        jobs = data.get("jobs", [])
+        job = next((j for j in jobs if j.get("id") == job_id), None)
+        if job:
+            job["_source_db"] = src_name
+            break
+
     if not job:
         abort(404)
     return render_template("job_detail.html", job=job)
@@ -731,6 +897,108 @@ def api_smart_search():
         })
 
 
+@app.route("/api/jobs/search-all")
+def api_search_all():
+    """
+    Unified search across ALL job sources (main + India + TN).
+    Returns combined results grouped by source with apply links.
+      ?keyword=     – search in title, company, skills
+      ?location=    – search in city, location text
+      ?per_page=    – max results (default 20)
+    """
+    keyword = request.args.get("keyword", "").strip().lower()
+    location = request.args.get("location", "").strip().lower()
+    per_page = min(100, max(1, int(request.args.get("per_page", 20))))
+
+    if not keyword and not location:
+        return jsonify({"jobs": [], "total": 0, "sources": {}})
+
+    all_jobs = []
+
+    # 1. Main jobs
+    main_data = load_jobs()
+    for j in main_data.get("jobs", []):
+        j["_source_db"] = "main"
+        all_jobs.append(j)
+
+    # 2. India jobs
+    india_data = load_india_jobs()
+    seen_keys = set()
+    for j in india_data.get("jobs", []):
+        key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+        if key not in seen_keys:
+            seen_keys.add(key)
+            j["_source_db"] = "india"
+            all_jobs.append(j)
+
+    # 3. TN jobs
+    tn_data = load_tn_jobs()
+    for j in tn_data.get("jobs", []):
+        key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+        if key not in seen_keys:
+            seen_keys.add(key)
+            j["_source_db"] = "tamilnadu"
+            all_jobs.append(j)
+
+    # Filter by keyword
+    if keyword:
+        keywords = [k.strip() for k in keyword.split(",") if k.strip()]
+        all_jobs = [
+            j for j in all_jobs
+            if any(
+                kw in j.get("title", "").lower()
+                or kw in j.get("company", "").lower()
+                or kw in j.get("category", "").lower()
+                or any(kw in s.lower() for s in j.get("skills", []))
+                for kw in keywords
+            )
+        ]
+
+    # Filter by location
+    if location:
+        loc_terms = [l.strip() for l in location.split(",") if l.strip()]
+        all_jobs = [
+            j for j in all_jobs
+            if any(
+                lt in j.get("location", "").lower()
+                or lt in j.get("location_city", "").lower()
+                or lt in j.get("location_state", "").lower()
+                or lt in j.get("location_country", "").lower()
+                for lt in loc_terms
+            )
+        ]
+
+    # Sort by quality/composite score then freshness
+    all_jobs.sort(
+        key=lambda j: (
+            j.get("composite_score", j.get("quality_score", 50)),
+            j.get("posted_date", "")
+        ),
+        reverse=True,
+    )
+
+    from collections import Counter
+    source_counts = Counter(j.get("_source_db", "main") for j in all_jobs)
+    portal_counts = Counter(j.get("source", "CareerPath Pro") for j in all_jobs)
+
+    # Keep source_db for frontend link building, rename to cleaner key
+    paginated = all_jobs[:per_page]
+    for j in paginated:
+        j["source_db"] = j.pop("_source_db", "main")
+
+    return jsonify({
+        "jobs": paginated,
+        "total": len(all_jobs),
+        "returned": len(paginated),
+        "sources": {
+            "main": source_counts.get("main", 0),
+            "india": source_counts.get("india", 0),
+            "tamilnadu": source_counts.get("tamilnadu", 0),
+        },
+        "portals": dict(portal_counts.most_common(10)),
+    })
+
+
 @app.route("/api/trending")
 def api_trending():
     """
@@ -872,6 +1140,562 @@ def api_career_paths():
     except Exception as e:
         logger.error(f"Career paths error: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# TAMIL NADU & PONDICHERRY – API ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/jobs/tamilnadu")
+def tn_jobs_page():
+    """Dedicated Tamil Nadu & Pondicherry jobs page."""
+    return render_template("tn_jobs.html")
+
+
+@app.route("/api/jobs/tamilnadu")
+def api_tn_jobs():
+    """
+    Return Tamil Nadu & Pondicherry jobs with filters:
+      ?keyword=         – title / company / skills search
+      ?city=            – specific TN city (e.g. Chennai, Coimbatore)
+      ?type=            – job type (Full-time, Internship, Fresher, etc.)
+      ?experience=      – experience level
+      ?category=        – job category
+      ?source=          – source portal
+      ?sort=            – newest | oldest | title | company
+      ?page= &per_page= – pagination
+    """
+    # Try dedicated TN file first, then filter from main jobs
+    tn_data = load_tn_jobs()
+    tn_jobs = tn_data.get("jobs", [])
+
+    # Also include any TN jobs from the main jobs file
+    main_data = load_jobs()
+    main_jobs = main_data.get("jobs", [])
+    tn_states = {"tamil nadu", "puducherry"}
+    tn_city_names = {c.lower() for c in _get_tn_cities()}
+
+    for j in main_jobs:
+        state = (j.get("location_state", "") or "").lower()
+        city = (j.get("location_city", "") or "").lower()
+        loc = (j.get("location", "") or "").lower()
+        if state in tn_states or city in tn_city_names or "tamil nadu" in loc or "pondicherry" in loc or "puducherry" in loc:
+            # Check if already in tn_jobs (avoid dups)
+            key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+            existing = {f"{tj.get('title','')}-{tj.get('company','')}-{tj.get('location','')}".lower() for tj in tn_jobs}
+            if key not in existing:
+                j["is_tamilnadu"] = True
+                j["region"] = "Tamil Nadu & Pondicherry"
+                tn_jobs.append(j)
+
+    jobs = tn_jobs
+
+    # ── Keyword search ─────────────────────────────────────────────
+    keyword = request.args.get("keyword", "").strip().lower()
+    if keyword:
+        keywords = [k.strip() for k in keyword.split(",") if k.strip()]
+        jobs = [
+            j for j in jobs
+            if any(
+                kw in j.get("title", "").lower()
+                or kw in j.get("company", "").lower()
+                or kw in j.get("category", "").lower()
+                or kw in j.get("description", "").lower()[:500]
+                or any(kw in s.lower() for s in j.get("skills", []))
+                for kw in keywords
+            )
+        ]
+
+    # ── City filter ────────────────────────────────────────────────
+    city = request.args.get("city", "").strip().lower()
+    if city:
+        jobs = [j for j in jobs if city in j.get("location_city", "").lower()
+                or city in j.get("location", "").lower()]
+
+    # ── State filter ───────────────────────────────────────────────
+    state = request.args.get("state", "").strip().lower()
+    if state:
+        jobs = [j for j in jobs if state in j.get("location_state", "").lower()]
+
+    # ── Other filters ──────────────────────────────────────────────
+    job_type = request.args.get("type", "").strip()
+    experience = request.args.get("experience", "").strip()
+    category = request.args.get("category", "").strip()
+    source = request.args.get("source", "").strip()
+
+    if job_type:
+        type_vals = [t.strip().lower() for t in job_type.split(",") if t.strip()]
+        jobs = [j for j in jobs if any(tv in j.get("type", "").lower() for tv in type_vals)]
+    if experience:
+        exp_vals = [e.strip().lower() for e in experience.split(",") if e.strip()]
+        jobs = [j for j in jobs if any(ev in j.get("experience", "").lower() for ev in exp_vals)]
+    if category:
+        cat_vals = [c.strip().lower() for c in category.split(",") if c.strip()]
+        jobs = [j for j in jobs if any(cv in j.get("category", "").lower() for cv in cat_vals)]
+    if source:
+        src_vals = [s.strip().lower() for s in source.split(",") if s.strip()]
+        jobs = [j for j in jobs if any(sv in j.get("source", "").lower() for sv in src_vals)]
+
+    # ── Sorting ────────────────────────────────────────────────────
+    sort = request.args.get("sort", "newest").strip().lower()
+    if sort == "newest":
+        jobs.sort(key=lambda j: j.get("posted_date", ""), reverse=True)
+    elif sort == "oldest":
+        jobs.sort(key=lambda j: j.get("posted_date", ""))
+    elif sort == "title":
+        jobs.sort(key=lambda j: j.get("title", "").lower())
+    elif sort == "company":
+        jobs.sort(key=lambda j: j.get("company", "").lower())
+
+    # ── Pagination ─────────────────────────────────────────────────
+    total = len(jobs)
+    page = max(1, int(request.args.get("page", 1)))
+    per_page = min(500, max(1, int(request.args.get("per_page", 50))))
+    start = (page - 1) * per_page
+    paginated = jobs[start : start + per_page]
+
+    # ── Filter counts ──────────────────────────────────────────────
+    from collections import Counter
+    city_counts = Counter(j.get("location_city", "Unknown") for j in tn_jobs)
+    type_counts = Counter(j.get("type", "Other") for j in jobs)
+    exp_counts = Counter(j.get("experience", "Unknown") for j in jobs)
+    cat_counts = Counter(j.get("category", "Other") for j in jobs)
+    src_counts = Counter(j.get("source", "Unknown") for j in jobs)
+
+    return jsonify({
+        "jobs": paginated,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": (total + per_page - 1) // per_page,
+        "region": "Tamil Nadu & Pondicherry",
+        "last_updated": tn_data.get("last_updated") or main_data.get("last_updated"),
+        "filter_counts": {
+            "cities": dict(city_counts.most_common(50)),
+            "types": dict(type_counts),
+            "experience": dict(exp_counts),
+            "categories": dict(cat_counts),
+            "sources": dict(src_counts),
+        },
+    })
+
+
+@app.route("/api/jobs/tamilnadu/cities")
+def api_tn_cities():
+    """Return all Tamil Nadu & Pondicherry cities with job counts."""
+    tn_data = load_tn_jobs()
+    tn_jobs = tn_data.get("jobs", [])
+
+    # Also count TN jobs from main file
+    main_data = load_jobs()
+    for j in main_data.get("jobs", []):
+        state = (j.get("location_state", "") or "").lower()
+        if state in ("tamil nadu", "puducherry"):
+            tn_jobs.append(j)
+
+    from collections import Counter
+    city_counts = Counter(j.get("location_city", "Unknown") for j in tn_jobs)
+
+    # Always include all known TN cities even with 0 count
+    all_cities = _get_tn_cities()
+    for c in all_cities:
+        if c not in city_counts:
+            city_counts[c] = 0
+
+    cities = [{"city": c, "count": n} for c, n in city_counts.most_common() if c != "Unknown"]
+    return jsonify({
+        "cities": cities,
+        "total_cities": len(cities),
+        "total_jobs": len(tn_jobs),
+        "region": "Tamil Nadu & Pondicherry",
+    })
+
+
+@app.route("/api/jobs/tamilnadu/stats")
+def api_tn_stats():
+    """Statistics for Tamil Nadu & Pondicherry job market."""
+    tn_data = load_tn_jobs()
+    tn_jobs = tn_data.get("jobs", [])
+
+    # Also include TN jobs from main data
+    main_data = load_jobs()
+    for j in main_data.get("jobs", []):
+        state = (j.get("location_state", "") or "").lower()
+        if state in ("tamil nadu", "puducherry"):
+            tn_jobs.append(j)
+
+    from collections import Counter
+    city_counts = Counter(j.get("location_city", "Unknown") for j in tn_jobs)
+    type_counts = Counter(j.get("type", "Other") for j in tn_jobs)
+    cat_counts = Counter(j.get("category", "Other") for j in tn_jobs)
+    exp_counts = Counter(j.get("experience", "Unknown") for j in tn_jobs)
+    src_counts = Counter(j.get("source", "Unknown") for j in tn_jobs)
+    company_counts = Counter(j.get("company", "Unknown") for j in tn_jobs)
+
+    # Computed stats
+    fresher_jobs = sum(1 for j in tn_jobs if "fresher" in (j.get("type", "") or "").lower()
+                       or "entry" in (j.get("experience", "") or "").lower()
+                       or "internship" in (j.get("type", "") or "").lower())
+    remote_jobs = sum(1 for j in tn_jobs if "remote" in (j.get("type", "") or "").lower()
+                      or "wfh" in (j.get("type", "") or "").lower()
+                      or "hybrid" in (j.get("type", "") or "").lower())
+
+    top_cities = [{"city": c, "count": n} for c, n in city_counts.most_common(15) if c != "Unknown"]
+
+    return jsonify({
+        "total_jobs": len(tn_jobs),
+        "unique_cities": len([c for c in city_counts if c != "Unknown"]),
+        "unique_companies": len(company_counts) - (1 if "Unknown" in company_counts else 0),
+        "fresher_jobs": fresher_jobs,
+        "remote_jobs": remote_jobs,
+        "last_updated": tn_data.get("last_updated"),
+        "region": "Tamil Nadu & Pondicherry",
+        "cities": dict(city_counts.most_common(50)),
+        "top_cities": top_cities,
+        "types": dict(type_counts),
+        "categories": dict(cat_counts),
+        "experience": dict(exp_counts),
+        "sources": dict(src_counts),
+        "top_companies": dict(company_counts.most_common(20)),
+    })
+
+
+@app.route("/api/jobs/tamilnadu/refresh", methods=["POST"])
+def api_tn_refresh():
+    """Manually trigger Tamil Nadu job scraper refresh."""
+    count = refresh_tn_jobs()
+    return jsonify({
+        "status": "success",
+        "message": f"Refreshed {count} Tamil Nadu & Pondicherry jobs",
+        "count": count,
+        "jobs_count": count,
+        "region": "Tamil Nadu & Pondicherry",
+    })
+
+
+def _get_tn_cities():
+    """Return the list of TN city names (strings)."""
+    try:
+        from scraper.tamilnadu_scraper import TAMILNADU_CITIES
+        return list(set(c["city"] for c in TAMILNADU_CITIES))
+    except ImportError:
+        return [
+            "Chennai", "Coimbatore", "Madurai", "Tiruchirappalli", "Salem",
+            "Tirunelveli", "Erode", "Vellore", "Hosur", "Tirupur",
+            "Pondicherry", "Puducherry", "Karaikal", "Thanjavur", "Dindigul",
+            "Thoothukudi", "Nagercoil", "Kanchipuram",
+        ]
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ALL INDIA – PAGE & API ENDPOINTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/jobs/india")
+def india_jobs_page():
+    """Dedicated All-India jobs page with AI-powered organization."""
+    return render_template("india_jobs.html")
+
+
+@app.route("/api/jobs/india")
+def api_india_jobs():
+    """
+    Return All-India jobs with comprehensive filters:
+      ?keyword=         – title / company / skills text search
+      ?city=            – specific city (Bangalore, Mumbai, Delhi NCR, etc.)
+      ?state=           – state filter (Karnataka, Maharashtra, etc.)
+      ?type=            – job type (Full-time, Remote, Internship, etc.)
+      ?experience=      – experience level (Entry Level, Junior, Mid Level, etc.)
+      ?category=        – job category (Technology, Data Science, etc.)
+      ?source=          – source portal (Naukri.com, LinkedIn, etc.)
+      ?sort=            – newest | oldest | title | company | score | trending
+      ?page= &per_page= – pagination (default 50 per page)
+    """
+    india_data = load_india_jobs()
+    india_jobs = india_data.get("jobs", [])
+
+    # Also include India-tagged jobs from main jobs file
+    main_data = load_jobs()
+    main_jobs = main_data.get("jobs", [])
+    existing_keys = {
+        f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+        for j in india_jobs
+    }
+    for j in main_jobs:
+        country = (j.get("location_country", "") or "").lower()
+        location = (j.get("location", "") or "").lower()
+        if "india" in country or "india" in location:
+            key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+            if key not in existing_keys:
+                existing_keys.add(key)
+                j["is_india"] = True
+                j["region"] = "India"
+                india_jobs.append(j)
+
+    jobs = india_jobs
+
+    # ── Keyword search ─────────────────────────────────────────────
+    keyword = request.args.get("keyword", "").strip().lower()
+    if keyword:
+        keywords = [k.strip() for k in keyword.split(",") if k.strip()]
+        jobs = [
+            j for j in jobs
+            if any(
+                kw in j.get("title", "").lower()
+                or kw in j.get("company", "").lower()
+                or kw in j.get("category", "").lower()
+                or kw in j.get("description", "").lower()[:500]
+                or any(kw in s.lower() for s in j.get("skills", []))
+                for kw in keywords
+            )
+        ]
+
+    # ── City filter ────────────────────────────────────────────────
+    city = request.args.get("city", "").strip().lower()
+    if city:
+        jobs = [j for j in jobs
+                if city in j.get("location_city", "").lower()
+                or city in j.get("location", "").lower()]
+
+    # ── State filter ───────────────────────────────────────────────
+    state = request.args.get("state", "").strip().lower()
+    if state:
+        jobs = [j for j in jobs
+                if state in j.get("location_state", "").lower()]
+
+    # ── Other filters ──────────────────────────────────────────────
+    job_type = request.args.get("type", "").strip()
+    experience = request.args.get("experience", "").strip()
+    category = request.args.get("category", "").strip()
+    source = request.args.get("source", "").strip()
+
+    if job_type:
+        type_vals = [t.strip().lower() for t in job_type.split(",") if t.strip()]
+        jobs = [j for j in jobs if any(tv in j.get("type", "").lower() for tv in type_vals)]
+    if experience:
+        exp_vals = [e.strip().lower() for e in experience.split(",") if e.strip()]
+        jobs = [j for j in jobs if any(ev in j.get("experience", "").lower() for ev in exp_vals)]
+    if category:
+        cat_vals = [c.strip().lower() for c in category.split(",") if c.strip()]
+        jobs = [j for j in jobs if any(cv in j.get("category", "").lower() for cv in cat_vals)]
+    if source:
+        src_vals = [s.strip().lower() for s in source.split(",") if s.strip()]
+        jobs = [j for j in jobs if any(sv in j.get("source", "").lower() for sv in src_vals)]
+
+    # ── Sorting ────────────────────────────────────────────────────
+    sort = request.args.get("sort", "score").strip().lower()
+    if sort == "newest":
+        jobs.sort(key=lambda j: j.get("posted_date", ""), reverse=True)
+    elif sort == "oldest":
+        jobs.sort(key=lambda j: j.get("posted_date", ""))
+    elif sort == "title":
+        jobs.sort(key=lambda j: j.get("title", "").lower())
+    elif sort == "company":
+        jobs.sort(key=lambda j: j.get("company", "").lower())
+    elif sort == "score":
+        jobs.sort(key=lambda j: j.get("composite_score", 0), reverse=True)
+    elif sort == "trending":
+        jobs.sort(key=lambda j: (1 if j.get("trending") else 0, j.get("composite_score", 0)), reverse=True)
+
+    # ── Pagination ─────────────────────────────────────────────────
+    total = len(jobs)
+    page = max(1, int(request.args.get("page", 1)))
+    per_page = min(500, max(1, int(request.args.get("per_page", 50))))
+    start_idx = (page - 1) * per_page
+    paginated = jobs[start_idx : start_idx + per_page]
+
+    # ── Filter counts ──────────────────────────────────────────────
+    from collections import Counter
+    state_counts = Counter(j.get("location_state", "Unknown") for j in india_jobs if j.get("location_state"))
+    city_counts = Counter(j.get("location_city", "Unknown") for j in india_jobs if j.get("location_city"))
+    type_counts = Counter(j.get("type", "Other") for j in jobs)
+    exp_counts = Counter(j.get("experience", "Unknown") for j in jobs)
+    cat_counts = Counter(j.get("category", "Other") for j in jobs)
+    src_counts = Counter(j.get("source", "Unknown") for j in jobs)
+
+    return jsonify({
+        "jobs": paginated,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": (total + per_page - 1) // per_page,
+        "region": "India",
+        "last_updated": india_data.get("last_updated") or main_data.get("last_updated"),
+        "filter_counts": {
+            "states": dict(state_counts.most_common(40)),
+            "cities": dict(city_counts.most_common(50)),
+            "types": dict(type_counts),
+            "experience": dict(exp_counts),
+            "categories": dict(cat_counts),
+            "sources": dict(src_counts),
+        },
+    })
+
+
+@app.route("/api/jobs/india/states")
+def api_india_states():
+    """Return all Indian states/UTs with job counts."""
+    india_data = load_india_jobs()
+    india_jobs = india_data.get("jobs", [])
+
+    from collections import Counter
+    state_counts = Counter(j.get("location_state", "Unknown") for j in india_jobs if j.get("location_state"))
+
+    # Include all known states even with 0 count
+    try:
+        from scraper.india_scraper import ALL_INDIA_REGIONS
+        for state_name in ALL_INDIA_REGIONS:
+            if state_name not in state_counts:
+                state_counts[state_name] = 0
+    except ImportError:
+        pass
+
+    states = [{"state": s, "count": n} for s, n in state_counts.most_common() if s != "Unknown"]
+    return jsonify({
+        "states": states,
+        "total_states": len(states),
+        "total_jobs": len(india_jobs),
+        "region": "India",
+    })
+
+
+@app.route("/api/jobs/india/cities")
+def api_india_cities():
+    """Return top India cities with job counts."""
+    india_data = load_india_jobs()
+    india_jobs = india_data.get("jobs", [])
+
+    from collections import Counter
+    city_counts = Counter(j.get("location_city", "Unknown") for j in india_jobs if j.get("location_city"))
+
+    cities = [{"city": c, "count": n, "state": _resolve_city_state(c)}
+              for c, n in city_counts.most_common(100) if c != "Unknown"]
+    return jsonify({
+        "cities": cities,
+        "total_cities": len(cities),
+        "total_jobs": len(india_jobs),
+        "region": "India",
+    })
+
+
+@app.route("/api/jobs/india/stats")
+def api_india_stats():
+    """Comprehensive statistics for All-India job market."""
+    india_data = load_india_jobs()
+    india_jobs = india_data.get("jobs", [])
+
+    from collections import Counter
+    state_counts = Counter(j.get("location_state", "Unknown") for j in india_jobs if j.get("location_state"))
+    city_counts = Counter(j.get("location_city", "Unknown") for j in india_jobs if j.get("location_city"))
+    type_counts = Counter(j.get("type", "Other") for j in india_jobs)
+    cat_counts = Counter(j.get("category", "Other") for j in india_jobs)
+    exp_counts = Counter(j.get("experience", "Unknown") for j in india_jobs)
+    src_counts = Counter(j.get("source", "Unknown") for j in india_jobs)
+    company_counts = Counter(j.get("company", "Unknown") for j in india_jobs)
+    skill_counter = Counter()
+    for j in india_jobs:
+        for s in j.get("skills", []):
+            skill_counter[s] += 1
+
+    # Computed stats
+    fresher_jobs = sum(1 for j in india_jobs if "fresher" in (j.get("type", "") or "").lower()
+                       or "entry" in (j.get("experience", "") or "").lower()
+                       or "internship" in (j.get("type", "") or "").lower())
+    remote_jobs = sum(1 for j in india_jobs if "remote" in (j.get("type", "") or "").lower()
+                      or "wfh" in (j.get("type", "") or "").lower()
+                      or "hybrid" in (j.get("type", "") or "").lower())
+    trending_jobs = sum(1 for j in india_jobs if j.get("trending", False))
+
+    top_cities = [{"city": c, "count": n} for c, n in city_counts.most_common(20) if c != "Unknown"]
+    top_states = [{"state": s, "count": n} for s, n in state_counts.most_common(15) if s != "Unknown"]
+
+    return jsonify({
+        "total_jobs": len(india_jobs),
+        "unique_states": len([s for s in state_counts if s != "Unknown"]),
+        "unique_cities": len([c for c in city_counts if c != "Unknown"]),
+        "unique_companies": len(company_counts) - (1 if "Unknown" in company_counts else 0),
+        "fresher_jobs": fresher_jobs,
+        "remote_jobs": remote_jobs,
+        "trending_jobs": trending_jobs,
+        "last_updated": india_data.get("last_updated"),
+        "region": "India",
+        "top_cities": top_cities,
+        "top_states": top_states,
+        "types": dict(type_counts),
+        "categories": dict(cat_counts),
+        "experience": dict(exp_counts),
+        "sources": dict(src_counts),
+        "top_companies": dict(company_counts.most_common(30)),
+        "top_skills": dict(skill_counter.most_common(30)),
+    })
+
+
+@app.route("/api/jobs/india/trending")
+def api_india_trending():
+    """Return trending skills, roles, and companies in India job market."""
+    india_data = load_india_jobs()
+    india_jobs = india_data.get("jobs", [])
+
+    from collections import Counter
+    skill_counter = Counter()
+    role_counter = Counter()
+    company_counter = Counter()
+    city_counter = Counter()
+
+    for j in india_jobs:
+        for s in j.get("skills", []):
+            skill_counter[s] += 1
+        role_counter[j.get("title", "")] += 1
+        company_counter[j.get("company", "")] += 1
+        if j.get("location_city"):
+            city_counter[j["location_city"]] += 1
+
+    # Recently posted (last 7 days)
+    from datetime import datetime as dt_cls
+    recent_count = 0
+    for j in india_jobs:
+        try:
+            posted = dt_cls.strptime(j.get("posted_date", "")[:10], "%Y-%m-%d")
+            if (dt_cls.now() - posted).days <= 7:
+                recent_count += 1
+        except Exception:
+            continue
+
+    return jsonify({
+        "trending_skills": [{"skill": s, "count": n} for s, n in skill_counter.most_common(20)],
+        "trending_roles": [{"role": r, "count": n} for r, n in role_counter.most_common(15)],
+        "top_hiring_companies": [{"company": c, "count": n} for c, n in company_counter.most_common(15)],
+        "top_hiring_cities": [{"city": c, "count": n} for c, n in city_counter.most_common(15)],
+        "jobs_posted_last_7_days": recent_count,
+        "total_jobs": len(india_jobs),
+    })
+
+
+@app.route("/api/jobs/india/refresh", methods=["POST"])
+def api_india_refresh():
+    """Manually trigger All-India job scraper refresh."""
+    count = refresh_india_jobs()
+    return jsonify({
+        "status": "success",
+        "message": f"Refreshed {count} All-India jobs",
+        "count": count,
+        "jobs_count": count,
+        "region": "India",
+    })
+
+
+def _resolve_city_state(city_name):
+    """Helper: return state name for a city."""
+    try:
+        from scraper.india_scraper import ALL_INDIA_REGIONS
+        city_lower = city_name.lower().strip()
+        for state, info in ALL_INDIA_REGIONS.items():
+            for c in info["cities"]:
+                if c.lower() == city_lower:
+                    return state
+        return ""
+    except ImportError:
+        return ""
 
 
 @app.route("/api/location-intelligence")
