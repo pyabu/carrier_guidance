@@ -22,28 +22,28 @@
             <div class="stat-card">
                 <div class="stat-card-icon blue"><i class="fas fa-paper-plane"></i></div>
                 <div class="stat-card-content">
-                    <h3>12</h3>
+                    <h3>0</h3>
                     <p>Applications Sent</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="stat-card-content">
-                    <h3>3</h3>
+                    <h3>0</h3>
                     <p>Interview Calls</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon orange"><i class="fas fa-heart"></i></div>
                 <div class="stat-card-content">
-                    <h3>8</h3>
+                    <h3>0</h3>
                     <p>Saved Jobs</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon red"><i class="fas fa-eye"></i></div>
                 <div class="stat-card-content">
-                    <h3>45</h3>
+                    <h3>1</h3>
                     <p>Profile Views</p>
                 </div>
             </div>
@@ -55,8 +55,8 @@
             <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;">
                 <div class="text-center">
                     <div
-                        style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;">
-                        U</div>
+                        style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;text-transform:uppercase;">
+                        {{ user.name[0] }}</div>
                     <button class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Change Photo</button>
                 </div>
                 <div>
@@ -108,34 +108,10 @@
                         <th>Action</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="appliedJobsTableBody">
                     <tr>
-                        <td><strong>Frontend Developer</strong></td>
-                        <td>Google</td>
-                        <td>Mar 5, 2026</td>
-                        <td><span class="status-badge active">Interview Scheduled</span></td>
-                        <td><a href="#" class="text-accent">View</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Software Engineer Intern</strong></td>
-                        <td>Microsoft</td>
-                        <td>Mar 3, 2026</td>
-                        <td><span class="status-badge pending">Under Review</span></td>
-                        <td><a href="#" class="text-accent">View</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Data Analyst</strong></td>
-                        <td>Amazon</td>
-                        <td>Feb 28, 2026</td>
-                        <td><span class="status-badge closed">Rejected</span></td>
-                        <td><a href="#" class="text-accent">View</a></td>
-                    </tr>
-                    <tr>
-                        <td><strong>Full Stack Developer</strong></td>
-                        <td>Flipkart</td>
-                        <td>Feb 25, 2026</td>
-                        <td><span class="status-badge active">Offer Received</span></td>
-                        <td><a href="#" class="text-accent">View</a></td>
+                        <td colspan="5" class="text-center py-4 text-muted">You haven't applied to any jobs yet. <a
+                                href="/jobs">Browse jobs</a> to get started.</td>
                     </tr>
                 </tbody>
             </table>
@@ -259,9 +235,12 @@
                         <span><i class="fas fa-map-marker-alt"></i> ${j.location || 'Remote'}</span>
                         <span><i class="fas fa-briefcase"></i> ${j.type}</span>
                     </div>
-                    <div class="job-card-footer">
+                    <div class="job-card-footer" style="display:flex; justify-content:space-between; align-items:center;">
                         <span class="job-salary">${j.salary_min || ''} – ${j.salary_max || ''}</span>
-                        <a href="/job/${j.id}" class="btn-apply">View</a>
+                        <div style="display:flex; gap:8px;">
+                            <button onclick="saveJob(event, '${j.id}')" class="btn btn-outline btn-sm"><i class="far fa-heart"></i> Save</button>
+                            <a href="/job/${j.id}" class="btn-apply btn-sm">View</a>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -272,8 +251,79 @@
         document.getElementById('recommendedJobsGrid').innerHTML = '<p class="text-muted">Could not load recommendations.</p>';
     }
 
-    // Saved jobs placeholder
-    document.getElementById('savedJobsGrid').innerHTML = '<p class="text-muted" style="padding:20px;">No saved jobs yet. Click the <i class="far fa-heart"></i> icon on any job to save it. <a href="/jobs">Browse jobs now &rarr;</a></p>';
+    // Load saved jobs
+    try {
+        const res = await fetch('/api/saved-jobs');
+        const data = await res.json();
+        const grid = document.getElementById('savedJobsGrid');
+
+        if (data.jobs && data.jobs.length > 0) {
+            grid.innerHTML = data.jobs.map(j => {
+                const logo = j.company_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.company)}&background=667eea&color=fff&size=50`;
+                return `<div class="job-card" onclick="window.location='/job/${j.id}'">
+                    <div class="job-card-header">
+                        <img src="${logo}" alt="${j.company}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'">
+                        <div class="job-card-info"><h3>${j.title}</h3><span class="job-card-company">${j.company}</span></div>
+                    </div>
+                    <div class="job-card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> ${j.location || 'Remote'}</span>
+                        <span><i class="fas fa-briefcase"></i> ${j.type}</span>
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="job-salary">${j.salary_min || ''} – ${j.salary_max || ''}</span>
+                        <button class="btn btn-outline btn-sm" disabled><i class="fas fa-check text-accent"></i> Saved</button>
+                    </div>
+                </div>`;
+            }).join('');
+
+            // Update the stats counter text since it defaults to 0
+            const statCards = document.querySelectorAll('.stat-card-content p');
+            statCards.forEach(el => {
+                if (el.innerText === 'Saved Jobs') {
+                    el.previousElementSibling.innerText = data.jobs.length;
+                }
+            });
+        } else {
+            grid.innerHTML = '<p class="text-muted" style="padding:20px;">No saved jobs yet. Click the "Save" button on any job to save it. <a href="/jobs">Browse jobs now &rarr;</a></p>';
+        }
+    } catch (e) {
+        document.getElementById('savedJobsGrid').innerHTML = '<p class="text-muted" style="padding:20px;">Could not load saved jobs.</p>';
+    }
 });
+
+    // Function to handle saving a job
+    async function saveJob(event, jobId) {
+        event.stopPropagation(); // Prevent card click
+
+        const btn = event.currentTarget;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+        btn.disabled = true;
+
+        try {
+            const res = await fetch('/api/save-job', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ job_id: jobId })
+            });
+
+            const data = await res.json();
+            if (res.ok) {
+                btn.innerHTML = '<i class="fas fa-check"></i> Saved';
+                btn.classList.add('btn-primary');
+                btn.classList.remove('btn-outline');
+
+                // Reload the saved jobs grid to show the new addition
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                console.error(data.error);
+                btn.innerHTML = '<i class="far fa-heart"></i> Save';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            console.error("Failed to save job", e);
+            btn.innerHTML = '<i class="far fa-heart"></i> Save';
+            btn.disabled = false;
+        }
+    }
 </script>
 {% endblock %}

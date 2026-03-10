@@ -1974,5 +1974,77 @@ def not_found(e):
 application = app
 
 # ── Run (local dev only – Vercel uses the `app` WSGI object) ──────────
+# ── Student Capabilities ──────────────────────────────────────────────
+
+@app.route("/api/save-job", methods=["POST"])
+@login_required
+def save_job():
+    """Save a job ID for the logged-in user."""
+    data = request.json
+    job_id = data.get("job_id")
+    
+    if not job_id:
+        return jsonify({"error": "Job ID required"}), 400
+        
+    try:
+        # Check if already saved
+        existing = supabase.table("saved_jobs").select("*").eq("user_id", session['user_id']).eq("job_id", job_id).execute()
+        if existing.data:
+            return jsonify({"status": "already_saved"})
+            
+        supabase.table("saved_jobs").insert({
+            "user_id": session['user_id'],
+            "job_id": job_id
+        }).execute()
+        return jsonify({"status": "success"})
+    except Exception as e:
+        logger.error(f"Error saving job: {e}")
+        return jsonify({"error": str(e)}), 500
+
+@app.route("/api/saved-jobs", methods=["GET"])
+@login_required
+def get_saved_jobs():
+    """Get all saved job details for the logged-in user."""
+    try:
+        # Fetch saved job IDs from Supabase
+        response = supabase.table("saved_jobs").select("job_id").eq("user_id", session['user_id']).execute()
+        saved_job_ids = [row['job_id'] for row in response.data]
+        
+        if not saved_job_ids:
+            return jsonify({"jobs": []})
+            
+        # Cross reference with scraped json data
+        all_jobs = []
+        try:
+            with open(INDIA_SEED_FILE, 'r', encoding='utf-8') as f:
+                all_jobs.extend(json.load(f))
+        except FileNotFoundError:
+            pass
+            
+        try:
+            with open(TN_SEED_FILE, 'r', encoding='utf-8') as f:
+                all_jobs.extend(json.load(f))
+        except FileNotFoundError:
+            pass
+            
+        try:
+            with open(SEED_FILE, 'r', encoding='utf-8') as f:
+                all_jobs.extend(json.load(f))
+        except FileNotFoundError:
+            pass
+            
+        # Filter matching jobs
+        saved_jobs_data = [job for job in all_jobs if job.get('id') in saved_job_ids]
+        
+        # Remove duplicates
+        unique_jobs = {job['id']: job for job in saved_jobs_data}.values()
+        
+        return jsonify({"jobs": list(unique_jobs)})
+        
+    except Exception as e:
+        logger.error(f"Error fetching saved jobs: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 if __name__ == "__main__":
-    app.run(debug=True, port=8080)
+    app.run(port=8080, debug=True)
