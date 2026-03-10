@@ -497,10 +497,6 @@ def student_dashboard():
     return render_template("student_dashboard.html", user=user)
 
 
-@app.route("/employer-dashboard")
-def employer_dashboard():
-    return render_template("employer_dashboard.html")
-
 # ═══════════════════════════════════════════════════════════════════════
 # AUTHENTICATION ROUTES
 # ═══════════════════════════════════════════════════════════════════════
