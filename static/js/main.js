@@ -332,24 +332,7 @@ async function fetchLastUpdate() {
 }
 fetchLastUpdate();
 
-/* ── Typed Text Effect for Hero ──────────────────────────────────────── */
-
-(function() {
-    const el = document.getElementById('typedTitle');
-    if (!el) return;
-    const words = ['Career in India', 'Tech Job', 'Dream Company', 'Future'];
-    let wordIdx = 0, charIdx = 0, isDeleting = false;
-    function type() {
-        const word = words[wordIdx];
-        if (isDeleting) { el.textContent = word.substring(0, --charIdx); }
-        else { el.textContent = word.substring(0, ++charIdx); }
-        let speed = isDeleting ? 40 : 80;
-        if (!isDeleting && charIdx === word.length) { speed = 2000; isDeleting = true; }
-        else if (isDeleting && charIdx === 0) { isDeleting = false; wordIdx = (wordIdx + 1) % words.length; speed = 500; }
-        setTimeout(type, speed);
-    }
-    setTimeout(type, 800);
-})();
+/* ── Typed Text Effect removed (caused layout jumping) ──────────────── */
 
 /* ── Card Tilt Effect ────────────────────────────────────────────────── */
 

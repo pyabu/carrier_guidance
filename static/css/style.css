@@ -456,25 +456,110 @@ select.form-control {
     transition: var(--transition);
 }
 
+/* ── User Dropdown Menu ──────────────────────────────────────────────── */
+.user-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 10px);
+    right: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-lg);
+    min-width: 200px;
+    z-index: 1000;
+    padding: 8px 0;
+    opacity: 0;
+    transform: translateY(-8px);
+    transition: opacity .2s, transform .2s;
+}
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 16px;
+    font-size: .85rem;
+    font-weight: 500;
+    color: var(--text-primary);
+    text-decoration: none;
+    transition: background .15s;
+}
+.user-dropdown a:hover {
+    background: var(--bg-tertiary);
+}
+.user-dropdown a i {
+    width: 16px;
+    text-align: center;
+    color: var(--text-tertiary);
+}
+
 /* ═══════════════════════════════════════════════════════════════════════
    HERO SECTION
    ═══════════════════════════════════════════════════════════════════════ */
 
 .hero {
     background: var(--bg-hero);
-    padding: 160px 0 110px;
+    padding: 140px 0 100px;
     position: relative;
-    overflow: visible;
-    animation: heroGradient 12s ease infinite;
-    background-size: 200% 200%;
-    will-change: background-position;
-    transform: translateZ(0);
+    overflow: hidden;
 }
 
-@keyframes heroGradient {
-    0%, 100% { background-position: 0% 50%; }
-    50% { background-position: 100% 50%; }
+/* Hero gradient text */
+.hero-gradient-text {
+    background: linear-gradient(135deg, #5eead4, #38bdf8, #818cf8);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
+
+/* Hero tags */
+.hero-tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+    justify-content: center;
+    align-items: center;
+}
+.hero-tags-label {
+    font-size: .78rem;
+    color: rgba(255,255,255,.5);
+}
+.hero-tag {
+    cursor: pointer;
+    font-size: .75rem;
+    padding: 4px 14px;
+    border-radius: 20px;
+    background: rgba(255,255,255,.08);
+    color: rgba(255,255,255,.7);
+    text-decoration: none;
+    transition: all .2s ease;
+    border: 1px solid rgba(255,255,255,.06);
+}
+.hero-tag:hover {
+    background: rgba(255,255,255,.18);
+    color: #fff;
+}
+
+/* Search result tabs */
+.search-tab {
+    padding: 6px 14px;
+    border-radius: 20px;
+    font-size: .78rem;
+    font-weight: 600;
+    color: #fff;
+    text-decoration: none;
+    transition: opacity .2s;
+}
+.search-tab:hover { opacity: .85; }
+.search-tab-global { background: #667eea; }
+.search-tab-india { background: #ff9933; }
+.search-tab-tn { background: #764ba2; }
 
 .hero::before {
     content: '';
@@ -507,10 +592,15 @@ select.form-control {
 }
 
 .hero h1 span {
-    background: linear-gradient(135deg, #5eead4, #38bdf8);
+    background: linear-gradient(135deg, #5eead4, #38bdf8, #818cf8);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+}
+
+/* Remove typed cursor flash */
+.typed-cursor {
+    display: none;
 }
 
 .hero p {
