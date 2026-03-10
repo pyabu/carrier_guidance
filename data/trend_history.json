@@ -20,7 +20,7 @@
   },
   {
     "date": "2026-03-10",
-    "total_jobs": 680,
+    "total_jobs": 676,
     "top_5_skills": [
       "Communication",
       "Problem Solving",
@@ -31,10 +31,10 @@
     "top_5_companies": [
       "Startup",
       "Walmart",
-      "Uplers",
       "Meta",
-      "CVS Health"
+      "CVS Health",
+      "Tinder"
     ],
-    "remote_percentage": 27.9
+    "remote_percentage": 28.8
   }
 ]
