@@ -4,13 +4,15 @@
 {% block content %}
 <section class="dashboard">
     <div class="container">
-        <div class="dashboard-header">
+        <div class="dashboard-header"
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 24px; background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-sm);">
             <div>
-                <h2>👋 Welcome, Career Seeker!</h2>
-                <p class="text-muted">Track your job search, manage applications, and build your profile</p>
+                <h2 style="margin: 0; color: var(--text-primary);"><i class="fas fa-hand-sparkles"
+                        style="color: #f59e0b;"></i> Welcome back, {{ user.name.split(' ')[0] }}!</h2>
+                <p class="text-muted" style="margin: 8px 0 0 0;">Here's what's happening with your job search today.</p>
             </div>
-            <div class="d-flex gap-2" style="gap:10px;">
-                <a href="/resume-builder" class="btn btn-primary"><i class="fas fa-file-alt"></i> Build Resume</a>
+            <div class="d-flex gap-2" style="display: flex; gap:10px;">
+                <a href="/resume-builder" class="btn btn-primary"><i class="fas fa-file-alt"></i> Resume Builder</a>
                 <a href="/jobs" class="btn btn-outline"><i class="fas fa-search"></i> Find Jobs</a>
             </div>
         </div>
@@ -52,23 +54,41 @@
             <h3><i class="fas fa-user text-accent"></i> My Profile</h3>
             <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;">
                 <div class="text-center">
-                    <div style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;">U</div>
+                    <div
+                        style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;">
+                        U</div>
                     <button class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Change Photo</button>
                 </div>
                 <div>
                     <form>
                         <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                            <div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="User Name"></div>
-                            <div class="form-group"><label>Email</label><input type="email" class="form-control" value="user@email.com"></div>
-                            <div class="form-group"><label>Phone</label><input type="tel" class="form-control" value="+91 98765 43210"></div>
-                            <div class="form-group"><label>Location</label><input type="text" class="form-control" value="Bangalore, India"></div>
-                            <div class="form-group"><label>Current Role</label><input type="text" class="form-control" value="Student / Fresher"></div>
-                            <div class="form-group"><label>Skills</label><input type="text" class="form-control" value="Python, React, SQL"></div>
+                            <div class="form-group"><label>Full Name</label><input type="text" class="form-control"
+                                    value="{{ user.name }}"></div>
+                            <div class="form-group"><label>Email</label><input type="email" class="form-control"
+                                    value="{{ user.email }}" readonly></div>
+                            <div class="form-group"><label>Experience Level</label><input type="text"
+                                    class="form-control" value="{{ user.experience_level }}"></div>
+                            <div class="form-group"><label>Skills</label><input type="text" class="form-control"
+                                    value="{{ user.skills }}"></div>
                         </div>
-                        <div class="form-group"><label>Bio</label><textarea class="form-control" rows="3">Passionate computer science student looking for software engineering opportunities...</textarea></div>
+                        <div class="form-group" style="margin-top: 16px;">
+                            <label>Saved Fields of Interest</label>
+                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                                {% for interest in user.interests_list %}
+                                <span
+                                    style="background: var(--bg-accent); color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem;"><i
+                                        class="fas fa-tag"></i> {{ interest }}</span>
+                                {% else %}
+                                <p class="text-muted">No interests saved. <a href="/onboarding">Update them here</a>.
+                                </p>
+                                {% endfor %}
+                            </div>
+                        </div>
                         <div style="display:flex;gap:12px;">
-                            <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile</button>
-                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload Resume</button>
+                            <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save
+                                Profile</button>
+                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload
+                                Resume</button>
                         </div>
                     </form>
                 </div>
@@ -80,26 +100,40 @@
             <h3><i class="fas fa-paper-plane text-accent"></i> Applied Jobs</h3>
             <table class="data-table">
                 <thead>
-                    <tr><th>Job Title</th><th>Company</th><th>Applied Date</th><th>Status</th><th>Action</th></tr>
+                    <tr>
+                        <th>Job Title</th>
+                        <th>Company</th>
+                        <th>Applied Date</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
                 </thead>
                 <tbody>
                     <tr>
-                        <td><strong>Frontend Developer</strong></td><td>Google</td><td>Mar 5, 2026</td>
+                        <td><strong>Frontend Developer</strong></td>
+                        <td>Google</td>
+                        <td>Mar 5, 2026</td>
                         <td><span class="status-badge active">Interview Scheduled</span></td>
                         <td><a href="#" class="text-accent">View</a></td>
                     </tr>
                     <tr>
-                        <td><strong>Software Engineer Intern</strong></td><td>Microsoft</td><td>Mar 3, 2026</td>
+                        <td><strong>Software Engineer Intern</strong></td>
+                        <td>Microsoft</td>
+                        <td>Mar 3, 2026</td>
                         <td><span class="status-badge pending">Under Review</span></td>
                         <td><a href="#" class="text-accent">View</a></td>
                     </tr>
                     <tr>
-                        <td><strong>Data Analyst</strong></td><td>Amazon</td><td>Feb 28, 2026</td>
+                        <td><strong>Data Analyst</strong></td>
+                        <td>Amazon</td>
+                        <td>Feb 28, 2026</td>
                         <td><span class="status-badge closed">Rejected</span></td>
                         <td><a href="#" class="text-accent">View</a></td>
                     </tr>
                     <tr>
-                        <td><strong>Full Stack Developer</strong></td><td>Flipkart</td><td>Feb 25, 2026</td>
+                        <td><strong>Full Stack Developer</strong></td>
+                        <td>Flipkart</td>
+                        <td>Feb 25, 2026</td>
                         <td><span class="status-badge active">Offer Received</span></td>
                         <td><a href="#" class="text-accent">View</a></td>
                     </tr>
@@ -107,52 +141,110 @@
             </table>
         </div>
 
-        <!-- AI Career Recommendations -->
+        <!-- AI Course Recommendations -->
         <div class="dashboard-section">
-            <h3><i class="fas fa-magic text-accent"></i> AI Career Recommendations</h3>
-            <div class="guidance-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr));">
-                <div class="category-card">
-                    <div class="category-icon"><i class="fas fa-code"></i></div>
-                    <h3>Full Stack Developer</h3>
-                    <p>94% match based on your skills</p>
+            <h3><i class="fas fa-graduation-cap text-accent"></i> Recommended Courses & Certifications</h3>
+            <p class="text-muted" style="margin-bottom: 20px;">Based on your interest in <strong>{{
+                    user.interests_list[0] if user.interests_list else 'Technology' }}</strong></p>
+            <div class="guidance-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap: 16px;">
+                {% if "Data Science" in user.interests_list or "AI & Machine Learning" in user.interests_list %}
+                <div class="category-card"
+                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <div class="category-icon" style="font-size: 2rem; color: #4338ca; margin-bottom: 12px;"><i
+                            class="fab fa-python"></i></div>
+                    <h5>Google Data Analytics Cert.</h5>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 6 Months
+                    </p>
+                    <a href="https://www.coursera.org/professional-certificates/google-data-analytics" target="_blank"
+                        class="btn btn-outline btn-sm">View Course</a>
                 </div>
-                <div class="category-card">
-                    <div class="category-icon"><i class="fas fa-database"></i></div>
-                    <h3>Data Engineer</h3>
-                    <p>87% match based on your skills</p>
+                <div class="category-card"
+                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <div class="category-icon" style="font-size: 2rem; color: #f59e0b; margin-bottom: 12px;"><i
+                            class="fas fa-robot"></i></div>
+                    <h5>DeepLearning.AI: Gen AI</h5>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 4 Months
+                    </p>
+                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
                 </div>
-                <div class="category-card">
-                    <div class="category-icon"><i class="fas fa-cloud"></i></div>
-                    <h3>Cloud Developer</h3>
-                    <p>82% match based on your skills</p>
+                {% elif "Software Engineering" in user.interests_list or "Web Development" in user.interests_list %}
+                <div class="category-card"
+                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <div class="category-icon" style="font-size: 2rem; color: #10b981; margin-bottom: 12px;"><i
+                            class="fab fa-react"></i></div>
+                    <h5>Meta Front-End Developer</h5>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 7 Months
+                    </p>
+                    <a href="https://www.coursera.org/professional-certificates/meta-front-end-developer"
+                        target="_blank" class="btn btn-outline btn-sm">View Course</a>
                 </div>
+                <div class="category-card"
+                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <div class="category-icon" style="font-size: 2rem; color: #ef4444; margin-bottom: 12px;"><i
+                            class="fab fa-node-js"></i></div>
+                    <h5>Full-Stack Web Dev</h5>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Udemy · 40 Hours
+                    </p>
+                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                {% else %}
+                <div class="category-card"
+                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
+                    <div class="category-icon" style="font-size: 2rem; color: #3b82f6; margin-bottom: 12px;"><i
+                            class="fas fa-laptop-code"></i></div>
+                    <h5>CS50: Intro to Computer Science</h5>
+                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">edX / Harvard · 12
+                        Weeks</p>
+                    <a href="https://www.edx.org/course/introduction-computer-science-harvardx-cs50x" target="_blank"
+                        class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                {% endif %}
             </div>
         </div>
 
         <!-- Saved Jobs -->
         <div class="dashboard-section">
             <h3><i class="fas fa-heart text-accent"></i> Saved Jobs</h3>
-            <div class="jobs-grid" id="savedJobsGrid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
-                <div class="loading-spinner"><div class="spinner"></div></div>
+            <div class="jobs-grid" id="savedJobsGrid"
+                style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
 
         <!-- Recommended Jobs (fetched live from API) -->
         <div class="dashboard-section">
             <h3><i class="fas fa-star text-accent"></i> Recommended for You</h3>
-            <div class="jobs-grid" id="recommendedJobsGrid" style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
-                <div class="loading-spinner"><div class="spinner"></div></div>
+            <div class="jobs-grid" id="recommendedJobsGrid"
+                style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
+                </div>
             </div>
         </div>
     </div>
 </section>
 
 <script>
-// Load recommended jobs from API
-document.addEventListener('DOMContentLoaded', async () => {
+    // Load recommended jobs from API
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Generate keyword query from user profile
+        const skillsList = {{ user.skills_list | tojson | safe
+    }} || [];
+    const interestsList = {{ user.interests_list | tojson | safe }} || [];
+
+    // Mix interests and skills for smarter job recommendations
+    let keywords = [];
+    if (interestsList.length > 0) keywords.push(interestsList[0]);
+    if (skillsList.length > 0) keywords.push(skillsList[0]);
+    if (interestsList.length > 1) keywords.push(interestsList[1]);
+
+    const query = keywords.join(',') || 'developer';
+
     // Load recommended jobs
     try {
-        const res = await fetch('/api/jobs?per_page=6&keyword=developer');
+        const res = await fetch(`/api/jobs?per_page=6&keyword=${encodeURIComponent(query)}`);
         const data = await res.json();
         const grid = document.getElementById('recommendedJobsGrid');
         if (data.jobs && data.jobs.length > 0) {
@@ -176,7 +268,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } else {
             grid.innerHTML = '<p class="text-muted">No recommendations yet. <a href="/jobs">Browse jobs</a> to get started!</p>';
         }
-    } catch(e) {
+    } catch (e) {
         document.getElementById('recommendedJobsGrid').innerHTML = '<p class="text-muted">Could not load recommendations.</p>';
     }
 

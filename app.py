@@ -7,10 +7,12 @@ Works both locally and on Vercel (serverless).
 import os
 import json
 import shutil
-import logging
-import threading
 from datetime import datetime, timedelta
-from flask import Flask, render_template, jsonify, request, abort
+import os
+from supabase import create_client, Client
+from werkzeug.security import generate_password_hash, check_password_hash
+from functools import wraps
+from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash
 from flask_cors import CORS
 
 # ── Vercel detection ───────────────────────────────────────────────────
@@ -18,6 +20,7 @@ IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
 
 # ── App Configuration ──────────────────────────────────────────────────
 app = Flask(__name__, template_folder="templates", static_folder="static")
+app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super-secret-careerpath-key")
 CORS(app)
 
 logging.basicConfig(level=logging.INFO)
@@ -38,6 +41,21 @@ INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
 SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
 TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
+
+# Database Setup - Supabase
+SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://yerecpvwemiuexucboee.supabase.co")
+SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_eGUWBISpXTHlHQHO2LYhSA_E1bQB4ou")
+
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
+
+# ── Authentication Helper ──────────────────────────────────────────────
+def login_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login', next=request.url))
+        return f(*args, **kwargs)
+    return decorated_function
 
 # ── Helpers ────────────────────────────────────────────────────────────
 
@@ -454,13 +472,125 @@ def resume_builder():
 
 
 @app.route("/student-dashboard")
+@login_required
 def student_dashboard():
-    return render_template("student_dashboard.html")
+    # Fetch user details
+    response = supabase.table("users").select("*").eq("id", session['user_id']).execute()
+    if not response.data:
+        session.clear()
+        return redirect(url_for('login'))
+        
+    user = response.data[0]
+    
+    # Parse JSON arrays if present
+    try:
+        user['skills_list'] = json.loads(user.get('skills') or '[]')
+    except:
+        user['skills_list'] = [s.strip() for s in str(user.get('skills', '')).split(',') if s.strip()]
+        
+    try:
+        user['interests_list'] = json.loads(user.get('interests') or '[]')
+    except:
+        user['interests_list'] = [i.strip() for i in str(user.get('interests', '')).split(',') if i.strip()]
+
+    return render_template("student_dashboard.html", user=user)
 
 
 @app.route("/employer-dashboard")
 def employer_dashboard():
     return render_template("employer_dashboard.html")
+
+# ═══════════════════════════════════════════════════════════════════════
+# AUTHENTICATION ROUTES
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        response = supabase.table("users").select("*").eq("email", email).execute()
+        
+        if response.data and check_password_hash(response.data[0]['password_hash'], password):
+            user = response.data[0]
+            session['user_id'] = user['id']
+            session['user_name'] = user['name']
+            
+            # Check if onboarding is complete
+            if not user.get('interests'):
+                return redirect(url_for('onboarding'))
+            return redirect(url_for('student_dashboard'))
+        else:
+            return render_template("login.html", error="Invalid email or password.")
+            
+    return render_template("login.html")
+
+
+@app.route("/signup", methods=["GET", "POST"])
+def signup():
+    if request.method == "POST":
+        name = request.form.get("name")
+        email = request.form.get("email")
+        password = request.form.get("password")
+        
+        # Check if email exists
+        existing = supabase.table("users").select("id").eq("email", email).execute()
+        if existing.data:
+            return render_template("signup.html", error="Email already exists.")
+            
+        hashed_pw = generate_password_hash(password)
+        try:
+            new_user = supabase.table("users").insert({
+                "name": name,
+                "email": email,
+                "password_hash": hashed_pw,
+                "skills": "",
+                "interests": "",
+                "experience_level": ""
+            }).execute()
+            
+            if new_user.data:
+                user = new_user.data[0]
+                session['user_id'] = user['id']
+                session['user_name'] = user['name']
+                return redirect(url_for('onboarding'))
+            else:
+                return render_template("signup.html", error="Failed to create account.")
+                
+        except Exception as e:
+            return render_template("signup.html", error=f"Database error: {str(e)}")
+            
+    return render_template("signup.html")
+
+
+@app.route("/logout")
+def logout():
+    session.clear()
+    return redirect(url_for('home'))
+
+
+@app.route("/onboarding", methods=["GET", "POST"])
+@login_required
+def onboarding():
+    if request.method == "POST":
+        skills = request.form.get("skills")
+        interests = request.form.getlist("interests")
+        experience = request.form.get("experience")
+        
+        try:
+            supabase.table("users").update({
+                "skills": skills,
+                "interests": json.dumps(interests),
+                "experience_level": experience
+            }).eq("id", session['user_id']).execute()
+            
+            return redirect(url_for('student_dashboard'))
+        except Exception as e:
+            logger.error(f"Onboarding error: {e}")
+            return render_template("onboarding.html", error="Failed to save profile.")
+        
+    return render_template("onboarding.html")
 
 
 @app.route("/about")

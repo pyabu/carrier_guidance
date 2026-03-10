@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% block title %}Personalize Your Experience - CareerPath Pro{% endblock %}
+
+{% block content %}
+<section class="page-header"
+    style="background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);">
+    <div class="container" style="text-align: center;">
+        <h1 style="color: var(--text-primary);">Let's Get to Know You! 🚀</h1>
+        <p style="color: var(--text-secondary); max-width: 600px; margin: 0 auto; font-size: 1.1rem;">
+            Answer a few quick questions so we can personalize your job recommendations and career path.
+        </p>
+    </div>
+</section>
+
+<section class="section" style="padding: 60px 0;">
+    <div class="container" style="max-width: 700px; margin: 0 auto;">
+
+        <form method="POST" action="/onboarding"
+            style="background: var(--surface); padding: 40px; border-radius: 16px; box-shadow: var(--shadow-md);">
+            <!-- Interests -->
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label
+                    style="display:block; margin-bottom:12px; font-size: 1.2rem; font-weight: 700; color:var(--text-primary);">1.
+                    What are your primary fields of interest? <span
+                        style="font-weight: normal; color: var(--text-tertiary); font-size: 0.9rem;">(Select all that
+                        apply)</span></label>
+                <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 12px;">
+                    {% set areas = ['Software Engineering', 'Data Science', 'AI & Machine Learning', 'Cloud & DevOps',
+                    'Cybersecurity', 'Web Development', 'Mobile App Development', 'Product Management', 'UI/UX Design',
+                    'Digital Marketing'] %}
+                    {% for area in areas %}
+                    <label
+                        style="display: flex; align-items: center; gap: 8px; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; transition: all 0.2s;">
+                        <input type="checkbox" name="interests" value="{{ area }}"
+                            style="width: 18px; height: 18px; accent-color: var(--accent);">
+                        {{ area }}
+                    </label>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Skills -->
+            <div class="form-group" style="margin-bottom: 30px;">
+                <label
+                    style="display:block; margin-bottom:8px; font-size: 1.2rem; font-weight: 700; color:var(--text-primary);">2.
+                    What are your top technical skills?</label>
+                <p style="color: var(--text-secondary); margin-bottom: 12px; font-size: 0.95rem;">Enter comma-separated
+                    values (e.g., Python, React, SQL, AWS, Figma).</p>
+                <input type="text" name="skills" class="form-control" placeholder="Python, JavaScript, Data Analysis..."
+                    style="width:100%; padding:14px; border:1px solid var(--border-color); border-radius:8px; font-size: 1.05rem;"
+                    required>
+            </div>
+
+            <!-- Experience -->
+            <div class="form-group" style="margin-bottom: 40px;">
+                <label
+                    style="display:block; margin-bottom:12px; font-size: 1.2rem; font-weight: 700; color:var(--text-primary);">3.
+                    Select your experience level</label>
+                <select name="experience" class="form-control"
+                    style="width:100%; padding:14px; border:1px solid var(--border-color); border-radius:8px; font-size: 1.05rem;"
+                    required>
+                    <option value="" disabled selected>Choose experience...</option>
+                    <option value="Student / Fresher">Student / Fresher (0 years)</option>
+                    <option value="Junior">Junior (1-3 years)</option>
+                    <option value="Mid-Level">Mid-Level (3-5 years)</option>
+                    <option value="Senior">Senior (5+ years)</option>
+                </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary"
+                style="width:100%; padding:16px; font-size:1.2rem; border-radius:8px; background: linear-gradient(135deg, var(--accent) 0%, #4338ca 100%); border: none;">
+                <i class="fas fa-magic"></i> Generate My Personalized Dashboard
+            </button>
+        </form>
+
+    </div>
+</section>
+{% endblock %}
