@@ -137,59 +137,70 @@ def main():
             json.dump(payload, f, indent=2)
         logger.info(f"   Backup: {backup_file}")
 
-    # ── Refresh Tamil Nadu & Pondicherry Jobs ──────────────────────
-    tn_jobs_file = os.path.join(DATA_DIR, "tn_jobs.json")
+    # ── Refresh India & TN Jobs via Scrapy ────────────────────────
+    # Uses Scrapy spiders for real-time scraping from 12+ sources
+    # with anti-blocking, rotating user agents, and AI enrichment
     try:
-        from scraper.tamilnadu_scraper import TamilNaduJobScraper
-        logger.info("\n🗺️  Refreshing Tamil Nadu & Pondicherry jobs …")
-        tn_scraper = TamilNaduJobScraper()
-        tn_jobs = tn_scraper.scrape_all()
-        for i, j in enumerate(tn_jobs):
-            j["id"] = i + 1
-        tn_payload = {
-            "jobs": tn_jobs,
-            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "region": "Tamil Nadu & Pondicherry",
-            "total": len(tn_jobs),
-        }
-        if not args.dry_run:
-            with open(tn_jobs_file, "w") as f:
-                json.dump(tn_payload, f, indent=2)
-            logger.info(f"✅ Saved {len(tn_jobs)} TN jobs to {tn_jobs_file}")
-        else:
-            logger.info(f"⚠️  DRY RUN – Would save {len(tn_jobs)} TN jobs")
-    except ImportError:
-        logger.warning("⚠️  TN scraper module not found – skipping")
-    except Exception as e:
-        logger.warning(f"⚠️  TN scraper failed: {e}")
+        logger.info("\n🕷️  Running Scrapy spiders for India & TN jobs …")
+        from scrapy_jobs.run_scrapy import run_spiders
 
-    # ── Refresh All-India Jobs ─────────────────────────────────────
-    india_jobs_file = os.path.join(DATA_DIR, "india_jobs.json")
-    try:
-        from scraper.india_scraper import IndiaJobScraper
-        logger.info("\n🇮🇳 Refreshing All-India jobs …")
-        india_scraper = IndiaJobScraper()
-        india_jobs = india_scraper.scrape_all(min_jobs=500)
-        for i, j in enumerate(india_jobs):
-            j["id"] = i + 1
-        india_payload = {
-            "jobs": india_jobs,
-            "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "region": "India",
-            "total": len(india_jobs),
-            "states_covered": len(set(j.get("location_state", "") for j in india_jobs if j.get("location_state"))),
-            "cities_covered": len(set(j.get("location_city", "") for j in india_jobs if j.get("location_city"))),
-        }
+        use_ai = bool(os.environ.get("GEMINI_API_KEY"))
         if not args.dry_run:
-            with open(india_jobs_file, "w") as f:
-                json.dump(india_payload, f, indent=2)
-            logger.info(f"✅ Saved {len(india_jobs)} India jobs to {india_jobs_file}")
+            run_spiders(spider_name=None, dry_run=False, ai_enrich=use_ai)
+            logger.info("✅ Scrapy spiders completed – India & TN jobs updated")
         else:
-            logger.info(f"⚠️  DRY RUN – Would save {len(india_jobs)} India jobs")
-    except ImportError:
-        logger.warning("⚠️  India scraper module not found – skipping")
+            run_spiders(spider_name=None, dry_run=True, ai_enrich=False)
+            logger.info("⚠️  DRY RUN – Scrapy spiders ran in preview mode")
+
+    except ImportError as e:
+        logger.warning(f"⚠️  Scrapy not installed – falling back to legacy scrapers: {e}")
+
+        # ── Fallback: Legacy TN Scraper ────────────────────────────
+        tn_jobs_file = os.path.join(DATA_DIR, "tn_jobs.json")
+        try:
+            from scraper.tamilnadu_scraper import TamilNaduJobScraper
+            logger.info("\n🗺️  [Fallback] Refreshing Tamil Nadu jobs …")
+            tn_scraper = TamilNaduJobScraper()
+            tn_jobs = tn_scraper.scrape_all()
+            for i, j in enumerate(tn_jobs):
+                j["id"] = i + 1
+            tn_payload = {
+                "jobs": tn_jobs,
+                "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "region": "Tamil Nadu & Pondicherry",
+                "total": len(tn_jobs),
+            }
+            if not args.dry_run:
+                with open(tn_jobs_file, "w") as f:
+                    json.dump(tn_payload, f, indent=2)
+                logger.info(f"✅ Saved {len(tn_jobs)} TN jobs to {tn_jobs_file}")
+        except Exception as ex:
+            logger.warning(f"⚠️  TN fallback scraper failed: {ex}")
+
+        # ── Fallback: Legacy India Scraper ─────────────────────────
+        india_jobs_file = os.path.join(DATA_DIR, "india_jobs.json")
+        try:
+            from scraper.india_scraper import IndiaJobScraper
+            logger.info("\n🇮🇳 [Fallback] Refreshing All-India jobs …")
+            india_scraper = IndiaJobScraper()
+            india_jobs = india_scraper.scrape_all(min_jobs=500)
+            for i, j in enumerate(india_jobs):
+                j["id"] = i + 1
+            india_payload = {
+                "jobs": india_jobs,
+                "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "region": "India",
+                "total": len(india_jobs),
+            }
+            if not args.dry_run:
+                with open(india_jobs_file, "w") as f:
+                    json.dump(india_payload, f, indent=2)
+                logger.info(f"✅ Saved {len(india_jobs)} India jobs to {india_jobs_file}")
+        except Exception as ex:
+            logger.warning(f"⚠️  India fallback scraper failed: {ex}")
+
     except Exception as e:
-        logger.warning(f"⚠️  India scraper failed: {e}")
+        logger.error(f"❌ Scrapy scraping failed: {e}")
 
     elapsed = (datetime.now() - start).total_seconds()
     logger.info(f"\n⏱  Completed in {elapsed:.1f} seconds")

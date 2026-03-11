@@ -29,6 +29,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
 
+from scraper.anti_block import (
+    create_stealth_session, safe_get, human_delay,
+    warm_cookies, get_browser_headers, get_random_ua,
+)
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -274,13 +279,24 @@ class TamilNaduJobScraper:
     """
 
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept-Language": "en-IN,en;q=0.9,ta;q=0.8",
-            "Accept": "text/html,application/xhtml+xml,application/json",
-        })
+        self.session = create_stealth_session()
         self.seen_keys = set()
+
+        # Warm cookies for major Indian job portals
+        for base_url in [
+            "https://www.naukri.com",
+            "https://www.foundit.in",
+            "https://internshala.com",
+            "https://www.timesjobs.com",
+            "https://www.freshersworld.com",
+        ]:
+            warm_cookies(self.session, base_url)
+
+    def _get(self, url, timeout=15, **kwargs):
+        """Anti-blocking GET wrapper with per-request UA rotation and retry."""
+        resp = safe_get(self.session, url, timeout=timeout, **kwargs)
+        human_delay(0.8, 2.5)
+        return resp
 
     def scrape_all(self) -> list[dict]:
         """
@@ -353,10 +369,10 @@ class TamilNaduJobScraper:
         for city, term in city_searches:
             try:
                 url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={term}&location={city}%2C+India&start=0"
-                resp = self.session.get(url, timeout=12, headers={
+                resp = self._get(url, timeout=12, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -425,8 +441,8 @@ class TamilNaduJobScraper:
         for city, term in city_terms:
             try:
                 url = f"https://www.naukri.com/{term}-jobs-in-{city}"
-                resp = self.session.get(url, timeout=15, headers=headers)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=15, headers=headers)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -537,10 +553,10 @@ class TamilNaduJobScraper:
         for query, location in searches:
             try:
                 url = f"https://www.indeed.co.in/rss?q={query}&l={location}&sort=date&limit=15"
-                resp = self.session.get(url, timeout=12, headers={
+                resp = self._get(url, timeout=12, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "xml")
@@ -599,12 +615,12 @@ class TamilNaduJobScraper:
         for term, city in searches:
             try:
                 url = f"https://www.foundit.in/srp/results?query={term}&locations={city}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -664,12 +680,12 @@ class TamilNaduJobScraper:
         for path in paths:
             try:
                 url = f"https://internshala.com/{path}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -734,12 +750,12 @@ class TamilNaduJobScraper:
         for term, city in searches:
             try:
                 url = f"https://www.timesjobs.com/candidate/job-search.html?txtKeywords={term}&txtLocation={city}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -794,12 +810,12 @@ class TamilNaduJobScraper:
         for path in searches:
             try:
                 url = f"https://www.freshersworld.com/{path}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
