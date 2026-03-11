@@ -21,6 +21,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
 
+from scraper.anti_block import (
+    create_stealth_session, safe_get, human_delay,
+    get_browser_headers, get_random_ua,
+)
+
 logger = logging.getLogger(__name__)
 
 USER_AGENTS = [
@@ -131,11 +136,7 @@ class CompanyScraper:
     """
 
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept-Language": "en-US,en;q=0.9",
-        })
+        self.session = create_stealth_session()
         self._cache = {}
 
     def get_company_profile(self, company_name: str) -> dict:
@@ -230,7 +231,7 @@ class CompanyScraper:
             ]
             for url in urls_to_try:
                 try:
-                    resp = self.session.get(url, timeout=5, allow_redirects=True)
+                    resp = safe_get(self.session, url, timeout=5, allow_redirects=True)
                     if resp.status_code == 200:
                         profile["website"] = url
                         soup = BeautifulSoup(resp.text, "html.parser")
