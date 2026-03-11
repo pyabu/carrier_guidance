@@ -522,7 +522,7 @@ function jobCardHTML(j) {
     const trendClass = j.trending ? ' trending' : '';
 
     return `
-    <div class="india-job-card${trendClass}">
+    <div class="india-job-card${trendClass}" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/${j.id}'">
         <div class="india-job-header">
             <img class="india-job-logo" src="${j.company_logo||'https://ui-avatars.com/api/?name='+encodeURIComponent(j.company)+'&background=ff9933&color=fff&size=50'}" alt="${j.company}" onerror="this.src='https://ui-avatars.com/api/?name='+encodeURIComponent('${j.company}')+'&background=ff9933&color=fff&size=50'">
             <div class="india-job-info">
@@ -542,7 +542,8 @@ function jobCardHTML(j) {
             <span class="india-salary">${salary || 'Competitive Salary'}</span>
             <div class="india-job-actions">
                 <span class="india-source-badge" style="background:${srcColor}">${j.source||'Various'}</span>
-                <a href="${j.apply_url||'#'}" target="_blank" rel="noopener" class="india-apply-btn"><i class="fas fa-external-link-alt"></i> Apply</a>
+                <button class="india-save-btn" onclick="event.stopPropagation();indiaSaveJob(this,'${j.id}')" title="Save"><i class="far fa-heart"></i></button>
+                <a href="${j.apply_url||'#'}" target="_blank" rel="noopener" class="india-apply-btn" onclick="if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Sign in to track your job applications.',event);return false;}trackApply('${j.id}')"><i class="fas fa-external-link-alt"></i> Apply</a>
             </div>
         </div>
     </div>`;
@@ -608,6 +609,35 @@ function searchSkill(skill) {
     allJobs = [];
     fetchJobs();
     window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function trackApply(jobId) {
+    if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications.'); return; }
+    fetch('/api/apply-job', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: String(jobId)})
+    }).catch(function(){});
+}
+
+async function indiaSaveJob(btn, jobId) {
+    if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        var res = await fetch('/api/save-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: String(jobId)})
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i>';
+            btn.title = 'Saved';
+        } else {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+    }
 }
 
 function applySort(value) {

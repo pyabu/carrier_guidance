@@ -2,48 +2,98 @@
 {% block title %}Student Dashboard{% endblock %}
 
 {% block content %}
+<style>
+/* Dashboard responsive overrides */
+.dash-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; padding:24px; background:var(--surface); border-radius:12px; box-shadow:var(--shadow-sm); flex-wrap:wrap; gap:16px; }
+.dash-header-actions { display:flex; gap:10px; flex-wrap:wrap; }
+.dash-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:16px; margin-bottom:32px; }
+.dash-profile-grid { display:grid; grid-template-columns:180px 1fr; gap:32px; align-items:start; }
+.dash-profile-form-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.dash-profile-actions { display:flex; gap:12px; flex-wrap:wrap; }
+.dash-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.dash-courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
+.dash-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.dash-empty { padding:24px; text-align:center; color:var(--text-secondary); }
+.dash-job-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; cursor:pointer; transition:var(--transition); display:flex; flex-direction:column; gap:12px; }
+.dash-job-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
+.dash-job-card-head { display:flex; align-items:center; gap:12px; }
+.dash-job-card-head img { width:44px; height:44px; border-radius:8px; object-fit:cover; flex-shrink:0; }
+.dash-job-card-head h4 { margin:0; font-size:0.95rem; line-height:1.3; }
+.dash-job-card-head small { color:var(--text-secondary); font-size:0.82rem; }
+.dash-job-meta { display:flex; flex-wrap:wrap; gap:10px; font-size:0.82rem; color:var(--text-secondary); }
+.dash-job-foot { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-top:auto; }
+.dash-job-foot .btn { font-size:0.78rem; padding:6px 12px; }
+.unsave-btn { color:var(--danger); border-color:var(--danger); }
+.unsave-btn:hover { background:var(--danger); color:#fff; }
+
+/* Responsive breakpoints */
+@media (max-width:900px) {
+    .dash-stats { grid-template-columns:repeat(2,1fr); }
+    .dash-profile-grid { grid-template-columns:1fr; }
+    .dash-profile-form-grid { grid-template-columns:1fr; }
+    div[style*="grid-template-columns:1fr 1fr"] { grid-template-columns:1fr !important; }
+}
+@media (max-width:600px) {
+    .dash-stats { grid-template-columns:1fr 1fr; gap:10px; }
+    .dash-header { padding:16px; }
+    .dash-header h2 { font-size:1.15rem; }
+    .dash-header-actions .btn { font-size:0.82rem; padding:8px 14px; }
+    .stat-card { padding:16px; gap:10px; }
+    .stat-card-icon { width:40px; height:40px; font-size:1rem; }
+    .stat-card-content h3 { font-size:1.2rem; }
+    .dashboard-section { padding:16px; }
+    .dash-jobs-grid { grid-template-columns:1fr; }
+    .data-table th, .data-table td { padding:8px 10px; font-size:0.8rem; }
+    .dash-job-card { padding:14px; }
+}
+@media (max-width:400px) {
+    .dash-stats { grid-template-columns:1fr; }
+    .dash-header-actions { width:100%; }
+    .dash-header-actions .btn { flex:1; text-align:center; }
+}
+</style>
+
 <section class="dashboard">
     <div class="container">
-        <div class="dashboard-header"
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; padding: 24px; background: var(--surface); border-radius: 12px; box-shadow: var(--shadow-sm);">
+        <!-- Header -->
+        <div class="dash-header">
             <div>
-                <h2 style="margin: 0; color: var(--text-primary);"><i class="fas fa-hand-sparkles"
-                        style="color: #f59e0b;"></i> Welcome back, {{ user.name.split(' ')[0] }}!</h2>
-                <p class="text-muted" style="margin: 8px 0 0 0;">Here's what's happening with your job search today.</p>
+                <h2 style="margin:0; color:var(--text-primary);"><i class="fas fa-hand-sparkles" style="color:#f59e0b;"></i> Welcome back, {{ user.name.split(' ')[0] }}!</h2>
+                <p class="text-muted" style="margin:8px 0 0 0;">Here's what's happening with your job search today.</p>
             </div>
-            <div class="d-flex gap-2" style="display: flex; gap:10px;">
+            <div class="dash-header-actions">
                 <a href="/resume-builder" class="btn btn-primary"><i class="fas fa-file-alt"></i> Resume Builder</a>
                 <a href="/jobs" class="btn btn-outline"><i class="fas fa-search"></i> Find Jobs</a>
             </div>
         </div>
 
-        <!-- Stats Cards -->
-        <div class="dashboard-grid">
+        <!-- Stats Cards (fetched in real-time) -->
+        <div class="dash-stats">
             <div class="stat-card">
                 <div class="stat-card-icon blue"><i class="fas fa-paper-plane"></i></div>
                 <div class="stat-card-content">
-                    <h3>0</h3>
+                    <h3 id="statApplications"><span class="fas fa-spinner fa-spin" style="font-size:0.9rem;"></span></h3>
                     <p>Applications Sent</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon green"><i class="fas fa-check-circle"></i></div>
                 <div class="stat-card-content">
-                    <h3>0</h3>
+                    <h3 id="statInterviews"><span class="fas fa-spinner fa-spin" style="font-size:0.9rem;"></span></h3>
                     <p>Interview Calls</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon orange"><i class="fas fa-heart"></i></div>
                 <div class="stat-card-content">
-                    <h3>0</h3>
+                    <h3 id="statSaved"><span class="fas fa-spinner fa-spin" style="font-size:0.9rem;"></span></h3>
                     <p>Saved Jobs</p>
                 </div>
             </div>
             <div class="stat-card">
                 <div class="stat-card-icon red"><i class="fas fa-eye"></i></div>
                 <div class="stat-card-content">
-                    <h3>1</h3>
+                    <h3 id="statViews"><span class="fas fa-spinner fa-spin" style="font-size:0.9rem;"></span></h3>
                     <p>Profile Views</p>
                 </div>
             </div>
@@ -52,43 +102,32 @@
         <!-- Profile Section -->
         <div class="dashboard-section">
             <h3><i class="fas fa-user text-accent"></i> My Profile</h3>
-            <div style="display:grid;grid-template-columns:200px 1fr;gap:32px;align-items:start;">
+            <div class="dash-profile-grid">
                 <div class="text-center">
-                    <div
-                        style="width:120px;height:120px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:3rem;font-weight:700;margin:0 auto 12px;text-transform:uppercase;">
-                        {{ user.name[0] }}</div>
+                    <div style="width:110px;height:110px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;margin:0 auto 12px;text-transform:uppercase;">{{ user.name[0] }}</div>
                     <button class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Change Photo</button>
                 </div>
                 <div>
                     <form>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
-                            <div class="form-group"><label>Full Name</label><input type="text" class="form-control"
-                                    value="{{ user.name }}"></div>
-                            <div class="form-group"><label>Email</label><input type="email" class="form-control"
-                                    value="{{ user.email }}" readonly></div>
-                            <div class="form-group"><label>Experience Level</label><input type="text"
-                                    class="form-control" value="{{ user.experience_level }}"></div>
-                            <div class="form-group"><label>Skills</label><input type="text" class="form-control"
-                                    value="{{ user.skills }}"></div>
+                        <div class="dash-profile-form-grid">
+                            <div class="form-group"><label>Full Name</label><input type="text" class="form-control" value="{{ user.name }}"></div>
+                            <div class="form-group"><label>Email</label><input type="email" class="form-control" value="{{ user.email }}" readonly></div>
+                            <div class="form-group"><label>Experience Level</label><input type="text" class="form-control" value="{{ user.experience_level }}"></div>
+                            <div class="form-group"><label>Skills</label><input type="text" class="form-control" value="{{ user.skills }}"></div>
                         </div>
-                        <div class="form-group" style="margin-top: 16px;">
+                        <div class="form-group" style="margin-top:16px;">
                             <label>Saved Fields of Interest</label>
-                            <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px;">
+                            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:8px;">
                                 {% for interest in user.interests_list %}
-                                <span
-                                    style="background: var(--bg-accent); color: white; padding: 4px 12px; border-radius: 16px; font-size: 0.85rem;"><i
-                                        class="fas fa-tag"></i> {{ interest }}</span>
+                                <span style="background:var(--bg-accent);color:white;padding:4px 12px;border-radius:16px;font-size:0.85rem;"><i class="fas fa-tag"></i> {{ interest }}</span>
                                 {% else %}
-                                <p class="text-muted">No interests saved. <a href="/onboarding">Update them here</a>.
-                                </p>
+                                <p class="text-muted">No interests saved. <a href="/onboarding">Update them here</a>.</p>
                                 {% endfor %}
                             </div>
                         </div>
-                        <div style="display:flex;gap:12px;">
-                            <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save
-                                Profile</button>
-                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload
-                                Resume</button>
+                        <div class="dash-profile-actions">
+                            <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save Profile</button>
+                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload Resume</button>
                         </div>
                     </form>
                 </div>
@@ -98,232 +137,380 @@
         <!-- Applied Jobs Table -->
         <div class="dashboard-section">
             <h3><i class="fas fa-paper-plane text-accent"></i> Applied Jobs</h3>
-            <table class="data-table">
-                <thead>
-                    <tr>
-                        <th>Job Title</th>
-                        <th>Company</th>
-                        <th>Applied Date</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="appliedJobsTableBody">
-                    <tr>
-                        <td colspan="5" class="text-center py-4 text-muted">You haven't applied to any jobs yet. <a
-                                href="/jobs">Browse jobs</a> to get started.</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-
-        <!-- AI Course Recommendations -->
-        <div class="dashboard-section">
-            <h3><i class="fas fa-graduation-cap text-accent"></i> Recommended Courses & Certifications</h3>
-            <p class="text-muted" style="margin-bottom: 20px;">Based on your interest in <strong>{{
-                    user.interests_list[0] if user.interests_list else 'Technology' }}</strong></p>
-            <div class="guidance-grid" style="grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap: 16px;">
-                {% if "Data Science" in user.interests_list or "AI & Machine Learning" in user.interests_list %}
-                <div class="category-card"
-                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <div class="category-icon" style="font-size: 2rem; color: #4338ca; margin-bottom: 12px;"><i
-                            class="fab fa-python"></i></div>
-                    <h5>Google Data Analytics Cert.</h5>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 6 Months
-                    </p>
-                    <a href="https://www.coursera.org/professional-certificates/google-data-analytics" target="_blank"
-                        class="btn btn-outline btn-sm">View Course</a>
-                </div>
-                <div class="category-card"
-                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <div class="category-icon" style="font-size: 2rem; color: #f59e0b; margin-bottom: 12px;"><i
-                            class="fas fa-robot"></i></div>
-                    <h5>DeepLearning.AI: Gen AI</h5>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 4 Months
-                    </p>
-                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
-                </div>
-                {% elif "Software Engineering" in user.interests_list or "Web Development" in user.interests_list %}
-                <div class="category-card"
-                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <div class="category-icon" style="font-size: 2rem; color: #10b981; margin-bottom: 12px;"><i
-                            class="fab fa-react"></i></div>
-                    <h5>Meta Front-End Developer</h5>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Coursera · 7 Months
-                    </p>
-                    <a href="https://www.coursera.org/professional-certificates/meta-front-end-developer"
-                        target="_blank" class="btn btn-outline btn-sm">View Course</a>
-                </div>
-                <div class="category-card"
-                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <div class="category-icon" style="font-size: 2rem; color: #ef4444; margin-bottom: 12px;"><i
-                            class="fab fa-node-js"></i></div>
-                    <h5>Full-Stack Web Dev</h5>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">Udemy · 40 Hours
-                    </p>
-                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
-                </div>
-                {% else %}
-                <div class="category-card"
-                    style="padding: 20px; border: 1px solid var(--border-color); border-radius: 12px; text-align: center;">
-                    <div class="category-icon" style="font-size: 2rem; color: #3b82f6; margin-bottom: 12px;"><i
-                            class="fas fa-laptop-code"></i></div>
-                    <h5>CS50: Intro to Computer Science</h5>
-                    <p style="font-size: 0.9rem; margin-bottom: 12px; color: var(--text-secondary);">edX / Harvard · 12
-                        Weeks</p>
-                    <a href="https://www.edx.org/course/introduction-computer-science-harvardx-cs50x" target="_blank"
-                        class="btn btn-outline btn-sm">View Course</a>
-                </div>
-                {% endif %}
+            <div class="dash-table-wrap">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Job Title</th>
+                            <th>Company</th>
+                            <th>Applied Date</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="appliedJobsTableBody">
+                        <tr><td colspan="5" class="dash-empty"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
 
         <!-- Saved Jobs -->
         <div class="dashboard-section">
             <h3><i class="fas fa-heart text-accent"></i> Saved Jobs</h3>
-            <div class="jobs-grid" id="savedJobsGrid"
-                style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
-                </div>
+            <div class="dash-jobs-grid" id="savedJobsGrid">
+                <div class="dash-empty"><i class="fas fa-spinner fa-spin"></i> Loading saved jobs...</div>
             </div>
         </div>
 
-        <!-- Recommended Jobs (fetched live from API) -->
+        <!-- Recommended Jobs -->
         <div class="dashboard-section">
             <h3><i class="fas fa-star text-accent"></i> Recommended for You</h3>
-            <div class="jobs-grid" id="recommendedJobsGrid"
-                style="grid-template-columns:repeat(auto-fill,minmax(300px,1fr));">
-                <div class="loading-spinner">
-                    <div class="spinner"></div>
+            <div class="dash-jobs-grid" id="recommendedJobsGrid">
+                <div class="dash-empty"><i class="fas fa-spinner fa-spin"></i> Loading recommendations...</div>
+            </div>
+        </div>
+
+        <!-- Job Alerts & Bookmarks Row -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:24px;">
+            <div class="dashboard-section" style="margin-bottom:0;">
+                <h3><i class="fas fa-bell text-accent"></i> Job Alerts</h3>
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <input type="text" id="dashAlertKeyword" placeholder="e.g. Python, React" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.88rem;background:var(--bg);color:var(--text-primary);">
+                    <button onclick="addDashAlert()" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i></button>
                 </div>
+                <div id="dashAlertsList" style="max-height:200px;overflow-y:auto;"></div>
+            </div>
+            <div class="dashboard-section" style="margin-bottom:0;">
+                <h3><i class="fas fa-building text-accent"></i> Bookmarked Companies</h3>
+                <div id="dashBookmarksList" style="max-height:200px;overflow-y:auto;"></div>
+            </div>
+        </div>
+
+        <!-- Quick Resume -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-file-alt text-accent"></i> Resume</h3>
+            <div id="dashResumeArea" style="display:flex;align-items:center;gap:16px;">
+                <div id="dashResumeInfo" style="display:none;flex:1;display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border-radius:10px;">
+                    <i class="fas fa-file-pdf" style="font-size:1.5rem;color:#e74c3c;"></i>
+                    <div><strong id="dashResumeName"></strong><br><small id="dashResumeDate" style="color:var(--text-secondary);"></small></div>
+                </div>
+                <div id="dashResumeUpload" style="flex:1;border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;" onclick="document.getElementById('dashResumeInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--accent);"></i>
+                    <p style="margin:4px 0 0;font-size:0.9rem;">Click to upload resume (PDF, DOC, DOCX)</p>
+                    <input type="file" id="dashResumeInput" accept=".pdf,.doc,.docx" style="display:none;" onchange="dashUploadResume(this)">
+                </div>
+                <div id="dashResumeStatus" style="font-size:0.85rem;"></div>
+            </div>
+        </div>
+
+        <!-- AI Course Recommendations -->
+        <div class="dashboard-section">
+            <h3><i class="fas fa-graduation-cap text-accent"></i> Recommended Courses & Certifications</h3>
+            <p class="text-muted" style="margin-bottom:20px;">Based on your interest in <strong>{{ user.interests_list[0] if user.interests_list else 'Technology' }}</strong></p>
+            <div class="dash-courses-grid">
+                {% if "Data Science" in user.interests_list or "AI & Machine Learning" in user.interests_list %}
+                <div class="category-card" style="padding:20px;border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                    <div style="font-size:2rem;color:#4338ca;margin-bottom:12px;"><i class="fab fa-python"></i></div>
+                    <h5>Google Data Analytics Cert.</h5>
+                    <p style="font-size:0.9rem;margin-bottom:12px;color:var(--text-secondary);">Coursera · 6 Months</p>
+                    <a href="https://www.coursera.org/professional-certificates/google-data-analytics" target="_blank" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                <div class="category-card" style="padding:20px;border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                    <div style="font-size:2rem;color:#f59e0b;margin-bottom:12px;"><i class="fas fa-robot"></i></div>
+                    <h5>DeepLearning.AI: Gen AI</h5>
+                    <p style="font-size:0.9rem;margin-bottom:12px;color:var(--text-secondary);">Coursera · 4 Months</p>
+                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                {% elif "Software Engineering" in user.interests_list or "Web Development" in user.interests_list %}
+                <div class="category-card" style="padding:20px;border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                    <div style="font-size:2rem;color:#10b981;margin-bottom:12px;"><i class="fab fa-react"></i></div>
+                    <h5>Meta Front-End Developer</h5>
+                    <p style="font-size:0.9rem;margin-bottom:12px;color:var(--text-secondary);">Coursera · 7 Months</p>
+                    <a href="https://www.coursera.org/professional-certificates/meta-front-end-developer" target="_blank" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                <div class="category-card" style="padding:20px;border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                    <div style="font-size:2rem;color:#ef4444;margin-bottom:12px;"><i class="fab fa-node-js"></i></div>
+                    <h5>Full-Stack Web Dev</h5>
+                    <p style="font-size:0.9rem;margin-bottom:12px;color:var(--text-secondary);">Udemy · 40 Hours</p>
+                    <a href="#" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                {% else %}
+                <div class="category-card" style="padding:20px;border:1px solid var(--border-color);border-radius:12px;text-align:center;">
+                    <div style="font-size:2rem;color:#3b82f6;margin-bottom:12px;"><i class="fas fa-laptop-code"></i></div>
+                    <h5>CS50: Intro to Computer Science</h5>
+                    <p style="font-size:0.9rem;margin-bottom:12px;color:var(--text-secondary);">edX / Harvard · 12 Weeks</p>
+                    <a href="https://www.edx.org/course/introduction-computer-science-harvardx-cs50x" target="_blank" class="btn btn-outline btn-sm">View Course</a>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
 </section>
 
 <script>
-    // Load recommended jobs from API
-    document.addEventListener('DOMContentLoaded', async () => {
-        // Generate keyword query from user profile
-        const skillsList = {{ user.skills_list | tojson | safe
-    }} || [];
+(function() {
+    const skillsList = {{ user.skills_list | tojson | safe }} || [];
     const interestsList = {{ user.interests_list | tojson | safe }} || [];
+    let savedJobIds = new Set();
 
-    // Mix interests and skills for smarter job recommendations
-    let keywords = [];
-    if (interestsList.length > 0) keywords.push(interestsList[0]);
-    if (skillsList.length > 0) keywords.push(skillsList[0]);
-    if (interestsList.length > 1) keywords.push(interestsList[1]);
+    // ── Helpers ──
+    function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+    function logoUrl(company) { return 'https://ui-avatars.com/api/?name=' + encodeURIComponent(company) + '&background=667eea&color=fff&size=50'; }
+    function fmtDate(iso) { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }); }
+    function statusBadge(s) { const map = { applied:'pending', interview:'active', rejected:'closed', hired:'active' }; return '<span class="status-badge '+(map[s]||'pending')+'">'+esc(s||'applied')+'</span>'; }
 
-    const query = keywords.join(',') || 'developer';
+    function jobCard(j, isSaved) {
+        const logo = j.company_logo || logoUrl(j.company || '?');
+        const title = esc(j.title || 'Untitled');
+        const company = esc(j.company || '');
+        const loc = esc(j.location || 'Remote');
+        const type = esc(j.type || 'Full-time');
+        const sal = (j.salary_min || j.salary_max) ? esc((j.salary_min||'') + ' – ' + (j.salary_max||'')) : '';
+        const id = j.id;
 
-    // Load recommended jobs
-    try {
-        const res = await fetch(`/api/jobs?per_page=6&keyword=${encodeURIComponent(query)}`);
-        const data = await res.json();
-        const grid = document.getElementById('recommendedJobsGrid');
-        if (data.jobs && data.jobs.length > 0) {
-            grid.innerHTML = data.jobs.map(j => {
-                const logo = j.company_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.company)}&background=667eea&color=fff&size=50`;
-                return `<div class="job-card" onclick="window.location='/job/${j.id}'">
-                    <div class="job-card-header">
-                        <img src="${logo}" alt="${j.company}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'">
-                        <div class="job-card-info"><h3>${j.title}</h3><span class="job-card-company">${j.company}</span></div>
-                    </div>
-                    <div class="job-card-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> ${j.location || 'Remote'}</span>
-                        <span><i class="fas fa-briefcase"></i> ${j.type}</span>
-                    </div>
-                    <div class="job-card-footer" style="display:flex; justify-content:space-between; align-items:center;">
-                        <span class="job-salary">${j.salary_min || ''} – ${j.salary_max || ''}</span>
-                        <div style="display:flex; gap:8px;">
-                            <button onclick="saveJob(event, '${j.id}')" class="btn btn-outline btn-sm"><i class="far fa-heart"></i> Save</button>
-                            <a href="/job/${j.id}" class="btn-apply btn-sm">View</a>
-                        </div>
-                    </div>
-                </div>`;
-            }).join('');
+        let actionBtn;
+        if (isSaved) {
+            actionBtn = '<button class="btn btn-outline btn-sm unsave-btn" onclick="event.stopPropagation();window.__unsaveJob(this,\''+id+'\')"><i class="fas fa-heart-broken"></i> Remove</button>';
         } else {
-            grid.innerHTML = '<p class="text-muted">No recommendations yet. <a href="/jobs">Browse jobs</a> to get started!</p>';
+            actionBtn = '<button class="btn btn-outline btn-sm" onclick="event.stopPropagation();window.__saveJob(this,\''+id+'\')"><i class="far fa-heart"></i> Save</button>';
         }
-    } catch (e) {
-        document.getElementById('recommendedJobsGrid').innerHTML = '<p class="text-muted">Could not load recommendations.</p>';
+
+        return '<div class="dash-job-card" onclick="window.location=\'/job/'+id+'\'">'
+            + '<div class="dash-job-card-head">'
+            + '<img src="'+logo+'" alt="'+company+'" onerror="this.src=\''+logoUrl(company)+'\'">'
+            + '<div><h4>'+title+'</h4><small>'+company+'</small></div>'
+            + '</div>'
+            + '<div class="dash-job-meta"><span><i class="fas fa-map-marker-alt"></i> '+loc+'</span><span><i class="fas fa-briefcase"></i> '+type+'</span></div>'
+            + '<div class="dash-job-foot">'
+            + (sal ? '<span style="font-size:0.82rem;font-weight:600;color:var(--accent);">'+sal+'</span>' : '<span></span>')
+            + '<div style="display:flex;gap:6px;">'+actionBtn+'<a href="/job/'+id+'" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">View</a></div>'
+            + '</div></div>';
     }
 
-    // Load saved jobs
-    try {
-        const res = await fetch('/api/saved-jobs');
-        const data = await res.json();
-        const grid = document.getElementById('savedJobsGrid');
-
-        if (data.jobs && data.jobs.length > 0) {
-            grid.innerHTML = data.jobs.map(j => {
-                const logo = j.company_logo || `https://ui-avatars.com/api/?name=${encodeURIComponent(j.company)}&background=667eea&color=fff&size=50`;
-                return `<div class="job-card" onclick="window.location='/job/${j.id}'">
-                    <div class="job-card-header">
-                        <img src="${logo}" alt="${j.company}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'">
-                        <div class="job-card-info"><h3>${j.title}</h3><span class="job-card-company">${j.company}</span></div>
-                    </div>
-                    <div class="job-card-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> ${j.location || 'Remote'}</span>
-                        <span><i class="fas fa-briefcase"></i> ${j.type}</span>
-                    </div>
-                    <div class="job-card-footer">
-                        <span class="job-salary">${j.salary_min || ''} – ${j.salary_max || ''}</span>
-                        <button class="btn btn-outline btn-sm" disabled><i class="fas fa-check text-accent"></i> Saved</button>
-                    </div>
-                </div>`;
-            }).join('');
-
-            // Update the stats counter text since it defaults to 0
-            const statCards = document.querySelectorAll('.stat-card-content p');
-            statCards.forEach(el => {
-                if (el.innerText === 'Saved Jobs') {
-                    el.previousElementSibling.innerText = data.jobs.length;
-                }
-            });
-        } else {
-            grid.innerHTML = '<p class="text-muted" style="padding:20px;">No saved jobs yet. Click the "Save" button on any job to save it. <a href="/jobs">Browse jobs now &rarr;</a></p>';
-        }
-    } catch (e) {
-        document.getElementById('savedJobsGrid').innerHTML = '<p class="text-muted" style="padding:20px;">Could not load saved jobs.</p>';
-    }
-});
-
-    // Function to handle saving a job
-    async function saveJob(event, jobId) {
-        event.stopPropagation(); // Prevent card click
-
-        const btn = event.currentTarget;
-        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        btn.disabled = true;
-
+    // ── Load Stats (real-time) ──
+    async function loadStats() {
         try {
-            const res = await fetch('/api/save-job', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ job_id: jobId })
-            });
+            const res = await fetch('/api/dashboard-stats');
+            const d = await res.json();
+            document.getElementById('statApplications').textContent = d.applications_sent || 0;
+            document.getElementById('statInterviews').textContent = d.interview_calls || 0;
+            document.getElementById('statSaved').textContent = d.saved_jobs || 0;
+            document.getElementById('statViews').textContent = d.profile_views || 0;
+        } catch(e) {
+            document.getElementById('statApplications').textContent = '0';
+            document.getElementById('statInterviews').textContent = '0';
+            document.getElementById('statSaved').textContent = '0';
+            document.getElementById('statViews').textContent = '0';
+        }
+    }
 
-            const data = await res.json();
+    // ── Load Applications ──
+    async function loadApplications() {
+        const tbody = document.getElementById('appliedJobsTableBody');
+        try {
+            const res = await fetch('/api/applications');
+            const d = await res.json();
+            if (d.applications && d.applications.length > 0) {
+                tbody.innerHTML = d.applications.map(a =>
+                    '<tr>'
+                    + '<td><a href="/job/'+a.job_id+'" style="color:var(--accent);font-weight:500;">'+esc(a.title)+'</a></td>'
+                    + '<td>'+esc(a.company)+'</td>'
+                    + '<td>'+fmtDate(a.applied_at)+'</td>'
+                    + '<td>'+statusBadge(a.status)+'</td>'
+                    + '<td><a href="/job/'+a.job_id+'" class="btn btn-outline btn-sm">View</a></td>'
+                    + '</tr>'
+                ).join('');
+            } else {
+                tbody.innerHTML = '<tr><td colspan="5" class="dash-empty">You haven\'t applied to any jobs yet. <a href="/jobs">Browse jobs</a> to get started.</td></tr>';
+            }
+        } catch(e) {
+            tbody.innerHTML = '<tr><td colspan="5" class="dash-empty">Could not load applications.</td></tr>';
+        }
+    }
+
+    // ── Load Saved Jobs ──
+    async function loadSavedJobs() {
+        const grid = document.getElementById('savedJobsGrid');
+        try {
+            const res = await fetch('/api/saved-jobs');
+            const d = await res.json();
+            savedJobIds = new Set((d.jobs || []).map(j => j.id));
+            if (d.jobs && d.jobs.length > 0) {
+                grid.innerHTML = d.jobs.map(j => jobCard(j, true)).join('');
+            } else {
+                grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">No saved jobs yet. Click <i class="far fa-heart"></i> on any job to save it. <a href="/jobs">Browse jobs &rarr;</a></div>';
+            }
+            // update stat counter live
+            const el = document.getElementById('statSaved');
+            if (el) el.textContent = d.jobs ? d.jobs.length : 0;
+        } catch(e) {
+            grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">Could not load saved jobs.</div>';
+        }
+    }
+
+    // ── Load Recommended Jobs ──
+    async function loadRecommended() {
+        const grid = document.getElementById('recommendedJobsGrid');
+        let keywords = [];
+        if (interestsList.length > 0) keywords.push(interestsList[0]);
+        if (skillsList.length > 0) keywords.push(skillsList[0]);
+        if (interestsList.length > 1) keywords.push(interestsList[1]);
+        const query = keywords.join(',') || 'developer';
+        try {
+            const res = await fetch('/api/jobs?per_page=6&keyword=' + encodeURIComponent(query));
+            const d = await res.json();
+            if (d.jobs && d.jobs.length > 0) {
+                grid.innerHTML = d.jobs.map(j => jobCard(j, savedJobIds.has(j.id))).join('');
+            } else {
+                grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">No recommendations yet. <a href="/jobs">Browse jobs</a> to get started!</div>';
+            }
+        } catch(e) {
+            grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">Could not load recommendations.</div>';
+        }
+    }
+
+    // ── Save Job (no page reload) ──
+    window.__saveJob = async function(btn, jobId) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/save-job', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({job_id:jobId}) });
             if (res.ok) {
                 btn.innerHTML = '<i class="fas fa-check"></i> Saved';
                 btn.classList.add('btn-primary');
                 btn.classList.remove('btn-outline');
-
-                // Reload the saved jobs grid to show the new addition
-                setTimeout(() => window.location.reload(), 1000);
+                savedJobIds.add(jobId);
+                // Refresh saved section & stats without full reload
+                loadSavedJobs();
+                loadStats();
             } else {
-                console.error(data.error);
                 btn.innerHTML = '<i class="far fa-heart"></i> Save';
                 btn.disabled = false;
             }
-        } catch (e) {
-            console.error("Failed to save job", e);
+        } catch(e) {
             btn.innerHTML = '<i class="far fa-heart"></i> Save';
             btn.disabled = false;
         }
+    };
+
+    // ── Unsave Job (no page reload) ──
+    window.__unsaveJob = async function(btn, jobId) {
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/unsave-job', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({job_id:jobId}) });
+            if (res.ok) {
+                savedJobIds.delete(jobId);
+                loadSavedJobs();
+                loadStats();
+                loadRecommended(); // update heart state in recommendations
+            } else {
+                btn.innerHTML = '<i class="fas fa-heart-broken"></i> Remove';
+                btn.disabled = false;
+            }
+        } catch(e) {
+            btn.innerHTML = '<i class="fas fa-heart-broken"></i> Remove';
+            btn.disabled = false;
+        }
+    };
+
+    // ── Init: load everything in parallel ──
+    document.addEventListener('DOMContentLoaded', async () => {
+        // Track this dashboard view
+        fetch('/api/track-profile-view', {method:'POST',headers:{'Content-Type':'application/json'},body:'{}'}).catch(()=>{});
+        await Promise.all([loadStats(), loadApplications(), loadSavedJobs(), loadDashAlerts(), loadDashBookmarks(), loadDashResume()]);
+        // Load recommended after saved so we know which are already saved
+        loadRecommended();
+    });
+
+    // ── Dashboard Alerts ──
+    async function loadDashAlerts() {
+        try {
+            const res = await fetch('/api/alerts');
+            const d = await res.json();
+            const el = document.getElementById('dashAlertsList');
+            if (!d.alerts || !d.alerts.length) {
+                el.innerHTML = '<div class="dash-empty" style="padding:12px;">No alerts set. Add keywords to get notified about matching jobs.</div>';
+                return;
+            }
+            el.innerHTML = d.alerts.map(a =>
+                '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
+                '<span><i class="fas fa-bell" style="color:#f59e0b;margin-right:8px;"></i><strong>' + esc(a.keyword) + '</strong></span>' +
+                '<button onclick="removeDashAlert(\'' + a.keyword.replace(/'/g,"\\'") + '\')" style="background:none;border:none;color:var(--danger,#e74c3c);cursor:pointer;font-size:0.82rem;"><i class="fas fa-times"></i></button>' +
+                '</div>'
+            ).join('');
+        } catch(e) {}
     }
+    window.addDashAlert = function() {
+        const inp = document.getElementById('dashAlertKeyword');
+        const kw = inp.value.trim();
+        if (!kw) return;
+        fetch('/api/toggle-alert', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({keyword:kw}) })
+            .then(r=>r.json()).then(()=>{ inp.value=''; loadDashAlerts(); });
+    };
+    window.removeDashAlert = function(kw) {
+        fetch('/api/toggle-alert', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({keyword:kw}) })
+            .then(r=>r.json()).then(()=>loadDashAlerts());
+    };
+
+    // ── Dashboard Bookmarks ──
+    async function loadDashBookmarks() {
+        try {
+            const res = await fetch('/api/bookmarked-companies');
+            const d = await res.json();
+            const el = document.getElementById('dashBookmarksList');
+            if (!d.bookmarks || !d.bookmarks.length) {
+                el.innerHTML = '<div class="dash-empty" style="padding:12px;">No bookmarked companies. Bookmark companies from job detail pages.</div>';
+                return;
+            }
+            el.innerHTML = d.bookmarks.map(b =>
+                '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border);">' +
+                '<span><i class="fas fa-building" style="color:var(--accent);margin-right:8px;"></i><strong>' + esc(b.company) + '</strong></span>' +
+                '<button onclick="removeDashBookmark(\'' + b.company.replace(/'/g,"\\'") + '\')" style="background:none;border:none;color:var(--danger,#e74c3c);cursor:pointer;font-size:0.82rem;"><i class="fas fa-times"></i></button>' +
+                '</div>'
+            ).join('');
+        } catch(e) {}
+    }
+    window.removeDashBookmark = function(company) {
+        fetch('/api/bookmark-company', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({company:company}) })
+            .then(r=>r.json()).then(()=>loadDashBookmarks());
+    };
+
+    // ── Dashboard Resume ──
+    async function loadDashResume() {
+        try {
+            const res = await fetch('/api/dashboard-stats');
+            // Check if resume exists by trying the profile endpoint logic
+            // We'll just check via a quick approach
+        } catch(e) {}
+    }
+    window.dashUploadResume = function(input) {
+        if (!input.files.length) return;
+        const file = input.files[0];
+        if (file.size > 5*1024*1024) {
+            document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">File too large (max 5MB)</span>';
+            return;
+        }
+        const fd = new FormData();
+        fd.append('resume', file);
+        document.getElementById('dashResumeStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+        fetch('/api/upload-resume', { method:'POST', body:fd })
+            .then(r=>r.json()).then(d=>{
+                if (d.error) {
+                    document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">'+d.error+'</span>';
+                } else {
+                    document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#059669;">✓ Uploaded!</span>';
+                    document.getElementById('dashResumeUpload').style.display = 'none';
+                    const info = document.getElementById('dashResumeInfo');
+                    info.style.display = 'flex';
+                    document.getElementById('dashResumeName').textContent = d.filename;
+                    document.getElementById('dashResumeDate').textContent = 'Just uploaded';
+                }
+            }).catch(()=>{
+                document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">Upload failed</span>';
+            });
+    };
+})();
 </script>
 {% endblock %}

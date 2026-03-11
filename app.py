@@ -12,8 +12,9 @@ import logging
 import threading
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
 from functools import wraps
-from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash
+from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory
 from flask_cors import CORS
 
 # ── Vercel detection ───────────────────────────────────────────────────
@@ -43,6 +44,14 @@ SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
 TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
+# Upload folder for resumes
+UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
+os.makedirs(UPLOAD_DIR, exist_ok=True)
+ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
 # Database Setup - Supabase
 SUPABASE_URL = os.environ.get("SUPABASE_URL", "https://yerecpvwemiuexucboee.supabase.co")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_eGUWBISpXTHlHQHO2LYhSA_E1bQB4ou")
@@ -67,7 +76,7 @@ def _supabase_save_jobs(kind: str, data: dict):
         logger.warning(f"⚠️  Supabase save ({kind}) failed: {e}")
 
 
-def _supabase_load_jobs(kind: str) -> dict | None:
+def _supabase_load_jobs(kind: str):
     """Load scraped jobs JSON from Supabase `scraped_data` table."""
     try:
         resp = supabase.table("scraped_data").select("data").eq("kind", kind).execute()
@@ -481,6 +490,10 @@ if not IS_VERCEL:
 # PAGE ROUTES
 # ═══════════════════════════════════════════════════════════════════════
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
 @app.route("/")
 def home():
     data = load_jobs()
@@ -504,10 +517,16 @@ def jobs_page():
     return render_template("jobs.html")
 
 
-@app.route("/job/<int:job_id>")
+@app.route("/job/<job_id>")
 def job_detail(job_id):
     """Job detail page — searches main, India, and TN jobs by ID.
     Accepts optional ?source= param to narrow the search."""
+    # Normalise: try int conversion for files that use numeric IDs
+    try:
+        job_id_int = int(job_id)
+    except (ValueError, TypeError):
+        job_id_int = None
+
     source_hint = request.args.get("source", "").lower()
 
     # Search order based on source hint
@@ -523,7 +542,7 @@ def job_detail(job_id):
     for loader, src_name in search_order:
         data = loader()
         jobs = data.get("jobs", [])
-        job = next((j for j in jobs if j.get("id") == job_id), None)
+        job = next((j for j in jobs if str(j.get("id")) == str(job_id) or j.get("id") == job_id_int), None)
         if job:
             job["_source_db"] = src_name
             break
@@ -607,7 +626,7 @@ def signup():
         if existing.data:
             return render_template("signup.html", error="Email already exists.")
             
-        hashed_pw = generate_password_hash(password)
+        hashed_pw = generate_password_hash(password, method="pbkdf2:sha256")
         try:
             new_user = supabase.table("users").insert({
                 "name": name,
@@ -689,6 +708,355 @@ def privacy():
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# PROFILE, RESUME, ALERTS, BOOKMARKS, COMMENTS
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/profile", methods=["GET", "POST"])
+@login_required
+def profile():
+    uid = session['user_id']
+    response = supabase.table("users").select("*").eq("id", uid).execute()
+    if not response.data:
+        session.clear()
+        return redirect(url_for('login'))
+    user = response.data[0]
+
+    if request.method == "POST":
+        name = request.form.get("name", user['name'])
+        skills = request.form.get("skills", "")
+        interests = request.form.getlist("interests") or []
+        experience = request.form.get("experience_level", "")
+        bio = request.form.get("bio", "")
+        linkedin = request.form.get("linkedin", "")
+        github = request.form.get("github", "")
+        phone = request.form.get("phone", "")
+
+        update_data = {
+            "name": name,
+            "skills": skills,
+            "interests": json.dumps(interests) if isinstance(interests, list) else interests,
+            "experience_level": experience,
+        }
+        # Store extra fields in scraped_data (flexible storage)
+        extra = {"bio": bio, "linkedin": linkedin, "github": github, "phone": phone}
+        try:
+            supabase.table("users").update(update_data).eq("id", uid).execute()
+            supabase.table("scraped_data").upsert({
+                "kind": f"user_profile_{uid}",
+                "data": extra,
+                "updated_at": datetime.now().isoformat(),
+            }).execute()
+            session['user_name'] = name
+            flash("Profile updated successfully!", "success")
+        except Exception as e:
+            logger.error(f"Profile update error: {e}")
+            flash("Failed to update profile.", "error")
+        return redirect(url_for('profile'))
+
+    # Load extra profile data
+    extra = {}
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{uid}").execute()
+        if resp.data:
+            extra = resp.data[0].get("data", {})
+    except Exception:
+        pass
+
+    # Parse skills/interests
+    try:
+        user['skills_list'] = json.loads(user.get('skills') or '[]')
+    except Exception:
+        user['skills_list'] = [s.strip() for s in str(user.get('skills', '')).split(',') if s.strip()]
+    try:
+        user['interests_list'] = json.loads(user.get('interests') or '[]')
+    except Exception:
+        user['interests_list'] = [i.strip() for i in str(user.get('interests', '')).split(',') if i.strip()]
+
+    # Resume info
+    resume_info = None
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_resume_{uid}").execute()
+        if resp.data:
+            resume_info = resp.data[0].get("data", {})
+    except Exception:
+        pass
+
+    # Stats
+    stats = {"applications": 0, "saved": 0, "profile_views": 0}
+    try:
+        saved = supabase.table("saved_jobs").select("id", count="exact").eq("user_id", uid).execute()
+        stats["saved"] = saved.count if saved.count is not None else len(saved.data or [])
+    except Exception:
+        pass
+    try:
+        apps = _get_user_applications(uid)
+        stats["applications"] = len(apps)
+    except Exception:
+        pass
+    try:
+        views = _get_profile_views(uid)
+        stats["profile_views"] = views.get("count", 0)
+    except Exception:
+        pass
+
+    return render_template("profile.html", user=user, extra=extra, resume_info=resume_info, stats=stats)
+
+
+@app.route("/api/upload-resume", methods=["POST"])
+@login_required
+def upload_resume():
+    if 'resume' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    f = request.files['resume']
+    if f.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    if not allowed_file(f.filename):
+        return jsonify({"error": "Only PDF, DOC, DOCX files allowed"}), 400
+
+    uid = session['user_id']
+    filename = secure_filename(f"{uid}_{f.filename}")
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    f.save(filepath)
+
+    resume_data = {
+        "filename": f.filename,
+        "stored_as": filename,
+        "uploaded_at": datetime.now().isoformat(),
+        "size": os.path.getsize(filepath),
+    }
+    try:
+        supabase.table("scraped_data").upsert({
+            "kind": f"user_resume_{uid}",
+            "data": resume_data,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+    except Exception as e:
+        logger.error(f"Resume meta save error: {e}")
+
+    return jsonify({"status": "success", "filename": f.filename})
+
+
+@app.route("/api/delete-resume", methods=["POST"])
+@login_required
+def delete_resume():
+    uid = session['user_id']
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_resume_{uid}").execute()
+        if resp.data:
+            stored = resp.data[0]["data"].get("stored_as", "")
+            filepath = os.path.join(UPLOAD_DIR, stored)
+            if stored and os.path.exists(filepath):
+                os.remove(filepath)
+            supabase.table("scraped_data").delete().eq("kind", f"user_resume_{uid}").execute()
+        return jsonify({"status": "deleted"})
+    except Exception as e:
+        logger.error(f"Resume delete error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/toggle-alert", methods=["POST"])
+@login_required
+def toggle_alert():
+    uid = session['user_id']
+    data = request.json or {}
+    keyword = data.get("keyword", "").strip()
+    if not keyword:
+        return jsonify({"error": "Keyword required"}), 400
+
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_alerts_{uid}").execute()
+        alerts = resp.data[0]["data"] if resp.data else []
+
+        existing = [a for a in alerts if a.get("keyword", "").lower() == keyword.lower()]
+        if existing:
+            alerts = [a for a in alerts if a.get("keyword", "").lower() != keyword.lower()]
+            action = "removed"
+        else:
+            alerts.append({"keyword": keyword, "created_at": datetime.now().isoformat(), "active": True})
+            action = "added"
+
+        supabase.table("scraped_data").upsert({
+            "kind": f"user_alerts_{uid}",
+            "data": alerts,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+        return jsonify({"status": action, "alerts": alerts})
+    except Exception as e:
+        logger.error(f"Alert toggle error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/alerts", methods=["GET"])
+@login_required
+def get_alerts():
+    uid = session['user_id']
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_alerts_{uid}").execute()
+        alerts = resp.data[0]["data"] if resp.data else []
+        return jsonify({"alerts": alerts})
+    except Exception as e:
+        return jsonify({"alerts": []})
+
+
+@app.route("/api/bookmark-company", methods=["POST"])
+@login_required
+def bookmark_company():
+    uid = session['user_id']
+    data = request.json or {}
+    company = data.get("company", "").strip()
+    if not company:
+        return jsonify({"error": "Company name required"}), 400
+
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_bookmarks_{uid}").execute()
+        bookmarks = resp.data[0]["data"] if resp.data else []
+
+        existing = [b for b in bookmarks if b.get("company", "").lower() == company.lower()]
+        if existing:
+            bookmarks = [b for b in bookmarks if b.get("company", "").lower() != company.lower()]
+            action = "removed"
+        else:
+            bookmarks.append({"company": company, "created_at": datetime.now().isoformat()})
+            action = "added"
+
+        supabase.table("scraped_data").upsert({
+            "kind": f"user_bookmarks_{uid}",
+            "data": bookmarks,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+        return jsonify({"status": action, "bookmarks": bookmarks})
+    except Exception as e:
+        logger.error(f"Bookmark error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/bookmarked-companies", methods=["GET"])
+@login_required
+def get_bookmarked_companies():
+    uid = session['user_id']
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_bookmarks_{uid}").execute()
+        bookmarks = resp.data[0]["data"] if resp.data else []
+        return jsonify({"bookmarks": bookmarks})
+    except Exception as e:
+        return jsonify({"bookmarks": []})
+
+
+@app.route("/api/job-comment", methods=["POST"])
+@login_required
+def post_comment():
+    uid = session['user_id']
+    data = request.json or {}
+    job_id = str(data.get("job_id", ""))
+    text = data.get("text", "").strip()
+    if not job_id or not text:
+        return jsonify({"error": "Job ID and comment text required"}), 400
+    if len(text) > 500:
+        return jsonify({"error": "Comment too long (max 500 chars)"}), 400
+
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"job_comments_{job_id}").execute()
+        comments = resp.data[0]["data"] if resp.data else []
+
+        comments.append({
+            "user_id": uid,
+            "user_name": session.get('user_name', 'Anonymous'),
+            "text": text,
+            "created_at": datetime.now().isoformat(),
+        })
+
+        supabase.table("scraped_data").upsert({
+            "kind": f"job_comments_{job_id}",
+            "data": comments,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+        return jsonify({"status": "posted", "comment": comments[-1]})
+    except Exception as e:
+        logger.error(f"Comment error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/job-comments/<job_id>", methods=["GET"])
+def get_comments(job_id):
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"job_comments_{job_id}").execute()
+        comments = resp.data[0]["data"] if resp.data else []
+        return jsonify({"comments": comments})
+    except Exception:
+        return jsonify({"comments": []})
+
+
+@app.route("/api/personalized-guidance", methods=["GET"])
+@login_required
+def personalized_guidance():
+    uid = session['user_id']
+    try:
+        user_resp = supabase.table("users").select("skills,interests,experience_level").eq("id", uid).execute()
+        user = user_resp.data[0] if user_resp.data else {}
+
+        skills_raw = user.get('skills', '')
+        try:
+            skills = json.loads(skills_raw) if skills_raw else []
+        except Exception:
+            skills = [s.strip() for s in skills_raw.split(',') if s.strip()]
+
+        interests_raw = user.get('interests', '')
+        try:
+            interests = json.loads(interests_raw) if interests_raw else []
+        except Exception:
+            interests = [i.strip() for i in interests_raw.split(',') if i.strip()]
+
+        experience = user.get('experience_level', '')
+
+        # Generate personalized suggestions based on user profile
+        suggestions = []
+        skill_set = set(s.lower() for s in skills)
+        interest_set = set(i.lower() for i in interests)
+
+        career_map = {
+            'python': {'path': 'Data Science / AI / Backend', 'next': ['Machine Learning', 'Django/Flask', 'Data Engineering'], 'resources': ['Kaggle', 'fast.ai', 'CS50 AI']},
+            'javascript': {'path': 'Full Stack / Frontend', 'next': ['React/Next.js', 'Node.js', 'TypeScript'], 'resources': ['freeCodeCamp', 'JavaScript.info', 'Scrimba']},
+            'java': {'path': 'Enterprise / Android', 'next': ['Spring Boot', 'Microservices', 'Android Dev'], 'resources': ['Baeldung', 'NPTEL Java', 'Udemy']},
+            'react': {'path': 'Frontend Engineering', 'next': ['TypeScript', 'Next.js', 'Testing'], 'resources': ['React.dev', 'Kent C. Dodds', 'Vercel Docs']},
+            'machine learning': {'path': 'AI/ML Engineering', 'next': ['Deep Learning', 'NLP', 'MLOps'], 'resources': ['Andrew Ng Coursera', 'fast.ai', 'Papers With Code']},
+            'data science': {'path': 'Data Analytics / ML', 'next': ['Statistics', 'SQL', 'Visualization'], 'resources': ['Kaggle Learn', 'DataCamp', 'NPTEL']},
+            'cloud': {'path': 'Cloud / DevOps', 'next': ['AWS/Azure/GCP', 'Kubernetes', 'IaC'], 'resources': ['AWS Free Tier', 'KodeKloud', 'Cloud Guru']},
+            'sql': {'path': 'Data Engineering / Analytics', 'next': ['Python', 'ETL Pipelines', 'BI Tools'], 'resources': ['Mode Analytics', 'SQLZoo', 'DataLemur']},
+        }
+
+        for skill in skills:
+            sl = skill.lower().strip()
+            for key, info in career_map.items():
+                if key in sl:
+                    suggestions.append({
+                        'based_on': skill,
+                        'career_path': info['path'],
+                        'learn_next': info['next'],
+                        'resources': info['resources'],
+                    })
+                    break
+
+        # Job recommendations count based on skills
+        all_jobs = _load_all_jobs()
+        matching_jobs = 0
+        for job in all_jobs:
+            job_text = (json.dumps(job.get('skills', [])) + ' ' + job.get('title', '') + ' ' + job.get('description', '')).lower()
+            if any(s.lower() in job_text for s in skills[:5]):
+                matching_jobs += 1
+
+        return jsonify({
+            "suggestions": suggestions[:5],
+            "matching_jobs": matching_jobs,
+            "experience": experience,
+            "skills": skills,
+            "interests": interests,
+        })
+    except Exception as e:
+        logger.error(f"Personalized guidance error: {e}")
+        return jsonify({"suggestions": [], "matching_jobs": 0})
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -2074,14 +2442,33 @@ def api_scheduler_status():
 
 @app.errorhandler(404)
 def not_found(e):
-    return """
-    <html><head><title>404 - Not Found</title>
+    logged_in = 'user_id' in session
+    if logged_in:
+        cta = '<a href="/" class="btn btn-primary" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#0f4c75;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Go Home</a>'
+    else:
+        cta = (
+            '<p style="color:var(--text-secondary,#546478);margin:0 0 20px;font-size:1.05rem;">Login to access full features and explore all opportunities.</p>'
+            '<div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">'
+            '<a href="/login" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#0f4c75;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-sign-in-alt"></i> Login to Continue</a>'
+            '<a href="/signup" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:transparent;color:#0f4c75;border:2px solid #0f4c75;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-user-plus"></i> Sign Up Free</a>'
+            '</div>'
+            '<p style="margin-top:16px;"><a href="/" style="color:#3282b8;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Back to Home</a></p>'
+        )
+    return f"""
+    <html><head><title>CareerPath Pro</title>
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    </head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;">
-    <div><h1 style="font-size:5rem;color:#667eea;">404</h1><h2>Page Not Found</h2>
-    <p style="color:#5f6368;margin:12px 0 24px;">The page you're looking for doesn't exist.</p>
-    <a href="/" class="btn btn-primary"><i class="fas fa-home"></i> Go Home</a></div>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:var(--bg-primary,#fff);font-family:'Inter',sans-serif;">
+    <div style="max-width:480px;padding:40px;">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0f4c75,#3282b8);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+            <i class="fas fa-lock" style="color:#fff;font-size:2rem;"></i>
+        </div>
+        <h1 style="font-size:1.8rem;color:var(--text-primary,#1a2332);margin:0 0 8px;">Login to Access Full Features</h1>
+        <p style="color:var(--text-secondary,#546478);margin:0 0 24px;">This page requires an account. Sign in to unlock jobs, dashboards, career tools and more.</p>
+        {cta}
+    </div>
     </body></html>
     """, 404
 
@@ -2091,6 +2478,28 @@ application = app
 
 # ── Run (local dev only – Vercel uses the `app` WSGI object) ──────────
 # ── Student Capabilities ──────────────────────────────────────────────
+
+def _load_all_jobs():
+    """Load all job JSON files from data directory and seed files."""
+    all_jobs = []
+    for fpath in [JOBS_FILE, TN_JOBS_FILE, INDIA_JOBS_FILE, SEED_FILE, TN_SEED_FILE, INDIA_SEED_FILE]:
+        try:
+            with open(fpath, 'r', encoding='utf-8') as f:
+                raw = json.load(f)
+                if isinstance(raw, dict) and 'jobs' in raw:
+                    all_jobs.extend(raw['jobs'])
+                elif isinstance(raw, list):
+                    all_jobs.extend(raw)
+        except (FileNotFoundError, json.JSONDecodeError):
+            pass
+    # Deduplicate by id
+    seen = {}
+    for j in all_jobs:
+        jid = j.get('id')
+        if jid and jid not in seen:
+            seen[jid] = j
+    return list(seen.values())
+
 
 @app.route("/api/save-job", methods=["POST"])
 @login_required
@@ -2103,8 +2512,7 @@ def save_job():
         return jsonify({"error": "Job ID required"}), 400
         
     try:
-        # Check if already saved
-        existing = supabase.table("saved_jobs").select("*").eq("user_id", session['user_id']).eq("job_id", job_id).execute()
+        existing = supabase.table("saved_jobs").select("id").eq("user_id", session['user_id']).eq("job_id", job_id).execute()
         if existing.data:
             return jsonify({"status": "already_saved"})
             
@@ -2117,49 +2525,181 @@ def save_job():
         logger.error(f"Error saving job: {e}")
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/unsave-job", methods=["POST"])
+@login_required
+def unsave_job():
+    """Remove a saved job for the logged-in user."""
+    data = request.json
+    job_id = data.get("job_id")
+    if not job_id:
+        return jsonify({"error": "Job ID required"}), 400
+    try:
+        supabase.table("saved_jobs").delete().eq("user_id", session['user_id']).eq("job_id", job_id).execute()
+        return jsonify({"status": "removed"})
+    except Exception as e:
+        logger.error(f"Error unsaving job: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
 @app.route("/api/saved-jobs", methods=["GET"])
 @login_required
 def get_saved_jobs():
     """Get all saved job details for the logged-in user."""
     try:
-        # Fetch saved job IDs from Supabase
         response = supabase.table("saved_jobs").select("job_id").eq("user_id", session['user_id']).execute()
         saved_job_ids = [row['job_id'] for row in response.data]
         
         if not saved_job_ids:
             return jsonify({"jobs": []})
-            
-        # Cross reference with scraped json data
-        all_jobs = []
-        try:
-            with open(INDIA_SEED_FILE, 'r', encoding='utf-8') as f:
-                all_jobs.extend(json.load(f))
-        except FileNotFoundError:
-            pass
-            
-        try:
-            with open(TN_SEED_FILE, 'r', encoding='utf-8') as f:
-                all_jobs.extend(json.load(f))
-        except FileNotFoundError:
-            pass
-            
-        try:
-            with open(SEED_FILE, 'r', encoding='utf-8') as f:
-                all_jobs.extend(json.load(f))
-        except FileNotFoundError:
-            pass
-            
-        # Filter matching jobs
-        saved_jobs_data = [job for job in all_jobs if job.get('id') in saved_job_ids]
         
-        # Remove duplicates
-        unique_jobs = {job['id']: job for job in saved_jobs_data}.values()
+        all_jobs = _load_all_jobs()
+        saved_set = set(saved_job_ids)
+        saved_jobs_data = [j for j in all_jobs if str(j.get('id')) in saved_set]
         
-        return jsonify({"jobs": list(unique_jobs)})
-        
+        return jsonify({"jobs": saved_jobs_data})
     except Exception as e:
         logger.error(f"Error fetching saved jobs: {e}")
         return jsonify({"error": str(e)}), 500
+
+
+def _get_user_applications(uid):
+    """Load applications list from scraped_data for a user."""
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_apps_{uid}").execute()
+        if resp.data and resp.data[0].get("data"):
+            return resp.data[0]["data"]
+    except Exception:
+        pass
+    return []
+
+
+def _save_user_applications(uid, apps):
+    """Persist applications list to scraped_data for a user."""
+    supabase.table("scraped_data").upsert({
+        "kind": f"user_apps_{uid}",
+        "data": apps,
+        "updated_at": datetime.now().isoformat(),
+    }).execute()
+
+
+def _get_profile_views(uid):
+    """Load profile view count from scraped_data for a user."""
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"profile_views_{uid}").execute()
+        if resp.data and resp.data[0].get("data"):
+            return resp.data[0]["data"]
+    except Exception:
+        pass
+    return {"count": 0, "viewers": []}
+
+
+def _save_profile_views(uid, views_data):
+    """Persist profile views data to scraped_data."""
+    supabase.table("scraped_data").upsert({
+        "kind": f"profile_views_{uid}",
+        "data": views_data,
+        "updated_at": datetime.now().isoformat(),
+    }).execute()
+
+
+@app.route("/api/apply-job", methods=["POST"])
+@login_required
+def apply_job():
+    """Record that the user applied for a job."""
+    data = request.json
+    job_id = str(data.get("job_id", ""))
+    if not job_id:
+        return jsonify({"error": "Job ID required"}), 400
+    try:
+        uid = session['user_id']
+        apps = _get_user_applications(uid)
+        # Check if already applied
+        if any(a['job_id'] == job_id for a in apps):
+            return jsonify({"status": "already_applied"})
+        apps.append({
+            "job_id": job_id,
+            "status": "applied",
+            "created_at": datetime.now().isoformat(),
+        })
+        _save_user_applications(uid, apps)
+        return jsonify({"status": "success"})
+    except Exception as e:
+        logger.error(f"Error applying to job: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/applications", methods=["GET"])
+@login_required
+def get_applications():
+    """Get all applications with job details for the logged-in user."""
+    try:
+        uid = session['user_id']
+        apps = _get_user_applications(uid)
+
+        job_ids = {a['job_id'] for a in apps}
+        all_jobs = _load_all_jobs()
+        jobs_map = {str(j['id']): j for j in all_jobs if str(j.get('id')) in job_ids}
+
+        result = []
+        for a in reversed(apps):  # newest first
+            job = jobs_map.get(a['job_id'], {})
+            result.append({
+                "job_id": a['job_id'],
+                "status": a.get('status', 'applied'),
+                "applied_at": a.get('created_at', ''),
+                "title": job.get('title', 'Unknown Position'),
+                "company": job.get('company', 'Unknown Company'),
+                "location": job.get('location', ''),
+            })
+        return jsonify({"applications": result})
+    except Exception as e:
+        logger.error(f"Error fetching applications: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/track-profile-view", methods=["POST"])
+@login_required
+def track_profile_view():
+    """Increment profile view count when dashboard is loaded."""
+    uid = session['user_id']
+    try:
+        views = _get_profile_views(uid)
+        views["count"] = views.get("count", 0) + 1
+        _save_profile_views(uid, views)
+        return jsonify({"views": views["count"]})
+    except Exception as e:
+        logger.error(f"Error tracking profile view: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/dashboard-stats", methods=["GET"])
+@login_required
+def dashboard_stats():
+    """Return real counts for dashboard stat cards."""
+    uid = session['user_id']
+    stats = {"applications_sent": 0, "interview_calls": 0, "saved_jobs": 0, "profile_views": 0}
+    
+    try:
+        saved = supabase.table("saved_jobs").select("id", count="exact").eq("user_id", uid).execute()
+        stats["saved_jobs"] = saved.count if saved.count is not None else len(saved.data or [])
+    except Exception as e:
+        logger.warning(f"saved_jobs count failed: {e}")
+    
+    try:
+        apps = _get_user_applications(uid)
+        stats["applications_sent"] = len(apps)
+        stats["interview_calls"] = sum(1 for a in apps if a.get("status") == "interview")
+    except Exception as e:
+        logger.warning(f"applications count failed: {e}")
+    
+    try:
+        views = _get_profile_views(uid)
+        stats["profile_views"] = views.get("count", 0)
+    except Exception as e:
+        logger.warning(f"profile views count failed: {e}")
+    
+    return jsonify(stats)
 
 
 if __name__ == "__main__":

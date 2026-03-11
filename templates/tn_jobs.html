@@ -725,7 +725,7 @@ function renderTNJobCard(job) {
     var skills = (job.skills||[]).slice(0, 5).map(function(s) { return '<span class="tn-skill-tag">' + esc(s) + '</span>'; }).join('');
     var cityBadge = job.location_city ? '<span style="background:#e8f5e9;color:#2e7d32;font-size:.65rem;padding:2px 8px;border-radius:8px;margin-left:6px"><i class="fas fa-map-marker-alt"></i> ' + esc(job.location_city) + '</span>' : '';
 
-    return '<div class="tn-job-card" onclick="window.location=\'/job/' + job.id + '\'">'
+    return '<div class="tn-job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
         + '<div class="tn-job-header">'
         +   '<img src="' + logo + '" alt="' + esc(job.company||'') + '" class="tn-job-logo" onerror="this.src=\'' + fallback + '\'">'
         +   '<div class="tn-job-info"><h3>' + esc(job.title||'Untitled') + cityBadge + '</h3>'
@@ -741,10 +741,39 @@ function renderTNJobCard(job) {
         +   '<div><span class="tn-salary">' + salary + '</span> ' + posted + '</div>'
         +   '<div class="tn-job-actions">'
         +     '<span class="tn-source-badge" style="background:'+clr+'">'+esc(job.source||'Portal')+'</span>'
-        +     '<button class="tn-save-btn" onclick="event.stopPropagation();this.innerHTML=this.innerHTML.includes(\'far\')?\'<i class=\\\'fas fa-heart\\\' style=\\\'color:#e74c3c\\\'></i>\':\'<i class=\\\'far fa-heart\\\'></i>\'" title="Save"><i class="far fa-heart"></i></button>'
-        +     '<a href="'+esc(job.apply_url||'#')+'" class="tn-apply-btn" target="_blank" onclick="event.stopPropagation()"><i class="fas fa-external-link-alt"></i> Apply</a>'
+        +     '<button class="tn-save-btn" onclick="event.stopPropagation();tnSaveJob(this,\''+job.id+'\')" title="Save"><i class="far fa-heart"></i></button>'
+        +     '<a href="'+esc(job.apply_url||'#')+'" class="tn-apply-btn" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Sign in to track your job applications.\',event);return false;}tnTrackApply(\''+job.id+'\')"><i class="fas fa-external-link-alt"></i> Apply</a>'
         +   '</div>'
         + '</div></div>';
+}
+
+function tnTrackApply(jobId) {
+    if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications.'); return; }
+    fetch('/api/apply-job', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: String(jobId)})
+    }).catch(function(){});
+}
+
+async function tnSaveJob(btn, jobId) {
+    if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        var res = await fetch('/api/save-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: String(jobId)})
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i>';
+            btn.title = 'Saved';
+        } else {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+    }
 }
 
 /* ================================================================
