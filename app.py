@@ -49,6 +49,35 @@ SUPABASE_KEY = os.environ.get("SUPABASE_KEY", "sb_publishable_eGUWBISpXTHlHQHO2L
 
 supabase: Client = create_client(SUPABASE_URL, SUPABASE_KEY)
 
+
+# ── Supabase Jobs Persistence (for Vercel – /tmp is ephemeral) ────────
+def _supabase_save_jobs(kind: str, data: dict):
+    """
+    Upsert scraped jobs JSON into Supabase `scraped_data` table.
+    Table schema:  kind TEXT PRIMARY KEY, data JSONB, updated_at TIMESTAMPTZ
+    """
+    try:
+        supabase.table("scraped_data").upsert({
+            "kind": kind,
+            "data": data,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+        logger.info(f"☁️  Saved {kind} to Supabase ({len(data.get('jobs', []))} jobs)")
+    except Exception as e:
+        logger.warning(f"⚠️  Supabase save ({kind}) failed: {e}")
+
+
+def _supabase_load_jobs(kind: str) -> dict | None:
+    """Load scraped jobs JSON from Supabase `scraped_data` table."""
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", kind).execute()
+        if resp.data:
+            return resp.data[0]["data"]
+    except Exception as e:
+        logger.warning(f"⚠️  Supabase load ({kind}) failed: {e}")
+    return None
+
+
 # ── Authentication Helper ──────────────────────────────────────────────
 def login_required(f):
     @wraps(f)
@@ -61,17 +90,26 @@ def login_required(f):
 # ── Helpers ────────────────────────────────────────────────────────────
 
 def load_jobs():
-    """Load cached jobs from JSON file, falling back to seed on Vercel."""
+    """Load cached jobs from JSON file, falling back to Supabase then seed on Vercel."""
     if os.path.exists(JOBS_FILE):
         with open(JOBS_FILE, "r") as f:
             return json.load(f)
-    # On Vercel cold-start: copy seed file to /tmp
-    if IS_VERCEL and os.path.exists(SEED_FILE):
-        os.makedirs(DATA_DIR, exist_ok=True)
-        shutil.copy2(SEED_FILE, JOBS_FILE)
-        logger.info("📦 Copied seed jobs.json to /tmp for Vercel cold-start")
-        with open(JOBS_FILE, "r") as f:
-            return json.load(f)
+    # On Vercel: try Supabase first (persisted from last scrape)
+    if IS_VERCEL:
+        sb_data = _supabase_load_jobs("jobs")
+        if sb_data:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            with open(JOBS_FILE, "w") as f:
+                json.dump(sb_data, f)
+            logger.info("☁️  Loaded jobs from Supabase → /tmp")
+            return sb_data
+        # Fallback to seed file
+        if os.path.exists(SEED_FILE):
+            os.makedirs(DATA_DIR, exist_ok=True)
+            shutil.copy2(SEED_FILE, JOBS_FILE)
+            logger.info("📦 Copied seed jobs.json to /tmp for Vercel cold-start")
+            with open(JOBS_FILE, "r") as f:
+                return json.load(f)
     return {"jobs": [], "last_updated": None}
 
 
@@ -80,19 +118,29 @@ def load_tn_jobs():
     if os.path.exists(TN_JOBS_FILE):
         with open(TN_JOBS_FILE, "r") as f:
             return json.load(f)
-    if IS_VERCEL and os.path.exists(TN_SEED_FILE):
-        os.makedirs(DATA_DIR, exist_ok=True)
-        shutil.copy2(TN_SEED_FILE, TN_JOBS_FILE)
-        logger.info("📦 Copied TN seed to /tmp")
-        with open(TN_JOBS_FILE, "r") as f:
-            return json.load(f)
+    if IS_VERCEL:
+        sb_data = _supabase_load_jobs("tn_jobs")
+        if sb_data:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            with open(TN_JOBS_FILE, "w") as f:
+                json.dump(sb_data, f)
+            logger.info("☁️  Loaded TN jobs from Supabase → /tmp")
+            return sb_data
+        if os.path.exists(TN_SEED_FILE):
+            os.makedirs(DATA_DIR, exist_ok=True)
+            shutil.copy2(TN_SEED_FILE, TN_JOBS_FILE)
+            logger.info("📦 Copied TN seed to /tmp")
+            with open(TN_JOBS_FILE, "r") as f:
+                return json.load(f)
     return {"jobs": [], "last_updated": None, "region": "Tamil Nadu & Pondicherry"}
 
 
 def save_tn_jobs(data):
-    """Persist Tamil Nadu jobs to JSON file."""
+    """Persist Tamil Nadu jobs to JSON file (+ Supabase on Vercel)."""
     with open(TN_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    if IS_VERCEL:
+        _supabase_save_jobs("tn_jobs", data)
 
 
 def load_india_jobs():
@@ -100,25 +148,37 @@ def load_india_jobs():
     if os.path.exists(INDIA_JOBS_FILE):
         with open(INDIA_JOBS_FILE, "r") as f:
             return json.load(f)
-    if IS_VERCEL and os.path.exists(INDIA_SEED_FILE):
-        os.makedirs(DATA_DIR, exist_ok=True)
-        shutil.copy2(INDIA_SEED_FILE, INDIA_JOBS_FILE)
-        logger.info("📦 Copied India seed to /tmp")
-        with open(INDIA_JOBS_FILE, "r") as f:
-            return json.load(f)
+    if IS_VERCEL:
+        sb_data = _supabase_load_jobs("india_jobs")
+        if sb_data:
+            os.makedirs(DATA_DIR, exist_ok=True)
+            with open(INDIA_JOBS_FILE, "w") as f:
+                json.dump(sb_data, f)
+            logger.info("☁️  Loaded India jobs from Supabase → /tmp")
+            return sb_data
+        if os.path.exists(INDIA_SEED_FILE):
+            os.makedirs(DATA_DIR, exist_ok=True)
+            shutil.copy2(INDIA_SEED_FILE, INDIA_JOBS_FILE)
+            logger.info("📦 Copied India seed to /tmp")
+            with open(INDIA_JOBS_FILE, "r") as f:
+                return json.load(f)
     return {"jobs": [], "last_updated": None, "region": "India"}
 
 
 def save_india_jobs(data):
-    """Persist All-India jobs to JSON file."""
+    """Persist All-India jobs to JSON file (+ Supabase on Vercel)."""
     with open(INDIA_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    if IS_VERCEL:
+        _supabase_save_jobs("india_jobs", data)
 
 
 def save_jobs(data):
-    """Persist jobs to JSON file."""
+    """Persist jobs to JSON file (+ Supabase on Vercel)."""
     with open(JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    if IS_VERCEL:
+        _supabase_save_jobs("jobs", data)
 
 
 def refresh_jobs():
@@ -127,7 +187,14 @@ def refresh_jobs():
     try:
         from scraper.job_scraper import JobScraper  # lazy import
         scraper = JobScraper()
-        jobs = scraper.scrape_all()
+
+        # On Vercel: use fast API-only scraper to stay within timeout
+        if IS_VERCEL:
+            jobs = scraper.scrape_fast()
+            logger.info(f"⚡ Vercel fast-scrape: {len(jobs)} jobs")
+        else:
+            jobs = scraper.scrape_all()
+
         data = {
             "jobs": jobs,
             "last_updated": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -135,54 +202,58 @@ def refresh_jobs():
         save_jobs(data)
         logger.info(f"✅ Saved {len(jobs)} jobs at {data['last_updated']}")
 
-        # Run Tamil Nadu specific scraper
-        try:
-            tn_count = refresh_tn_jobs()
-            logger.info(f"✅ TN scraper: {tn_count} jobs")
-        except Exception as e:
-            logger.warning(f"⚠️  TN scraper skipped: {e}")
+        # On Vercel, TN/India scrapers run via separate cron endpoints
+        if not IS_VERCEL:
+            # Run Tamil Nadu specific scraper
+            try:
+                tn_count = refresh_tn_jobs()
+                logger.info(f"✅ TN scraper: {tn_count} jobs")
+            except Exception as e:
+                logger.warning(f"⚠️  TN scraper skipped: {e}")
 
-        # Run All-India mega scraper
-        try:
-            india_count = refresh_india_jobs()
-            logger.info(f"✅ India scraper: {india_count} jobs")
-        except Exception as e:
-            logger.warning(f"⚠️  India scraper skipped: {e}")
+            # Run All-India mega scraper
+            try:
+                india_count = refresh_india_jobs()
+                logger.info(f"✅ India scraper: {india_count} jobs")
+            except Exception as e:
+                logger.warning(f"⚠️  India scraper skipped: {e}")
 
         # Merge TN jobs into main jobs list (avoid duplicates)
-        try:
-            tn_data = load_tn_jobs()
-            tn_jobs = tn_data.get("jobs", [])
-            existing_keys = set()
-            for j in jobs:
-                key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
-                existing_keys.add(key)
-            new_tn = []
-            for j in tn_jobs:
-                key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
-                if key not in existing_keys:
+        if not IS_VERCEL:
+            try:
+                tn_data = load_tn_jobs()
+                tn_jobs = tn_data.get("jobs", [])
+                existing_keys = set()
+                for j in jobs:
+                    key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
                     existing_keys.add(key)
-                    new_tn.append(j)
-            if new_tn:
-                # Re-assign IDs for merged list
-                merged = jobs + new_tn
-                for i, j in enumerate(merged):
-                    j["id"] = i + 1
-                data["jobs"] = merged
-                data["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                save_jobs(data)
-                logger.info(f"✅ Merged {len(new_tn)} TN jobs → total {len(merged)}")
-        except Exception as e:
-            logger.warning(f"⚠️  TN merge skipped: {e}")
+                new_tn = []
+                for j in tn_jobs:
+                    key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
+                    if key not in existing_keys:
+                        existing_keys.add(key)
+                        new_tn.append(j)
+                if new_tn:
+                    # Re-assign IDs for merged list
+                    merged = jobs + new_tn
+                    for i, j in enumerate(merged):
+                        j["id"] = i + 1
+                    data["jobs"] = merged
+                    data["last_updated"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                    save_jobs(data)
+                    logger.info(f"✅ Merged {len(new_tn)} TN jobs → total {len(merged)}")
+            except Exception as e:
+                logger.warning(f"⚠️  TN merge skipped: {e}")
 
-        # Run trend analysis after scrape
-        try:
-            from scraper.trend_analyzer import TrendAnalyzer
-            analyzer = TrendAnalyzer(DATA_DIR)
-            analyzer.analyze(data.get("jobs", jobs))
-            logger.info("📊 Trend analysis complete")
-        except Exception as e:
-            logger.warning(f"⚠️  Trend analysis skipped: {e}")
+        # Run trend analysis after scrape (skip on Vercel – too slow)
+        if not IS_VERCEL:
+            try:
+                from scraper.trend_analyzer import TrendAnalyzer
+                analyzer = TrendAnalyzer(DATA_DIR)
+                analyzer.analyze(data.get("jobs", jobs))
+                logger.info("📊 Trend analysis complete")
+            except Exception as e:
+                logger.warning(f"⚠️  Trend analysis skipped: {e}")
 
         return len(data.get("jobs", jobs))
     except Exception as e:
@@ -791,6 +862,55 @@ def api_cron():
         "jobs_scraped": count,
         "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
     })
+
+
+def _check_cron_secret():
+    """Shared secret check for cron endpoints."""
+    expected = os.environ.get("CRON_SECRET", "")
+    provided = request.args.get("secret", "") or request.headers.get("Authorization", "").replace("Bearer ", "")
+    if expected and provided != expected:
+        return False
+    return True
+
+
+@app.route("/api/cron/tn")
+def api_cron_tn():
+    """
+    Vercel Cron – Tamil Nadu & Pondicherry scraper (separate to stay within timeout).
+    """
+    if not _check_cron_secret():
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        count = refresh_tn_jobs()
+        return jsonify({
+            "status": "success",
+            "region": "Tamil Nadu",
+            "jobs_scraped": count,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        })
+    except Exception as e:
+        logger.error(f"❌ TN cron failed: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@app.route("/api/cron/india")
+def api_cron_india():
+    """
+    Vercel Cron – All-India mega scraper (separate to stay within timeout).
+    """
+    if not _check_cron_secret():
+        return jsonify({"error": "Unauthorized"}), 401
+    try:
+        count = refresh_india_jobs()
+        return jsonify({
+            "status": "success",
+            "region": "India",
+            "jobs_scraped": count,
+            "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        })
+    except Exception as e:
+        logger.error(f"❌ India cron failed: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
 
 
 @app.route("/api/stats")
