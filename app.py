@@ -625,6 +625,171 @@ def terms():
 
 
 # ═══════════════════════════════════════════════════════════════════════
+# RECOMMENDATION ENGINE
+# ═══════════════════════════════════════════════════════════════════════
+
+# Maps onboarding interest labels → keywords to match against job fields
+INTEREST_KEYWORD_MAP = {
+    "Software Engineering":      ["software", "engineer", "engineering", "developer", "programming", "backend", "frontend"],
+    "Data Science":              ["data science", "data scientist", "analytics", "statistical", "machine learning", "big data", "data analyst"],
+    "AI & Machine Learning":     ["machine learning", "artificial intelligence", "deep learning", "nlp", "computer vision", "ml engineer", "ai"],
+    "Cloud & DevOps":            ["cloud", "devops", "aws", "azure", "gcp", "kubernetes", "docker", "ci/cd", "infrastructure", "sre"],
+    "Cybersecurity":             ["security", "cybersecurity", "penetration", "soc", "infosec", "vulnerability", "firewall"],
+    "Web Development":           ["web", "frontend", "react", "angular", "vue", "html", "css", "javascript", "fullstack", "full stack"],
+    "Mobile App Development":    ["mobile", "android", "ios", "flutter", "react native", "swift", "kotlin"],
+    "Product Management":        ["product manager", "product management", "product owner", "roadmap", "agile", "scrum"],
+    "UI/UX Design":              ["ui", "ux", "design", "figma", "user experience", "user interface", "wireframe", "prototype"],
+    "Digital Marketing":         ["marketing", "seo", "sem", "social media", "content", "growth", "digital marketing", "campaigns"],
+}
+
+# Maps experience level → what strings to look for in job experience field
+EXPERIENCE_LEVEL_MAP = {
+    "Student / Fresher": ["fresher", "entry", "0-1", "0 year", "graduate", "intern", "junior"],
+    "Junior":            ["junior", "1-3", "entry", "associate", "fresher"],
+    "Mid-Level":         ["mid", "3-5", "intermediate", "senior associate", "lead"],
+    "Senior":            ["senior", "5+", "lead", "principal", "staff", "architect"],
+}
+
+
+def score_job_for_user(job, interests, skills_list, experience_level, top_n=8):
+    """
+    Score a single job against a user profile.
+    Returns (score, matched_tags) where score is 0–100.
+
+    Weights:
+      Interests  → 40 pts max
+      Skills     → 35 pts max
+      Experience → 25 pts max
+    """
+    score = 0
+    matched_tags = []
+
+    # ── Text fields to search in ──────────────────────────────────────
+    job_text = " ".join([
+        job.get("title", ""),
+        job.get("category", ""),
+        job.get("industry", ""),
+        job.get("description", "")[:400],
+    ]).lower()
+    job_skills = [s.lower() for s in job.get("skills", [])]
+
+    # ── 1. Interests (40 pts) ─────────────────────────────────────────
+    interest_pts_each = 40 / max(len(interests), 1)
+    for interest in interests:
+        keywords = INTEREST_KEYWORD_MAP.get(interest, [interest.lower()])
+        if any(kw in job_text for kw in keywords):
+            score += interest_pts_each
+            matched_tags.append(interest)
+
+    # ── 2. Skills (35 pts) ────────────────────────────────────────────
+    skill_pts_each = 35 / max(len(skills_list), 1)
+    for skill in skills_list:
+        skill_lower = skill.lower().strip()
+        if not skill_lower:
+            continue
+        # Match skill against job's skills list OR description
+        if skill_lower in job_skills or skill_lower in job_text:
+            score += skill_pts_each
+            matched_tags.append(skill)
+
+    # ── 3. Experience level (25 pts) ──────────────────────────────────
+    job_exp = job.get("experience", "").lower()
+    exp_keywords = EXPERIENCE_LEVEL_MAP.get(experience_level, [])
+    if exp_keywords and any(kw in job_exp for kw in exp_keywords):
+        score += 25
+    elif experience_level:
+        # Adjacent level → partial credit (12 pts)
+        all_levels = list(EXPERIENCE_LEVEL_MAP.keys())
+        user_idx = all_levels.index(experience_level) if experience_level in all_levels else -1
+        if user_idx != -1:
+            adjacent = []
+            if user_idx > 0:
+                adjacent += EXPERIENCE_LEVEL_MAP[all_levels[user_idx - 1]]
+            if user_idx < len(all_levels) - 1:
+                adjacent += EXPERIENCE_LEVEL_MAP[all_levels[user_idx + 1]]
+            if any(kw in job_exp for kw in adjacent):
+                score += 12
+
+    # Clamp and round
+    score = round(min(score, 100))
+    # Deduplicate tags, preserve order
+    seen = set()
+    unique_tags = []
+    for t in matched_tags:
+        if t.lower() not in seen:
+            seen.add(t.lower())
+            unique_tags.append(t)
+
+    return score, unique_tags
+
+
+@app.route("/api/recommendations")
+@login_required
+def api_recommendations():
+    """
+    Return personalised job recommendations for the logged-in user.
+    Scores every job in the main jobs list against the user's profile
+    (interests, skills, experience_level) and returns the top 8 matches
+    with match_score (0-100) and matched_tags attached to each job.
+    """
+    # ── Fetch user profile ────────────────────────────────────────────
+    user_resp = supabase.table("users").select("*").eq("id", session["user_id"]).execute()
+    if not user_resp.data:
+        return jsonify({"error": "User not found"}), 404
+
+    user = user_resp.data[0]
+
+    # Parse interests (stored as JSON array string or plain string)
+    try:
+        interests = json.loads(user.get("interests") or "[]")
+    except Exception:
+        interests = [i.strip() for i in str(user.get("interests", "")).split(",") if i.strip()]
+
+    # Parse skills (stored as comma-separated string)
+    skills_raw = user.get("skills", "") or ""
+    skills_list = [s.strip() for s in skills_raw.split(",") if s.strip()]
+
+    experience_level = user.get("experience_level", "") or ""
+
+    # ── Edge case: no profile data ────────────────────────────────────
+    if not interests and not skills_list:
+        return jsonify({
+            "jobs": [],
+            "total": 0,
+            "has_profile": False,
+            "message": "Complete your onboarding to get personalised recommendations.",
+        })
+
+    # ── Score all jobs ────────────────────────────────────────────────
+    data = load_jobs()
+    all_jobs = data.get("jobs", [])
+
+    scored = []
+    for job in all_jobs:
+        match_score, matched_tags = score_job_for_user(
+            job, interests, skills_list, experience_level
+        )
+        if match_score > 0:
+            job_copy = dict(job)
+            job_copy["match_score"] = match_score
+            job_copy["matched_tags"] = matched_tags
+            scored.append(job_copy)
+
+    # Sort by score descending, take top 8
+    scored.sort(key=lambda j: j["match_score"], reverse=True)
+    top_jobs = scored[:8]
+
+    return jsonify({
+        "jobs": top_jobs,
+        "total": len(top_jobs),
+        "has_profile": True,
+        "interests": interests,
+        "skills": skills_list,
+        "experience_level": experience_level,
+    })
+
+
+# ═══════════════════════════════════════════════════════════════════════
 # API ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
 
@@ -2033,8 +2198,11 @@ def get_saved_jobs():
         except FileNotFoundError:
             pass
             
-        # Filter matching jobs
-        saved_jobs_data = [job for job in all_jobs if job.get('id') in saved_job_ids]
+        # Normalize saved job IDs to strings for comparison
+        saved_job_ids_str = {str(jid) for jid in saved_job_ids}
+        
+        # Filter matching jobs (convert json id to string)
+        saved_jobs_data = [job for job in all_jobs if str(job.get('id')) in saved_job_ids_str]
         
         # Remove duplicates
         unique_jobs = {job['id']: job for job in saved_jobs_data}.values()
