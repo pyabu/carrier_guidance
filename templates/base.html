@@ -64,9 +64,12 @@
     <!-- ═══════════ NAVBAR ═══════════ -->
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
-            <a href="/" class="nav-logo">
-                <i class="fas fa-rocket"></i>
-                <span>CareerPath<strong>Pro</strong></span>
+            <a href="/" class="nav-link" style="display:flex; align-items:center; gap:8px;">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CareerPath Pro Logo"
+                    style="height:32px; width:auto; object-fit:contain;">
+                <span
+                    style="font-size:1.2rem;font-weight:700;letter-spacing:-0.5px;color:var(--text-primary);">CareerPath<strong
+                        style="color:var(--accent);">Pro</strong></span>
             </a>
 
             <ul class="nav-menu" id="navMenu">
@@ -144,9 +147,12 @@
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-brand">
-                    <a href="/" class="footer-logo">
-                        <i class="fas fa-rocket"></i>
-                        <span>CareerPath<strong>Pro</strong></span>
+                    <a href="/" class="footer-logo" style="display:flex; align-items:center; gap:8px;">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CareerPath Pro Logo"
+                            style="height:32px; width:auto; object-fit:contain;">
+                        <span
+                            style="font-size:1.2rem;font-weight:700;letter-spacing:-0.5px;color:var(--text-primary);">CareerPath<strong
+                                style="color:var(--accent);">Pro</strong></span>
                     </a>
                     <p>India's leading career guidance, job search, and hiring platform. Empowering Indian students,
                         freshers, and professionals across Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai &
