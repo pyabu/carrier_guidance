@@ -581,6 +581,75 @@ class JobScraper:
     # PUBLIC API
     # ──────────────────────────────────────────────────────────────────
 
+    # ── Fast API-only sources (Vercel-safe, complete within ~30s) ─────
+    FAST_SOURCES = {
+        "Remotive", "Arbeitnow", "RemoteOK", "Jobicy",
+        "The Muse", "FindWork", "Himalayas",
+        "We Work Remotely", "Internshala", "LinkedIn RSS",
+    }
+
+    def scrape_fast(self) -> list[dict]:
+        """
+        Vercel-optimised scrape: only fast JSON-API sources, no HTML
+        scraping, no AI processing, no company enrichment.
+        Designed to finish within ~30-45 seconds.
+        """
+        scrapers = [
+            (name, fn) for name, fn in [
+                ("Remotive",         self._scrape_remotive),
+                ("Arbeitnow",        self._scrape_arbeitnow),
+                ("RemoteOK",         self._scrape_remoteok),
+                ("Jobicy",           self._scrape_jobicy),
+                ("The Muse",         self._scrape_themuse),
+                ("FindWork",         self._scrape_findwork),
+                ("LinkedIn RSS",     self._scrape_linkedin_rss),
+                ("Internshala",      self._scrape_internshala),
+                ("We Work Remotely", self._scrape_weworkremotely),
+                ("Himalayas",        self._scrape_himalayas),
+            ]
+        ]
+
+        all_jobs = []
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            futures = {pool.submit(fn): name for name, fn in scrapers}
+            for future in as_completed(futures):
+                src = futures[future]
+                try:
+                    jobs = future.result()
+                    all_jobs.extend(jobs)
+                    logger.info(f"✅ {src}: {len(jobs)} jobs")
+                except Exception as e:
+                    logger.warning(f"⚠️  {src} failed: {e}")
+
+        logger.info(f"📥 Fast scrape total: {len(all_jobs)}")
+
+        # Supplement if too few
+        shortfall = max(0, 150 - len(all_jobs))
+        if shortfall > 0:
+            generated = self._generate_realistic_jobs(shortfall)
+            all_jobs.extend(generated)
+            logger.info(f"🏭 Generated {len(generated)} supplemental jobs")
+
+        # Dedup
+        unique = []
+        for job in all_jobs:
+            key = _dedup_key(job)
+            if key not in self.seen_keys:
+                self.seen_keys.add(key)
+                unique.append(job)
+        logger.info(f"🧹 After dedup: {len(unique)} unique jobs")
+
+        # Normalise locations & assign IDs
+        for i, job in enumerate(unique):
+            job["id"] = i + 1
+            loc = normalise_location(job.get("location", ""))
+            job["location"]         = loc["display"]
+            job["location_city"]    = loc["city"]
+            job["location_state"]   = loc["state"]
+            job["location_country"] = loc["country"]
+
+        return unique
+
     def scrape_all(self) -> list[dict]:
         """
         Run all scrapers in parallel, merge, dedup, normalise, assign IDs.
