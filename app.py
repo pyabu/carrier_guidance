@@ -73,7 +73,8 @@ def sitemap():
         ET.SubElement(url, "loc").text = f"{domain}/job/{job['id']}"
         ET.SubElement(url, "priority").text = "0.6"
         ET.SubElement(url, "lastmod").text = job.get("posted_date", today)
-    xml_str = ET.tostring(urlset, encoding="utf-8", method="xml")
+    xml_body = ET.tostring(urlset, encoding="utf-8", method="xml").decode("utf-8")
+    xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body
     return Response(xml_str, mimetype="application/xml")
 
 # Seed file shipped with the repo (used as fallback on Vercel cold-start)
