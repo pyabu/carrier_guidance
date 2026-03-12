@@ -1,59 +1,73 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://yourdomain.com/</loc>
+    <loc>https://carrierguidancepro.me/</loc>
     <priority>1.0</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/jobs</loc>
+    <loc>https://carrierguidancepro.me/jobs</loc>
     <priority>0.8</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/career-guidance</loc>
+    <loc>https://carrierguidancepro.me/career-guidance</loc>
     <priority>0.7</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/resume-builder</loc>
+    <loc>https://carrierguidancepro.me/resume-builder</loc>
     <priority>0.7</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/student-dashboard</loc>
+    <loc>https://carrierguidancepro.me/student-dashboard</loc>
     <priority>0.6</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/login</loc>
+    <loc>https://carrierguidancepro.me/login</loc>
     <priority>0.5</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/signup</loc>
+    <loc>https://carrierguidancepro.me/signup</loc>
     <priority>0.5</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/onboarding</loc>
+    <loc>https://carrierguidancepro.me/onboarding</loc>
     <priority>0.5</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/about</loc>
+    <loc>https://carrierguidancepro.me/about</loc>
     <priority>0.4</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/contact</loc>
+    <loc>https://carrierguidancepro.me/contact</loc>
     <priority>0.4</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/blog</loc>
+    <loc>https://carrierguidancepro.me/blog</loc>
     <priority>0.4</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/faq</loc>
+    <loc>https://carrierguidancepro.me/faq</loc>
     <priority>0.4</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/privacy</loc>
+    <loc>https://carrierguidancepro.me/privacy</loc>
     <priority>0.3</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
   <url>
-    <loc>https://yourdomain.com/terms</loc>
+    <loc>https://carrierguidancepro.me/terms</loc>
     <priority>0.3</priority>
+    <lastmod>2026-03-12</lastmod>
   </url>
 </urlset>

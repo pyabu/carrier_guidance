@@ -40,7 +40,41 @@ TN_JOBS_FILE = os.path.join(DATA_DIR, "tn_jobs.json")
 INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
 @app.route("/sitemap.xml")
 def sitemap():
-     return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
+    from flask import Response
+    import xml.etree.ElementTree as ET
+    domain = "https://carrierguidancepro.me"
+    static_urls = [
+        ("/", 1.0),
+        ("/jobs", 0.8),
+        ("/career-guidance", 0.7),
+        ("/resume-builder", 0.7),
+        ("/student-dashboard", 0.6),
+        ("/login", 0.5),
+        ("/signup", 0.5),
+        ("/onboarding", 0.5),
+        ("/about", 0.4),
+        ("/contact", 0.4),
+        ("/blog", 0.4),
+        ("/faq", 0.4),
+        ("/privacy", 0.3),
+        ("/terms", 0.3),
+    ]
+    today = datetime.now().strftime("%Y-%m-%d")
+    urlset = ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    for path, priority in static_urls:
+        url = ET.SubElement(urlset, "url")
+        ET.SubElement(url, "loc").text = f"{domain}{path}"
+        ET.SubElement(url, "priority").text = str(priority)
+        ET.SubElement(url, "lastmod").text = today
+    # Add job detail pages
+    jobs_data = load_jobs()
+    for job in jobs_data.get("jobs", []):
+        url = ET.SubElement(urlset, "url")
+        ET.SubElement(url, "loc").text = f"{domain}/job/{job['id']}"
+        ET.SubElement(url, "priority").text = "0.6"
+        ET.SubElement(url, "lastmod").text = job.get("posted_date", today)
+    xml_str = ET.tostring(urlset, encoding="utf-8", method="xml")
+    return Response(xml_str, mimetype="application/xml")
 
 # Seed file shipped with the repo (used as fallback on Vercel cold-start)
 SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
