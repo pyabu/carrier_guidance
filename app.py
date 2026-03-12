@@ -494,6 +494,10 @@ if not IS_VERCEL:
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route("/google25c1f4c7795c1819.html")
+def google_verification():
+    return send_from_directory(app.root_path, 'google25c1f4c7795c1819.html')
+
 @app.route("/")
 def home():
     data = load_jobs()
