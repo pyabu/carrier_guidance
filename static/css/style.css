@@ -456,6 +456,22 @@ select.form-control {
     transition: var(--transition);
 }
 
+/* Mobile auth links - hidden on desktop */
+.nav-mobile-auth {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .nav-mobile-auth {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-top: 1px solid var(--border);
+        margin-top: 12px;
+        padding-top: 12px;
+    }
+}
+
 /* ── User Dropdown Menu ──────────────────────────────────────────────── */
 .user-dropdown {
     display: none;
@@ -715,7 +731,7 @@ section {
 /* ── Job Cards ───────────────────────────────────────────────────────── */
 .jobs-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
     gap: 20px;
 }
 
@@ -1487,7 +1503,7 @@ section {
 /* ── Blog Cards ──────────────────────────────────────────────────────── */
 .blog-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
     gap: 24px;
 }
 
@@ -1719,7 +1735,7 @@ section {
 /* ── Testimonials ────────────────────────────────────────────────────── */
 .testimonials-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
     gap: 24px;
 }
 
@@ -1803,7 +1819,7 @@ section {
 
 .footer-grid {
     display: grid;
-    grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+    grid-template-columns: 2fr repeat(4, 1fr);
     gap: 40px;
     padding-bottom: 40px;
     border-bottom: 1px solid rgba(255,255,255,0.08);
@@ -2015,6 +2031,10 @@ section {
 }
 
 @media (max-width: 768px) {
+    .container {
+        padding: 0 16px;
+    }
+
     .nav-menu {
         position: fixed;
         top: 70px;
@@ -2028,6 +2048,7 @@ section {
         transform: translateX(100%);
         transition: var(--transition);
         overflow-y: auto;
+        z-index: 999;
     }
 
     .nav-menu.open {
@@ -2039,6 +2060,15 @@ section {
     }
 
     .nav-actions .btn {
+        display: none;
+    }
+
+    .nav-actions .btn-sm {
+        display: none;
+    }
+
+    /* Keep auth buttons compact on mobile */
+    .nav-actions > div {
         display: none;
     }
 
@@ -2058,16 +2088,16 @@ section {
     }
 
     .hero {
-        padding: 120px 0 60px;
+        padding: 100px 0 50px;
     }
 
     .hero h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 
     .hero-search {
         flex-direction: column;
-        padding: 12px;
+        padding: 10px;
     }
 
     .hero-search .search-field {
@@ -2083,12 +2113,18 @@ section {
 
     .hero-stats {
         flex-direction: row;
-        gap: 12px;
+        gap: 10px;
+        flex-wrap: wrap;
+        justify-content: center;
     }
 
     .hero-stats .stat {
-        flex: 1;
-        min-width: 140px;
+        flex: 1 1 auto;
+        min-width: 70px;
+    }
+
+    .hero-stats .stat-number {
+        font-size: 1.4rem;
     }
 
     .jobs-layout {
@@ -2136,9 +2172,73 @@ section {
         display: block;
         overflow-x: auto;
     }
+
+    .job-detail-header {
+        padding: 90px 0 40px;
+    }
+
+    .job-detail-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .job-detail-sidebar {
+        position: static;
+    }
+
+    .job-detail-main {
+        padding: 20px;
+    }
+
+    .resume-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-preview {
+        position: static;
+    }
+
+    .resume-form {
+        padding: 20px;
+    }
+
+    .blog-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .guidance-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .roadmap-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .categories-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .companies-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+
+    .section-header {
+        margin-bottom: 32px;
+    }
+
+    .section-header h2 {
+        font-size: 1.4rem;
+    }
 }
 
 @media (max-width: 480px) {
+    .container {
+        padding: 0 12px;
+    }
+
     .dashboard-grid {
         grid-template-columns: 1fr;
     }
@@ -2154,12 +2254,35 @@ section {
         grid-template-columns: repeat(2, 1fr);
     }
 
+    .hero {
+        padding: 90px 0 40px;
+    }
+
+    .hero h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero p {
+        font-size: 0.95rem;
+    }
+
     .hero-stats {
-        flex-direction: column;
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 8px;
     }
 
     .hero-stats .stat {
-        min-width: auto;
+        min-width: 60px;
+        flex: 1 1 auto;
+    }
+
+    .hero-stats .stat-number {
+        font-size: 1.2rem;
+    }
+
+    .hero-stats .stat-label {
+        font-size: 0.7rem;
     }
 
     .btn-lg {
@@ -2177,7 +2300,56 @@ section {
     }
 
     .contact-form {
-        padding: 20px;
+        padding: 16px;
+    }
+
+    .sidebar-card {
+        padding: 16px;
+    }
+
+    .job-card {
+        padding: 16px;
+    }
+
+    .job-card-header {
+        gap: 10px;
+    }
+
+    .job-card-logo {
+        width: 40px;
+        height: 40px;
+    }
+
+    .page-header {
+        padding: 80px 0 30px;
+    }
+
+    .page-header h1 {
+        font-size: 1.4rem;
+    }
+
+    .page-header p {
+        font-size: 0.9rem;
+    }
+
+    .nav-logo {
+        font-size: 1.2rem;
+    }
+
+    .nav-logo i {
+        font-size: 1.2rem;
+    }
+
+    .footer {
+        padding: 40px 0 0;
+    }
+
+    .footer-brand p {
+        font-size: 0.82rem;
+    }
+
+    .footer-links h4 {
+        font-size: 0.88rem;
     }
 }
 
@@ -2735,7 +2907,7 @@ section {
 
 .portals-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
     gap: 28px;
 }
 

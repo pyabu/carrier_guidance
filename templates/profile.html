@@ -6,7 +6,7 @@
 .profile-hero { padding:100px 0 40px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; }
 .profile-hero h1 { font-size:2rem; margin:0 0 4px; }
 .profile-hero p { opacity:0.85; margin:0; }
-.profile-grid { display:grid; grid-template-columns:320px 1fr; gap:32px; padding:40px 0 60px; }
+.profile-grid { display:grid; grid-template-columns:minmax(240px, 320px) 1fr; gap:32px; padding:40px 0 60px; }
 .profile-sidebar { display:flex; flex-direction:column; gap:20px; }
 .profile-card { background:var(--surface); border-radius:16px; padding:28px; box-shadow:var(--shadow-sm); }
 .profile-card h3 { margin:0 0 16px; font-size:1.05rem; display:flex; align-items:center; gap:8px; }
@@ -55,8 +55,12 @@
     .form-row { grid-template-columns:1fr; }
 }
 @media (max-width:600px) {
+    .profile-hero { padding:80px 0 30px; }
     .profile-hero h1 { font-size:1.5rem; }
     .profile-card { padding:20px; }
+    .profile-mini-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .profile-mini-stat { padding:10px 6px; }
+    .profile-mini-stat strong { font-size:1rem; }
 }
 </style>
 

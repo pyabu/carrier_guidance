@@ -25,7 +25,7 @@
                     <label>Professional Title</label>
                     <input type="text" class="form-control" id="rTitle" placeholder="Full Stack Developer" oninput="updatePreview()">
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;">
                     <div class="form-group">
                         <label>Email</label>
                         <input type="email" class="form-control" id="rEmail" placeholder="rahul@email.com" oninput="updatePreview()">
@@ -35,7 +35,7 @@
                         <input type="tel" class="form-control" id="rPhone" placeholder="+91 98765 43210" oninput="updatePreview()">
                     </div>
                 </div>
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;">
                     <div class="form-group">
                         <label>Location</label>
                         <input type="text" class="form-control" id="rLocation" placeholder="Bangalore, Karnataka" oninput="updatePreview()">
@@ -59,11 +59,11 @@
                 <h4 style="margin:24px 0 16px;"><i class="fas fa-briefcase text-accent"></i> Work Experience</h4>
                 <div id="experienceFields">
                     <div class="experience-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
                             <div class="form-group"><label>Job Title</label><input type="text" class="form-control exp-title" placeholder="Software Engineer" oninput="updatePreview()"></div>
                             <div class="form-group"><label>Company</label><input type="text" class="form-control exp-company" placeholder="Infosys" oninput="updatePreview()"></div>
                         </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
                             <div class="form-group"><label>Duration</label><input type="text" class="form-control exp-duration" placeholder="2022 – Present" oninput="updatePreview()"></div>
                             <div class="form-group"><label>Location</label><input type="text" class="form-control exp-location" placeholder="Bangalore, India" oninput="updatePreview()"></div>
                         </div>
@@ -75,11 +75,11 @@
                 <h4 style="margin:24px 0 16px;"><i class="fas fa-graduation-cap text-accent"></i> Education</h4>
                 <div id="educationFields">
                     <div class="education-entry" style="background:var(--bg-secondary);border-radius:12px;padding:16px;margin-bottom:12px;">
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
                             <div class="form-group"><label>Degree</label><input type="text" class="form-control edu-degree" placeholder="B.Tech Computer Science" oninput="updatePreview()"></div>
                             <div class="form-group"><label>Institution</label><input type="text" class="form-control edu-school" placeholder="IIT Bangalore / NIT Trichy" oninput="updatePreview()"></div>
                         </div>
-                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                        <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(180px, 1fr));gap:12px;">
                             <div class="form-group"><label>Year</label><input type="text" class="form-control edu-year" placeholder="2018 – 2022" oninput="updatePreview()"></div>
                             <div class="form-group"><label>CGPA / Percentage</label><input type="text" class="form-control edu-gpa" placeholder="8.5 / 10 CGPA" oninput="updatePreview()"></div>
                         </div>
@@ -87,7 +87,7 @@
                 </div>
                 <button class="btn btn-ghost btn-sm" onclick="addEducation()"><i class="fas fa-plus"></i> Add Education</button>
 
-                <div style="margin-top:24px;display:flex;gap:12px;">
+                <div style="margin-top:24px;display:flex;gap:12px;flex-wrap:wrap;">
                     <button class="btn btn-primary btn-lg" onclick="downloadResume()"><i class="fas fa-download"></i> Download PDF</button>
                     <button class="btn btn-outline" onclick="resetForm()"><i class="fas fa-redo"></i> Reset</button>
                 </div>

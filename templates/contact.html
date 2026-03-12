@@ -56,7 +56,7 @@
             <div class="contact-form" data-aos="fade-left">
                 <h3 style="margin-bottom:20px;"><i class="fas fa-paper-plane text-accent"></i> Send a Message</h3>
                 <form onsubmit="event.preventDefault(); showToast('Message sent successfully! We\'ll get back to you soon.', 'success'); this.reset();">
-                    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;">
                         <div class="form-group">
                             <label>Your Name</label>
                             <input type="text" class="form-control" placeholder="John Doe" required>

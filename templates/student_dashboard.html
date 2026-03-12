@@ -12,7 +12,7 @@
 .dash-profile-actions { display:flex; gap:12px; flex-wrap:wrap; }
 .dash-table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
 .dash-courses-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:16px; }
-.dash-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+.dash-jobs-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(min(100%, 280px),1fr)); gap:16px; }
 .dash-empty { padding:24px; text-align:center; color:var(--text-secondary); }
 .dash-job-card { background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:20px; cursor:pointer; transition:var(--transition); display:flex; flex-direction:column; gap:12px; }
 .dash-job-card:hover { transform:translateY(-2px); box-shadow:var(--shadow-md); }
