@@ -7,6 +7,29 @@
     <title>{% block title %}CareerPath Pro{% endblock %} | Career Guidance & Job Portal</title>
     <meta name="description"
         content="{% block meta_desc %}CareerPath Pro – India's #1 career guidance, job search, and hiring platform for Indian students, freshers, and professionals.{% endblock %}">
+    <meta name="keywords"
+        content="{% block meta_keywords %}jobs, career guidance, hiring, India, freshers, students, internships, remote jobs, software engineering{% endblock %}">
+    {% block meta_robots %}
+    <meta name="robots" content="index, follow">{% endblock %}
+
+    <!-- Canonical URL -->
+    <link rel="canonical" href="{% block canonical_url %}{{ request.url }}{% endblock %}">
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title"
+        content="{% block og_title %}{{ self.title() }} | Career Guidance & Job Portal{% endblock %}">
+    <meta property="og:description" content="{% block og_desc %}{{ self.meta_desc() }}{% endblock %}">
+    <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:image"
+        content="{% block og_image %}{{ url_for('static', filename='images/og-default.jpg', _external=True) }}{% endblock %}">
+    <meta property="og:site_name" content="CareerPath Pro">
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
+    <meta name="twitter:description" content="{% block twitter_desc %}{{ self.meta_desc() }}{% endblock %}">
+    <meta name="twitter:image" content="{% block twitter_image %}{{ self.og_image() }}{% endblock %}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

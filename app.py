@@ -13,7 +13,7 @@ import threading
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from functools import wraps
-from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash
+from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, Response
 from flask_cors import CORS
 
 # ── Vercel detection ───────────────────────────────────────────────────
@@ -404,6 +404,63 @@ if not IS_VERCEL:
     else:
         data = load_jobs()
         logger.info(f"📦 Data is fresh – {len(data.get('jobs', []))} jobs, last updated {data.get('last_updated', 'N/A')}")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# SEO ROUTES
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/robots.txt")
+def robots_txt():
+    lines = [
+        "User-agent: *",
+        "Disallow: /student-dashboard",
+        "Disallow: /employer-dashboard",
+        "Disallow: /api/",
+        f"Sitemap: {url_for('sitemap_xml', _external=True)}"
+    ]
+    return Response("\n".join(lines), mimetype="text/plain")
+
+
+@app.route("/sitemap.xml")
+def sitemap_xml():
+    import xml.etree.ElementTree as ET
+    from datetime import datetime
+    
+    urlset = ET.Element("urlset", xmlns="http://www.sitemaps.org/schemas/sitemap/0.9")
+    
+    # Static pages
+    pages = ["home", "jobs_page", "career_guidance", "resume_builder", "blog", "about", "contact", "faq"]
+    for page in pages:
+        try:
+            url = ET.SubElement(urlset, "url")
+            ET.SubElement(url, "loc").text = url_for(page, _external=True)
+            ET.SubElement(url, "changefreq").text = "daily" if page == "home" else "weekly"
+            ET.SubElement(url, "priority").text = "1.0" if page == "home" else "0.8"
+        except Exception:
+            pass
+            
+    # Dynamic Job Pages (Limit to 1000 to keep it manageable, though it could handle all)
+    try:
+        data = load_jobs()
+        jobs = data.get("jobs", [])
+        for job in jobs[:1000]:
+            url = ET.SubElement(urlset, "url")
+            ET.SubElement(url, "loc").text = url_for("job_detail", job_id=job.get("id"), _external=True)
+            date_str = job.get("posted_date", "")
+            if date_str:
+                try:
+                    # just try to take the YYYY-MM-DD
+                    ET.SubElement(url, "lastmod").text = date_str[:10]
+                except Exception:
+                    pass
+            ET.SubElement(url, "changefreq").text = "weekly"
+            ET.SubElement(url, "priority").text = "0.6"
+    except Exception as e:
+        logger.error(f"Sitemap job generation error: {e}")
+        
+    xml_str = ET.tostring(urlset, encoding="utf-8", xml_declaration=True)
+    return Response(xml_str, mimetype="application/xml")
 
 
 # ═══════════════════════════════════════════════════════════════════════
