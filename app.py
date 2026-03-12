@@ -38,6 +38,9 @@ os.makedirs(DATA_DIR, exist_ok=True)
 JOBS_FILE = os.path.join(DATA_DIR, "jobs.json")
 TN_JOBS_FILE = os.path.join(DATA_DIR, "tn_jobs.json")
 INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
+@app.route("/sitemap.xml")
+def sitemap():
+     return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
 
 # Seed file shipped with the repo (used as fallback on Vercel cold-start)
 SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
