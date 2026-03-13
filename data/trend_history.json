@@ -55,5 +55,24 @@
       "Pavago"
     ],
     "remote_percentage": 27.6
+  },
+  {
+    "date": "2026-03-13",
+    "total_jobs": 918,
+    "top_5_skills": [
+      "TypeScript",
+      "Communication",
+      "Problem Solving",
+      "Go",
+      "Terraform"
+    ],
+    "top_5_companies": [
+      "",
+      "Startup",
+      "Walmart",
+      "BairesDev",
+      "Synchrony"
+    ],
+    "remote_percentage": 19.5
   }
 ]

@@ -1,147 +1,147 @@
 {
-  "generated_at": "2026-03-12 15:11:06",
-  "total_jobs": 671,
+  "generated_at": "2026-03-13 19:35:22",
+  "total_jobs": 918,
   "skills": {
     "top_25": [
       {
+        "skill": "TypeScript",
+        "count": 217,
+        "percentage": 23.6
+      },
+      {
         "skill": "Communication",
-        "count": 278,
-        "percentage": 41.4
+        "count": 166,
+        "percentage": 18.1
       },
       {
         "skill": "Problem Solving",
-        "count": 258,
-        "percentage": 38.5
-      },
-      {
-        "skill": "TypeScript",
-        "count": 211,
-        "percentage": 31.4
+        "count": 154,
+        "percentage": 16.8
       },
       {
         "skill": "Go",
-        "count": 123,
-        "percentage": 18.3
-      },
-      {
-        "skill": "Agile",
-        "count": 99,
-        "percentage": 14.8
-      },
-      {
-        "skill": "Excel",
-        "count": 95,
-        "percentage": 14.2
+        "count": 126,
+        "percentage": 13.7
       },
       {
         "skill": "Terraform",
+        "count": 105,
+        "percentage": 11.4
+      },
+      {
+        "skill": "Agile",
+        "count": 91,
+        "percentage": 9.9
+      },
+      {
+        "skill": "Excel",
         "count": 82,
-        "percentage": 12.2
-      },
-      {
-        "skill": "Python",
-        "count": 75,
-        "percentage": 11.2
-      },
-      {
-        "skill": "AWS",
-        "count": 74,
-        "percentage": 11.0
+        "percentage": 8.9
       },
       {
         "skill": "RAG",
-        "count": 74,
-        "percentage": 11.0
+        "count": 82,
+        "percentage": 8.9
       },
       {
-        "skill": "Git",
-        "count": 65,
-        "percentage": 9.7
+        "skill": "AWS",
+        "count": 71,
+        "percentage": 7.7
       },
       {
         "skill": "Rust",
-        "count": 55,
-        "percentage": 8.2
+        "count": 59,
+        "percentage": 6.4
+      },
+      {
+        "skill": "AI / ML",
+        "count": 53,
+        "percentage": 5.8
+      },
+      {
+        "skill": "Git",
+        "count": 52,
+        "percentage": 5.7
+      },
+      {
+        "skill": "Python",
+        "count": 52,
+        "percentage": 5.7
       },
       {
         "skill": "Deep Learning",
-        "count": 48,
-        "percentage": 7.2
+        "count": 51,
+        "percentage": 5.6
       },
       {
         "skill": "Machine Learning",
-        "count": 47,
-        "percentage": 7.0
+        "count": 45,
+        "percentage": 4.9
       },
       {
         "skill": "Java",
-        "count": 34,
-        "percentage": 5.1
+        "count": 31,
+        "percentage": 3.4
       },
       {
         "skill": "SAFe",
         "count": 30,
-        "percentage": 4.5
+        "percentage": 3.3
       },
       {
         "skill": "React",
-        "count": 24,
-        "percentage": 3.6
-      },
-      {
-        "skill": "support",
-        "count": 21,
+        "count": 28,
         "percentage": 3.1
       },
       {
+        "skill": "JavaScript",
+        "count": 25,
+        "percentage": 2.7
+      },
+      {
+        "skill": "Scala",
+        "count": 20,
+        "percentage": 2.2
+      },
+      {
+        "skill": "Leadership",
+        "count": 19,
+        "percentage": 2.1
+      },
+      {
+        "skill": "support",
+        "count": 18,
+        "percentage": 2.0
+      },
+      {
         "skill": "design",
-        "count": 18,
-        "percentage": 2.7
-      },
-      {
-        "skill": "SQL",
-        "count": 18,
-        "percentage": 2.7
-      },
-      {
-        "skill": "Figma",
-        "count": 17,
-        "percentage": 2.5
+        "count": 16,
+        "percentage": 1.7
       },
       {
         "skill": "technical",
         "count": 16,
-        "percentage": 2.4
+        "percentage": 1.7
       },
       {
-        "skill": "Leadership",
+        "skill": "Figma",
         "count": 15,
-        "percentage": 2.2
-      },
-      {
-        "skill": "Scala",
-        "count": 14,
-        "percentage": 2.1
-      },
-      {
-        "skill": "SEO",
-        "count": 14,
-        "percentage": 2.1
+        "percentage": 1.6
       }
     ],
     "by_job_type": {
       "Remote": [
         {
           "skill": "TypeScript",
-          "count": 107
-        },
-        {
-          "skill": "Go",
-          "count": 57
+          "count": 105
         },
         {
           "skill": "Terraform",
-          "count": 53
+          "count": 61
+        },
+        {
+          "skill": "Go",
+          "count": 55
         },
         {
           "skill": "Agile",
@@ -149,136 +149,132 @@
         },
         {
           "skill": "Communication",
-          "count": 46
-        },
-        {
-          "skill": "Excel",
-          "count": 42
+          "count": 48
         },
         {
           "skill": "Problem Solving",
-          "count": 38
+          "count": 39
+        },
+        {
+          "skill": "Excel",
+          "count": 39
         },
         {
           "skill": "Rust",
-          "count": 34
+          "count": 28
         },
         {
           "skill": "Deep Learning",
-          "count": 31
+          "count": 28
         },
         {
           "skill": "RAG",
-          "count": 27
+          "count": 26
         }
       ],
       "Full-time": [
         {
           "skill": "Communication",
-          "count": 172
+          "count": 101
         },
         {
           "skill": "Problem Solving",
-          "count": 166
+          "count": 98
         },
         {
           "skill": "TypeScript",
-          "count": 100
+          "count": 94
         },
         {
           "skill": "Go",
-          "count": 61
-        },
-        {
-          "skill": "Excel",
-          "count": 49
+          "count": 65
         },
         {
           "skill": "RAG",
-          "count": 47
+          "count": 56
         },
         {
           "skill": "AWS",
-          "count": 46
+          "count": 45
         },
         {
-          "skill": "Agile",
-          "count": 36
-        },
-        {
-          "skill": "Git",
-          "count": 35
+          "skill": "Excel",
+          "count": 43
         },
         {
           "skill": "Terraform",
+          "count": 31
+        },
+        {
+          "skill": "Git",
+          "count": 29
+        },
+        {
+          "skill": "Agile",
           "count": 28
         }
       ],
       "Part-time": [
-        {
-          "skill": "Python",
-          "count": 4
-        },
-        {
-          "skill": "TypeScript",
-          "count": 3
-        },
-        {
-          "skill": "Swift",
-          "count": 2
-        },
-        {
-          "skill": "SwiftUI",
-          "count": 2
-        },
-        {
-          "skill": "Xcode",
-          "count": 2
-        },
-        {
-          "skill": "Core Data",
-          "count": 2
-        },
-        {
-          "skill": "Agile",
-          "count": 1
-        },
-        {
-          "skill": "PMP",
-          "count": 1
-        },
         {
           "skill": "Problem Solving",
           "count": 1
         },
         {
           "skill": "Communication",
+          "count": 1
+        },
+        {
+          "skill": "SAFe",
+          "count": 1
+        },
+        {
+          "skill": "TypeScript",
+          "count": 1
+        },
+        {
+          "skill": "Python",
+          "count": 1
+        },
+        {
+          "skill": "Agile",
+          "count": 1
+        },
+        {
+          "skill": "Computer Vision",
+          "count": 1
+        },
+        {
+          "skill": "Docker",
+          "count": 1
+        },
+        {
+          "skill": "GPT",
+          "count": 1
+        },
+        {
+          "skill": "Go",
           "count": 1
         }
       ],
       "Internship": [
         {
           "skill": "Problem Solving",
-          "count": 42
+          "count": 16
         },
         {
           "skill": "Communication",
-          "count": 42
-        },
-        {
-          "skill": "Python",
-          "count": 12
-        },
-        {
-          "skill": "Git",
-          "count": 10
+          "count": 16
         },
         {
           "skill": "Agile",
-          "count": 8
+          "count": 10
         },
         {
-          "skill": "JavaScript",
+          "skill": "Git",
+          "count": 6
+        },
+        {
+          "skill": "Python",
           "count": 5
         },
         {
@@ -287,227 +283,105 @@
         },
         {
           "skill": "Machine Learning",
-          "count": 5
-        },
-        {
-          "skill": "Java",
-          "count": 5
-        },
-        {
-          "skill": "React",
-          "count": 5
-        }
-      ],
-      "Fresher": [
-        {
-          "skill": "Communication",
-          "count": 11
-        },
-        {
-          "skill": "Problem Solving",
-          "count": 10
-        },
-        {
-          "skill": "Python",
-          "count": 7
-        },
-        {
-          "skill": "Tally",
-          "count": 3
-        },
-        {
-          "skill": "GST",
-          "count": 3
-        },
-        {
-          "skill": "Accounting",
-          "count": 3
-        },
-        {
-          "skill": "Excel",
-          "count": 3
-        },
-        {
-          "skill": "SQL",
-          "count": 3
-        },
-        {
-          "skill": "Java",
-          "count": 3
-        },
-        {
-          "skill": "PostgreSQL",
-          "count": 2
-        }
-      ],
-      "Contract": [
-        {
-          "skill": "Python",
           "count": 4
         },
         {
-          "skill": "CRM",
-          "count": 2
-        },
-        {
-          "skill": "Communication",
-          "count": 2
-        },
-        {
-          "skill": "Kotlin",
-          "count": 2
-        },
-        {
-          "skill": "SQL",
-          "count": 2
-        },
-        {
-          "skill": "SAP ABAP",
+          "skill": "C#",
           "count": 1
         },
         {
-          "skill": "SAP FICO",
+          "skill": "Android SDK",
           "count": 1
         },
         {
-          "skill": "SAP MM",
-          "count": 1
-        },
-        {
-          "skill": "SAP SD",
-          "count": 1
-        },
-        {
-          "skill": "Sales",
+          "skill": "Social Media Marketing",
           "count": 1
         }
       ],
-      "Walk-in": [
+      "Unknown": [
         {
-          "skill": "MySQL",
-          "count": 3
-        },
-        {
-          "skill": "Communication",
-          "count": 3
-        },
-        {
-          "skill": "Docker",
-          "count": 3
-        },
-        {
-          "skill": "Networking",
-          "count": 3
-        },
-        {
-          "skill": "Oracle",
-          "count": 2
-        },
-        {
-          "skill": "PostgreSQL",
-          "count": 2
-        },
-        {
-          "skill": "SQL Server",
-          "count": 2
+          "skill": "AI / ML",
+          "count": 53
         },
         {
           "skill": "Python",
-          "count": 2
+          "count": 22
         },
         {
-          "skill": "Microservices",
-          "count": 2
+          "skill": "Java",
+          "count": 20
         },
         {
-          "skill": "AWS",
-          "count": 2
-        }
-      ],
-      "Hybrid": [
-        {
-          "skill": "JIRA",
-          "count": 3
+          "skill": "JavaScript",
+          "count": 18
         },
         {
-          "skill": "Python",
-          "count": 3
+          "skill": "TypeScript",
+          "count": 17
         },
         {
-          "skill": "SEO",
-          "count": 2
+          "skill": "React",
+          "count": 15
         },
         {
-          "skill": "Manual Testing",
-          "count": 1
+          "skill": "Terraform",
+          "count": 12
         },
         {
-          "skill": "Test Cases",
-          "count": 1
+          "skill": "Machine Learning",
+          "count": 8
         },
         {
-          "skill": "Bug Tracking",
-          "count": 1
+          "skill": "ASP.NET",
+          "count": 7
         },
         {
-          "skill": "Writing",
-          "count": 1
-        },
-        {
-          "skill": "Blog",
-          "count": 1
-        },
-        {
-          "skill": "Copywriting",
-          "count": 1
-        },
-        {
-          "skill": "PyTorch",
-          "count": 1
+          "skill": "PHP",
+          "count": 5
         }
       ]
     },
     "by_experience": {
       "Mid Level": [
         {
+          "skill": "TypeScript",
+          "count": 151
+        },
+        {
           "skill": "Communication",
-          "count": 176
+          "count": 112
         },
         {
           "skill": "Problem Solving",
-          "count": 165
-        },
-        {
-          "skill": "TypeScript",
-          "count": 150
+          "count": 102
         },
         {
           "skill": "Go",
-          "count": 88
-        },
-        {
-          "skill": "Agile",
-          "count": 68
-        },
-        {
-          "skill": "Excel",
-          "count": 67
+          "count": 90
         },
         {
           "skill": "Terraform",
-          "count": 62
+          "count": 78
+        },
+        {
+          "skill": "Agile",
+          "count": 65
+        },
+        {
+          "skill": "Excel",
+          "count": 64
         },
         {
           "skill": "RAG",
-          "count": 55
+          "count": 59
         },
         {
           "skill": "Rust",
-          "count": 44
+          "count": 45
         },
         {
           "skill": "AWS",
-          "count": 41
+          "count": 45
         }
       ],
       "Senior": [
@@ -516,23 +390,23 @@
           "count": 29
         },
         {
-          "skill": "AWS",
-          "count": 20
-        },
-        {
           "skill": "Go",
-          "count": 19
+          "count": 22
         },
         {
-          "skill": "Git",
+          "skill": "AWS",
           "count": 18
         },
         {
-          "skill": "Excel",
-          "count": 16
+          "skill": "Git",
+          "count": 15
         },
         {
           "skill": "RAG",
+          "count": 13
+        },
+        {
+          "skill": "Excel",
           "count": 12
         },
         {
@@ -544,180 +418,122 @@
           "count": 10
         },
         {
-          "skill": "Communication",
-          "count": 10
+          "skill": "Problem Solving",
+          "count": 9
         },
         {
-          "skill": "Rust",
-          "count": 8
+          "skill": "Communication",
+          "count": 9
         }
       ],
       "Entry Level": [
         {
           "skill": "Communication",
-          "count": 83
+          "count": 43
         },
         {
           "skill": "Problem Solving",
-          "count": 81
+          "count": 41
         },
         {
           "skill": "TypeScript",
-          "count": 27
-        },
-        {
-          "skill": "Agile",
           "count": 18
         },
         {
           "skill": "Go",
-          "count": 15
-        },
-        {
-          "skill": "Git",
-          "count": 15
-        },
-        {
-          "skill": "Python",
           "count": 14
         },
         {
-          "skill": "Excel",
-          "count": 9
+          "skill": "Agile",
+          "count": 14
+        },
+        {
+          "skill": "Git",
+          "count": 13
+        },
+        {
+          "skill": "RAG",
+          "count": 10
         },
         {
           "skill": "AWS",
-          "count": 9
+          "count": 8
         },
         {
-          "skill": "Deep Learning",
+          "skill": "Python",
           "count": 8
+        },
+        {
+          "skill": "Excel",
+          "count": 6
         }
       ],
       "Lead": [
         {
-          "skill": "Communication",
-          "count": 5
+          "skill": "Problem Solving",
+          "count": 2
         },
         {
-          "skill": "Problem Solving",
-          "count": 4
+          "skill": "Communication",
+          "count": 2
         },
         {
           "skill": "TypeScript",
-          "count": 3
+          "count": 2
+        },
+        {
+          "skill": "Rust",
+          "count": 1
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 1
         },
         {
           "skill": "Terraform",
-          "count": 3
-        },
-        {
-          "skill": "SQL",
-          "count": 3
-        },
-        {
-          "skill": "Tableau",
-          "count": 3
-        },
-        {
-          "skill": "Photoshop",
-          "count": 3
-        },
-        {
-          "skill": "Illustrator",
-          "count": 3
-        },
-        {
-          "skill": "Canva",
-          "count": 3
-        },
-        {
-          "skill": "CorelDraw",
-          "count": 3
+          "count": 1
         }
       ],
-      "Fresher": [
+      "Unknown": [
+        {
+          "skill": "AI / ML",
+          "count": 53
+        },
         {
           "skill": "Python",
-          "count": 11
+          "count": 22
         },
         {
-          "skill": "React",
-          "count": 6
-        },
-        {
-          "skill": "AutoCAD",
-          "count": 6
-        },
-        {
-          "skill": "HTML",
-          "count": 5
-        },
-        {
-          "skill": "CSS",
-          "count": 5
-        },
-        {
-          "skill": "Docker",
-          "count": 5
-        },
-        {
-          "skill": "SolidWorks",
-          "count": 5
-        },
-        {
-          "skill": "Manufacturing",
-          "count": 5
-        },
-        {
-          "skill": "GD&T",
-          "count": 5
+          "skill": "Java",
+          "count": 20
         },
         {
           "skill": "JavaScript",
-          "count": 4
-        }
-      ],
-      "Junior": [
-        {
-          "skill": "Python",
-          "count": 4
+          "count": 18
         },
         {
-          "skill": "Docker",
-          "count": 4
+          "skill": "TypeScript",
+          "count": 17
         },
         {
-          "skill": "MySQL",
-          "count": 2
+          "skill": "React",
+          "count": 15
         },
         {
-          "skill": "PyTorch",
-          "count": 2
+          "skill": "Terraform",
+          "count": 12
         },
         {
-          "skill": "MLOps",
-          "count": 2
+          "skill": "Machine Learning",
+          "count": 8
         },
         {
-          "skill": "Deep Learning",
-          "count": 2
+          "skill": "ASP.NET",
+          "count": 7
         },
         {
-          "skill": "Microservices",
-          "count": 2
-        },
-        {
-          "skill": "AWS",
-          "count": 2
-        },
-        {
-          "skill": "Kubernetes",
-          "count": 2
-        },
-        {
-          "skill": "Jenkins",
-          "count": 2
+          "skill": "PHP",
+          "count": 5
         }
       ]
     },
@@ -725,211 +541,325 @@
       "Worldwide": [
         {
           "skill": "TypeScript",
-          "count": 62
+          "count": 63
         },
         {
           "skill": "Communication",
-          "count": 43
+          "count": 46
         },
         {
           "skill": "Problem Solving",
-          "count": 35
+          "count": 38
         },
         {
           "skill": "Terraform",
-          "count": 26
+          "count": 30
         },
         {
           "skill": "Agile",
-          "count": 25
+          "count": 26
         },
         {
           "skill": "Deep Learning",
           "count": 15
         },
         {
-          "skill": "Rust",
-          "count": 14
-        },
-        {
           "skill": "design",
-          "count": 13
+          "count": 11
         },
         {
           "skill": "support",
-          "count": 13
+          "count": 10
         },
         {
           "skill": "Excel",
-          "count": 12
+          "count": 10
+        },
+        {
+          "skill": "Figma",
+          "count": 10
         }
       ],
-      "France": [
+      "United Kingdom": [
         {
-          "skill": "Terraform",
-          "count": 3
+          "skill": "Go",
+          "count": 9
         },
         {
           "skill": "TypeScript",
-          "count": 3
+          "count": 8
         },
         {
           "skill": "Rust",
-          "count": 2
-        },
-        {
-          "skill": "Go",
-          "count": 2
+          "count": 6
         },
         {
           "skill": "Excel",
-          "count": 2
+          "count": 6
         },
         {
-          "skill": "Machine Learning",
-          "count": 2
+          "skill": "Terraform",
+          "count": 6
         },
         {
-          "skill": "Python",
-          "count": 2
+          "skill": "Agile",
+          "count": 6
         },
         {
-          "skill": "ios",
-          "count": 1
+          "skill": "RAG",
+          "count": 4
         },
         {
-          "skill": "security",
-          "count": 1
+          "skill": "Communication",
+          "count": 4
         },
         {
-          "skill": "cloud",
-          "count": 1
+          "skill": "AWS",
+          "count": 3
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 3
         }
       ],
       "Other": [
         {
           "skill": "TypeScript",
-          "count": 93
+          "count": 72
         },
         {
           "skill": "Go",
-          "count": 77
-        },
-        {
-          "skill": "Excel",
-          "count": 60
+          "count": 71
         },
         {
           "skill": "RAG",
-          "count": 60
+          "count": 55
         },
         {
           "skill": "AWS",
-          "count": 48
+          "count": 47
+        },
+        {
+          "skill": "Excel",
+          "count": 47
         },
         {
           "skill": "Agile",
-          "count": 44
+          "count": 33
         },
         {
           "skill": "Git",
-          "count": 34
-        },
-        {
-          "skill": "Communication",
-          "count": 31
-        },
-        {
-          "skill": "Problem Solving",
-          "count": 28
+          "count": 26
         },
         {
           "skill": "Terraform",
           "count": 24
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 23
+        },
+        {
+          "skill": "Communication",
+          "count": 23
+        }
+      ],
+      "France": [
+        {
+          "skill": "Go",
+          "count": 4
+        },
+        {
+          "skill": "RAG",
+          "count": 4
+        },
+        {
+          "skill": "Terraform",
+          "count": 4
+        },
+        {
+          "skill": "TypeScript",
+          "count": 3
+        },
+        {
+          "skill": "Rust",
+          "count": 3
+        },
+        {
+          "skill": "Agile",
+          "count": 2
+        },
+        {
+          "skill": "AWS",
+          "count": 2
+        },
+        {
+          "skill": "Machine Learning",
+          "count": 2
+        },
+        {
+          "skill": "SAFe",
+          "count": 2
+        },
+        {
+          "skill": "Git",
+          "count": 1
+        }
+      ],
+      "Ireland": [
+        {
+          "skill": "Terraform",
+          "count": 3
+        },
+        {
+          "skill": "TypeScript",
+          "count": 3
+        },
+        {
+          "skill": "Go",
+          "count": 2
+        },
+        {
+          "skill": "Rust",
+          "count": 2
+        },
+        {
+          "skill": "AWS",
+          "count": 2
+        },
+        {
+          "skill": "Excel",
+          "count": 2
+        },
+        {
+          "skill": "Problem Solving",
+          "count": 1
+        },
+        {
+          "skill": "Communication",
+          "count": 1
+        },
+        {
+          "skill": "Computer Vision",
+          "count": 1
+        }
+      ],
+      "Netherlands": [
+        {
+          "skill": "Go",
+          "count": 1
+        },
+        {
+          "skill": "AWS",
+          "count": 1
+        },
+        {
+          "skill": "Azure",
+          "count": 1
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 1
+        },
+        {
+          "skill": "Excel",
+          "count": 1
+        },
+        {
+          "skill": "Git",
+          "count": 1
+        },
+        {
+          "skill": "GCP",
+          "count": 1
+        },
+        {
+          "skill": "Scala",
+          "count": 1
+        }
+      ],
+      "Germany": [
+        {
+          "skill": "TypeScript",
+          "count": 8
+        },
+        {
+          "skill": "Go",
+          "count": 5
+        },
+        {
+          "skill": "Git",
+          "count": 5
+        },
+        {
+          "skill": "AWS",
+          "count": 4
+        },
+        {
+          "skill": "RAG",
+          "count": 3
+        },
+        {
+          "skill": "Rust",
+          "count": 3
+        },
+        {
+          "skill": "Terraform",
+          "count": 3
+        },
+        {
+          "skill": "Azure",
+          "count": 2
+        },
+        {
+          "skill": "Kubernetes",
+          "count": 2
+        },
+        {
+          "skill": "Excel",
+          "count": 2
         }
       ],
       "United States": [
         {
           "skill": "Communication",
-          "count": 44
+          "count": 54
         },
         {
           "skill": "Problem Solving",
-          "count": 43
+          "count": 53
         },
         {
           "skill": "TypeScript",
-          "count": 29
+          "count": 40
         },
         {
           "skill": "Terraform",
-          "count": 19
+          "count": 21
         },
         {
           "skill": "Go",
-          "count": 15
-        },
-        {
-          "skill": "Machine Learning",
-          "count": 10
-        },
-        {
-          "skill": "Agile",
-          "count": 9
-        },
-        {
-          "skill": "Rust",
-          "count": 9
+          "count": 18
         },
         {
           "skill": "Deep Learning",
-          "count": 8
+          "count": 14
         },
         {
-          "skill": "Excel",
-          "count": 8
-        }
-      ],
-      "Canada": [
-        {
-          "skill": "TypeScript",
-          "count": 4
-        },
-        {
-          "skill": "Communication",
-          "count": 2
-        },
-        {
-          "skill": "Agile",
-          "count": 2
-        },
-        {
-          "skill": "system",
-          "count": 1
-        },
-        {
-          "skill": "technical",
-          "count": 1
-        },
-        {
-          "skill": "support",
-          "count": 1
-        },
-        {
-          "skill": "software",
-          "count": 1
-        },
-        {
-          "skill": "financial",
-          "count": 1
-        },
-        {
-          "skill": "finance",
-          "count": 1
+          "skill": "RAG",
+          "count": 13
         },
         {
           "skill": "Rust",
-          "count": 1
+          "count": 11
+        },
+        {
+          "skill": "Agile",
+          "count": 11
+        },
+        {
+          "skill": "Excel",
+          "count": 10
         }
       ],
       "Japan": [
@@ -962,257 +892,155 @@
           "count": 1
         }
       ],
-      "United Kingdom": [
-        {
-          "skill": "TypeScript",
-          "count": 10
-        },
-        {
-          "skill": "Go",
-          "count": 5
-        },
-        {
-          "skill": "Problem Solving",
-          "count": 5
-        },
+      "Canada": [
         {
           "skill": "Communication",
-          "count": 5
-        },
-        {
-          "skill": "Agile",
-          "count": 4
-        },
-        {
-          "skill": "AWS",
-          "count": 4
-        },
-        {
-          "skill": "Excel",
-          "count": 4
-        },
-        {
-          "skill": "RAG",
           "count": 3
+        },
+        {
+          "skill": "Terraform",
+          "count": 2
+        },
+        {
+          "skill": "documentation",
+          "count": 1
+        },
+        {
+          "skill": "zendesk",
+          "count": 1
+        },
+        {
+          "skill": "account management",
+          "count": 1
+        },
+        {
+          "skill": "startup",
+          "count": 1
+        },
+        {
+          "skill": "Linux/Unix",
+          "count": 1
         },
         {
           "skill": "Deep Learning",
-          "count": 3
-        },
-        {
-          "skill": "Terraform",
-          "count": 3
-        }
-      ],
-      "Germany": [
-        {
-          "skill": "Terraform",
-          "count": 4
-        },
-        {
-          "skill": "Go",
-          "count": 3
-        },
-        {
-          "skill": "AWS",
-          "count": 3
-        },
-        {
-          "skill": "TypeScript",
-          "count": 3
-        },
-        {
-          "skill": "Rust",
-          "count": 2
-        },
-        {
-          "skill": "Excel",
-          "count": 2
-        },
-        {
-          "skill": "Agile",
-          "count": 2
-        },
-        {
-          "skill": "RAG",
-          "count": 2
+          "count": 1
         },
         {
           "skill": "Machine Learning",
-          "count": 2
+          "count": 1
         },
         {
           "skill": "Python",
           "count": 1
-        }
-      ],
-      "Singapore": [
-        {
-          "skill": "Excel",
-          "count": 1
-        },
-        {
-          "skill": "Git",
-          "count": 1
-        },
-        {
-          "skill": "TypeScript",
-          "count": 1
-        },
-        {
-          "skill": "User Research",
-          "count": 1
-        }
-      ],
-      "India": [
-        {
-          "skill": "Communication",
-          "count": 153
-        },
-        {
-          "skill": "Problem Solving",
-          "count": 145
-        },
-        {
-          "skill": "Python",
-          "count": 49
-        },
-        {
-          "skill": "Java",
-          "count": 21
-        },
-        {
-          "skill": "Git",
-          "count": 15
-        },
-        {
-          "skill": "Agile",
-          "count": 13
-        },
-        {
-          "skill": "React",
-          "count": 12
-        },
-        {
-          "skill": "Docker",
-          "count": 12
-        },
-        {
-          "skill": "AutoCAD",
-          "count": 11
-        },
-        {
-          "skill": "SQL",
-          "count": 9
         }
       ]
     },
-    "total_unique": 325
+    "total_unique": 261
   },
   "roles": {
     "top_20": [
       {
         "role": "DevOps Engineer",
-        "count": 19
+        "count": 16
       },
       {
         "role": "Data Scientist",
-        "count": 9
+        "count": 7
       },
       {
-        "role": "Senior Software Engineer",
-        "count": 8
-      },
-      {
-        "role": "Java Developer",
+        "role": "Frontend Developer",
         "count": 7
       },
       {
         "role": "Product Manager",
-        "count": 5
-      },
-      {
-        "role": "Data Analyst",
-        "count": 5
+        "count": 6
       },
       {
         "role": "Python Developer",
         "count": 5
       },
       {
-        "role": "Mechanical Engineering Trainee",
-        "count": 5
-      },
-      {
-        "role": "iOS Developer",
+        "role": "Data Analyst",
         "count": 4
       },
       {
-        "role": "Frontend Developer",
+        "role": "Senior Product Designer",
         "count": 4
       },
       {
-        "role": "Graphic Designer",
-        "count": 4
+        "role": "Senior Software Engineer",
+        "count": 3
       },
       {
-        "role": "Web Development Intern",
-        "count": 4
+        "role": "Shopify Engineer",
+        "count": 3
       },
       {
-        "role": "Mobile App Developer",
-        "count": 4
+        "role": "Senior DevOps Engineer",
+        "count": 3
       },
       {
-        "role": "Software Development Intern",
-        "count": 4
+        "role": "Pharmacy Technician",
+        "count": 3
       },
       {
-        "role": "Sales Executive",
-        "count": 4
+        "role": "Machine Learning Engineer",
+        "count": 3
       },
       {
-        "role": "Accounts Executive",
-        "count": 4
+        "role": "Web Developer",
+        "count": 3
       },
       {
-        "role": "Database Administrator",
-        "count": 4
+        "role": "Full Stack Engineer",
+        "count": 3
       },
       {
-        "role": "Digital Marketing Executive",
-        "count": 4
+        "role": "Software Developer",
+        "count": 3
       },
       {
-        "role": "Voice Process Executive",
-        "count": 4
+        "role": "Java Developer",
+        "count": 3
       },
       {
-        "role": "Project Manager",
-        "count": 4
+        "role": "React.js Developer",
+        "count": 3
+      },
+      {
+        "role": "Software Engineer",
+        "count": 3
+      },
+      {
+        "role": "Quality Assurance Engineer",
+        "count": 3
+      },
+      {
+        "role": "Data Engineer",
+        "count": 3
       }
     ],
     "by_experience": {
       "Mid Level": [
         {
           "role": "DevOps Engineer",
-          "count": 13
+          "count": 10
         },
         {
           "role": "Data Scientist",
-          "count": 7
+          "count": 6
         },
         {
           "role": "Product Manager",
           "count": 5
         },
         {
-          "role": "Python Developer",
-          "count": 5
+          "role": "Senior Product Designer",
+          "count": 3
         },
         {
-          "role": "Senior DevOps Engineer",
-          "count": 3
+          "role": "Senior Account Executive, Enterprise",
+          "count": 2
         }
       ],
       "Senior": [
@@ -1221,123 +1049,103 @@
           "count": 3
         },
         {
-          "role": "Database Administrator",
-          "count": 2
-        },
-        {
-          "role": "iOS Developer",
-          "count": 2
-        },
-        {
           "role": "Retail Manager - Tire and Battery Center",
+          "count": 1
+        },
+        {
+          "role": "Talent Management Partner, Performance",
           "count": 1
         },
         {
           "role": "Product Operation Specialist - Comprehensive Search Operation",
           "count": 1
+        },
+        {
+          "role": "(USA) Manager, Apparel Designer",
+          "count": 1
         }
       ],
       "Entry Level": [
+        {
+          "role": "Merchandising Internship Program | Summer 2026 | Framingham, MA",
+          "count": 1
+        },
+        {
+          "role": "Spring 2026 Intern - Electronics (Masters), C++",
+          "count": 1
+        },
+        {
+          "role": "Maintenance/Janitorial Associate",
+          "count": 1
+        },
+        {
+          "role": "Pharmacy Intern - Grad",
+          "count": 1
+        },
+        {
+          "role": "Prepared Food Team Member",
+          "count": 1
+        }
+      ],
+      "Lead": [
+        {
+          "role": "Sr. Director Analyst, AI Business Strategy and Adoption (Remote EU)",
+          "count": 1
+        },
+        {
+          "role": "Enterprise Sales Manager",
+          "count": 1
+        }
+      ],
+      "Unknown": [
+        {
+          "role": "Frontend Developer",
+          "count": 6
+        },
+        {
+          "role": "DevOps Engineer",
+          "count": 6
+        },
+        {
+          "role": "Python Developer",
+          "count": 5
+        },
         {
           "role": "Java Developer",
           "count": 3
         },
         {
-          "role": "Graphic Design",
-          "count": 2
-        },
-        {
-          "role": "Content and Social Media Marketing",
-          "count": 2
-        },
-        {
-          "role": "Business Development (Sales)",
-          "count": 2
-        },
-        {
-          "role": "Digital Marketing",
-          "count": 2
-        }
-      ],
-      "Lead": [
-        {
-          "role": "Graphic Designer",
+          "role": "React.js Developer",
           "count": 3
-        },
-        {
-          "role": "Digital Marketing Executive",
-          "count": 3
-        },
-        {
-          "role": "Direct Auto Area Sales Manager-Western Tennessee (Virtual)",
-          "count": 1
-        },
-        {
-          "role": "Director of Major Projects and Change (Health and Life Sciences)",
-          "count": 1
-        },
-        {
-          "role": "Customer Success Renewals Manager",
-          "count": 1
-        }
-      ],
-      "Fresher": [
-        {
-          "role": "Mechanical Engineering Trainee",
-          "count": 5
-        },
-        {
-          "role": "Web Development Intern",
-          "count": 4
-        },
-        {
-          "role": "DevOps Engineer",
-          "count": 4
-        },
-        {
-          "role": "Software Development Intern",
-          "count": 4
-        },
-        {
-          "role": "Content Writer",
-          "count": 2
-        }
-      ],
-      "Junior": [
-        {
-          "role": "ML Engineer",
-          "count": 2
-        },
-        {
-          "role": "Senior Software Engineer",
-          "count": 2
-        },
-        {
-          "role": "DevOps Engineer",
-          "count": 2
-        },
-        {
-          "role": "Sales Executive",
-          "count": 2
-        },
-        {
-          "role": "Mobile App Developer",
-          "count": 1
         }
       ]
     },
-    "total_unique": 528
+    "total_unique": 795
   },
   "companies": {
     "top_30": [
       {
+        "company": "",
+        "open_positions": 293,
+        "categories": [
+          "Cloud & DevOps",
+          "Design",
+          "Other",
+          "Software Development",
+          "Cybersecurity",
+          "Data Science",
+          "Product Management",
+          "Marketing"
+        ]
+      },
+      {
         "company": "Startup",
-        "open_positions": 93,
+        "open_positions": 50,
         "categories": [
           "Management",
-          "Data Science",
           "Technology",
           "Internship",
+          "Data Science",
           "Marketing"
         ]
       },
@@ -1345,110 +1153,133 @@
         "company": "Walmart",
         "open_positions": 29,
         "categories": [
+          "Business",
           "Technology",
-          "Design",
-          "Business"
+          "Design"
         ]
       },
       {
-        "company": "The Coca-Cola Company",
-        "open_positions": 8,
+        "company": "BairesDev",
+        "open_positions": 10,
         "categories": [
-          "Management"
+          "Software Development",
+          "Cloud & DevOps"
         ]
       },
       {
-        "company": "CVS Health",
+        "company": "Synchrony",
         "open_positions": 8,
         "categories": [
-          "Technology",
           "Data Science",
-          "Internship"
+          "QA & Testing",
+          "Other"
         ]
       },
       {
-        "company": "Pavago",
-        "open_positions": 8,
+        "company": "Remote",
+        "open_positions": 7,
         "categories": [
           "Management",
-          "Data Science",
-          "Technology",
           "Design",
-          "Marketing"
-        ]
-      },
-      {
-        "company": "Mindrift",
-        "open_positions": 6,
-        "categories": [
-          "Data Science",
-          "Technology"
-        ]
-      },
-      {
-        "company": "Infosys",
-        "open_positions": 6,
-        "categories": [
-          "Data Science",
-          "Engineering",
-          "Technology"
-        ]
-      },
-      {
-        "company": "Capgemini",
-        "open_positions": 6,
-        "categories": [
-          "Engineering",
-          "Data Science",
-          "Technology",
-          "Design",
-          "Internship"
-        ]
-      },
-      {
-        "company": "Salem Steel Plant (SAIL)",
-        "open_positions": 6,
-        "categories": [
-          "Engineering",
-          "Data Science",
-          "Technology",
-          "Customer Service",
-          "Internship"
-        ]
-      },
-      {
-        "company": "Hyundai Motor India",
-        "open_positions": 6,
-        "categories": [
-          "Sales",
-          "Technology",
+          "Finance",
+          "Business",
+          "Human Resources",
           "Data Science"
         ]
       },
       {
-        "company": "TVS Motor Company",
+        "company": "CVS Health",
+        "open_positions": 7,
+        "categories": [
+          "Internship",
+          "Data Science",
+          "Technology"
+        ]
+      },
+      {
+        "company": "ARMStrong Insurance Services",
         "open_positions": 6,
         "categories": [
-          "Data Science",
-          "Technology",
-          "Internship"
+          "Technology"
+        ]
+      },
+      {
+        "company": "Uplers",
+        "open_positions": 6,
+        "categories": [
+          "Software Development",
+          "Other"
+        ]
+      },
+      {
+        "company": "Aptean India",
+        "open_positions": 6,
+        "categories": [
+          "Software Development",
+          "Cloud & DevOps"
+        ]
+      },
+      {
+        "company": "The Coca-Cola Company",
+        "open_positions": 5,
+        "categories": [
+          "Management"
         ]
       },
       {
         "company": "Meta",
         "open_positions": 5,
         "categories": [
-          "Technology",
-          "Management"
+          "Management",
+          "Technology"
         ]
       },
       {
-        "company": "Amazon Development Centre",
+        "company": "Bjak",
         "open_positions": 5,
         "categories": [
-          "Engineering",
-          "Technology",
-          "Finance"
+          "Business",
+          "Internship",
+          "Data Science"
+        ]
+      },
+      {
+        "company": "Bank of America",
+        "open_positions": 5,
+        "categories": [
+          "Software Development",
+          "Marketing"
+        ]
+      },
+      {
+        "company": "MaduraiStartups",
+        "open_positions": 5,
+        "categories": [
+          "Software Development",
+          "Other"
+        ]
+      },
+      {
+        "company": "Larsen & Toubro",
+        "open_positions": 5,
+        "categories": [
+          "Software Development",
+          "Other"
+        ]
+      },
+      {
+        "company": "Calpion Inc.",
+        "open_positions": 5,
+        "categories": [
+          "QA & Testing",
+          "Other"
+        ]
+      },
+      {
+        "company": "DoiT International",
+        "open_positions": 4,
+        "categories": [
+          "Sales"
         ]
       },
       {
@@ -1460,6 +1291,13 @@
         ]
       },
       {
+        "company": "Coalition Technologies",
+        "open_positions": 4,
+        "categories": [
+          "Marketing"
+        ]
+      },
+      {
         "company": "Kroger",
         "open_positions": 4,
         "categories": [
@@ -1468,99 +1306,8 @@
         ]
       },
       {
-        "company": "Allime Tech Solutions",
+        "company": "Netflix",
         "open_positions": 4,
-        "categories": [
-          "Technology"
-        ]
-      },
-      {
-        "company": "Caterpillar India",
-        "open_positions": 4,
-        "categories": [
-          "Design",
-          "Technology",
-          "Marketing"
-        ]
-      },
-      {
-        "company": "Chargebee",
-        "open_positions": 4,
-        "categories": [
-          "Customer Service",
-          "Marketing",
-          "Internship"
-        ]
-      },
-      {
-        "company": "IBM India",
-        "open_positions": 4,
-        "categories": [
-          "Technology",
-          "Customer Service",
-          "Management"
-        ]
-      },
-      {
-        "company": "TAFE (Tractors)",
-        "open_positions": 4,
-        "categories": [
-          "Technology",
-          "Human Resources"
-        ]
-      },
-      {
-        "company": "Cholamandalam Finance",
-        "open_positions": 4,
-        "categories": [
-          "Sales",
-          "Technology",
-          "Customer Service"
-        ]
-      },
-      {
-        "company": "Kraken",
-        "open_positions": 3,
-        "categories": [
-          "Design",
-          "Marketing"
-        ]
-      },
-      {
-        "company": "TikTok",
-        "open_positions": 3,
-        "categories": [
-          "Technology",
-          "Management"
-        ]
-      },
-      {
-        "company": "Apple",
-        "open_positions": 3,
-        "categories": [
-          "Technology"
-        ]
-      },
-      {
-        "company": "Wipro",
-        "open_positions": 3,
-        "categories": [
-          "Technology",
-          "Design",
-          "Customer Service"
-        ]
-      },
-      {
-        "company": "Tinder",
-        "open_positions": 3,
-        "categories": [
-          "Technology",
-          "Internship"
-        ]
-      },
-      {
-        "company": "Turing",
-        "open_positions": 3,
         "categories": [
           "Data Science",
           "Technology"
@@ -1568,144 +1315,195 @@
       },
       {
         "company": "Virtusa",
+        "open_positions": 4,
+        "categories": [
+          "Software Development",
+          "Data Science",
+          "QA & Testing",
+          "Other"
+        ]
+      },
+      {
+        "company": "Arcana",
+        "open_positions": 4,
+        "categories": [
+          "Software Development",
+          "Data Science",
+          "Other"
+        ]
+      },
+      {
+        "company": "VenPep Group",
+        "open_positions": 4,
+        "categories": [
+          "Software Development"
+        ]
+      },
+      {
+        "company": "HCLTech",
+        "open_positions": 4,
+        "categories": [
+          "Software Development",
+          "Other"
+        ]
+      },
+      {
+        "company": "Meril",
+        "open_positions": 4,
+        "categories": [
+          "Software Development"
+        ]
+      },
+      {
+        "company": "Deel",
         "open_positions": 3,
         "categories": [
+          "Management",
+          "Sales"
+        ]
+      },
+      {
+        "company": "Gartner",
+        "open_positions": 3,
+        "categories": [
+          "Software Development",
           "Data Science",
           "Technology"
         ]
       },
       {
-        "company": "Synchrony",
+        "company": "XXIX",
         "open_positions": 3,
         "categories": [
-          "Data Science"
-        ]
-      },
-      {
-        "company": "Adani Total Gas",
-        "open_positions": 3,
-        "categories": [
-          "Technology"
+          "Design"
         ]
       }
     ],
-    "total_unique": 379
+    "total_unique": 373
   },
   "locations": {
     "top_cities": [
+      {
+        "city": "Chennai",
+        "count": 206
+      },
+      {
+        "city": "Coimbatore",
+        "count": 120
+      },
       {
         "city": "Remote",
         "count": 96
       },
       {
-        "city": "Chennai",
-        "count": 74
+        "city": "Madurai",
+        "count": 89
       },
       {
         "city": "India",
         "count": 50
       },
       {
-        "city": "Coimbatore",
-        "count": 29
-      },
-      {
         "city": "United States",
-        "count": 23
+        "count": 45
       },
       {
-        "city": "Madurai",
-        "count": 21
+        "city": "Puducherry",
+        "count": 45
       },
       {
-        "city": "Pondicherry",
-        "count": 20
-      },
-      {
-        "city": "OMR (Old Mahabalipuram Road)",
-        "count": 17
+        "city": "Tamil Nadu",
+        "count": 31
       },
       {
         "city": "New York",
-        "count": 15
+        "count": 17
       },
       {
-        "city": "Salem",
-        "count": 15
-      },
-      {
-        "city": "Tidel Park",
-        "count": 15
+        "city": "Tiruchirappalli",
+        "count": 10
       },
       {
         "city": "China",
-        "count": 10
-      },
-      {
-        "city": "Siruseri",
-        "count": 10
+        "count": 9
       },
       {
         "city": "San Francisco",
         "count": 9
       },
       {
-        "city": "Tiruchirappalli",
+        "city": "Worldwide",
         "count": 9
       },
       {
-        "city": "Hosur",
-        "count": 9
+        "city": "UK",
+        "count": 6
       },
       {
-        "city": "Tirupur",
-        "count": 9
+        "city": "Europe",
+        "count": 5
       },
       {
-        "city": "Sholinganallur",
-        "count": 9
+        "city": "France",
+        "count": 5
       },
       {
-        "city": "Los Angeles",
-        "count": 7
+        "city": "Germany",
+        "count": 5
       },
       {
         "city": "Brazil",
-        "count": 6
+        "count": 5
+      },
+      {
+        "city": "USA",
+        "count": 5
+      },
+      {
+        "city": "United Kingdom",
+        "count": 4
       }
     ],
     "top_countries": [
       {
         "country": "India",
-        "count": 328
+        "count": 569
       },
       {
         "country": "Other",
-        "count": 135
+        "count": 115
+      },
+      {
+        "country": "United States",
+        "count": 97
       },
       {
         "country": "Worldwide",
         "count": 96
       },
       {
-        "country": "United States",
-        "count": 84
+        "country": "United Kingdom",
+        "count": 14
       },
       {
-        "country": "United Kingdom",
-        "count": 12
+        "country": "Germany",
+        "count": 10
+      },
+      {
+        "country": "France",
+        "count": 6
       },
       {
         "country": "Canada",
         "count": 5
       },
       {
-        "country": "Germany",
-        "count": 5
+        "country": "Ireland",
+        "count": 3
       },
       {
-        "country": "France",
-        "count": 4
+        "country": "Netherlands",
+        "count": 1
       },
       {
         "country": "Japan",
@@ -1716,68 +1514,98 @@
         "count": 1
       }
     ],
-    "remote_percentage": 27.6,
-    "total_remote": 185
+    "remote_percentage": 19.5,
+    "total_remote": 179
   },
   "categories": {
     "distribution": [
       {
-        "category": "Technology",
-        "count": 359,
-        "percentage": 53.5
+        "category": "Software Development",
+        "count": 221,
+        "percentage": 24.1
       },
       {
-        "category": "Internship",
-        "count": 89,
-        "percentage": 13.3
+        "category": "Other",
+        "count": 207,
+        "percentage": 22.5
+      },
+      {
+        "category": "Technology",
+        "count": 202,
+        "percentage": 22.0
       },
       {
         "category": "Data Science",
-        "count": 66,
-        "percentage": 9.8
-      },
-      {
-        "category": "Management",
-        "count": 45,
-        "percentage": 6.7
-      },
-      {
-        "category": "Design",
-        "count": 29,
-        "percentage": 4.3
+        "count": 70,
+        "percentage": 7.6
       },
       {
         "category": "Marketing",
+        "count": 44,
+        "percentage": 4.8
+      },
+      {
+        "category": "Design",
+        "count": 41,
+        "percentage": 4.5
+      },
+      {
+        "category": "Internship",
+        "count": 40,
+        "percentage": 4.4
+      },
+      {
+        "category": "Management",
         "count": 29,
-        "percentage": 4.3
+        "percentage": 3.2
       },
       {
         "category": "Customer Service",
-        "count": 21,
-        "percentage": 3.1
+        "count": 14,
+        "percentage": 1.5
       },
       {
         "category": "Sales",
         "count": 13,
-        "percentage": 1.9
+        "percentage": 1.4
+      },
+      {
+        "category": "Cloud & DevOps",
+        "count": 8,
+        "percentage": 0.9
       },
       {
         "category": "Finance",
-        "count": 9,
-        "percentage": 1.3
+        "count": 7,
+        "percentage": 0.8
       },
       {
-        "category": "Engineering",
-        "count": 8,
-        "percentage": 1.2
+        "category": "QA & Testing",
+        "count": 6,
+        "percentage": 0.7
+      },
+      {
+        "category": "Business",
+        "count": 5,
+        "percentage": 0.5
+      },
+      {
+        "category": "Cybersecurity",
+        "count": 5,
+        "percentage": 0.5
+      },
+      {
+        "category": "Product Management",
+        "count": 3,
+        "percentage": 0.3
       },
       {
         "category": "Human Resources",
         "count": 2,
-        "percentage": 0.3
+        "percentage": 0.2
       },
       {
-        "category": "Business",
+        "category": "AI / Machine Learning",
         "count": 1,
         "percentage": 0.1
       }
@@ -1786,28 +1614,36 @@
       "Worldwide": [
         {
           "category": "Technology",
-          "count": 53
+          "count": 55
         },
         {
           "category": "Design",
-          "count": 12
+          "count": 14
         },
         {
           "category": "Management",
-          "count": 11
+          "count": 9
         },
         {
           "category": "Data Science",
-          "count": 9
+          "count": 7
         },
         {
           "category": "Marketing",
           "count": 6
         }
       ],
-      "France": [
+      "United Kingdom": [
         {
           "category": "Technology",
+          "count": 5
+        },
+        {
+          "category": "Design",
+          "count": 2
+        },
+        {
+          "category": "Internship",
           "count": 2
         },
         {
@@ -1815,74 +1651,108 @@
           "count": 1
         },
         {
-          "category": "Data Science",
+          "category": "Finance",
           "count": 1
         }
       ],
       "Other": [
         {
           "category": "Technology",
-          "count": 82
-        },
-        {
-          "category": "Management",
-          "count": 17
+          "count": 70
         },
         {
           "category": "Data Science",
-          "count": 12
+          "count": 13
+        },
+        {
+          "category": "Management",
+          "count": 13
         },
         {
           "category": "Customer Service",
-          "count": 6
+          "count": 5
         },
         {
-          "category": "Marketing",
-          "count": 6
+          "category": "Design",
+          "count": 4
+        }
+      ],
+      "France": [
+        {
+          "category": "Sales",
+          "count": 3
+        },
+        {
+          "category": "Technology",
+          "count": 2
+        },
+        {
+          "category": "Business",
+          "count": 1
+        }
+      ],
+      "Ireland": [
+        {
+          "category": "Sales",
+          "count": 1
+        },
+        {
+          "category": "Customer Service",
+          "count": 1
+        },
+        {
+          "category": "Technology",
+          "count": 1
+        }
+      ],
+      "Netherlands": [
+        {
+          "category": "Sales",
+          "count": 1
+        }
+      ],
+      "Germany": [
+        {
+          "category": "Sales",
+          "count": 4
+        },
+        {
+          "category": "Technology",
+          "count": 3
+        },
+        {
+          "category": "Customer Service",
+          "count": 1
+        },
+        {
+          "category": "Design",
+          "count": 1
+        },
+        {
+          "category": "Data Science",
+          "count": 1
         }
       ],
       "United States": [
         {
           "category": "Technology",
-          "count": 41
+          "count": 50
         },
         {
           "category": "Data Science",
-          "count": 14
+          "count": 18
+        },
+        {
+          "category": "Design",
+          "count": 6
         },
         {
           "category": "Management",
-          "count": 11
-        },
-        {
-          "category": "Internship",
           "count": 6
         },
         {
           "category": "Customer Service",
-          "count": 3
-        }
-      ],
-      "Canada": [
-        {
-          "category": "Internship",
-          "count": 1
-        },
-        {
-          "category": "Data Science",
-          "count": 1
-        },
-        {
-          "category": "Marketing",
-          "count": 1
-        },
-        {
-          "category": "Technology",
-          "count": 1
-        },
-        {
-          "category": "Sales",
-          "count": 1
+          "count": 5
         }
       ],
       "Japan": [
@@ -1891,76 +1761,26 @@
           "count": 1
         }
       ],
-      "United Kingdom": [
+      "Canada": [
+        {
+          "category": "Data Science",
+          "count": 1
+        },
         {
           "category": "Technology",
-          "count": 6
+          "count": 1
         },
         {
           "category": "Design",
-          "count": 2
-        },
-        {
-          "category": "Sales",
           "count": 1
-        },
-        {
-          "category": "Management",
-          "count": 1
-        },
-        {
-          "category": "Data Science",
-          "count": 1
-        }
-      ],
-      "Germany": [
-        {
-          "category": "Technology",
-          "count": 1
-        },
-        {
-          "category": "Customer Service",
-          "count": 1
-        },
-        {
-          "category": "Marketing",
-          "count": 1
-        },
-        {
-          "category": "Sales",
-          "count": 1
-        },
-        {
-          "category": "Data Science",
-          "count": 1
-        }
-      ],
-      "Singapore": [
-        {
-          "category": "Technology",
-          "count": 1
-        }
-      ],
-      "India": [
-        {
-          "category": "Technology",
-          "count": 171
         },
         {
           "category": "Internship",
-          "count": 78
+          "count": 1
         },
         {
-          "category": "Data Science",
-          "count": 27
-        },
-        {
-          "category": "Marketing",
-          "count": 12
-        },
-        {
-          "category": "Customer Service",
-          "count": 9
+          "category": "Sales",
+          "count": 1
         }
       ]
     }
@@ -1968,14 +1788,14 @@
   "sources": {
     "distribution": [
       {
-        "source": "LinkedIn",
-        "count": 184,
-        "avg_quality": 56.8
+        "source": "Internshala",
+        "count": 343,
+        "avg_quality": 52.6
       },
       {
-        "source": "Internshala",
-        "count": 106,
-        "avg_quality": 64.6
+        "source": "LinkedIn",
+        "count": 263,
+        "avg_quality": 61.5
       },
       {
         "source": "The Muse",
@@ -1985,119 +1805,70 @@
       {
         "source": "Himalayas",
         "count": 60,
-        "avg_quality": 89.2
+        "avg_quality": 90.9
       },
       {
         "source": "We Work Remotely",
         "count": 56,
-        "avg_quality": 79.8
-      },
-      {
-        "source": "RemoteOK",
-        "count": 50,
-        "avg_quality": 82.1
+        "avg_quality": 79.7
       },
       {
         "source": "Jobicy",
         "count": 50,
-        "avg_quality": 85.0
+        "avg_quality": 84.9
       },
       {
-        "source": "Freshersworld",
-        "count": 23,
-        "avg_quality": 50.0
+        "source": "RemoteOK",
+        "count": 50,
+        "avg_quality": 83.0
       },
       {
         "source": "Remotive",
-        "count": 20,
-        "avg_quality": 95.0
+        "count": 30,
+        "avg_quality": 96.5
       },
       {
-        "source": "TimesJobs",
-        "count": 17,
-        "avg_quality": 50.0
-      },
-      {
-        "source": "Indeed",
-        "count": 17,
-        "avg_quality": 50.0
-      },
-      {
-        "source": "Company Career Page",
-        "count": 11,
-        "avg_quality": 50.0
-      },
-      {
-        "source": "Naukri.com",
-        "count": 10,
-        "avg_quality": 50.0
-      },
-      {
-        "source": "Foundit",
-        "count": 7,
-        "avg_quality": 50.0
+        "source": "TheMuse",
+        "count": 6,
+        "avg_quality": 85.0
       }
     ]
   },
   "salary_insights": {
-    "jobs_with_salary": 228,
-    "salary_transparency": 34.0,
+    "jobs_with_salary": 77,
+    "salary_transparency": 8.4,
     "by_experience": {
       "Mid Level": {
-        "count": 39,
+        "count": 33,
         "sample": [
-          "$30,000",
-          "$42,000",
-          "$60k"
-        ]
-      },
-      "Entry Level": {
-        "count": 93,
-        "sample": [
-          "USD 40,000",
-          "USD 44,000",
-          "USD 90,000"
+          "$25",
+          "$70,000",
+          "$30,000"
         ]
       },
       "Senior": {
-        "count": 20,
+        "count": 8,
         "sample": [
-          "USD 105,000",
-          "USD 89,000",
-          "USD 161,000"
+          "USD 80,000",
+          "USD 62,400",
+          "USD 109,400"
         ]
       },
-      "Lead": {
-        "count": 22,
+      "Entry Level": {
+        "count": 36,
         "sample": [
-          "USD 83,000",
-          "USD 120,000",
-          "\u20b930,00,000"
-        ]
-      },
-      "Fresher": {
-        "count": 39,
-        "sample": [
-          "\u20b91,80,000",
-          "\u20b91,80,000",
-          "\u20b91,80,000"
-        ]
-      },
-      "Junior": {
-        "count": 15,
-        "sample": [
-          "\u20b95,00,000",
-          "\u20b95,00,000",
-          "\u20b95,00,000"
+          "USD 35,360",
+          "GBP 55,000",
+          "USD 37,440"
         ]
       }
     }
   },
   "freshness": {
-    "today": 321,
-    "this_week": 169,
-    "this_month": 130,
-    "older": 51
+    "today": 203,
+    "this_week": 134,
+    "this_month": 150,
+    "older": 431
   },
   "career_paths": [
     {
@@ -2112,7 +1883,7 @@
             "JavaScript",
             "Git"
           ],
-          "available_jobs": 66
+          "available_jobs": 73
         },
         {
           "level": "Junior",
@@ -2123,7 +1894,7 @@
             "SQL",
             "REST APIs"
           ],
-          "available_jobs": 92
+          "available_jobs": 155
         },
         {
           "level": "Mid",
@@ -2134,7 +1905,7 @@
             "MongoDB",
             "CI/CD"
           ],
-          "available_jobs": 20
+          "available_jobs": 40
         },
         {
           "level": "Senior",
@@ -2145,7 +1916,7 @@
             "AWS",
             "Kubernetes"
           ],
-          "available_jobs": 86
+          "available_jobs": 138
         },
         {
           "level": "Lead",
@@ -2155,7 +1926,7 @@
             "Leadership",
             "Team Management"
           ],
-          "available_jobs": 41
+          "available_jobs": 64
         }
       ],
       "avg_salary_progression": [
@@ -2165,7 +1936,7 @@
         "\u20b924-40 LPA",
         "\u20b940-60 LPA"
       ],
-      "total_available_jobs": 305
+      "total_available_jobs": 470
     },
     {
       "name": "Data Scientist",
@@ -2179,7 +1950,7 @@
             "SQL",
             "Excel"
           ],
-          "available_jobs": 47
+          "available_jobs": 65
         },
         {
           "level": "Junior",
@@ -2190,7 +1961,7 @@
             "A/B Testing",
             "SQL"
           ],
-          "available_jobs": 58
+          "available_jobs": 85
         },
         {
           "level": "Mid",
@@ -2201,7 +1972,7 @@
             "Deep Learning",
             "NLP"
           ],
-          "available_jobs": 46
+          "available_jobs": 63
         },
         {
           "level": "Senior",
@@ -2212,7 +1983,7 @@
             "Feature Engineering",
             "Research"
           ],
-          "available_jobs": 112
+          "available_jobs": 161
         },
         {
           "level": "Lead",
@@ -2223,7 +1994,7 @@
             "MLOps",
             "Product Sense"
           ],
-          "available_jobs": 24
+          "available_jobs": 21
         }
       ],
       "avg_salary_progression": [
@@ -2233,7 +2004,7 @@
         "\u20b930-50 LPA",
         "\u20b950-80 LPA"
       ],
-      "total_available_jobs": 287
+      "total_available_jobs": 395
     },
     {
       "name": "DevOps / Cloud Engineer",
@@ -2247,7 +2018,7 @@
             "Bash",
             "Networking"
           ],
-          "available_jobs": 102
+          "available_jobs": 182
         },
         {
           "level": "Junior",
@@ -2258,7 +2029,7 @@
             "AWS Basics",
             "Terraform"
           ],
-          "available_jobs": 48
+          "available_jobs": 73
         },
         {
           "level": "Mid",
@@ -2269,7 +2040,7 @@
             "Ansible",
             "IaC"
           ],
-          "available_jobs": 181
+          "available_jobs": 210
         },
         {
           "level": "Senior",
@@ -2280,7 +2051,7 @@
             "SLOs",
             "Incident Management"
           ],
-          "available_jobs": 100
+          "available_jobs": 134
         },
         {
           "level": "Lead",
@@ -2290,7 +2061,7 @@
             "Cost Optimization",
             "Team Leadership"
           ],
-          "available_jobs": 9
+          "available_jobs": 18
         }
       ],
       "avg_salary_progression": [
@@ -2300,7 +2071,7 @@
         "\u20b928-45 LPA",
         "\u20b945-70 LPA"
       ],
-      "total_available_jobs": 440
+      "total_available_jobs": 617
     },
     {
       "name": "AI / ML Engineer",
@@ -2314,7 +2085,7 @@
             "Pandas",
             "Linear Algebra"
           ],
-          "available_jobs": 37
+          "available_jobs": 36
         },
         {
           "level": "Junior",
@@ -2325,7 +2096,7 @@
             "Feature Engineering",
             "SQL"
           ],
-          "available_jobs": 184
+          "available_jobs": 211
         },
         {
           "level": "Mid",
@@ -2336,7 +2107,7 @@
             "Computer Vision",
             "MLOps"
           ],
-          "available_jobs": 184
+          "available_jobs": 211
         },
         {
           "level": "Senior",
@@ -2347,7 +2118,7 @@
             "Fine-tuning",
             "Distributed Training"
           ],
-          "available_jobs": 78
+          "available_jobs": 115
         },
         {
           "level": "Lead",
@@ -2358,7 +2129,7 @@
             "Team Building",
             "Strategy"
           ],
-          "available_jobs": 85
+          "available_jobs": 114
         }
       ],
       "avg_salary_progression": [
@@ -2368,7 +2139,7 @@
         "\u20b935-60 LPA",
         "\u20b960-1Cr+"
       ],
-      "total_available_jobs": 568
+      "total_available_jobs": 687
     },
     {
       "name": "Product Manager",
@@ -2382,7 +2153,7 @@
             "Wireframing",
             "Analytics"
           ],
-          "available_jobs": 55
+          "available_jobs": 68
         },
         {
           "level": "Junior",
@@ -2393,7 +2164,7 @@
             "SQL",
             "A/B Testing"
           ],
-          "available_jobs": 59
+          "available_jobs": 89
         },
         {
           "level": "Mid",
@@ -2404,7 +2175,7 @@
             "Stakeholder Management",
             "Metrics"
           ],
-          "available_jobs": 87
+          "available_jobs": 99
         },
         {
           "level": "Senior",
@@ -2415,7 +2186,7 @@
             "Go-to-Market",
             "OKRs"
           ],
-          "available_jobs": 104
+          "available_jobs": 150
         },
         {
           "level": "Lead",
@@ -2425,7 +2196,7 @@
             "Board Presentation",
             "Multi-Product Strategy"
           ],
-          "available_jobs": 34
+          "available_jobs": 42
         }
       ],
       "avg_salary_progression": [
@@ -2435,69 +2206,69 @@
         "\u20b935-55 LPA",
         "\u20b955-1Cr+"
       ],
-      "total_available_jobs": 339
+      "total_available_jobs": 448
     }
   ],
   "hot_combinations": [
     {
       "combination": "Communication + Problem Solving",
-      "demand": 248
+      "demand": 148
+    },
+    {
+      "combination": "Go + RAG",
+      "demand": 61
     },
     {
       "combination": "Excel + Go",
       "demand": 58
     },
     {
-      "combination": "Go + RAG",
-      "demand": 56
-    },
-    {
       "combination": "AWS + Go",
-      "demand": 50
+      "demand": 52
     },
     {
       "combination": "Communication + TypeScript",
+      "demand": 51
+    },
+    {
+      "combination": "Problem Solving + TypeScript",
+      "demand": 46
+    },
+    {
+      "combination": "Terraform + TypeScript",
       "demand": 46
     },
     {
       "combination": "Agile + Go",
-      "demand": 40
-    },
-    {
-      "combination": "Problem Solving + TypeScript",
-      "demand": 40
-    },
-    {
-      "combination": "Go + TypeScript",
-      "demand": 39
+      "demand": 41
     },
     {
       "combination": "Excel + RAG",
       "demand": 39
     },
     {
+      "combination": "Go + TypeScript",
+      "demand": 39
+    },
+    {
       "combination": "AWS + Excel",
-      "demand": 35
-    },
-    {
-      "combination": "Git + Go",
-      "demand": 34
-    },
-    {
-      "combination": "Agile + Excel",
-      "demand": 33
+      "demand": 37
     },
     {
       "combination": "AWS + RAG",
       "demand": 31
     },
     {
-      "combination": "Terraform + TypeScript",
+      "combination": "Git + Go",
       "demand": 30
     },
     {
-      "combination": "Excel + TypeScript",
-      "demand": 29
+      "combination": "Agile + Excel",
+      "demand": 27
+    },
+    {
+      "combination": "Communication + Terraform",
+      "demand": 27
     }
   ]
 }
