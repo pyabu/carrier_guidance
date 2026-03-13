@@ -454,9 +454,18 @@
         font-size: 11px;
         background: #f1f5f9;
         color: #475569;
-        padding: 3px 10px;
-        border-radius: 100px;
+        padding: 4px 10px;
+        border-radius: 6px;
         font-weight: 600;
+    }
+
+    .projects-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        margin-top: 10px;
+        padding-top: 10px;
+        border-top: 1px dashed #e2e8f0;
     }
 
     @media (max-width: 640px) {
@@ -909,15 +918,23 @@
             <div class="team-grid">
 
                 <!-- Sindhu Bharathi -->
-                <div class="team-card tc-pink">
+                <div class="team-card tc-pink" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto;">
                     <div class="team-avatar av-pink">S</div>
-                    <div class="team-info">
+                    <div class="team-info" style="width: 100%;">
                         <div class="team-badge tb-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
                             2024–2026</div>
                         <h5>Sindhu Bharathi P G</h5>
                         <p class="team-role">Student · MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India
                         </p>
-                        <span class="collab-tag"><i class="fas fa-virus fa-xs"></i> Dengue Connect Collaborator</span>
+
+                        <div class="projects-list">
+                            <span class="collab-tag"><i class="fas fa-file-alt fa-fw text-primary"></i> Tamil Text to
+                                Text Summarization (Final Year)</span>
+                            <span class="collab-tag"><i class="fas fa-virus fa-fw text-danger"></i> Dengue Connect
+                                2024</span>
+                            <span class="collab-tag"><i class="fas fa-clipboard-check fa-fw text-success"></i> Attend_x
+                                (PU Attendance App)</span>
+                        </div>
                     </div>
                 </div>
 
