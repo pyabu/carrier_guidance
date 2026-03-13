@@ -474,6 +474,170 @@
         }
     }
 
+    /* ── Extended teammate card styles ── */
+    .team-card.tc-purple::before {
+        background: linear-gradient(to right, #8b5cf6, #6366f1);
+    }
+
+    .team-card-top {
+        display: flex;
+        align-items: flex-start;
+        gap: 16px;
+        margin-bottom: 16px;
+    }
+
+    /* ── Teammate photo ── */
+    .teammate-photo-wrap {
+        flex-shrink: 0;
+        width: 72px;
+        height: 72px;
+    }
+
+    .teammate-photo {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: top;
+        border: 2px solid #e2e8f0;
+        display: block;
+    }
+
+    .teammate-initial {
+        display: none;
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: white;
+    }
+
+    .ti-purple {
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+    }
+
+    .ti-pink {
+        background: linear-gradient(135deg, #ec4899, #f43f5e);
+    }
+
+    /* ── Badges ── */
+    .tb-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    /* ── Mini links ── */
+    .mini-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: opacity 0.2s;
+    }
+
+    .link-purple {
+        background: #ede9fe;
+        color: #7c3aed;
+    }
+
+    .link-pink {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .mini-link:hover {
+        opacity: 0.8;
+        text-decoration: none;
+    }
+
+    /* ── Project rows inside team card ── */
+    .proj-list-label {
+        font-size: 11px;
+        font-weight: 800;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        color: #94a3b8;
+        margin-bottom: 8px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .proj-row {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        padding: 8px 0;
+        border-bottom: 1px solid #f1f5f9;
+    }
+
+    .proj-row:last-child {
+        border-bottom: none;
+    }
+
+    .proj-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 5px;
+    }
+
+    .dot-purple {
+        background: #8b5cf6;
+    }
+
+    .dot-blue {
+        background: #3b82f6;
+    }
+
+    .dot-teal {
+        background: #14b8a6;
+    }
+
+    .dot-green {
+        background: #22c55e;
+    }
+
+    .dot-orange {
+        background: #f97316;
+    }
+
+    .dot-pink {
+        background: #ec4899;
+    }
+
+    .proj-row strong {
+        font-size: 0.88rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-right: 5px;
+    }
+
+    .proj-type {
+        font-size: 10px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 1px 7px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .proj-desc {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.5;
+        margin: 3px 0 0 0;
+    }
+
     .sec-head h2 {
         font-size: 1.25rem;
         font-weight: 800;
@@ -912,28 +1076,134 @@
         <div class="mb-5">
             <div class="sec-head">
                 <div class="sec-icon si-orange"><i class="fas fa-users"></i></div>
-                <h2>Team &amp; Collaborators</h2>
+                <h2>Core Team &amp; Collaborators</h2>
                 <div class="sec-line"></div>
             </div>
+
+            <!-- team note -->
+            <p
+                style="color:#64748b; font-size:0.88rem; margin: -10px 0 20px; display:flex; align-items:center; gap:6px;">
+                <i class="fas fa-handshake text-warning"></i>
+                Both teammates are MSc Computer Science batchmates at Pondicherry University (2024–2026) who
+                collaborated on the following projects together.
+            </p>
+
             <div class="team-grid">
 
-                <!-- Sindhu Bharathi -->
-                <div class="team-card tc-pink" style="grid-column: 1 / -1; max-width: 600px; margin: 0 auto;">
-                    <div class="team-avatar av-pink">S</div>
-                    <div class="team-info" style="width: 100%;">
-                        <div class="team-badge tb-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
-                            2024–2026</div>
-                        <h5>Sindhu Bharathi P G</h5>
-                        <p class="team-role">Student · MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India
-                        </p>
+                <!-- ── Abu Saleem ── -->
+                <div class="team-card tc-purple">
+                    <div class="team-card-top">
+                        <div class="teammate-photo-wrap">
+                            <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Abu Saleem"
+                                class="teammate-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="teammate-initial ti-purple">A</div>
+                        </div>
+                        <div>
+                            <div class="team-badge tb-purple"><i class="fab fa-github fa-xs"></i> pyabu</div>
+                            <h5>Abu Saleem</h5>
+                            <p class="team-role">MSc Computer Science<br>Pondicherry University, India</p>
+                            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
+                                <a href="mailto:abusaleem.dev@gmail.com" class="mini-link link-purple"><i
+                                        class="fas fa-envelope"></i> Email</a>
+                                <a href="https://github.com/pyabu" target="_blank" class="mini-link link-purple"><i
+                                        class="fab fa-github"></i> GitHub</a>
+                                <a href="https://www.linkedin.com/in/abu-py/" target="_blank"
+                                    class="mini-link link-purple"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="projects-list">
+                        <div class="proj-list-label"><i class="fas fa-code-branch"></i> Projects</div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-purple"></div>
+                            <div>
+                                <strong>HearAlert</strong><span class="proj-type">Final Year · Android</span>
+                                <p class="proj-desc">Real-time acoustic sound monitoring mobile app using TensorFlow
+                                    Lite &amp; YAMNet for smart health alerts for the hearing impaired.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-blue"></div>
+                            <div>
+                                <strong>Health Tracker</strong><span class="proj-type">Web App</span>
+                                <p class="proj-desc">Full-stack health metrics dashboard with interactive charts built
+                                    using Flask and Supabase.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-teal"></div>
+                            <div>
+                                <strong>Dengue Connect 2024</strong><span class="proj-type">Collaborative</span>
+                                <p class="proj-desc">Community health platform for dengue awareness and case tracking
+                                    built during 2024 with Sindhu Bharathi.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-green"></div>
+                            <div>
+                                <strong>Attend_x</strong><span class="proj-type">University Tool</span>
+                                <p class="proj-desc">Automated attendance tracking application developed for Pondicherry
+                                    University students and faculty.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-orange"></div>
+                            <div>
+                                <strong>Developer Portfolio</strong><span class="proj-type">Web</span>
+                                <p class="proj-desc">Personal career guidance platform &amp; portfolio website
+                                    showcasing projects and skills.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-                        <div class="projects-list">
-                            <span class="collab-tag"><i class="fas fa-file-alt fa-fw text-primary"></i> Tamil Text to
-                                Text Summarization (Final Year)</span>
-                            <span class="collab-tag"><i class="fas fa-virus fa-fw text-danger"></i> Dengue Connect
-                                2024</span>
-                            <span class="collab-tag"><i class="fas fa-clipboard-check fa-fw text-success"></i> Attend_x
-                                (PU Attendance App)</span>
+                <!-- ── Sindhu Bharathi ── -->
+                <div class="team-card tc-pink">
+                    <div class="team-card-top">
+                        <div class="teammate-photo-wrap">
+                            <img src="{{ url_for('static', filename='images/sindhu.png') }}" alt="Sindhu Bharathi P G"
+                                class="teammate-photo"
+                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                            <div class="teammate-initial ti-pink">S</div>
+                        </div>
+                        <div>
+                            <div class="team-badge tb-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
+                                2024–2026</div>
+                            <h5>Sindhu Bharathi P G</h5>
+                            <p class="team-role">MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India</p>
+                            <div style="margin-top:4px;">
+                                <span class="mini-link link-pink"><i class="fas fa-microscope"></i> ICMR-VCRC
+                                    Researcher</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="projects-list">
+                        <div class="proj-list-label"><i class="fas fa-code-branch"></i> Projects</div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-pink"></div>
+                            <div>
+                                <strong>Tamil Text to Text Summarization</strong><span class="proj-type">Final Year ·
+                                    NLP</span>
+                                <p class="proj-desc">Deep learning NLP project to automatically summarize Tamil-language
+                                    text documents using transformer-based models.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-teal"></div>
+                            <div>
+                                <strong>Dengue Connect 2024</strong><span class="proj-type">Collaborative</span>
+                                <p class="proj-desc">Community health platform for dengue awareness and case tracking,
+                                    developed collaboratively with Abu Saleem in 2024.</p>
+                            </div>
+                        </div>
+                        <div class="proj-row">
+                            <div class="proj-dot dot-green"></div>
+                            <div>
+                                <strong>Attend_x</strong><span class="proj-type">University Tool</span>
+                                <p class="proj-desc">Smart attendance management application designed for Pondicherry
+                                    University to streamline student and faculty records.</p>
+                            </div>
                         </div>
                     </div>
                 </div>
