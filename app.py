@@ -46,6 +46,8 @@ def sitemap():
     static_urls = [
         ("/", 1.0),
         ("/jobs", 0.8),
+        ("/jobs/india", 0.8),
+        ("/jobs/tamilnadu", 0.8),
         ("/career-guidance", 0.7),
         ("/resume-builder", 0.7),
         ("/student-dashboard", 0.6),
@@ -66,13 +68,31 @@ def sitemap():
         ET.SubElement(url, "loc").text = f"{domain}{path}"
         ET.SubElement(url, "priority").text = str(priority)
         ET.SubElement(url, "lastmod").text = today
-    # Add job detail pages
+    # Add main job detail pages
     jobs_data = load_jobs()
     for job in jobs_data.get("jobs", []):
         url = ET.SubElement(urlset, "url")
         ET.SubElement(url, "loc").text = f"{domain}/job/{job['id']}"
         ET.SubElement(url, "priority").text = "0.6"
         ET.SubElement(url, "lastmod").text = job.get("posted_date", today)
+        
+    # Add India job detail pages
+    india_data = load_india_jobs()
+    for job in india_data.get("jobs", []):
+        if 'id' in job:
+            url = ET.SubElement(urlset, "url")
+            ET.SubElement(url, "loc").text = f"{domain}/job/{job['id']}?source=india"
+            ET.SubElement(url, "priority").text = "0.6"
+            ET.SubElement(url, "lastmod").text = job.get("posted_date", today)
+            
+    # Add Tamil Nadu job detail pages
+    tn_data = load_tn_jobs()
+    for job in tn_data.get("jobs", []):
+        if 'id' in job:
+            url = ET.SubElement(urlset, "url")
+            ET.SubElement(url, "loc").text = f"{domain}/job/{job['id']}?source=tamilnadu"
+            ET.SubElement(url, "priority").text = "0.6"
+            ET.SubElement(url, "lastmod").text = job.get("posted_date", today)
     xml_body = ET.tostring(urlset, encoding="utf-8", method="xml").decode("utf-8")
     xml_str = '<?xml version="1.0" encoding="UTF-8"?>\n' + xml_body
     return Response(xml_str, mimetype="application/xml")
