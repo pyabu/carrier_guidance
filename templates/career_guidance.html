@@ -123,8 +123,8 @@
         </div>
         <div class="guidance-grid">
             <div class="guidance-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="guidance-card-img" style="background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-laptop-code" style="font-size:4rem;color:white;"></i>
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1517694712202-14dd9538aa97?w=600&h=340&fit=crop" alt="Technical Interview" style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="guidance-card-body">
                     <h3>Technical Interview Guide</h3>
@@ -135,8 +135,8 @@
                 </div>
             </div>
             <div class="guidance-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="guidance-card-img" style="background:linear-gradient(135deg,#f093fb,#f5576c);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-comments" style="font-size:4rem;color:white;"></i>
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1560439514-4e9645039924?w=600&h=340&fit=crop" alt="Behavioral Interview" style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="guidance-card-body">
                     <h3>Behavioral Interview Guide</h3>
@@ -146,8 +146,8 @@
                 </div>
             </div>
             <div class="guidance-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="guidance-card-img" style="background:linear-gradient(135deg,#34c759,#00b4d8);display:flex;align-items:center;justify-content:center;">
-                    <i class="fas fa-chalkboard-teacher" style="font-size:4rem;color:white;"></i>
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=600&h=340&fit=crop" alt="Interview Checklist" style="width:100%;height:100%;object-fit:cover;">
                 </div>
                 <div class="guidance-card-body">
                     <h3>Interview Day Checklist</h3>
@@ -238,6 +238,27 @@
     </div>
 </section>
 
+<!-- Personalized Guidance (logged-in users) -->
+{% if session.get('user_id') %}
+<section class="section" style="background:var(--bg);">
+    <div class="container" data-aos="fade-up">
+        <div class="section-header">
+            <span class="badge"><i class="fas fa-user-astronaut"></i> Just For You</span>
+            <h2>Your Personalized Career Path</h2>
+            <p>Based on your skills and interests</p>
+        </div>
+        <div id="personalGuidance" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:20px;">
+            <div style="text-align:center;padding:40px;grid-column:1/-1;color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading your suggestions...</div>
+        </div>
+        <div id="noProfileMsg" style="display:none;text-align:center;padding:40px;">
+            <i class="fas fa-user-edit" style="font-size:2rem;color:var(--accent);margin-bottom:12px;display:block;"></i>
+            <p style="color:var(--text-secondary);margin-bottom:16px;">Complete your profile with skills and interests to get personalized guidance.</p>
+            <a href="/profile" class="btn btn-primary"><i class="fas fa-user-edit"></i> Update Profile</a>
+        </div>
+    </div>
+</section>
+{% endif %}
+
 <!-- CTA -->
 <section class="cta-section">
     <div class="container" data-aos="fade-up">
@@ -250,4 +271,36 @@
     </div>
 </section>
 
+{% endblock %}
+
+{% block extra_scripts %}
+{% if session.get('user_id') %}
+<script>
+fetch('/api/personalized-guidance').then(r=>r.json()).then(d=>{
+    const el = document.getElementById('personalGuidance');
+    const noP = document.getElementById('noProfileMsg');
+    if (!d.suggestions || !d.suggestions.length) {
+        el.innerHTML = '';
+        noP.style.display = 'block';
+        return;
+    }
+    let html = '';
+    d.suggestions.forEach(s => {
+        html += '<div style="background:var(--surface);border-radius:16px;padding:24px;box-shadow:var(--shadow-sm);">' +
+            '<div style="font-weight:700;font-size:1.05rem;margin-bottom:8px;"><i class="fas fa-route" style="color:var(--accent);margin-right:8px;"></i>' + s.career_path + '</div>' +
+            '<div style="font-size:0.88rem;color:var(--text-secondary);margin-bottom:12px;">Based on: <strong>' + s.based_on + '</strong></div>' +
+            '<div style="margin-bottom:8px;font-size:0.85rem;font-weight:600;">Learn Next:</div>' +
+            '<div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px;">' + s.learn_next.map(n=>'<span style="background:rgba(102,126,234,0.12);color:var(--accent);padding:4px 12px;border-radius:20px;font-size:0.82rem;">'+n+'</span>').join('') + '</div>' +
+            '<div style="font-size:0.82rem;color:var(--text-secondary);"><i class="fas fa-book-open" style="margin-right:4px;"></i> ' + s.resources.join(' • ') + '</div>' +
+            '</div>';
+    });
+    if (d.matching_jobs > 0) {
+        html += '<div style="grid-column:1/-1;text-align:center;padding:20px;background:linear-gradient(135deg,rgba(102,126,234,0.08),rgba(118,75,162,0.08));border-radius:16px;">' +
+            '<p style="font-size:1.1rem;font-weight:600;margin:0 0 8px;"><i class="fas fa-briefcase" style="color:var(--accent);"></i> ' + d.matching_jobs + ' jobs match your skills!</p>' +
+            '<a href="/jobs" class="btn btn-primary btn-sm"><i class="fas fa-search"></i> View Matching Jobs</a></div>';
+    }
+    el.innerHTML = html;
+});
+</script>
+{% endif %}
 {% endblock %}

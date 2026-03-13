@@ -95,9 +95,8 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
 
         <div class="jobs-grid" id="featuredJobsGrid">
             {% if featured_jobs %}
-            {% for job in featured_jobs %}
-            <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}"
-                onclick="window.location='/job/{{ job.id }}'">
+            <<<<<<< HEAD {% for job in featured_jobs %} <div class="job-card fade-in" data-aos="fade-up"
+                data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='/job/{{ job.id }}'">
                 <div class="job-card-header">
                     <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}"
                         class="job-card-logo"
@@ -105,43 +104,79 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
                     <div class="job-card-info">
                         <h3>{{ job.title }}</h3>
                         <span class="job-card-company">{{ job.company }}</span>
+                        =======
+                        {% for job in featured_jobs %}
+                        <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}"
+                            onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job.id }}'">
+                            <div class="job-card-header">
+                                <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}"
+                                    alt="{{ job.company }}" class="job-card-logo"
+                                    onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
+                                <div class="job-card-info">
+                                    <h3>{{ job.title }}</h3>
+                                    <span class="job-card-company">{{ job.company }}</span>
+                                </div>
+                            </div>
+                            <div class="job-card-meta">
+                                <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                                <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
+                                <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
+                            </div>
+                            <div class="job-card-skills">
+                                {% for skill in job.skills[:4] %}
+                                <span class="skill-tag">{{ skill }}</span>
+                                {% endfor %}
+                            </div>
+                            <div class="job-card-footer">
+                                <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
+                                <div class="job-card-actions">
+                                    <button class="btn-save"
+                                        onclick="event.stopPropagation();if(!__isLoggedIn){requireLogin('Login to Save Jobs','Please login to continue and save jobs.');return;}toggleSave(this)"
+                                        title="Save Job">
+                                        <i class="far fa-heart"></i>
+                                    </button>
+                                    <a href="{{ job.apply_url }}" class="btn-apply" target="_blank"
+                                        onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Please login to continue and apply for jobs.');return false;}">Apply
+                                        Now</a>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="job-card-meta">
+                            <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                            <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
+                            <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
+                        </div>
+                        <div class="job-card-skills">
+                            {% for skill in job.skills[:4] %}
+                            <span class="skill-tag">{{ skill }}</span>
+                            {% endfor %}
+                        </div>
+                        <div class="job-card-footer">
+                            <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
+                            <div class="job-card-actions">
+                                <button class="btn-save" onclick="event.stopPropagation(); toggleSave(this)"
+                                    title="Save Job">
+                                    <i class="far fa-heart"></i>
+                                </button>
+                                <a href="{{ job.apply_url }}" class="btn-apply" target="_blank"
+                                    onclick="event.stopPropagation()">Apply Now</a>
+                            </div>
+                        </div>
                     </div>
-                </div>
-                <div class="job-card-meta">
-                    <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
-                    <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
-                    <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
-                </div>
-                <div class="job-card-skills">
-                    {% for skill in job.skills[:4] %}
-                    <span class="skill-tag">{{ skill }}</span>
                     {% endfor %}
+                    {% else %}
+                    {% for i in range(6) %}
+                    <div class="skeleton skeleton-card"></div>
+                    {% endfor %}
+                    {% endif %}
                 </div>
-                <div class="job-card-footer">
-                    <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
-                    <div class="job-card-actions">
-                        <button class="btn-save" onclick="event.stopPropagation(); toggleSave(this)" title="Save Job">
-                            <i class="far fa-heart"></i>
-                        </button>
-                        <a href="{{ job.apply_url }}" class="btn-apply" target="_blank"
-                            onclick="event.stopPropagation()">Apply Now</a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-            {% else %}
-            {% for i in range(6) %}
-            <div class="skeleton skeleton-card"></div>
-            {% endfor %}
-            {% endif %}
-        </div>
 
-        <div class="text-center mt-4" data-aos="fade-up">
-            <a href="/jobs" class="btn btn-primary btn-lg">
-                <i class="fas fa-th-list"></i> Browse All Jobs
-            </a>
+                <div class="text-center mt-4" data-aos="fade-up">
+                    <a href="/jobs" class="btn btn-primary btn-lg">
+                        <i class="fas fa-th-list"></i> Browse All Jobs
+                    </a>
+                </div>
         </div>
-    </div>
 </section>
 
 <!-- ═══════════ JOB CATEGORIES ═══════════ -->
@@ -208,7 +243,9 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
         </div>
         <div class="guidance-grid">
             <a href="/career-guidance" class="guidance-card" data-aos="fade-up" data-aos-delay="100">
-                <div class="guidance-card-img" style="background: linear-gradient(135deg, #667eea, #764ba2)">
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=340&fit=crop"
+                        alt="Career Roadmaps" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>📍 Roadmaps</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -218,7 +255,9 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
                 </div>
             </a>
             <a href="/resume-builder" class="guidance-card" data-aos="fade-up" data-aos-delay="200">
-                <div class="guidance-card-img" style="background: linear-gradient(135deg, #f093fb, #f5576c)">
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=340&fit=crop"
+                        alt="Resume Builder" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>📝 Resume</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -228,7 +267,9 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
                 </div>
             </a>
             <a href="/career-guidance#interview" class="guidance-card" data-aos="fade-up" data-aos-delay="300">
-                <div class="guidance-card-img" style="background: linear-gradient(135deg, #34c759, #00b4d8)">
+                <div class="guidance-card-img" style="position:relative;overflow:hidden;">
+                    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=340&fit=crop"
+                        alt="Interview Preparation" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>🎤 Interview</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -540,7 +581,7 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
         const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';
         const scoreBadge = j.composite_score > 70 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;">★ ' + Math.round(j.composite_score) + '</span> ' : '';
 
-        return '<div class="job-card fade-in" style="cursor:pointer;" onclick="window.location=\'' + detailUrl + '\'">'
+        return '<div class="job-card fade-in" style="cursor:pointer;" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'' + detailUrl + '\'">'
             + '<div class="job-card-header">'
             + '<img src="' + logo + '" alt="' + escH(j.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
             + '<div class="job-card-info"><h3>' + escH(j.title || 'Untitled') + ' ' + scoreBadge + '</h3><span class="job-card-company">' + escH(j.company || '') + '</span></div>'
@@ -555,7 +596,7 @@ jobs across IT, Core Engineering, Marketing and more.{% endblock %}
             + '<div>' + (salary ? '<span class="job-salary">' + salary + '</span> ' : '') + postedBadge + '</div>'
             + '<div class="job-card-actions">'
             + '<span style="background:' + srcClr + ';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:4px">' + escH(j.source || '') + '</span>'
-            + '<a href="' + applyUrl + '" class="btn-apply" target="_blank" onclick="event.stopPropagation()">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
+            + '<a href="' + applyUrl + '" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Please login to continue and apply for jobs.\');return false;}">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
             + '</div>'
             + '</div></div>';
     }

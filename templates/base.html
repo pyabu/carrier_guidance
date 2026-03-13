@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
     <title>{% block title %}CareerPath Pro{% endblock %} | Career Guidance & Job Portal</title>
     <meta name="description"
         content="{% block meta_desc %}CareerPath Pro – India's #1 career guidance, job search, and hiring platform for Indian students, freshers, and professionals.{% endblock %}">
@@ -30,6 +31,10 @@
     <meta name="twitter:title" content="{% block twitter_title %}{{ self.og_title() }}{% endblock %}">
     <meta name="twitter:description" content="{% block twitter_desc %}{{ self.meta_desc() }}{% endblock %}">
     <meta name="twitter:image" content="{% block twitter_image %}{{ self.og_image() }}{% endblock %}">
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -107,28 +112,44 @@
                 <li><a href="/contact" class="nav-link {% if 'contact' in request.path %}active{% endif %}">
                         <i class="fas fa-envelope"></i> Contact
                     </a></li>
+                <!-- Mobile-only auth links -->
+                <li class="nav-mobile-auth">
+                    {% if session.get('user_id') %}
+                    <a href="/student-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+                    <a href="/profile" class="nav-link"><i class="fas fa-user"></i> My Profile</a>
+                    <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    {% else %}
+                    <a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="/signup" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+                    {% endif %}
+                </li>
             </ul>
 
             <div class="nav-actions">
                 <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
                     <i class="fas fa-moon"></i>
                 </button>
-                <a href="/employer-dashboard" class="btn btn-outline btn-sm">
-                    <i class="fas fa-building"></i> For Employers
-                </a>
                 {% if session.get('user_id') %}
                 <div style="display: flex; gap: 8px; align-items: center;">
+                    <a href="/profile" class="btn btn-outline btn-sm" title="My Profile" style="border:none;padding:6px 10px;">
+                        <i class="fas fa-user"></i>
+                    </a>
                     <a href="/student-dashboard" class="btn btn-primary btn-sm">
-                        <i class="fas fa-user-circle"></i> Dashboard
+                        <i class="fas fa-th-large"></i> Dashboard
                     </a>
                     <a href="/logout" class="btn btn-outline btn-sm" style="border: none;">
                         Logout
                     </a>
                 </div>
                 {% else %}
-                <a href="/login" class="btn btn-primary btn-sm">
-                    <i class="fas fa-sign-in-alt"></i> Login
-                </a>
+                <div style="display: flex; gap: 8px; align-items: center;">
+                    <a href="/login" class="btn btn-primary btn-sm">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="/signup" class="btn btn-outline btn-sm">
+                        Sign Up
+                    </a>
+                </div>
                 {% endif %}
                 <button class="nav-toggle" id="navToggle">
                     <span></span><span></span><span></span>
@@ -177,13 +198,7 @@
                     <a href="/resume-builder">Resume Builder</a>
                     <a href="/career-guidance">Career Guidance</a>
                 </div>
-                <div class="footer-links">
-                    <h4>For Employers</h4>
-                    <a href="/employer-dashboard">Post a Job</a>
-                    <a href="/employer-dashboard">Manage Listings</a>
-                    <a href="/employer-dashboard">View Applicants</a>
-                    <a href="/about">Pricing Plans</a>
-                </div>
+
                 <div class="footer-links">
                     <h4>Resources</h4>
                     <a href="/blog">Blog & Articles</a>
@@ -205,6 +220,38 @@
             </div>
         </div>
     </footer>
+
+    <!-- ═══════════ LOGIN PROMPT MODAL ═══════════ -->
+    {% if not session.get('user_id') %}
+    <div id="loginModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;">
+            <button onclick="closeLoginModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
+            <div style="width:64px;height:64px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <i class="fas fa-lock" style="color:white;font-size:1.5rem;"></i>
+            </div>
+            <h3 id="loginModalTitle" style="margin:0 0 8px;color:var(--text-primary);">Login Required</h3>
+            <p id="loginModalMsg" style="color:var(--text-secondary);margin-bottom:24px;">Sign in to unlock this feature and get the full CareerPath Pro experience.</p>
+            <a href="/login" class="btn btn-primary" style="display:flex;width:100%;justify-content:center;margin-bottom:12px;gap:8px;padding:12px 20px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.95rem;">
+                <i class="fas fa-sign-in-alt"></i> Login to Continue
+            </a>
+            <p style="font-size:0.85rem;color:var(--text-secondary);">Don't have an account? <a href="/signup" style="color:var(--accent);font-weight:600;">Sign up free</a></p>
+        </div>
+    </div>
+    <script>
+    function showLoginModal(title, msg) {
+        var m = document.getElementById('loginModal');
+        if (title) document.getElementById('loginModalTitle').textContent = title;
+        if (msg) document.getElementById('loginModalMsg').textContent = msg;
+        m.style.display = 'flex';
+    }
+    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+    document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target === this) closeLoginModal(); });
+    var __isLoggedIn = false;
+    function requireLogin(title, msg, evt) { if (evt) { evt.preventDefault(); evt.stopPropagation(); } showLoginModal(title, msg); return false; }
+    </script>
+    {% else %}
+    <script>var __isLoggedIn = true;</script>
+    {% endif %}
 
     <!-- Scripts -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>

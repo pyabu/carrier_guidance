@@ -20,7 +20,7 @@
 .india-hero .ai-badge i{animation:sparkle 2s ease-in-out infinite}
 @keyframes sparkle{0%,100%{opacity:1}50%{opacity:.4}}
 .india-stats-row{display:flex;gap:14px;margin-top:20px;flex-wrap:wrap;position:relative;z-index:1}
-.india-stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:120px;text-align:center;transition:transform .2s}
+.india-stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:0;flex:1 1 auto;text-align:center;transition:transform .2s}
 .india-stat-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.12)}
 .india-stat-card .stat-num{font-size:1.5rem;font-weight:800;color:#fff}
 .india-stat-card .stat-label{font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
@@ -138,13 +138,25 @@
 /* ═══════════ MOBILE ═══════════ */
 @media(max-width:900px){
     .india-hero h1{font-size:1.5rem}
-    .india-stats-row{gap:10px}
-    .india-stat-card{padding:10px 14px;min-width:100px}
+    .india-stats-row{gap:8px}
+    .india-stat-card{padding:10px 12px}
     .india-stat-card .stat-num{font-size:1.1rem}
     .india-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;max-height:100vh;border-radius:0}
     .india-sidebar.open{display:block}
     .india-mobile-filter-btn{display:flex!important}
     .features-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+    .india-hero{padding:80px 0 30px}
+    .india-hero h1{font-size:1.3rem}
+    .india-hero p{font-size:.82rem}
+    .india-stats-row{gap:6px}
+    .india-stat-card{padding:8px 10px}
+    .india-stat-card .stat-num{font-size:.95rem}
+    .india-stat-card .stat-label{font-size:.6rem}
+    .india-search form{flex-direction:column}
+    .india-search button{width:100%}
+    .state-grid{grid-template-columns:repeat(2,1fr)}
 }
 .india-mobile-filter-btn{display:none!important;width:100%;margin-bottom:12px;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text-primary)}
 .india-mobile-filter-btn:hover{border-color:#ff9933;color:#ff9933}
@@ -522,7 +534,7 @@ function jobCardHTML(j) {
     const trendClass = j.trending ? ' trending' : '';
 
     return `
-    <div class="india-job-card${trendClass}">
+    <div class="india-job-card${trendClass}" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/${j.id}'">
         <div class="india-job-header">
             <img class="india-job-logo" src="${j.company_logo||'https://ui-avatars.com/api/?name='+encodeURIComponent(j.company)+'&background=ff9933&color=fff&size=50'}" alt="${j.company}" onerror="this.src='https://ui-avatars.com/api/?name='+encodeURIComponent('${j.company}')+'&background=ff9933&color=fff&size=50'">
             <div class="india-job-info">
@@ -542,7 +554,8 @@ function jobCardHTML(j) {
             <span class="india-salary">${salary || 'Competitive Salary'}</span>
             <div class="india-job-actions">
                 <span class="india-source-badge" style="background:${srcColor}">${j.source||'Various'}</span>
-                <a href="${j.apply_url||'#'}" target="_blank" rel="noopener" class="india-apply-btn"><i class="fas fa-external-link-alt"></i> Apply</a>
+                <button class="india-save-btn" onclick="event.stopPropagation();indiaSaveJob(this,'${j.id}')" title="Save"><i class="far fa-heart"></i></button>
+                <a href="${j.apply_url||'#'}" target="_blank" rel="noopener" class="india-apply-btn" onclick="if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Sign in to track your job applications.',event);return false;}trackApply('${j.id}')"><i class="fas fa-external-link-alt"></i> Apply</a>
             </div>
         </div>
     </div>`;
@@ -608,6 +621,35 @@ function searchSkill(skill) {
     allJobs = [];
     fetchJobs();
     window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function trackApply(jobId) {
+    if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications.'); return; }
+    fetch('/api/apply-job', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: String(jobId)})
+    }).catch(function(){});
+}
+
+async function indiaSaveJob(btn, jobId) {
+    if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        var res = await fetch('/api/save-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: String(jobId)})
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i>';
+            btn.title = 'Saved';
+        } else {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+    }
 }
 
 function applySort(value) {

@@ -27,6 +27,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
 
+from scraper.anti_block import (
+    create_stealth_session, safe_get, human_delay,
+    warm_cookies, get_browser_headers, get_random_ua,
+)
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -554,17 +559,96 @@ class JobScraper:
     """
 
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept-Language": "en-US,en;q=0.9",
-            "Accept": "application/json",
-        })
+        self.session = create_stealth_session()
         self.seen_keys = set()   # dedup tracker
+
+        # Warm cookies for sites that require session cookies
+        for base_url in [
+            "https://www.naukri.com",
+            "https://www.foundit.in",
+            "https://www.shine.com",
+            "https://internshala.com",
+        ]:
+            warm_cookies(self.session, base_url)
+
+    def _get(self, url, timeout=15, **kwargs):
+        """Anti-blocking GET wrapper with per-request UA rotation and retry."""
+        resp = safe_get(self.session, url, timeout=timeout, **kwargs)
+        human_delay(0.8, 2.5)  # human-like gap between requests
+        return resp
 
     # ──────────────────────────────────────────────────────────────────
     # PUBLIC API
     # ──────────────────────────────────────────────────────────────────
+
+    # ── Fast API-only sources (Vercel-safe, complete within ~30s) ─────
+    FAST_SOURCES = {
+        "Remotive", "Arbeitnow", "RemoteOK", "Jobicy",
+        "The Muse", "FindWork", "Himalayas",
+        "We Work Remotely", "Internshala", "LinkedIn RSS",
+    }
+
+    def scrape_fast(self) -> list[dict]:
+        """
+        Vercel-optimised scrape: only fast JSON-API sources, no HTML
+        scraping, no AI processing, no company enrichment.
+        Designed to finish within ~30-45 seconds.
+        """
+        scrapers = [
+            (name, fn) for name, fn in [
+                ("Remotive",         self._scrape_remotive),
+                ("Arbeitnow",        self._scrape_arbeitnow),
+                ("RemoteOK",         self._scrape_remoteok),
+                ("Jobicy",           self._scrape_jobicy),
+                ("The Muse",         self._scrape_themuse),
+                ("FindWork",         self._scrape_findwork),
+                ("LinkedIn RSS",     self._scrape_linkedin_rss),
+                ("Internshala",      self._scrape_internshala),
+                ("We Work Remotely", self._scrape_weworkremotely),
+                ("Himalayas",        self._scrape_himalayas),
+            ]
+        ]
+
+        all_jobs = []
+        with ThreadPoolExecutor(max_workers=6) as pool:
+            futures = {pool.submit(fn): name for name, fn in scrapers}
+            for future in as_completed(futures):
+                src = futures[future]
+                try:
+                    jobs = future.result()
+                    all_jobs.extend(jobs)
+                    logger.info(f"✅ {src}: {len(jobs)} jobs")
+                except Exception as e:
+                    logger.warning(f"⚠️  {src} failed: {e}")
+
+        logger.info(f"📥 Fast scrape total: {len(all_jobs)}")
+
+        # Supplement if too few
+        shortfall = max(0, 150 - len(all_jobs))
+        if shortfall > 0:
+            generated = self._generate_realistic_jobs(shortfall)
+            all_jobs.extend(generated)
+            logger.info(f"🏭 Generated {len(generated)} supplemental jobs")
+
+        # Dedup
+        unique = []
+        for job in all_jobs:
+            key = _dedup_key(job)
+            if key not in self.seen_keys:
+                self.seen_keys.add(key)
+                unique.append(job)
+        logger.info(f"🧹 After dedup: {len(unique)} unique jobs")
+
+        # Normalise locations & assign IDs
+        for i, job in enumerate(unique):
+            job["id"] = i + 1
+            loc = normalise_location(job.get("location", ""))
+            job["location"]         = loc["display"]
+            job["location_city"]    = loc["city"]
+            job["location_state"]   = loc["state"]
+            job["location_country"] = loc["country"]
+
+        return unique
 
     def scrape_all(self) -> list[dict]:
         """
@@ -671,8 +755,8 @@ class JobScraper:
         for cat in categories:
             try:
                 url = f"https://remotive.com/api/remote-jobs?category={cat}&limit=30"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = safe_get(self.session, url, extra_headers={"Accept": "application/json"})
+                if not resp or resp.status_code != 200:
                     continue
                 data = resp.json()
                 for item in data.get("jobs", []):
@@ -706,8 +790,8 @@ class JobScraper:
         for page in range(1, 4):
             try:
                 url = f"https://www.arbeitnow.com/api/job-board-api?page={page}"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=12)
+                if not resp or resp.status_code != 200:
                     break
                 data = resp.json()
                 for item in data.get("data", []):
@@ -738,8 +822,8 @@ class JobScraper:
 
     def _scrape_remoteok(self) -> list[dict]:
         """https://remoteok.com/api"""
-        resp = self.session.get("https://remoteok.com/api", timeout=15)
-        if resp.status_code != 200:
+        resp = self._get("https://remoteok.com/api", timeout=15)
+        if not resp or resp.status_code != 200:
             return []
         data = resp.json()
         jobs = []
@@ -780,8 +864,8 @@ class JobScraper:
         for page_count in ["50"]:
             try:
                 url = f"https://jobicy.com/api/v2/remote-jobs?count={page_count}"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=12)
+                if not resp or resp.status_code != 200:
                     break
                 data = resp.json()
                 for item in data.get("jobs", []):
@@ -813,8 +897,8 @@ class JobScraper:
         for page in range(0, 3):
             try:
                 url = f"https://www.themuse.com/api/public/jobs?page={page}&descending=true"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=12)
+                if not resp or resp.status_code != 200:
                     break
                 data = resp.json()
                 for item in data.get("results", []):
@@ -852,8 +936,8 @@ class JobScraper:
     def _scrape_findwork(self) -> list[dict]:
         """https://findwork.dev/api/jobs/"""
         url = "https://findwork.dev/api/jobs/?order_by=-date_posted"
-        resp = self.session.get(url, timeout=15, headers={"Accept": "application/json"})
-        if resp.status_code != 200:
+        resp = self._get(url, timeout=15, headers={"Accept": "application/json"})
+        if not resp or resp.status_code != 200:
             return []
         data = resp.json()
         jobs = []
@@ -893,10 +977,10 @@ class JobScraper:
             try:
                 # LinkedIn public job RSS feed
                 url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={term}&start=0"
-                resp = self.session.get(url, timeout=12, headers={
+                resp = self._get(url, timeout=12, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
                 soup = BeautifulSoup(resp.text, "html.parser")
                 cards = soup.find_all("div", class_="base-card") or soup.find_all("li")
@@ -953,10 +1037,10 @@ class JobScraper:
         for query, location in queries:
             try:
                 url = f"https://www.indeed.com/rss?q={query}&l={location}&sort=date&limit=25"
-                resp = self.session.get(url, timeout=12, headers={
+                resp = self._get(url, timeout=12, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
                 soup = BeautifulSoup(resp.text, "xml")
                 items = soup.find_all("item")
@@ -1029,8 +1113,8 @@ class JobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.naukri.com/{term}-jobs"
-                resp = self.session.get(url, timeout=15, headers=headers)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=15, headers=headers)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1160,13 +1244,13 @@ class JobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.foundit.in/srp/results?searchId=&query={term.replace('-', '+')}&locations=India"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                     "Referer": "https://www.foundit.in/",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1226,12 +1310,12 @@ class JobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.shine.com/job-search/{term}-jobs"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1291,12 +1375,12 @@ class JobScraper:
         for cat in categories:
             try:
                 url = f"https://www.freshersworld.com/jobs/category/{cat}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1355,12 +1439,12 @@ class JobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personal498&from=submit&searchTextSrc=&searchTextText=&txtKeywords={term}&txtLocation="
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1449,13 +1533,13 @@ class JobScraper:
         for path, default_type in categories:
             try:
                 url = f"https://internshala.com/{path}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-IN,en;q=0.9",
                     "X-Requested-With": "XMLHttpRequest",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1528,11 +1612,11 @@ class JobScraper:
         ]
         for cat, feed_url in rss_feeds:
             try:
-                resp = self.session.get(feed_url, timeout=12, headers={
+                resp = self._get(feed_url, timeout=12, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "application/rss+xml,application/xml,text/xml",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "xml")
@@ -1600,13 +1684,13 @@ class JobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.flexjobs.com/search?search={term.replace('-', '+')}&location="
-                resp = self.session.get(url, timeout=8, headers={
+                resp = self._get(url, timeout=8, headers={
                     "User-Agent": random.choice(USER_AGENTS),
                     "Accept": "text/html,application/xhtml+xml",
                     "Accept-Language": "en-US,en;q=0.9",
                     "Referer": "https://www.flexjobs.com/",
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "html.parser")
@@ -1664,11 +1748,11 @@ class JobScraper:
         for offset in offsets:
             try:
                 url = f"https://himalayas.app/jobs/api?limit=50&offset={offset}"
-                resp = self.session.get(url, timeout=15, headers={
+                resp = self._get(url, timeout=15, headers={
                     "Accept": "application/json",
                     "User-Agent": random.choice(USER_AGENTS),
                 })
-                if resp.status_code != 200:
+                if not resp or resp.status_code != 200:
                     continue
 
                 data = resp.json()

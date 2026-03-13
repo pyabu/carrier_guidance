@@ -1,0 +1,326 @@
+{% extends "base.html" %}
+{% block title %}My Profile{% endblock %}
+
+{% block content %}
+<style>
+.profile-hero { padding:100px 0 40px; background:linear-gradient(135deg,#667eea 0%,#764ba2 100%); color:#fff; }
+.profile-hero h1 { font-size:2rem; margin:0 0 4px; }
+.profile-hero p { opacity:0.85; margin:0; }
+.profile-grid { display:grid; grid-template-columns:minmax(240px, 320px) 1fr; gap:32px; padding:40px 0 60px; }
+.profile-sidebar { display:flex; flex-direction:column; gap:20px; }
+.profile-card { background:var(--surface); border-radius:16px; padding:28px; box-shadow:var(--shadow-sm); }
+.profile-card h3 { margin:0 0 16px; font-size:1.05rem; display:flex; align-items:center; gap:8px; }
+.profile-card h3 i { color:var(--accent); }
+.profile-avatar { width:80px; height:80px; border-radius:50%; background:linear-gradient(135deg,#667eea,#764ba2); display:flex; align-items:center; justify-content:center; color:#fff; font-size:2rem; font-weight:700; margin:0 auto 16px; }
+.profile-name { text-align:center; font-size:1.3rem; font-weight:700; margin-bottom:4px; }
+.profile-email { text-align:center; color:var(--text-secondary); font-size:0.9rem; margin-bottom:16px; }
+.profile-mini-stats { display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px; text-align:center; }
+.profile-mini-stat { background:var(--bg); border-radius:10px; padding:12px 8px; }
+.profile-mini-stat strong { display:block; font-size:1.2rem; color:var(--accent); }
+.profile-mini-stat small { color:var(--text-secondary); font-size:0.75rem; }
+.profile-main { display:flex; flex-direction:column; gap:20px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:12px; }
+.form-group label { font-weight:600; font-size:0.88rem; color:var(--text-secondary); }
+.form-group input, .form-group textarea, .form-group select { padding:10px 14px; border:1px solid var(--border); border-radius:10px; font-size:0.92rem; background:var(--bg); color:var(--text-primary); transition:var(--transition); }
+.form-group input:focus, .form-group textarea:focus { outline:none; border-color:var(--accent); box-shadow:0 0 0 3px rgba(102,126,234,0.15); }
+.form-group textarea { resize:vertical; min-height:80px; }
+.tag-list { display:flex; flex-wrap:wrap; gap:8px; margin-top:4px; }
+.tag { background:var(--accent-light,rgba(102,126,234,0.12)); color:var(--accent); padding:4px 12px; border-radius:20px; font-size:0.82rem; font-weight:500; }
+.resume-area { border:2px dashed var(--border); border-radius:12px; padding:32px; text-align:center; position:relative; transition:var(--transition); cursor:pointer; }
+.resume-area:hover { border-color:var(--accent); background:rgba(102,126,234,0.04); }
+.resume-area i { font-size:2rem; color:var(--accent); margin-bottom:8px; }
+.resume-area p { margin:4px 0; }
+.resume-info { display:flex; align-items:center; gap:12px; padding:16px; background:var(--bg); border-radius:10px; }
+.resume-info i { font-size:1.5rem; color:#e74c3c; }
+.resume-info-text strong { display:block; }
+.resume-info-text small { color:var(--text-secondary); }
+.alert-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+.alert-item:last-child { border:none; }
+.alert-keyword { font-weight:600; }
+.alert-remove { background:none; border:none; color:var(--danger,#e74c3c); cursor:pointer; font-size:0.85rem; }
+.bookmark-item { display:flex; justify-content:space-between; align-items:center; padding:10px 0; border-bottom:1px solid var(--border); }
+.bookmark-item:last-child { border:none; }
+.btn-save-profile { background:linear-gradient(135deg,#667eea,#764ba2); color:#fff; border:none; padding:12px 32px; border-radius:10px; font-weight:600; font-size:0.95rem; cursor:pointer; transition:var(--transition); }
+.btn-save-profile:hover { transform:translateY(-1px); box-shadow:0 4px 15px rgba(102,126,234,0.4); }
+.flash-msg { padding:12px 20px; border-radius:10px; margin-bottom:16px; font-weight:500; }
+.flash-success { background:rgba(16,185,129,0.12); color:#059669; }
+.flash-error { background:rgba(239,68,68,0.12); color:#dc2626; }
+.interest-check { display:flex; flex-wrap:wrap; gap:8px; }
+.interest-check label { display:flex; align-items:center; gap:6px; padding:6px 14px; border:1px solid var(--border); border-radius:20px; cursor:pointer; font-size:0.85rem; transition:var(--transition); }
+.interest-check label:has(input:checked) { background:var(--accent); color:#fff; border-color:var(--accent); }
+.interest-check input { display:none; }
+@media (max-width:900px) {
+    .profile-grid { grid-template-columns:1fr; }
+    .form-row { grid-template-columns:1fr; }
+}
+@media (max-width:600px) {
+    .profile-hero { padding:80px 0 30px; }
+    .profile-hero h1 { font-size:1.5rem; }
+    .profile-card { padding:20px; }
+    .profile-mini-stats { grid-template-columns:1fr 1fr 1fr; gap:6px; }
+    .profile-mini-stat { padding:10px 6px; }
+    .profile-mini-stat strong { font-size:1rem; }
+}
+</style>
+
+<!-- Hero -->
+<section class="profile-hero">
+    <div class="container">
+        <h1><i class="fas fa-user-circle"></i> My Profile</h1>
+        <p>Manage your career profile, resume, and preferences</p>
+    </div>
+</section>
+
+<section class="container" style="padding-top:0;">
+    <!-- Flash messages -->
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+    {% for cat, msg in messages %}
+    <div class="flash-msg flash-{{ cat }}" style="margin-top:20px;">{{ msg }}</div>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+
+    <div class="profile-grid">
+        <!-- ═══ SIDEBAR ═══ -->
+        <div class="profile-sidebar">
+            <!-- Avatar Card -->
+            <div class="profile-card" style="text-align:center;">
+                <div class="profile-avatar">{{ user.name[0]|upper }}</div>
+                <div class="profile-name">{{ user.name }}</div>
+                <div class="profile-email">{{ user.email }}</div>
+                <div class="profile-mini-stats">
+                    <div class="profile-mini-stat">
+                        <strong>{{ stats.applications }}</strong>
+                        <small>Applied</small>
+                    </div>
+                    <div class="profile-mini-stat">
+                        <strong>{{ stats.saved }}</strong>
+                        <small>Saved</small>
+                    </div>
+                    <div class="profile-mini-stat">
+                        <strong>{{ stats.profile_views }}</strong>
+                        <small>Views</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Resume Card -->
+            <div class="profile-card">
+                <h3><i class="fas fa-file-alt"></i> Resume</h3>
+                {% if resume_info %}
+                <div class="resume-info" id="resumeDisplay">
+                    <i class="fas fa-file-pdf"></i>
+                    <div class="resume-info-text">
+                        <strong>{{ resume_info.filename }}</strong>
+                        <small>Uploaded {{ resume_info.uploaded_at[:10] if resume_info.uploaded_at else '' }}</small>
+                    </div>
+                    <button onclick="deleteResume()" class="alert-remove" title="Delete resume"><i class="fas fa-trash"></i></button>
+                </div>
+                {% endif %}
+                <div class="resume-area" id="resumeDropzone" onclick="document.getElementById('resumeInput').click()" {% if resume_info %}style="display:none;"{% endif %}>
+                    <i class="fas fa-cloud-upload-alt"></i>
+                    <p><strong>Click to upload</strong> or drag & drop</p>
+                    <p style="font-size:0.8rem;color:var(--text-secondary);">PDF, DOC, DOCX (max 5MB)</p>
+                    <input type="file" id="resumeInput" accept=".pdf,.doc,.docx" style="display:none;" onchange="uploadResume(this)">
+                </div>
+                <div id="resumeStatus" style="margin-top:8px;font-size:0.85rem;"></div>
+            </div>
+
+            <!-- Job Alerts Card -->
+            <div class="profile-card">
+                <h3><i class="fas fa-bell"></i> Job Alerts</h3>
+                <div style="display:flex;gap:8px;margin-bottom:12px;">
+                    <input type="text" id="alertKeyword" placeholder="e.g. Python, React, Data Science" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:0.88rem;background:var(--bg);color:var(--text-primary);">
+                    <button onclick="addAlert()" class="btn btn-primary btn-sm"><i class="fas fa-plus"></i></button>
+                </div>
+                <div id="alertsList"></div>
+            </div>
+
+            <!-- Bookmarked Companies -->
+            <div class="profile-card">
+                <h3><i class="fas fa-building"></i> Bookmarked Companies</h3>
+                <div id="bookmarksList"><p style="color:var(--text-secondary);font-size:0.88rem;">No bookmarks yet. Bookmark companies from job listings.</p></div>
+            </div>
+        </div>
+
+        <!-- ═══ MAIN FORM ═══ -->
+        <div class="profile-main">
+            <div class="profile-card">
+                <h3><i class="fas fa-user-edit"></i> Personal Information</h3>
+                <form method="POST" action="/profile">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" name="name" value="{{ user.name }}" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" value="{{ user.email }}" disabled style="opacity:0.6;">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Phone</label>
+                            <input type="tel" name="phone" value="{{ extra.get('phone','') }}" placeholder="+91 xxxxxxxx">
+                        </div>
+                        <div class="form-group">
+                            <label>Experience Level</label>
+                            <select name="experience_level">
+                                <option value="">Select...</option>
+                                <option value="student" {% if user.get('experience_level')=='student' %}selected{% endif %}>Student</option>
+                                <option value="fresher" {% if user.get('experience_level')=='fresher' %}selected{% endif %}>Fresher</option>
+                                <option value="1-2 years" {% if user.get('experience_level')=='1-2 years' %}selected{% endif %}>1-2 Years</option>
+                                <option value="3-5 years" {% if user.get('experience_level')=='3-5 years' %}selected{% endif %}>3-5 Years</option>
+                                <option value="5+ years" {% if user.get('experience_level')=='5+ years' %}selected{% endif %}>5+ Years</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Bio</label>
+                        <textarea name="bio" placeholder="Tell employers about yourself...">{{ extra.get('bio','') }}</textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Skills (comma-separated)</label>
+                        <input type="text" name="skills" value="{{ ', '.join(user.skills_list) }}" placeholder="Python, React, SQL...">
+                    </div>
+                    <div class="form-group">
+                        <label>Interests</label>
+                        <div class="interest-check">
+                            {% set all_interests = ['Software Development','Data Science','AI/ML','Web Development','Mobile Apps','Cloud Computing','Cybersecurity','DevOps','UI/UX Design','Product Management','Blockchain','IoT'] %}
+                            {% for interest in all_interests %}
+                            <label>
+                                <input type="checkbox" name="interests" value="{{ interest }}" {% if interest in user.interests_list %}checked{% endif %}>
+                                {{ interest }}
+                            </label>
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label><i class="fab fa-linkedin"></i> LinkedIn URL</label>
+                            <input type="url" name="linkedin" value="{{ extra.get('linkedin','') }}" placeholder="https://linkedin.com/in/...">
+                        </div>
+                        <div class="form-group">
+                            <label><i class="fab fa-github"></i> GitHub URL</label>
+                            <input type="url" name="github" value="{{ extra.get('github','') }}" placeholder="https://github.com/...">
+                        </div>
+                    </div>
+                    <button type="submit" class="btn-save-profile"><i class="fas fa-save"></i> Save Profile</button>
+                </form>
+            </div>
+
+            <!-- Personalized Career Guidance -->
+            <div class="profile-card" id="guidanceCard" style="display:none;">
+                <h3><i class="fas fa-compass"></i> Personalized Career Guidance</h3>
+                <div id="guidanceContent"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+// Resume upload
+function uploadResume(input) {
+    if (!input.files.length) return;
+    const file = input.files[0];
+    if (file.size > 5 * 1024 * 1024) {
+        document.getElementById('resumeStatus').innerHTML = '<span style="color:#e74c3c;">File too large (max 5MB)</span>';
+        return;
+    }
+    const fd = new FormData();
+    fd.append('resume', file);
+    document.getElementById('resumeStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
+    fetch('/api/upload-resume', { method: 'POST', body: fd })
+        .then(r => r.json())
+        .then(d => {
+            if (d.error) {
+                document.getElementById('resumeStatus').innerHTML = '<span style="color:#e74c3c;">' + d.error + '</span>';
+            } else {
+                document.getElementById('resumeStatus').innerHTML = '<span style="color:#059669;">✓ Uploaded!</span>';
+                setTimeout(() => location.reload(), 800);
+            }
+        })
+        .catch(() => { document.getElementById('resumeStatus').innerHTML = '<span style="color:#e74c3c;">Upload failed</span>'; });
+}
+
+function deleteResume() {
+    if (!confirm('Delete your resume?')) return;
+    fetch('/api/delete-resume', { method: 'POST' })
+        .then(r => r.json())
+        .then(() => location.reload());
+}
+
+// Job Alerts
+function loadAlerts() {
+    fetch('/api/alerts').then(r => r.json()).then(d => {
+        const el = document.getElementById('alertsList');
+        if (!d.alerts || !d.alerts.length) {
+            el.innerHTML = '<p style="color:var(--text-secondary);font-size:0.88rem;">No alerts set. Add keywords above to get notified.</p>';
+            return;
+        }
+        el.innerHTML = d.alerts.map(a =>
+            '<div class="alert-item"><span class="alert-keyword"><i class="fas fa-bell" style="color:#f59e0b;margin-right:6px;"></i>' + a.keyword + '</span>' +
+            '<button class="alert-remove" onclick="removeAlert(\'' + a.keyword.replace(/'/g, "\\'") + '\')"><i class="fas fa-times"></i> Remove</button></div>'
+        ).join('');
+    });
+}
+function addAlert() {
+    const inp = document.getElementById('alertKeyword');
+    const kw = inp.value.trim();
+    if (!kw) return;
+    fetch('/api/toggle-alert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw }) })
+        .then(r => r.json()).then(() => { inp.value = ''; loadAlerts(); });
+}
+function removeAlert(kw) {
+    fetch('/api/toggle-alert', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ keyword: kw }) })
+        .then(r => r.json()).then(() => loadAlerts());
+}
+
+// Bookmarks
+function loadBookmarks() {
+    fetch('/api/bookmarked-companies').then(r => r.json()).then(d => {
+        const el = document.getElementById('bookmarksList');
+        if (!d.bookmarks || !d.bookmarks.length) {
+            el.innerHTML = '<p style="color:var(--text-secondary);font-size:0.88rem;">No bookmarks yet. Bookmark companies from job listings.</p>';
+            return;
+        }
+        el.innerHTML = d.bookmarks.map(b =>
+            '<div class="bookmark-item"><span><i class="fas fa-building" style="color:var(--accent);margin-right:6px;"></i><strong>' + b.company + '</strong></span>' +
+            '<button class="alert-remove" onclick="unbookmark(\'' + b.company.replace(/'/g, "\\'") + '\')"><i class="fas fa-times"></i></button></div>'
+        ).join('');
+    });
+}
+function unbookmark(company) {
+    fetch('/api/bookmark-company', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ company: company }) })
+        .then(r => r.json()).then(() => loadBookmarks());
+}
+
+// Personalized guidance
+function loadGuidance() {
+    fetch('/api/personalized-guidance').then(r => r.json()).then(d => {
+        if (!d.suggestions || !d.suggestions.length) return;
+        const card = document.getElementById('guidanceCard');
+        card.style.display = 'block';
+        let html = '<p style="color:var(--text-secondary);margin-bottom:16px;"><strong>' + d.matching_jobs + '</strong> jobs match your skills right now!</p>';
+        d.suggestions.forEach(s => {
+            html += '<div style="background:var(--bg);border-radius:10px;padding:16px;margin-bottom:12px;">' +
+                '<div style="font-weight:600;margin-bottom:6px;"><i class="fas fa-route" style="color:var(--accent);"></i> Based on: ' + s.based_on + '</div>' +
+                '<div style="font-size:0.9rem;color:var(--text-secondary);margin-bottom:8px;">Career Path: <strong>' + s.career_path + '</strong></div>' +
+                '<div style="font-size:0.85rem;">Learn next: ' + s.learn_next.map(n => '<span class="tag">' + n + '</span>').join(' ') + '</div>' +
+                '<div style="font-size:0.82rem;margin-top:6px;color:var(--text-secondary);">Resources: ' + s.resources.join(', ') + '</div>' +
+                '</div>';
+        });
+        document.getElementById('guidanceContent').innerHTML = html;
+    });
+}
+
+// Init
+loadAlerts();
+loadBookmarks();
+loadGuidance();
+</script>
+{% endblock %}

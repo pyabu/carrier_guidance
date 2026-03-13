@@ -3,7 +3,11 @@
   "builds": [
     {
       "src": "app.py",
-      "use": "@vercel/python"
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "maxDuration": 60
+      }
     },
     {
       "src": "static/**",
@@ -24,6 +28,14 @@
     {
       "path": "/api/cron",
       "schedule": "0 6 * * *"
+    },
+    {
+      "path": "/api/cron/tn",
+      "schedule": "15 6 * * *"
+    },
+    {
+      "path": "/api/cron/india",
+      "schedule": "30 6 * * *"
     }
   ]
 }

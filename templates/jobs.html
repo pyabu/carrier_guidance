@@ -767,7 +767,7 @@ multiple premium sources.{% endblock %}
         var skills = (job.skills || []).slice(0, 4).map(function (s) { return '<span class="skill-tag">' + esc(s) + '</span>'; }).join('');
         var hotTag = (job.trending_skills || []).length ? '<span class="skill-tag" style="background:#f59e0b22;color:#f59e0b;border-color:#f59e0b">\ud83d\udd25 Trending</span>' : '';
 
-        return '<div class="job-card fade-in" onclick="window.location=\'/job/' + job.id + '\'">'
+        return '<div class="job-card fade-in" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
             + '<div class="job-card-header">'
             + '<img src="' + logo + '" alt="' + esc(job.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
             + '<div class="job-card-info"><h3>' + esc(job.title || 'Untitled') + qBadge + tBadge + '</h3><span class="job-card-company">' + esc(job.company || 'Unknown') + '</span></div>'
@@ -784,7 +784,7 @@ multiple premium sources.{% endblock %}
             + '<div class="job-card-actions">'
             + '<span class="source-badge" style="background:' + clr + ';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:6px">' + esc(job.source) + '</span>'
             + '<button class="btn-save btn btn-outline btn-sm" onclick="event.stopPropagation();saveJob(this, \'' + job.id + '\')" title="Save Job"><i class="far fa-heart"></i></button>'
-            + '<a href="' + job.apply_url + '" class="btn-apply" target="_blank" onclick="event.stopPropagation()">Apply</a>'
+            + '<a href="' + job.apply_url + '" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Sign in to track your job applications.\',event);return false;}trackApply(\'' + job.id + '\')">Apply</a>'
             + '</div>'
             + '</div></div>';
     }
@@ -792,6 +792,7 @@ multiple premium sources.{% endblock %}
     function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
 
     async function saveJob(btn, jobId) {
+        if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs and track your applications.');
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
         btn.disabled = true;
         try {
@@ -811,6 +812,15 @@ multiple premium sources.{% endblock %}
             btn.innerHTML = '<i class="far fa-heart"></i>';
             btn.disabled = false;
         }
+    }
+
+    function trackApply(jobId) {
+        if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications and get personalized recommendations.'); return; }
+        fetch('/api/apply-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: jobId})
+        }).catch(function(){});
     }
 
     /* ================================================================

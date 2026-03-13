@@ -32,6 +32,11 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import requests
 from bs4 import BeautifulSoup
 
+from scraper.anti_block import (
+    create_stealth_session, safe_get, human_delay,
+    warm_cookies, get_browser_headers, get_random_ua,
+)
+
 logger = logging.getLogger(__name__)
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -650,13 +655,24 @@ class IndiaJobScraper:
     """
 
     def __init__(self):
-        self.session = requests.Session()
-        self.session.headers.update({
-            "User-Agent": random.choice(USER_AGENTS),
-            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
-            "Accept-Language": "en-IN,en;q=0.9,hi;q=0.8",
-        })
+        self.session = create_stealth_session()
         self.seen_hashes = set()
+
+        # Warm cookies for sites that require session cookies
+        for base_url in [
+            "https://www.naukri.com",
+            "https://www.foundit.in",
+            "https://internshala.com",
+            "https://www.timesjobs.com",
+            "https://www.freshersworld.com",
+        ]:
+            warm_cookies(self.session, base_url)
+
+    def _get(self, url, timeout=15, **kwargs):
+        """Anti-blocking GET wrapper with per-request UA rotation and retry."""
+        resp = safe_get(self.session, url, timeout=timeout, **kwargs)
+        human_delay(0.8, 2.5)
+        return resp
 
     def _hash_job(self, title, company, location):
         """Generate dedup hash for a job."""
@@ -776,8 +792,8 @@ class IndiaJobScraper:
         for term in search_terms:
             try:
                 url = f"https://www.naukri.com/{term}-jobs"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=12)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -895,8 +911,8 @@ class IndiaJobScraper:
         for query, location in searches:
             try:
                 url = f"https://www.indeed.co.in/rss?q={query}&l={location}&limit=15"
-                resp = self.session.get(url, timeout=10)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=10)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "xml")
@@ -969,8 +985,8 @@ class IndiaJobScraper:
         for keywords, location in searches:
             try:
                 url = f"https://www.linkedin.com/jobs-guest/jobs/api/sJobsOnSerp/jobs-on-linkedin?keywords={keywords.replace(' ', '+')}&location={location.replace(' ', '+')}&start=0"
-                resp = self.session.get(url, timeout=12)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=12)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -1024,8 +1040,8 @@ class IndiaJobScraper:
         for term in searches:
             try:
                 url = f"https://www.foundit.in/srp/results?searchId=&query={term}&locations=India"
-                resp = self.session.get(url, timeout=10)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=10)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -1085,8 +1101,8 @@ class IndiaJobScraper:
         for path in paths:
             try:
                 url = f"https://internshala.com{path}"
-                resp = self.session.get(url, timeout=10)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=10)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -1146,8 +1162,8 @@ class IndiaJobScraper:
         for term in searches:
             try:
                 url = f"https://www.timesjobs.com/candidate/job-search.html?searchType=personal498&from=submit&txtKeywords={term}&cboWorkExp1=0&txtLocation="
-                resp = self.session.get(url, timeout=10)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=10)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -1207,8 +1223,8 @@ class IndiaJobScraper:
         for cat in categories:
             try:
                 url = f"https://www.freshersworld.com/jobs/{cat}"
-                resp = self.session.get(url, timeout=10)
-                if resp.status_code != 200:
+                resp = self._get(url, timeout=10)
+                if not resp or resp.status_code != 200:
                     continue
 
                 soup = BeautifulSoup(resp.text, "lxml")
@@ -1253,7 +1269,7 @@ class IndiaJobScraper:
         jobs = []
         try:
             url = "https://himalayas.app/jobs/api?limit=100&country=India"
-            resp = self.session.get(url, timeout=12)
+            resp = self._get(url, timeout=12)
             if resp.status_code == 200:
                 data = resp.json()
                 for item in (data.get("jobs", []) or []):
