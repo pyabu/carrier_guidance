@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% block title %}Developer Profile | CareerPath Pro{% endblock %}
+
+{% block content %}
+<main class="container my-5 fade-in">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0 glass-panel" style="border-radius: 16px;">
+                <div class="card-body p-5">
+
+                    <!-- Header Section -->
+                    <div class="text-center mb-5">
+                        <div class="d-inline-flex justify-content-center align-items-center mb-4"
+                            style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-color), var(--accent-light)); border-radius: 50%; color: white; font-size: 3rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
+                            A
+                        </div>
+                        <h1 class="fw-bold mb-2">Abu Saleem</h1>
+                        <p class="text-muted lead mb-3">Software Engineer & Application Developer</p>
+
+                        <div class="d-flex justify-content-center gap-3">
+                            <a href="mailto:abusaleem.dev@gmail.com" class="btn btn-outline-primary rounded-pill px-4">
+                                <i class="fas fa-envelope me-2"></i> Email Me
+                            </a>
+                            <a href="https://github.com/pyabu" target="_blank" class="btn btn-dark rounded-pill px-4">
+                                <i class="fab fa-github me-2"></i> pyabu
+                            </a>
+                            <a href="https://www.linkedin.com/in/abu-py/" target="_blank"
+                                class="btn btn-outline-primary rounded-pill px-4"
+                                style="color: #0077b5; border-color: #0077b5;">
+                                <i class="fab fa-linkedin me-2"></i> Abu py
+                            </a>
+                        </div>
+                    </div>
+
+                    <hr class="mb-4">
+
+                    <!-- Education Section -->
+                    <h3 class="fw-bold mb-4"><i class="fas fa-graduation-cap me-2 text-primary"></i> Education</h3>
+                    <div class="d-flex mb-4">
+                        <div class="me-4 flex-shrink-0" style="width: 2px; background: var(--primary-color);"></div>
+                        <div>
+                            <h5 class="fw-bold mb-1">MSc Computer Science</h5>
+                            <p class="text-muted mb-2"><i class="fas fa-university me-1"></i> Pondicherry University</p>
+                            <span class="badge bg-light text-dark mb-3"><i class="far fa-calendar-alt me-1"></i> 2024 -
+                                2026</span>
+                            <p>Completed Master's in Computer Science with a strong focus on software engineering,
+                                mobile application development, and modern web technologies.</p>
+                        </div>
+                    </div>
+
+                    <!-- Project Section -->
+                    <h3 class="fw-bold mb-4 mt-5"><i class="fas fa-rocket me-2 text-primary"></i> Featured Project</h3>
+                    <div class="card bg-light border-0"
+                        style="border-radius: 12px; border-left: 4px solid var(--accent-color) !important;">
+                        <div class="card-body p-4">
+                            <h5 class="fw-bold text-dark mb-2">HearAlert</h5>
+                            <p class="text-muted mb-1"><em>Final Year Project</em></p>
+                            <p class="mb-0">Designed and developed an innovative health monitoring application
+                                showcasing advanced skills in mobile development and software architecture.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

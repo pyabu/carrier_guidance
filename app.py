@@ -768,6 +768,10 @@ def onboarding():
 def about():
     return render_template("about.html")
 
+@app.route("/developer")
+def developer():
+    return render_template("developer.html")
+
 
 @app.route("/contact")
 def contact():
