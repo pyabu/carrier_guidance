@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://careerguidance.me/sitemap
+Sitemap: https://careerguidance.me/sitemap.xml
