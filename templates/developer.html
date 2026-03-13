@@ -342,6 +342,129 @@
         color: #14b8a6;
     }
 
+    .si-orange {
+        background: rgba(249, 115, 22, 0.12);
+        color: #ea580c;
+    }
+
+    /* ── Team cards ── */
+    .team-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+
+    .team-card {
+        background: white;
+        border: 1px solid #e8eaf0;
+        border-radius: 18px;
+        padding: 28px 24px;
+        display: flex;
+        align-items: flex-start;
+        gap: 18px;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .team-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        border-radius: 18px 18px 0 0;
+    }
+
+    .team-card.tc-pink::before {
+        background: linear-gradient(to right, #ec4899, #f43f5e);
+    }
+
+    .team-card.tc-orange::before {
+        background: linear-gradient(to right, #f97316, #eab308);
+    }
+
+    .team-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.09);
+    }
+
+    .team-avatar {
+        width: 56px;
+        height: 56px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: white;
+        flex-shrink: 0;
+    }
+
+    .av-pink {
+        background: linear-gradient(135deg, #ec4899, #f43f5e);
+    }
+
+    .av-orange {
+        background: linear-gradient(135deg, #f97316, #eab308);
+    }
+
+    .team-info h5 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 4px 0;
+    }
+
+    .team-info .team-role {
+        font-size: 0.82rem;
+        color: #64748b;
+        margin: 0 0 8px 0;
+        line-height: 1.4;
+    }
+
+    .team-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 100px;
+        margin-bottom: 8px;
+    }
+
+    .tb-pink {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .tb-orange {
+        background: #fff7ed;
+        color: #c2410c;
+    }
+
+    .collab-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        background: #f1f5f9;
+        color: #475569;
+        padding: 3px 10px;
+        border-radius: 100px;
+        font-weight: 600;
+    }
+
+    @media (max-width: 640px) {
+        .team-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
     .sec-head h2 {
         font-size: 1.25rem;
         font-weight: 800;
@@ -771,6 +894,43 @@
                     <h5>Developer Portfolio</h5>
                     <p>Personal showcase website demonstrating project history, software engineering experience, and
                         full-stack development capabilities.</p>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Team / Collaborators -->
+        <div class="mb-5">
+            <div class="sec-head">
+                <div class="sec-icon si-orange"><i class="fas fa-users"></i></div>
+                <h2>Team &amp; Collaborators</h2>
+                <div class="sec-line"></div>
+            </div>
+            <div class="team-grid">
+
+                <!-- Sindhu Bharathi -->
+                <div class="team-card tc-pink">
+                    <div class="team-avatar av-pink">S</div>
+                    <div class="team-info">
+                        <div class="team-badge tb-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
+                            2024–2026</div>
+                        <h5>Sindhu Bharathi P G</h5>
+                        <p class="team-role">Student · MSc Computer Science<br>Pondicherry University, India</p>
+                        <span class="collab-tag"><i class="fas fa-virus fa-xs"></i> Dengue Connect Collaborator</span>
+                    </div>
+                </div>
+
+                <!-- P. Palanivel -->
+                <div class="team-card tc-orange">
+                    <div class="team-avatar av-orange">P</div>
+                    <div class="team-info">
+                        <div class="team-badge tb-orange"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
+                            2024–2026</div>
+                        <h5>P. Palanivel</h5>
+                        <p class="team-role">Student · MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India
+                        </p>
+                        <span class="collab-tag"><i class="fas fa-virus fa-xs"></i> Dengue Connect Collaborator</span>
+                    </div>
                 </div>
 
             </div>
