@@ -11,10 +11,10 @@
 
                     <!-- Header Section -->
                     <div class="text-center mb-5">
-                        <div class="d-inline-flex justify-content-center align-items-center mb-4"
-                            style="width: 120px; height: 120px; background: linear-gradient(135deg, var(--primary-color), var(--accent-light)); border-radius: 50%; color: white; font-size: 3rem; font-weight: bold; box-shadow: 0 10px 20px rgba(0,0,0,0.1);">
-                            A
-                        </div>
+                        <img src="{{ url_for('static', filename='images/profile.png') }}"
+                            onerror="this.src='{{ url_for('static', filename='favicon.ico') }}'" alt="Abu Saleem"
+                            class="img-fluid rounded-circle mb-4"
+                            style="width: 150px; height: 150px; object-fit: cover; border: 4px solid var(--primary-color); box-shadow: 0 10px 25px rgba(0,0,0,0.1);">
                         <h1 class="fw-bold mb-2">Abu Saleem</h1>
                         <p class="text-muted lead mb-3">Software Engineer & Application Developer</p>
 
@@ -49,15 +49,57 @@
                         </div>
                     </div>
 
-                    <!-- Project Section -->
-                    <h3 class="fw-bold mb-4 mt-5"><i class="fas fa-rocket me-2 text-primary"></i> Featured Project</h3>
-                    <div class="card bg-light border-0"
-                        style="border-radius: 12px; border-left: 4px solid var(--accent-color) !important;">
-                        <div class="card-body p-4">
-                            <h5 class="fw-bold text-dark mb-2">HearAlert</h5>
-                            <p class="text-muted mb-1"><em>Final Year Project</em></p>
-                            <p class="mb-0">Designed and developed an innovative health monitoring application
-                                showcasing advanced skills in mobile development and software architecture.</p>
+                    <!-- Projects Section -->
+                    <h3 class="fw-bold mb-4 mt-5"><i class="fas fa-laptop-code me-2 text-primary"></i> Projects &
+                        Portfolio</h3>
+
+                    <div class="row g-4">
+                        <!-- HearAlert -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100"
+                                style="border-radius: 12px; border-top: 4px solid var(--accent-color) !important; transition: transform 0.2s;">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-heartbeat fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">HearAlert</h5>
+                                    <span class="badge bg-primary mb-3">Final Year Project</span>
+                                    <p class="text-muted small mb-0">An innovative health monitoring and acoustic
+                                        tracking mobile application (APK).</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Health Tracker -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100"
+                                style="border-radius: 12px; border-top: 4px solid var(--primary-color) !important; transition: transform 0.2s;">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-running fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">Health Tracker</h5>
+                                    <span class="badge bg-secondary mb-3">Application</span>
+                                    <p class="text-muted small mb-0">A comprehensive system built to track, organize,
+                                        and visualize core personal health metrics.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Portfolio -->
+                        <div class="col-md-4">
+                            <div class="card bg-light border-0 h-100"
+                                style="border-radius: 12px; border-top: 4px solid var(--accent-light) !important; transition: transform 0.2s;">
+                                <div class="card-body p-4 text-center">
+                                    <div class="mb-3">
+                                        <i class="fas fa-user-astronaut fa-2x text-primary"></i>
+                                    </div>
+                                    <h5 class="fw-bold text-dark mb-2">Developer Portfolio</h5>
+                                    <span class="badge bg-dark mb-3">Web Architecture</span>
+                                    <p class="text-muted small mb-0">Personal showcase website orchestrating project
+                                        history, experience, and development capabilities.</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
