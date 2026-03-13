@@ -3,164 +3,493 @@
 {% block title %}Developer Team | CareerGuidance{% endblock %}
 
 {% block extra_head %}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-    /* ══════════════════════════ DEVELOPER PAGE ══════════════════════════ */
-    .dev-page {
-        font-family: 'Inter', sans-serif;
+    /* ═══════════════════════════════════════════════════════
+   DEVELOPER PROFILE PAGE — PREMIUM REDESIGN
+═══════════════════════════════════════════════════════ */
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
     }
 
-    /* ── Intro Banner ── */
-    .intro-banner {
-        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+    .dp {
+        font-family: 'Inter', sans-serif;
+        color: #1e293b;
+    }
+
+    /* ─────────────────── HERO BANNER ─────────────────── */
+    .dp-hero {
+        background: #080b1a;
+        padding: 80px 0 70px;
         position: relative;
         overflow: hidden;
-        padding: 64px 0 52px;
-        text-align: center;
     }
 
-    .intro-banner::before {
+    /* Glowing orbs */
+    .dp-hero-orb1,
+    .dp-hero-orb2 {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+        animation: orb-drift 10s ease-in-out infinite alternate;
+    }
+
+    .dp-hero-orb1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(#6d28d9 0%, transparent 70%);
+        opacity: .28;
+        top: -120px;
+        left: -80px;
+    }
+
+    .dp-hero-orb2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(#0e7490 0%, transparent 70%);
+        opacity: .22;
+        bottom: -80px;
+        right: -60px;
+        animation-delay: 4s;
+    }
+
+    @keyframes orb-drift {
+        0% {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(40px, 40px);
+        }
+    }
+
+    /* Dot pattern */
+    .dp-hero::before {
         content: '';
         position: absolute;
         inset: 0;
-        background-image:
-            linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
-            linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 48px 48px;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 32px 32px;
     }
 
-    .intro-banner::after {
-        content: '';
-        position: absolute;
-        width: 600px;
-        height: 600px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.2), transparent 70%);
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        pointer-events: none;
-    }
-
-    .intro-inner {
+    .dp-hero-inner {
         position: relative;
         z-index: 2;
-        max-width: 700px;
+        max-width: 760px;
         margin: 0 auto;
-        padding: 0 24px;
+        padding: 0 28px;
+        text-align: center;
     }
 
-    .intro-chip {
+    .dp-eyebrow {
         display: inline-flex;
         align-items: center;
-        gap: 7px;
-        background: rgba(124, 58, 237, 0.2);
-        border: 1px solid rgba(124, 58, 237, 0.45);
+        gap: 8px;
+        background: rgba(109, 40, 217, .18);
+        border: 1px solid rgba(109, 40, 217, .4);
         color: #c4b5fd;
         font-size: 11px;
         font-weight: 700;
-        letter-spacing: 1.5px;
+        letter-spacing: 1.8px;
         text-transform: uppercase;
-        padding: 5px 16px;
+        padding: 5px 18px;
         border-radius: 100px;
-        margin-bottom: 20px;
+        margin-bottom: 22px;
     }
 
-    .intro-title {
-        font-size: 2.5rem;
+    .dp-eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #a78bfa;
+        animation: blink-dot 1.6s ease-in-out infinite;
+    }
+
+    @keyframes blink-dot {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: .2
+        }
+    }
+
+    .dp-hero-title {
+        font-size: clamp(2rem, 4vw, 3rem);
         font-weight: 900;
-        line-height: 1.15;
-        background: linear-gradient(135deg, #fff 0%, #a78bfa 55%, #67e8f9 100%);
+        line-height: 1.1;
+        background: linear-gradient(135deg, #fff 0%, #c4b5fd 45%, #67e8f9 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin: 0 0 14px;
+        margin: 0 0 16px;
     }
 
-    .intro-sub {
+    .dp-hero-sub {
         color: #94a3b8;
         font-size: 1rem;
         line-height: 1.7;
-        margin: 0;
+        margin: 0 auto;
+        max-width: 560px;
     }
 
-    /* ── Body ── */
-    .dev-body {
-        max-width: 980px;
-        margin: 56px auto;
-        padding: 0 24px;
+    /* ─────────────────── PAGE BODY ─────────────────── */
+    .dp-body {
+        max-width: 1020px;
+        margin: 0 auto;
+        padding: 64px 24px 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 72px;
     }
 
-    /* ── Section header ── */
-    .sec-head {
+    /* ─────────────────── SECTION HEADER ─────────────────── */
+    .dp-sec-head {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 24px;
+        gap: 14px;
+        margin-bottom: 32px;
     }
 
-    .sec-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 10px;
+    .dp-sec-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        font-size: 1.1rem;
+        font-size: 1.15rem;
         flex-shrink: 0;
     }
 
-    .si-indigo {
-        background: rgba(99, 102, 241, 0.1);
+    .sico-purple {
+        background: rgba(109, 40, 217, .1);
+        color: #7c3aed;
+    }
+
+    .sico-indigo {
+        background: rgba(99, 102, 241, .1);
         color: #6366f1;
     }
 
-    .si-purple {
-        background: rgba(139, 92, 246, 0.1);
-        color: #8b5cf6;
+    .sico-teal {
+        background: rgba(20, 184, 166, .1);
+        color: #0d9488;
     }
 
-    .si-teal {
-        background: rgba(20, 184, 166, 0.1);
-        color: #14b8a6;
-    }
-
-    .si-orange {
-        background: rgba(249, 115, 22, 0.1);
-        color: #ea580c;
-    }
-
-    .sec-head h2 {
-        font-size: 1.2rem;
+    .dp-sec-head h2 {
+        font-size: 1.25rem;
         font-weight: 800;
-        color: #1e293b;
+        color: #0f172a;
         margin: 0;
     }
 
-    .sec-line {
+    .dp-sec-rule {
         flex: 1;
         height: 1px;
         background: linear-gradient(to right, #e2e8f0, transparent);
     }
 
-    /* ── Features grid ── */
+    /* ─────────────────── TEAM GRID ─────────────────── */
+    .team-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    /* Profile card */
+    .profile-card {
+        background: #fff;
+        border-radius: 22px;
+        border: 1px solid #e8ecf4;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, .06);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform .28s ease, box-shadow .28s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, .11);
+    }
+
+    /* Coloured top strip */
+    .card-accent {
+        height: 5px;
+    }
+
+    .acc-purple {
+        background: linear-gradient(to right, #7c3aed, #6366f1);
+    }
+
+    .acc-pink {
+        background: linear-gradient(to right, #db2777, #e11d48);
+    }
+
+    /* Photo block */
+    .card-photo-block {
+        padding: 28px 28px 0;
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+    }
+
+    .card-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: top;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+        flex-shrink: 0;
+        display: block;
+    }
+
+    .card-avatar-fallback {
+        display: none;
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        color: #fff;
+        flex-shrink: 0;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+    }
+
+    .avf-purple {
+        background: linear-gradient(135deg, #7c3aed, #6366f1);
+    }
+
+    .avf-pink {
+        background: linear-gradient(135deg, #db2777, #e11d48);
+    }
+
+    .card-name-block {
+        padding-bottom: 4px;
+    }
+
+    .card-role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 100px;
+        margin-bottom: 6px;
+    }
+
+    .chip-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .chip-pink {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .card-name {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: #0f172a;
+        margin: 0 0 2px;
+    }
+
+    .card-inst {
+        font-size: 0.8rem;
+        color: #64748b;
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Info body */
+    .card-body {
+        padding: 20px 28px 28px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* Links row */
+    .card-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .clink {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 13px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+    .cl-purple {
+        background: #f5f3ff;
+        color: #6d28d9;
+        border-color: #ddd6fe;
+    }
+
+    .cl-pink {
+        background: #fdf2f8;
+        color: #be185d;
+        border-color: #fbcfe8;
+    }
+
+    .cl-ghost {
+        background: #f8fafc;
+        color: #475569;
+        border-color: #e2e8f0;
+    }
+
+    .clink:hover {
+        filter: brightness(.93);
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    /* Divider */
+    .card-divider {
+        height: 1px;
+        background: #f1f5f9;
+        margin: 0;
+    }
+
+    /* Projects list */
+    .proj-label {
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: #94a3b8;
+        margin: 0 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .proj-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 9px 0;
+        border-bottom: 1px solid #f8fafc;
+    }
+
+    .proj-item:last-child {
+        border-bottom: none;
+    }
+
+    .proj-pip {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 5px;
+    }
+
+    .pip-purple {
+        background: #7c3aed;
+    }
+
+    .pip-blue {
+        background: #3b82f6;
+    }
+
+    .pip-orange {
+        background: #f97316;
+    }
+
+    .pip-rose {
+        background: #e11d48;
+    }
+
+    .pip-teal {
+        background: #0d9488;
+    }
+
+    .pip-green {
+        background: #16a34a;
+    }
+
+    .proj-text-wrap {
+        flex: 1;
+    }
+
+    .proj-title-row {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 3px;
+    }
+
+    .proj-name {
+        font-size: .88rem;
+        font-weight: 700;
+        color: #1e293b;
+    }
+
+    .proj-badge {
+        font-size: 10px;
+        font-weight: 600;
+        background: #f1f5f9;
+        color: #64748b;
+        padding: 1px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .proj-desc {
+        font-size: .78rem;
+        color: #64748b;
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    /* ─────────────────── FEATURES GRID ─────────────────── */
     .features-grid {
         display: grid;
         grid-template-columns: repeat(3, 1fr);
-        gap: 18px;
+        gap: 16px;
     }
 
     .feat-card {
         background: #fff;
-        border: 1px solid #e8eaf0;
+        border: 1px solid #e8ecf4;
         border-radius: 16px;
         padding: 22px 20px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, .04);
+        transition: transform .25s, box-shadow .25s;
         position: relative;
         overflow: hidden;
-        transition: all 0.25s ease;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
     }
 
-    .feat-card::before {
+    .feat-card::after {
         content: '';
         position: absolute;
         top: 0;
@@ -171,49 +500,49 @@
 
     .feat-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.09);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, .09);
     }
 
-    .fc-1::before {
+    .fc-a::after {
         background: linear-gradient(to right, #6366f1, #8b5cf6);
     }
 
-    .fc-2::before {
-        background: linear-gradient(to right, #14b8a6, #3b82f6);
+    .fc-b::after {
+        background: linear-gradient(to right, #0d9488, #3b82f6);
     }
 
-    .fc-3::before {
+    .fc-c::after {
         background: linear-gradient(to right, #f59e0b, #ef4444);
     }
 
-    .fc-4::before {
-        background: linear-gradient(to right, #ec4899, #f43f5e);
+    .fc-d::after {
+        background: linear-gradient(to right, #db2777, #e11d48);
     }
 
-    .fc-5::before {
-        background: linear-gradient(to right, #22c55e, #14b8a6);
+    .fc-e::after {
+        background: linear-gradient(to right, #16a34a, #0d9488);
     }
 
-    .fc-6::before {
+    .fc-f::after {
         background: linear-gradient(to right, #3b82f6, #6366f1);
     }
 
-    .fc-7::before {
-        background: linear-gradient(to right, #8b5cf6, #ec4899);
+    .fc-g::after {
+        background: linear-gradient(to right, #8b5cf6, #db2777);
     }
 
-    .fc-8::before {
-        background: linear-gradient(to right, #f97316, #eab308);
+    .fc-h::after {
+        background: linear-gradient(to right, #f97316, #f59e0b);
     }
 
-    .fc-9::before {
-        background: linear-gradient(to right, #0ea5e9, #22c55e);
+    .fc-i::after {
+        background: linear-gradient(to right, #0ea5e9, #16a34a);
     }
 
-    .feat-icon {
-        width: 44px;
-        height: 44px;
-        border-radius: 12px;
+    .feat-ico {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -221,583 +550,371 @@
         margin-bottom: 12px;
     }
 
-    .fi-1 {
-        background: rgba(99, 102, 241, 0.1);
+    .fi-a {
+        background: rgba(99, 102, 241, .1);
         color: #6366f1;
     }
 
-    .fi-2 {
-        background: rgba(20, 184, 166, 0.1);
-        color: #14b8a6;
+    .fi-b {
+        background: rgba(13, 148, 136, .1);
+        color: #0d9488;
     }
 
-    .fi-3 {
-        background: rgba(245, 158, 11, 0.1);
+    .fi-c {
+        background: rgba(245, 158, 11, .1);
         color: #d97706;
     }
 
-    .fi-4 {
-        background: rgba(236, 72, 153, 0.1);
-        color: #db2777;
+    .fi-d {
+        background: rgba(219, 39, 119, .1);
+        color: #be185d;
     }
 
-    .fi-5 {
-        background: rgba(34, 197, 94, 0.1);
-        color: #16a34a;
+    .fi-e {
+        background: rgba(22, 163, 74, .1);
+        color: #15803d;
     }
 
-    .fi-6 {
-        background: rgba(59, 130, 246, 0.1);
+    .fi-f {
+        background: rgba(59, 130, 246, .1);
         color: #2563eb;
     }
 
-    .fi-7 {
-        background: rgba(139, 92, 246, 0.1);
+    .fi-g {
+        background: rgba(139, 92, 246, .1);
         color: #7c3aed;
     }
 
-    .fi-8 {
-        background: rgba(249, 115, 22, 0.1);
+    .fi-h {
+        background: rgba(249, 115, 22, .1);
         color: #ea580c;
     }
 
-    .fi-9 {
-        background: rgba(14, 165, 233, 0.1);
+    .fi-i {
+        background: rgba(14, 165, 233, .1);
         color: #0284c7;
     }
 
     .feat-card h5 {
-        font-size: 0.92rem;
+        font-size: .92rem;
         font-weight: 800;
-        color: #1e293b;
+        color: #0f172a;
         margin: 0 0 6px;
     }
 
     .feat-card p {
-        font-size: 0.8rem;
+        font-size: .78rem;
         color: #64748b;
         line-height: 1.6;
         margin: 0;
     }
 
-    /* ── Team cards ── */
-    .team-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 20px;
-    }
-
-    .team-card {
-        background: white;
-        border: 1px solid #e8eaf0;
-        border-radius: 18px;
-        padding: 28px 22px;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-        position: relative;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-    }
-
-    .team-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 3px;
-        border-radius: 18px 18px 0 0;
-    }
-
-    .team-card.tc-purple::before {
-        background: linear-gradient(to right, #8b5cf6, #6366f1);
-    }
-
-    .team-card.tc-pink::before {
-        background: linear-gradient(to right, #ec4899, #f43f5e);
-    }
-
-    .team-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.09);
-    }
-
-    .team-card-top {
-        display: flex;
-        align-items: flex-start;
-        gap: 16px;
-        margin-bottom: 16px;
-    }
-
-    .teammate-photo-wrap {
-        flex-shrink: 0;
-        width: 72px;
-        height: 72px;
-    }
-
-    .teammate-photo {
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        object-fit: cover;
-        object-position: top;
-        border: 2px solid #e2e8f0;
-        display: block;
-    }
-
-    .teammate-initial {
-        display: none;
-        width: 72px;
-        height: 72px;
-        border-radius: 50%;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.6rem;
-        font-weight: 900;
-        color: white;
-    }
-
-    .ti-purple {
-        background: linear-gradient(135deg, #8b5cf6, #6366f1);
-    }
-
-    .ti-pink {
-        background: linear-gradient(135deg, #ec4899, #f43f5e);
-    }
-
-    .team-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 3px 10px;
-        border-radius: 100px;
-        margin-bottom: 6px;
-    }
-
-    .tb-purple {
-        background: #ede9fe;
-        color: #6d28d9;
-    }
-
-    .tb-pink {
-        background: #fce7f3;
-        color: #be185d;
-    }
-
-    .team-info h5 {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 3px;
-    }
-
-    .team-role {
-        font-size: 0.82rem;
-        color: #64748b;
-        margin: 0 0 8px;
-        line-height: 1.4;
-    }
-
-    .mini-link {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 3px 10px;
-        border-radius: 6px;
-        text-decoration: none;
-        transition: opacity 0.2s;
-    }
-
-    .link-purple {
-        background: #ede9fe;
-        color: #7c3aed;
-    }
-
-    .link-pink {
-        background: #fce7f3;
-        color: #be185d;
-    }
-
-    .mini-link:hover {
-        opacity: 0.8;
-        text-decoration: none;
-    }
-
-    .projects-list {
-        margin-top: 12px;
-        padding-top: 12px;
-        border-top: 1px dashed #e2e8f0;
-    }
-
-    .proj-list-label {
-        font-size: 11px;
-        font-weight: 800;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        color: #94a3b8;
-        margin-bottom: 8px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .proj-row {
-        display: flex;
-        gap: 10px;
-        align-items: flex-start;
-        padding: 8px 0;
-        border-bottom: 1px solid #f1f5f9;
-    }
-
-    .proj-row:last-child {
-        border-bottom: none;
-    }
-
-    .proj-dot {
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        flex-shrink: 0;
-        margin-top: 5px;
-    }
-
-    .dot-purple {
-        background: #8b5cf6;
-    }
-
-    .dot-blue {
-        background: #3b82f6;
-    }
-
-    .dot-teal {
-        background: #14b8a6;
-    }
-
-    .dot-green {
-        background: #22c55e;
-    }
-
-    .dot-orange {
-        background: #f97316;
-    }
-
-    .dot-pink {
-        background: #ec4899;
-    }
-
-    .proj-row strong {
-        font-size: 0.88rem;
-        font-weight: 700;
-        color: #1e293b;
-        margin-right: 5px;
-    }
-
-    .proj-type {
-        font-size: 10px;
-        font-weight: 600;
-        background: #f1f5f9;
-        color: #64748b;
-        padding: 1px 7px;
-        border-radius: 5px;
-        white-space: nowrap;
-    }
-
-    .proj-desc {
-        font-size: 0.8rem;
-        color: #64748b;
-        line-height: 1.5;
-        margin: 3px 0 0;
-    }
-
-    /* ── Skills ── */
-    .skills-cloud {
+    /* ─────────────────── SKILLS CLOUD ─────────────────── */
+    .skills-wrap {
         display: flex;
         flex-wrap: wrap;
         gap: 10px;
     }
 
-    .skill-chip {
+    .sk-pill {
         display: inline-flex;
         align-items: center;
         gap: 7px;
         background: #f8fafc;
         border: 1px solid #e2e8f0;
         color: #334155;
-        padding: 7px 16px;
+        padding: 7px 18px;
         border-radius: 100px;
         font-size: 13px;
         font-weight: 600;
-        transition: all 0.2s;
+        transition: all .2s;
     }
 
-    .skill-chip:hover {
-        background: rgba(139, 92, 246, 0.07);
-        border-color: rgba(139, 92, 246, 0.3);
+    .sk-pill:hover {
+        background: #f5f3ff;
+        border-color: #ddd6fe;
         color: #6d28d9;
         transform: translateY(-1px);
     }
 
-    .skill-chip .dot-skill {
+    .sk-dot {
         width: 6px;
         height: 6px;
         border-radius: 50%;
         background: currentColor;
-        opacity: 0.5;
+        opacity: .45;
     }
 
-    /* ── Responsive ── */
+    /* ─────────────────── RESPONSIVE ─────────────────── */
     @media (max-width: 768px) {
+        .team-row {
+            grid-template-columns: 1fr;
+        }
+
         .features-grid {
             grid-template-columns: 1fr 1fr;
         }
-
-        .team-grid {
-            grid-template-columns: 1fr;
-        }
-
-        .intro-title {
-            font-size: 1.8rem;
-        }
     }
 
-    @media (max-width: 480px) {
+    @media (max-width: 520px) {
         .features-grid {
             grid-template-columns: 1fr;
+        }
+
+        .dp-hero-title {
+            font-size: 1.75rem;
         }
     }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="dev-page">
+<div class="dp">
 
-    <!-- ══ INTRO BANNER ══ -->
-    <section class="intro-banner">
-        <div class="intro-inner">
-            <div class="intro-chip"><i class="fas fa-code"></i> Built by Students · For Students</div>
-            <h1 class="intro-title">CareerGuidance<br>Developer Team</h1>
-            <p class="intro-sub">
-                An MSc Computer Science project by two Pondicherry University batchmates —
-                building technology that helps students find jobs, grow careers, and solve real-world problems.
+    <!-- ════════ HERO ════════ -->
+    <section class="dp-hero">
+        <div class="dp-hero-orb1"></div>
+        <div class="dp-hero-orb2"></div>
+        <div class="dp-hero-inner">
+            <div class="dp-eyebrow"><span class="dp-eyebrow-dot"></span> MSc Computer Science · Pondicherry University
+            </div>
+            <h1 class="dp-hero-title">CareerGuidance<br>Developer Team</h1>
+            <p class="dp-hero-sub">
+                Built by two passionate students dedicated to helping freshers and graduates find the right career path
+                through technology.
             </p>
         </div>
     </section>
 
-    <!-- ══ BODY ══ -->
-    <div class="dev-body">
+    <!-- ════════ BODY ════════ -->
+    <div class="dp-body">
 
-        <!-- ── Team ── -->
-        <div class="mb-5">
-            <div class="sec-head">
-                <div class="sec-icon si-orange"><i class="fas fa-users"></i></div>
+        <!-- ── TEAM PROFILES ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-purple"><i class="fas fa-users"></i></div>
                 <h2>Core Developer Team</h2>
-                <div class="sec-line"></div>
+                <div class="dp-sec-rule"></div>
             </div>
 
-            <p style="color:#64748b; font-size:0.88rem; margin:-8px 0 20px; display:flex; align-items:center; gap:6px;">
-                <i class="fas fa-handshake text-warning"></i>
-                MSc Computer Science batchmates at Pondicherry University (2024–2026) who collaborated to build this
-                platform and multiple other projects.
-            </p>
+            <div class="team-row">
 
-            <div class="team-grid">
+                <!-- ── Abu Saleem ── -->
+                <div class="profile-card">
+                    <div class="card-accent acc-purple"></div>
 
-                <!-- Abu Saleem -->
-                <div class="team-card tc-purple">
-                    <div class="team-card-top">
-                        <div class="teammate-photo-wrap">
-                            <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Abu Saleem"
-                                class="teammate-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div class="teammate-initial ti-purple">A</div>
-                        </div>
-                        <div>
-                            <div class="team-badge tb-purple"><i class="fab fa-github fa-xs"></i> pyabu</div>
-                            <h5>Abu Saleem</h5>
-                            <p class="team-role">MSc Computer Science<br>Pondicherry University, India</p>
-                            <div style="display:flex; gap:6px; flex-wrap:wrap; margin-top:4px;">
-                                <a href="mailto:abusaleem.dev@gmail.com" class="mini-link link-purple"><i
-                                        class="fas fa-envelope"></i> Email</a>
-                                <a href="https://github.com/pyabu" target="_blank" class="mini-link link-purple"><i
-                                        class="fab fa-github"></i> GitHub</a>
-                                <a href="https://www.linkedin.com/in/abu-py/" target="_blank"
-                                    class="mini-link link-purple"><i class="fab fa-linkedin"></i> LinkedIn</a>
+                    <div class="card-photo-block">
+                        <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Abu Saleem"
+                            class="card-avatar"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="card-avatar-fallback avf-purple">A</div>
+
+                        <div class="card-name-block">
+                            <div class="card-role-chip chip-purple"><i class="fab fa-github fa-xs"></i> pyabu · Lead Dev
                             </div>
+                            <h3 class="card-name">Abu Saleem</h3>
+                            <p class="card-inst">MSc Computer Science<br>Pondicherry University, India &middot; Batch
+                                2024–2026</p>
                         </div>
                     </div>
-                    <div class="projects-list">
-                        <div class="proj-list-label"><i class="fas fa-code-branch"></i> Projects</div>
-                        <div class="proj-row">
-                            <div class="proj-dot dot-purple"></div>
-                            <div>
-                                <strong>HearAlert</strong><span class="proj-type">Final Year · Android</span>
-                                <p class="proj-desc">Real-time acoustic sound monitoring mobile app using TensorFlow
-                                    Lite &amp; YAMNet for smart health alerts for the hearing impaired.</p>
-                            </div>
-                        </div>
-                        <div class="proj-row">
-                            <div class="proj-dot dot-blue"></div>
-                            <div>
-                                <strong>Health Tracker</strong><span class="proj-type">Web App</span>
-                                <p class="proj-desc">Full-stack health metrics dashboard with interactive charts built
-                                    using Flask and Supabase.</p>
-                            </div>
+
+                    <div class="card-body">
+                        <div class="card-links">
+                            <a href="mailto:abusaleem.dev@gmail.com" class="clink cl-purple"><i
+                                    class="fas fa-envelope"></i> Email</a>
+                            <a href="https://github.com/pyabu" target="_blank" class="clink cl-ghost"><i
+                                    class="fab fa-github"></i> GitHub</a>
+                            <a href="https://www.linkedin.com/in/abu-py/" target="_blank" class="clink cl-ghost"><i
+                                    class="fab fa-linkedin"></i> LinkedIn</a>
                         </div>
 
-                        <div class="proj-row">
-                            <div class="proj-dot dot-orange"></div>
-                            <div>
-                                <strong>CareerGuidance Platform</strong><span class="proj-type">Web · Lead Dev</span>
-                                <p class="proj-desc">Full-featured career guidance &amp; job portal website with admin
-                                    panel, SEO, employer &amp; candidate modules.</p>
+                        <div class="card-divider"></div>
+
+                        <div>
+                            <p class="proj-label"><i class="fas fa-code-branch"></i> Projects</p>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-purple"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">HearAlert</span>
+                                        <span class="proj-badge">Final Year · Android</span>
+                                    </div>
+                                    <p class="proj-desc">Real-time acoustic sound monitoring app using TensorFlow Lite
+                                        &amp; YAMNet for health alerts for the hearing impaired.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-blue"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Health Tracker</span>
+                                        <span class="proj-badge">Web App · Flask</span>
+                                    </div>
+                                    <p class="proj-desc">Full-stack personal health metrics dashboard with interactive
+                                        charts built on Flask and Supabase.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-orange"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">CareerGuidance</span>
+                                        <span class="proj-badge">Web · Lead Dev</span>
+                                    </div>
+                                    <p class="proj-desc">Full-featured job portal and career platform with employer
+                                        dashboard, candidate profiles, admin panel and SEO.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Sindhu Bharathi -->
-                <div class="team-card tc-pink">
-                    <div class="team-card-top">
-                        <div class="teammate-photo-wrap">
-                            <img src="{{ url_for('static', filename='images/sindhu.png') }}" alt="Sindhu Bharathi P G"
-                                class="teammate-photo"
-                                onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
-                            <div class="teammate-initial ti-pink">S</div>
-                        </div>
-                        <div>
-                            <div class="team-badge tb-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate ·
-                                2024–2026</div>
-                            <h5>Sindhu Bharathi P G</h5>
-                            <p class="team-role">MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India</p>
-                            <div style="margin-top:4px;">
-                                <span class="mini-link link-pink"><i class="fas fa-microscope"></i> ICMR-VCRC
-                                    Researcher</span>
-                            </div>
+                <!-- ── Sindhu Bharathi ── -->
+                <div class="profile-card">
+                    <div class="card-accent acc-pink"></div>
+
+                    <div class="card-photo-block">
+                        <img src="{{ url_for('static', filename='images/sindhu.png') }}" alt="Sindhu Bharathi P G"
+                            class="card-avatar"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="card-avatar-fallback avf-pink">S</div>
+
+                        <div class="card-name-block">
+                            <div class="card-role-chip chip-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate
+                                · 2024–2026</div>
+                            <h3 class="card-name">Sindhu Bharathi P G</h3>
+                            <p class="card-inst">MSc Computer Science<br>Pondicherry University · ICMR-VCRC, India</p>
                         </div>
                     </div>
-                    <div class="projects-list">
-                        <div class="proj-list-label"><i class="fas fa-code-branch"></i> Projects</div>
-                        <div class="proj-row">
-                            <div class="proj-dot dot-pink"></div>
-                            <div>
-                                <strong>Tamil Text to Text Summarization</strong><span class="proj-type">Final Year ·
-                                    NLP</span>
-                                <p class="proj-desc">Deep learning NLP project to automatically summarize Tamil-language
-                                    text using transformer-based models.</p>
-                            </div>
+
+                    <div class="card-body">
+                        <div class="card-links">
+                            <span class="clink cl-pink"><i class="fas fa-microscope"></i> ICMR-VCRC Researcher</span>
+                            <span class="clink cl-ghost"><i class="fas fa-university"></i> Pondicherry University</span>
                         </div>
-                        <div class="proj-row">
-                            <div class="proj-dot dot-teal"></div>
-                            <div>
-                                <strong>Dengue Connect 2024</strong><span class="proj-type">Collaborative</span>
-                                <p class="proj-desc">Community health platform for dengue awareness and case tracking,
-                                    co-built with Abu Saleem in 2024.</p>
+
+                        <div class="card-divider"></div>
+
+                        <div>
+                            <p class="proj-label"><i class="fas fa-code-branch"></i> Projects</p>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-rose"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Tamil Text Summarization</span>
+                                        <span class="proj-badge">Final Year · NLP</span>
+                                    </div>
+                                    <p class="proj-desc">Deep learning NLP system to automatically summarize
+                                        Tamil-language documents using transformer-based models.</p>
+                                </div>
                             </div>
-                        </div>
-                        <div class="proj-row">
-                            <div class="proj-dot dot-green"></div>
-                            <div>
-                                <strong>Attend_x</strong><span class="proj-type">University Tool</span>
-                                <p class="proj-desc">Smart attendance management application designed for Pondicherry
-                                    University to streamline student and faculty records.</p>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-teal"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Dengue Connect 2024</span>
+                                        <span class="proj-badge">Collaborative</span>
+                                    </div>
+                                    <p class="proj-desc">Community health platform for dengue awareness and real-time
+                                        case tracking, co-developed with Abu Saleem.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-green"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Attend_x</span>
+                                        <span class="proj-badge">University Tool</span>
+                                    </div>
+                                    <p class="proj-desc">Smart attendance management app designed and built for
+                                        Pondicherry University students and faculty.</p>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
 
-            </div>
-        </div>
+            </div><!-- /team-row -->
+        </section>
 
-        <!-- ── Platform Features ── -->
-        <div class="mb-5">
-            <div class="sec-head">
-                <div class="sec-icon si-indigo"><i class="fas fa-th-large"></i></div>
+        <!-- ── PLATFORM FEATURES ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-indigo"><i class="fas fa-th-large"></i></div>
                 <h2>CareerGuidance — Platform Features</h2>
-                <div class="sec-line"></div>
+                <div class="dp-sec-rule"></div>
             </div>
 
             <div class="features-grid">
-                <div class="feat-card fc-1">
-                    <div class="feat-icon fi-1"><i class="fas fa-briefcase"></i></div>
+                <div class="feat-card fc-a">
+                    <div class="feat-ico fi-a"><i class="fas fa-briefcase"></i></div>
                     <h5>Job Listings Portal</h5>
-                    <p>Browse curated job openings across India and Tamil Nadu — entry-level, fresher, and experienced
-                        roles updated regularly.</p>
+                    <p>Curated job openings across India &amp; Tamil Nadu — entry-level, fresher, and experienced roles
+                        updated regularly.</p>
                 </div>
-                <div class="feat-card fc-2">
-                    <div class="feat-icon fi-2"><i class="fas fa-search"></i></div>
+                <div class="feat-card fc-b">
+                    <div class="feat-ico fi-b"><i class="fas fa-search"></i></div>
                     <h5>Smart Job Search</h5>
-                    <p>Filter and search jobs by keyword, location, category, or experience level with a fast, intuitive
-                        search interface.</p>
+                    <p>Filter jobs by keyword, location, category, or experience level with a fast and intuitive search
+                        interface.</p>
                 </div>
-                <div class="feat-card fc-3">
-                    <div class="feat-icon fi-3"><i class="fas fa-map-marker-alt"></i></div>
+                <div class="feat-card fc-c">
+                    <div class="feat-ico fi-c"><i class="fas fa-map-marker-alt"></i></div>
                     <h5>Region-Specific Jobs</h5>
-                    <p>Dedicated sections for India-wide and Tamil Nadu–specific jobs, making local career discovery
+                    <p>Dedicated sections for India-wide and Tamil Nadu–specific openings, making local career discovery
                         seamless.</p>
                 </div>
-                <div class="feat-card fc-4">
-                    <div class="feat-icon fi-4"><i class="fas fa-user-circle"></i></div>
+                <div class="feat-card fc-d">
+                    <div class="feat-ico fi-d"><i class="fas fa-user-circle"></i></div>
                     <h5>Candidate Profiles</h5>
-                    <p>Students can register, create profiles, and submit their resumes directly through the platform to
-                        potential employers.</p>
+                    <p>Students register, build profiles, and submit resumes directly to employers through the platform.
+                    </p>
                 </div>
-                <div class="feat-card fc-5">
-                    <div class="feat-icon fi-5"><i class="fas fa-building"></i></div>
+                <div class="feat-card fc-e">
+                    <div class="feat-ico fi-e"><i class="fas fa-building"></i></div>
                     <h5>Employer Dashboard</h5>
-                    <p>Companies and recruiters can post job openings and manage applications with a clean, dedicated
-                        employer interface.</p>
+                    <p>Recruiters post openings and manage applications through a clean, dedicated employer portal.</p>
                 </div>
-                <div class="feat-card fc-6">
-                    <div class="feat-icon fi-6"><i class="fas fa-newspaper"></i></div>
+                <div class="feat-card fc-f">
+                    <div class="feat-ico fi-f"><i class="fas fa-newspaper"></i></div>
                     <h5>Tech Articles &amp; Blogs</h5>
-                    <p>Career advice, interview preparation tips, and industry news curated for students and fresh
-                        graduates.</p>
+                    <p>Career advice, interview tips, and industry news curated for students and fresh graduates.</p>
                 </div>
-                <div class="feat-card fc-7">
-                    <div class="feat-icon fi-7"><i class="fas fa-shield-alt"></i></div>
+                <div class="feat-card fc-g">
+                    <div class="feat-ico fi-g"><i class="fas fa-shield-alt"></i></div>
                     <h5>Admin Control Panel</h5>
-                    <p>A powerful dark-themed admin dashboard to manage users, job posts, signups, platform health, and
-                        site configuration.</p>
+                    <p>Dark-themed admin dashboard to manage users, posts, signups, platform health and site config.</p>
                 </div>
-                <div class="feat-card fc-8">
-                    <div class="feat-icon fi-8"><i class="fas fa-mobile-alt"></i></div>
+                <div class="feat-card fc-h">
+                    <div class="feat-ico fi-h"><i class="fas fa-mobile-alt"></i></div>
                     <h5>Mobile Responsive</h5>
-                    <p>Fully responsive design optimised for mobile, tablet, and desktop — accessible anywhere, any
-                        device.</p>
+                    <p>Fully responsive design optimised for mobile, tablet, and desktop — accessible on any device.</p>
                 </div>
-                <div class="feat-card fc-9">
-                    <div class="feat-icon fi-9"><i class="fas fa-chart-line"></i></div>
+                <div class="feat-card fc-i">
+                    <div class="feat-ico fi-i"><i class="fas fa-chart-line"></i></div>
                     <h5>SEO Optimised</h5>
-                    <p>Comprehensive sitemap, meta tags, and keyword strategy ensuring strong visibility on Google for
-                        job searchers.</p>
+                    <p>Comprehensive sitemap, structured meta tags and keyword strategy for strong Google visibility.
+                    </p>
                 </div>
             </div>
-        </div>
+        </section>
 
-        <!-- ── Skills ── -->
-        <div class="mb-5">
-            <div class="sec-head">
-                <div class="sec-icon si-teal"><i class="fas fa-tools"></i></div>
+        <!-- ── TECH STACK ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-teal"><i class="fas fa-layer-group"></i></div>
                 <h2>Tech Stack &amp; Skills</h2>
-                <div class="sec-line"></div>
+                <div class="dp-sec-rule"></div>
             </div>
-            <div class="skills-cloud">
-                {% for skill in ['Python', 'Flask', 'JavaScript', 'HTML & CSS', 'Android / Java', 'Mobile Development',
-                'REST API', 'Supabase', 'PostgreSQL', 'Git & GitHub', 'Machine Learning', 'TensorFlow Lite', 'NLP /
-                Transformers', 'Jinja2'] %}
-                <div class="skill-chip">
-                    <span class="dot-skill"></span>{{ skill }}
-                </div>
+            <div class="skills-wrap">
+                {% for sk in ['Python','Flask','JavaScript','HTML & CSS','Android / Java','Mobile Dev','REST
+                APIs','Supabase','PostgreSQL','Git & GitHub','Machine Learning','TensorFlow Lite','NLP /
+                Transformers','Jinja2','Vercel'] %}
+                <span class="sk-pill"><span class="sk-dot"></span>{{ sk }}</span>
                 {% endfor %}
             </div>
-        </div>
+        </section>
 
-    </div><!-- /dev-body -->
-</div><!-- /dev-page -->
+    </div><!-- /dp-body -->
+</div><!-- /dp -->
 {% endblock %}
