@@ -82,13 +82,43 @@ function initMobileMenu() {
             document.body.style.overflow = '';
         }
     });
+    // Fix for mobile nav dropdowns getting stuck
     document.querySelectorAll('.nav-dropdown > .nav-link').forEach(link => {
         link.addEventListener('click', (e) => {
-            if (window.innerWidth <= 768) { e.preventDefault(); link.parentElement.classList.toggle('open'); }
+            if (window.innerWidth <= 768) {
+                e.preventDefault();
+                const parent = link.parentElement;
+                
+                // Close other open dropdowns first for cleaner UX
+                document.querySelectorAll('.nav-dropdown').forEach(dropdown => {
+                    if (dropdown !== parent) {
+                        dropdown.classList.remove('open');
+                    }
+                });
+                
+                parent.classList.toggle('open');
+            }
         });
     });
+    
     document.querySelectorAll('.dropdown-menu a').forEach(a => {
-        a.addEventListener('click', () => { menu?.classList.remove('open'); document.body.style.overflow = ''; });
+        a.addEventListener('click', () => { 
+            menu?.classList.remove('open'); 
+            
+            // Remove 'open' from all dropdowns on click
+            document.querySelectorAll('.nav-dropdown').forEach(d => d.classList.remove('open'));
+            
+            // Reset hamburger icon
+            if (toggle && toggle.classList.contains('active')) {
+                toggle.classList.remove('active');
+                const spans = toggle.querySelectorAll('span');
+                spans[0].style.transform = 'none';
+                spans[1].style.opacity = '1';
+                spans[2].style.transform = 'none';
+            }
+            
+            document.body.style.overflow = ''; 
+        });
     });
 }
 

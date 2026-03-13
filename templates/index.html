@@ -7,10 +7,11 @@
 <section class="hero">
     <div class="container">
         <div class="hero-content">
-            <span class="section-badge">🚀 #1 Career Platform - careerguidancepro</span>
+            <span class="section-badge hero-badge">🚀 #1 CAREER PLATFORM - careerguidance</span>
             <h1>Your Career Journey<br><span class="hero-gradient-text">Starts Here</span></h1>
-                <p>Discover thousands of job opportunities across India. Get career guidance, build your resume, and connect with top employers — all in one place. Welcome to careerguidancepro!</p>
-            
+            <p>Discover thousands of job opportunities across India. Get career guidance, build your resume, and connect
+                with top employers — all in one place. Welcome to careerguidance!</p>
+
             <div class="hero-search">
                 <div class="search-field">
                     <i class="fas fa-search"></i>
@@ -18,7 +19,8 @@
                 </div>
                 <div class="search-field">
                     <i class="fas fa-map-marker-alt"></i>
-                    <input type="text" id="heroLocation" placeholder="Bangalore, Mumbai, Remote..." data-autocomplete="location" autocomplete="off" />
+                    <input type="text" id="heroLocation" placeholder="Bangalore, Mumbai, Remote..."
+                        data-autocomplete="location" autocomplete="off" />
                 </div>
                 <button class="btn btn-primary" id="heroSearchBtn" onclick="heroSearch()">
                     <i class="fas fa-search"></i> Search Jobs
@@ -61,18 +63,22 @@
 <!-- ═══════════ SEARCH RESULTS (Hidden by default) ═══════════ -->
 <section id="heroSearchResults" style="display:none;background:var(--bg-secondary);padding:40px 0;">
     <div class="container">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+        <div
+            style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
             <div>
                 <h2 style="margin:0;font-size:1.3rem;" id="searchResultsTitle">Search Results</h2>
-                <p id="searchResultsSubtitle" style="margin:4px 0 0;font-size:.82rem;color:var(--text-secondary);">Searching across all job sources...</p>
+                <p id="searchResultsSubtitle" style="margin:4px 0 0;font-size:.82rem;color:var(--text-secondary);">
+                    Searching across all job sources...</p>
             </div>
             <button onclick="closeSearchResults()" class="btn btn-ghost btn-sm" style="font-size:.82rem;">
                 <i class="fas fa-times"></i> Close Results
             </button>
         </div>
         <div id="searchSourceTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
-        <div id="searchJobsGrid" class="jobs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
-        <div id="searchMoreLinks" style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;"></div>
+        <div id="searchJobsGrid" class="jobs-grid"
+            style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+        <div id="searchMoreLinks" style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;">
+        </div>
     </div>
 </section>
 
@@ -87,40 +93,47 @@
 
         <div class="jobs-grid" id="featuredJobsGrid">
             {% if featured_jobs %}
-                {% for job in featured_jobs %}
-                <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job.id }}'">
-                    <div class="job-card-header">
-                        <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
-                        <div class="job-card-info">
-                            <h3>{{ job.title }}</h3>
-                            <span class="job-card-company">{{ job.company }}</span>
-                        </div>
-                    </div>
-                    <div class="job-card-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
-                        <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
-                        <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
-                    </div>
-                    <div class="job-card-skills">
-                        {% for skill in job.skills[:4] %}
-                        <span class="skill-tag">{{ skill }}</span>
-                        {% endfor %}
-                    </div>
-                    <div class="job-card-footer">
-                        <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
-                        <div class="job-card-actions">
-                            <button class="btn-save" onclick="event.stopPropagation();if(!__isLoggedIn){requireLogin('Login to Save Jobs','Please login to continue and save jobs.');return;}toggleSave(this)" title="Save Job">
-                                <i class="far fa-heart"></i>
-                            </button>
-                            <a href="{{ job.apply_url }}" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Please login to continue and apply for jobs.');return false;}">Apply Now</a>
-                        </div>
+            {% for job in featured_jobs %}
+            <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}"
+                onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job.id }}'">
+                <div class="job-card-header">
+                    <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}"
+                        class="job-card-logo"
+                        onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
+                    <div class="job-card-info">
+                        <h3>{{ job.title }}</h3>
+                        <span class="job-card-company">{{ job.company }}</span>
                     </div>
                 </div>
-                {% endfor %}
+                <div class="job-card-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                    <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
+                    <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
+                </div>
+                <div class="job-card-skills">
+                    {% for skill in job.skills[:4] %}
+                    <span class="skill-tag">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+                <div class="job-card-footer">
+                    <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
+                    <div class="job-card-actions">
+                        <button class="btn-save"
+                            onclick="event.stopPropagation();if(!__isLoggedIn){requireLogin('Login to Save Jobs','Please login to continue and save jobs.');return;}toggleSave(this)"
+                            title="Save Job">
+                            <i class="far fa-heart"></i>
+                        </button>
+                        <a href="{{ job.apply_url }}" class="btn-apply" target="_blank"
+                            onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Please login to continue and apply for jobs.');return false;}">Apply
+                            Now</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
             {% else %}
-                {% for i in range(6) %}
-                <div class="skeleton skeleton-card"></div>
-                {% endfor %}
+            {% for i in range(6) %}
+            <div class="skeleton skeleton-card"></div>
+            {% endfor %}
             {% endif %}
         </div>
 
@@ -191,12 +204,14 @@
         <div class="section-header" data-aos="fade-up">
             <span class="section-badge">🧭 Career Guidance</span>
             <h2>Navigate Your Career Path</h2>
-            <p class="section-subtitle">Expert-curated roadmaps, tips, and resources to accelerate your career growth</p>
+            <p class="section-subtitle">Expert-curated roadmaps, tips, and resources to accelerate your career growth
+            </p>
         </div>
         <div class="guidance-grid">
             <a href="/career-guidance" class="guidance-card" data-aos="fade-up" data-aos-delay="100">
                 <div class="guidance-card-img" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=340&fit=crop" alt="Career Roadmaps" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1552664730-d307ca884978?w=600&h=340&fit=crop"
+                        alt="Career Roadmaps" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>📍 Roadmaps</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -207,7 +222,8 @@
             </a>
             <a href="/resume-builder" class="guidance-card" data-aos="fade-up" data-aos-delay="200">
                 <div class="guidance-card-img" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=340&fit=crop" alt="Resume Builder" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1455390582262-044cdead277a?w=600&h=340&fit=crop"
+                        alt="Resume Builder" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>📝 Resume</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -218,7 +234,8 @@
             </a>
             <a href="/career-guidance#interview" class="guidance-card" data-aos="fade-up" data-aos-delay="300">
                 <div class="guidance-card-img" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=340&fit=crop" alt="Interview Preparation" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1553877522-43269d4ea984?w=600&h=340&fit=crop"
+                        alt="Interview Preparation" style="width:100%;height:100%;object-fit:cover;">
                     <div class="overlay"><span>🎤 Interview</span></div>
                 </div>
                 <div class="guidance-card-body">
@@ -270,66 +287,78 @@
         <div class="section-header" data-aos="fade-up">
             <span class="section-badge">🏢 Top Employers</span>
             <h2>Companies Hiring Now</h2>
-                <p class="section-subtitle">Leading companies trust careerguidancepro to find top talent</p>
+            <p class="section-subtitle">Leading companies trust careerguidance to find top talent</p>
         </div>
         <div class="companies-grid" data-aos="fade-up" data-aos-delay="200">
             <div class="company-card">
-                <img src="https://logo.clearbit.com/tcs.com" alt="TCS" onerror="this.src='https://ui-avatars.com/api/?name=TCS&background=2B6CB0&color=fff'">
+                <img src="https://logo.clearbit.com/tcs.com" alt="TCS"
+                    onerror="this.src='https://ui-avatars.com/api/?name=TCS&background=2B6CB0&color=fff'">
                 <h4>TCS</h4>
                 <p>250+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys" onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
+                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys"
+                    onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
                 <h4>Infosys</h4>
                 <p>200+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro" onerror="this.src='https://ui-avatars.com/api/?name=W&background=3F1D8E&color=fff'">
+                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro"
+                    onerror="this.src='https://ui-avatars.com/api/?name=W&background=3F1D8E&color=fff'">
                 <h4>Wipro</h4>
                 <p>150+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart" onerror="this.src='https://ui-avatars.com/api/?name=F&background=F7C948&color=000'">
+                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart"
+                    onerror="this.src='https://ui-avatars.com/api/?name=F&background=F7C948&color=000'">
                 <h4>Flipkart</h4>
                 <p>80+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay" onerror="this.src='https://ui-avatars.com/api/?name=R&background=0A62C9&color=fff'">
+                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay"
+                    onerror="this.src='https://ui-avatars.com/api/?name=R&background=0A62C9&color=fff'">
                 <h4>Razorpay</h4>
                 <p>60+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/google.com" alt="Google India" onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
+                <img src="https://logo.clearbit.com/google.com" alt="Google India"
+                    onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
                 <h4>Google India</h4>
                 <p>120+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India" onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
+                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India"
+                    onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
                 <h4>Microsoft India</h4>
                 <p>95+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India" onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
+                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India"
+                    onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
                 <h4>Amazon India</h4>
                 <p>180+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy" onerror="this.src='https://ui-avatars.com/api/?name=S&background=FC8019&color=fff'">
+                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy"
+                    onerror="this.src='https://ui-avatars.com/api/?name=S&background=FC8019&color=fff'">
                 <h4>Swiggy</h4>
                 <p>50+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato" onerror="this.src='https://ui-avatars.com/api/?name=Z&background=E23744&color=fff'">
+                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato"
+                    onerror="this.src='https://ui-avatars.com/api/?name=Z&background=E23744&color=fff'">
                 <h4>Zomato</h4>
                 <p>45+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks" onerror="this.src='https://ui-avatars.com/api/?name=FW&background=16C172&color=fff'">
+                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks"
+                    onerror="this.src='https://ui-avatars.com/api/?name=FW&background=16C172&color=fff'">
                 <h4>Freshworks</h4>
                 <p>70+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe" onerror="this.src='https://ui-avatars.com/api/?name=P&background=5F259F&color=fff'">
+                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe"
+                    onerror="this.src='https://ui-avatars.com/api/?name=P&background=5F259F&color=fff'">
                 <h4>PhonePe</h4>
                 <p>40+ openings</p>
             </div>
@@ -347,7 +376,8 @@
         </div>
         <div class="testimonials-grid">
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
-                    <p>careerguidancepro helped me land my dream job at Google Bangalore. The career roadmap and resume tips were absolute game-changers for my campus placement preparation!</p>
+                <p>careerguidance helped me land my dream job at Google Bangalore. The career roadmap and resume tips
+                    were absolute game-changers for my campus placement preparation!</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">AK</div>
                     <div>
@@ -357,7 +387,8 @@
                 </div>
             </div>
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
-                <p>As a B.Tech fresher from a Tier-2 college, I was lost. The career guidance section gave me a clear path — from learning Python to cracking my first Data Science role.</p>
+                <p>As a B.Tech fresher from a Tier-2 college, I was lost. The career guidance section gave me a clear
+                    path — from learning Python to cracking my first Data Science role.</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">SP</div>
                     <div>
@@ -367,7 +398,8 @@
                 </div>
             </div>
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
-                <p>We posted 5 positions and got 200+ quality applicants from IITs, NITs, and top engineering colleges within a week. The platform's reach is impressive.</p>
+                <p>We posted 5 positions and got 200+ quality applicants from IITs, NITs, and top engineering colleges
+                    within a week. The platform's reach is impressive.</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">RM</div>
                     <div>
@@ -377,7 +409,8 @@
                 </div>
             </div>
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
-                <p>The resume builder is perfectly tailored for Indian job market. It helped me create an ATS-friendly CV that got shortlisted at Flipkart, Swiggy, and Razorpay!</p>
+                <p>The resume builder is perfectly tailored for Indian job market. It helped me create an ATS-friendly
+                    CV that got shortlisted at Flipkart, Swiggy, and Razorpay!</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">VR</div>
                     <div>
@@ -387,7 +420,8 @@
                 </div>
             </div>
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
-                <p>After graduating from NIT Warangal, I used this platform for 3 months — the resources and off-campus job listings helped me bag an offer at Infosys!</p>
+                <p>After graduating from NIT Warangal, I used this platform for 3 months — the resources and off-campus
+                    job listings helped me bag an offer at Infosys!</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">PD</div>
                     <div>
@@ -397,7 +431,8 @@
                 </div>
             </div>
             <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
-                <p>As a mother returning to work after a career break, the career guidance and fresher-friendly listings helped me restart my journey at Zoho. Truly inclusive!</p>
+                <p>As a mother returning to work after a career break, the career guidance and fresher-friendly listings
+                    helped me restart my journey at Zoho. Truly inclusive!</p>
                 <div class="testimonial-author">
                     <div class="testimonial-avatar">AN</div>
                     <div>
@@ -414,131 +449,132 @@
 <section class="cta-section">
     <div class="container" data-aos="fade-up">
         <h2>Ready to Launch Your Career?</h2>
-            <p>Join 50,000+ professionals already using careerguidancepro to advance their careers across India.</p>
+        <p>Join 50,000+ professionals already using careerguidance to advance their careers across India.</p>
         <div class="cta-buttons">
             <a href="/jobs" class="btn btn-white btn-lg"><i class="fas fa-search"></i> Find Jobs</a>
-            <a href="/career-guidance" class="btn btn-outline btn-lg" style="border-color:white; color:white"><i class="fas fa-compass"></i> Career Guidance</a>
+            <a href="/career-guidance" class="btn btn-outline btn-lg" style="border-color:white; color:white"><i
+                    class="fas fa-compass"></i> Career Guidance</a>
         </div>
     </div>
 </section>
 
 <script>
-/* ═══════════ HERO SEARCH ═══════════ */
-function heroSearch() {
-    const keyword = document.getElementById('heroKeyword').value.trim();
-    const location = document.getElementById('heroLocation').value.trim();
-    if (!keyword && !location) return;
+    /* ═══════════ HERO SEARCH ═══════════ */
+    function heroSearch() {
+        const keyword = document.getElementById('heroKeyword').value.trim();
+        const location = document.getElementById('heroLocation').value.trim();
+        if (!keyword && !location) return;
 
-    const btn = document.getElementById('heroSearchBtn');
-    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
-    btn.disabled = true;
+        const btn = document.getElementById('heroSearchBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+        btn.disabled = true;
 
-    const params = new URLSearchParams();
-    if (keyword) params.set('keyword', keyword);
-    if (location) params.set('location', location);
-    params.set('per_page', '30');
+        const params = new URLSearchParams();
+        if (keyword) params.set('keyword', keyword);
+        if (location) params.set('location', location);
+        params.set('per_page', '30');
 
-    fetch('/api/jobs/search-all?' + params.toString())
-        .then(r => r.json())
-        .then(data => {
-            btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
-            btn.disabled = false;
-            showSearchResults(data, keyword, location);
-        })
-        .catch(e => {
-            btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
-            btn.disabled = false;
-            let url = '/jobs?';
-            if (keyword) url += 'keyword=' + encodeURIComponent(keyword) + '&';
-            if (location) url += 'location=' + encodeURIComponent(location);
-            window.location.href = url;
-        });
-}
-
-function quickSearch(term) {
-    document.getElementById('heroKeyword').value = term;
-    document.getElementById('heroLocation').value = '';
-    heroSearch();
-}
-
-function showSearchResults(data, keyword, location) {
-    const section = document.getElementById('heroSearchResults');
-    const grid = document.getElementById('searchJobsGrid');
-    const tabs = document.getElementById('searchSourceTabs');
-    const links = document.getElementById('searchMoreLinks');
-    const jobs = data.jobs || [];
-    const total = data.total || 0;
-    const sources = data.sources || {};
-    const query = [keyword, location].filter(Boolean).join(' in ');
-
-    document.getElementById('searchResultsTitle').innerHTML =
-        '<i class="fas fa-search" style="color:var(--accent)"></i> ' + total + ' Jobs Found' + (query ? ' for "<strong>' + escH(query) + '</strong>"' : '');
-    document.getElementById('searchResultsSubtitle').textContent =
-        'From ' + (sources.main||0) + ' global + ' + (sources.india||0) + ' India + ' + (sources.tamilnadu||0) + ' TN jobs';
-
-    tabs.innerHTML = '';
-    if (sources.main > 0) tabs.innerHTML += '<a href="/jobs?keyword=' + encodeURIComponent(keyword||'') + (location?'&location='+encodeURIComponent(location):'') + '" class="search-tab search-tab-global"><i class="fas fa-globe"></i> Global (' + sources.main + ')</a>';
-    if (sources.india > 0) tabs.innerHTML += '<a href="/jobs/india?keyword=' + encodeURIComponent(keyword||'') + (location?'&city='+encodeURIComponent(location):'') + '" class="search-tab search-tab-india"><i class="fas fa-flag"></i> India (' + sources.india + ')</a>';
-    if (sources.tamilnadu > 0) tabs.innerHTML += '<a href="/jobs/tamilnadu?keyword=' + encodeURIComponent(keyword||'') + (location?'&city='+encodeURIComponent(location):'') + '" class="search-tab search-tab-tn"><i class="fas fa-map"></i> TN (' + sources.tamilnadu + ')</a>';
-
-    if (jobs.length === 0) {
-        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;"><i class="fas fa-search" style="font-size:2rem;color:var(--text-tertiary);"></i><h3 style="margin-top:12px;">No jobs found</h3><p style="color:var(--text-secondary);">Try different keywords or location.</p></div>';
-    } else {
-        grid.innerHTML = jobs.map(function(j) { return searchJobCard(j); }).join('');
+        fetch('/api/jobs/search-all?' + params.toString())
+            .then(r => r.json())
+            .then(data => {
+                btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
+                btn.disabled = false;
+                showSearchResults(data, keyword, location);
+            })
+            .catch(e => {
+                btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
+                btn.disabled = false;
+                let url = '/jobs?';
+                if (keyword) url += 'keyword=' + encodeURIComponent(keyword) + '&';
+                if (location) url += 'location=' + encodeURIComponent(location);
+                window.location.href = url;
+            });
     }
 
-    const kw = encodeURIComponent(keyword||'');
-    const loc = encodeURIComponent(location||'');
-    links.innerHTML =
-        '<a href="/jobs?keyword=' + kw + '&location=' + loc + '" class="btn btn-primary" style="font-size:.88rem;"><i class="fas fa-th-list"></i> View All ' + total + ' Results</a>' +
-        '<a href="/jobs/india?keyword=' + kw + (location?'&city='+loc:'') + '" class="btn btn-outline" style="font-size:.88rem;"><i class="fas fa-flag"></i> Search India Jobs</a>';
+    function quickSearch(term) {
+        document.getElementById('heroKeyword').value = term;
+        document.getElementById('heroLocation').value = '';
+        heroSearch();
+    }
 
-    section.style.display = 'block';
-    section.scrollIntoView({behavior:'smooth', block:'start'});
-}
+    function showSearchResults(data, keyword, location) {
+        const section = document.getElementById('heroSearchResults');
+        const grid = document.getElementById('searchJobsGrid');
+        const tabs = document.getElementById('searchSourceTabs');
+        const links = document.getElementById('searchMoreLinks');
+        const jobs = data.jobs || [];
+        const total = data.total || 0;
+        const sources = data.sources || {};
+        const query = [keyword, location].filter(Boolean).join(' in ');
 
-function searchJobCard(j) {
-    const logo = j.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50');
-    const fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50';
-    const skills = (j.skills||[]).slice(0,4).map(function(s){return '<span class="skill-tag">'+escH(s)+'</span>';}).join('');
-    const salary = j.salary_min ? (escH(j.salary_min) + (j.salary_max ? ' – ' + escH(j.salary_max) : '')) : '';
-    const loc = j.location_city ? escH(j.location_city) + (j.location_state ? ', ' + escH(j.location_state) : '') : escH(j.location||'India');
-    const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : '/job/' + j.id + '?source=' + (j.source_db||'main');
-    const srcDb = j.source_db || 'main';
-    const detailUrl = '/job/' + (j.id||0) + '?source=' + srcDb;
-    const srcColors = {'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Internshala':'#00BCD4','TimesJobs':'#9C27B0','Foundit':'#FF5722','Freshersworld':'#FF9800','Himalayas':'#8b5cf6','Remotive':'#00D4AA','CareerPath Pro':'#667eea'};
-    const srcClr = srcColors[j.source] || '#667eea';
-    const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';
-    const scoreBadge = j.composite_score > 70 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;">★ ' + Math.round(j.composite_score) + '</span> ' : '';
+        document.getElementById('searchResultsTitle').innerHTML =
+            '<i class="fas fa-search" style="color:var(--accent)"></i> ' + total + ' Jobs Found' + (query ? ' for "<strong>' + escH(query) + '</strong>"' : '');
+        document.getElementById('searchResultsSubtitle').textContent =
+            'From ' + (sources.main || 0) + ' global + ' + (sources.india || 0) + ' India + ' + (sources.tamilnadu || 0) + ' TN jobs';
 
-    return '<div class="job-card fade-in" style="cursor:pointer;" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'' + detailUrl + '\'">'
-        + '<div class="job-card-header">'
-        +   '<img src="' + logo + '" alt="' + escH(j.company||'') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
-        +   '<div class="job-card-info"><h3>' + escH(j.title||'Untitled') + ' ' + scoreBadge + '</h3><span class="job-card-company">' + escH(j.company||'') + '</span></div>'
-        + '</div>'
-        + '<div class="job-card-meta">'
-        +   '<span><i class="fas fa-map-marker-alt"></i> ' + loc + '</span>'
-        +   '<span><i class="fas fa-briefcase"></i> ' + escH(j.type||'Full-time') + '</span>'
-        +   '<span><i class="fas fa-layer-group"></i> ' + escH(j.experience||'') + '</span>'
-        + '</div>'
-        + '<div class="job-card-skills">' + skills + '</div>'
-        + '<div class="job-card-footer">'
-        +   '<div>' + (salary ? '<span class="job-salary">' + salary + '</span> ' : '') + postedBadge + '</div>'
-        +   '<div class="job-card-actions">'
-        +     '<span style="background:'+srcClr+';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:4px">' + escH(j.source||'') + '</span>'
-        +     '<a href="' + applyUrl + '" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Please login to continue and apply for jobs.\');return false;}">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
-        +   '</div>'
-        + '</div></div>';
-}
+        tabs.innerHTML = '';
+        if (sources.main > 0) tabs.innerHTML += '<a href="/jobs?keyword=' + encodeURIComponent(keyword || '') + (location ? '&location=' + encodeURIComponent(location) : '') + '" class="search-tab search-tab-global"><i class="fas fa-globe"></i> Global (' + sources.main + ')</a>';
+        if (sources.india > 0) tabs.innerHTML += '<a href="/jobs/india?keyword=' + encodeURIComponent(keyword || '') + (location ? '&city=' + encodeURIComponent(location) : '') + '" class="search-tab search-tab-india"><i class="fas fa-flag"></i> India (' + sources.india + ')</a>';
+        if (sources.tamilnadu > 0) tabs.innerHTML += '<a href="/jobs/tamilnadu?keyword=' + encodeURIComponent(keyword || '') + (location ? '&city=' + encodeURIComponent(location) : '') + '" class="search-tab search-tab-tn"><i class="fas fa-map"></i> TN (' + sources.tamilnadu + ')</a>';
 
-function closeSearchResults() {
-    document.getElementById('heroSearchResults').style.display = 'none';
-}
+        if (jobs.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;"><i class="fas fa-search" style="font-size:2rem;color:var(--text-tertiary);"></i><h3 style="margin-top:12px;">No jobs found</h3><p style="color:var(--text-secondary);">Try different keywords or location.</p></div>';
+        } else {
+            grid.innerHTML = jobs.map(function (j) { return searchJobCard(j); }).join('');
+        }
 
-function escH(s) { var d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+        const kw = encodeURIComponent(keyword || '');
+        const loc = encodeURIComponent(location || '');
+        links.innerHTML =
+            '<a href="/jobs?keyword=' + kw + '&location=' + loc + '" class="btn btn-primary" style="font-size:.88rem;"><i class="fas fa-th-list"></i> View All ' + total + ' Results</a>' +
+            '<a href="/jobs/india?keyword=' + kw + (location ? '&city=' + loc : '') + '" class="btn btn-outline" style="font-size:.88rem;"><i class="fas fa-flag"></i> Search India Jobs</a>';
 
-document.getElementById('heroKeyword')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
-document.getElementById('heroLocation')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
+        section.style.display = 'block';
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function searchJobCard(j) {
+        const logo = j.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company || '?') + '&background=667eea&color=fff&size=50');
+        const fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company || '?') + '&background=667eea&color=fff&size=50';
+        const skills = (j.skills || []).slice(0, 4).map(function (s) { return '<span class="skill-tag">' + escH(s) + '</span>'; }).join('');
+        const salary = j.salary_min ? (escH(j.salary_min) + (j.salary_max ? ' – ' + escH(j.salary_max) : '')) : '';
+        const loc = j.location_city ? escH(j.location_city) + (j.location_state ? ', ' + escH(j.location_state) : '') : escH(j.location || 'India');
+        const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : '/job/' + j.id + '?source=' + (j.source_db || 'main');
+        const srcDb = j.source_db || 'main';
+        const detailUrl = '/job/' + (j.id || 0) + '?source=' + srcDb;
+        const srcColors = { 'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Naukri.com': '#2196F3', 'Internshala': '#00BCD4', 'TimesJobs': '#9C27B0', 'Foundit': '#FF5722', 'Freshersworld': '#FF9800', 'Himalayas': '#8b5cf6', 'Remotive': '#00D4AA', 'CareerPath Pro': '#667eea' };
+        const srcClr = srcColors[j.source] || '#667eea';
+        const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';
+        const scoreBadge = j.composite_score > 70 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;">★ ' + Math.round(j.composite_score) + '</span> ' : '';
+
+        return '<div class="job-card fade-in" style="cursor:pointer;" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'' + detailUrl + '\'">'
+            + '<div class="job-card-header">'
+            + '<img src="' + logo + '" alt="' + escH(j.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
+            + '<div class="job-card-info"><h3>' + escH(j.title || 'Untitled') + ' ' + scoreBadge + '</h3><span class="job-card-company">' + escH(j.company || '') + '</span></div>'
+            + '</div>'
+            + '<div class="job-card-meta">'
+            + '<span><i class="fas fa-map-marker-alt"></i> ' + loc + '</span>'
+            + '<span><i class="fas fa-briefcase"></i> ' + escH(j.type || 'Full-time') + '</span>'
+            + '<span><i class="fas fa-layer-group"></i> ' + escH(j.experience || '') + '</span>'
+            + '</div>'
+            + '<div class="job-card-skills">' + skills + '</div>'
+            + '<div class="job-card-footer">'
+            + '<div>' + (salary ? '<span class="job-salary">' + salary + '</span> ' : '') + postedBadge + '</div>'
+            + '<div class="job-card-actions">'
+            + '<span style="background:' + srcClr + ';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:4px">' + escH(j.source || '') + '</span>'
+            + '<a href="' + applyUrl + '" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Please login to continue and apply for jobs.\');return false;}">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
+            + '</div>'
+            + '</div></div>';
+    }
+
+    function closeSearchResults() {
+        document.getElementById('heroSearchResults').style.display = 'none';
+    }
+
+    function escH(s) { var d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+
+    document.getElementById('heroKeyword')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') heroSearch(); });
+    document.getElementById('heroLocation')?.addEventListener('keypress', (e) => { if (e.key === 'Enter') heroSearch(); });
 </script>
 
 {% endblock %}
