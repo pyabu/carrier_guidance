@@ -1,320 +1,101 @@
 {% extends "base.html" %}
 
-{% block title %}Abu Saleem | Software Engineer{% endblock %}
+{% block title %}Developer Team | CareerGuidance{% endblock %}
 
 {% block extra_head %}
 <style>
-    /* ══════════════════════════════════════
-       DEVELOPER PAGE — PREMIUM DESIGN
-    ══════════════════════════════════════ */
-
-    /* ── Base ── */
+    /* ══════════════════════════ DEVELOPER PAGE ══════════════════════════ */
     .dev-page {
         font-family: 'Inter', sans-serif;
     }
 
-    /* ── HERO ── */
-    .dev-hero {
-        background: #06061a;
+    /* ── Intro Banner ── */
+    .intro-banner {
+        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
         position: relative;
         overflow: hidden;
-        padding: 100px 0 80px;
+        padding: 64px 0 52px;
+        text-align: center;
     }
 
-    /* Animated gradient background blobs */
-    .dev-hero::before,
-    .dev-hero::after {
+    .intro-banner::before {
         content: '';
-        position: absolute;
-        border-radius: 50%;
-        filter: blur(80px);
-        opacity: 0.35;
-        pointer-events: none;
-        animation: blob-float 8s ease-in-out infinite alternate;
-    }
-
-    .dev-hero::before {
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, #7c3aed, #4f46e5);
-        top: -100px;
-        left: -100px;
-    }
-
-    .dev-hero::after {
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, #06b6d4, #3b82f6);
-        bottom: -80px;
-        right: -80px;
-        animation-delay: 3s;
-    }
-
-    @keyframes blob-float {
-        from {
-            transform: translate(0, 0) scale(1);
-        }
-
-        to {
-            transform: translate(30px, 30px) scale(1.1);
-        }
-    }
-
-    /* Grid lines overlay */
-    .hero-grid {
         position: absolute;
         inset: 0;
         background-image:
             linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
             linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
-        background-size: 50px 50px;
+        background-size: 48px 48px;
     }
 
-    .hero-content {
+    .intro-banner::after {
+        content: '';
+        position: absolute;
+        width: 600px;
+        height: 600px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.2), transparent 70%);
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        pointer-events: none;
+    }
+
+    .intro-inner {
         position: relative;
         z-index: 2;
-        max-width: 960px;
+        max-width: 700px;
         margin: 0 auto;
-        padding: 0 28px;
-        display: flex;
-        align-items: center;
-        gap: 60px;
+        padding: 0 24px;
     }
 
-    /* ── Photo frame ── */
-    .photo-frame {
-        flex-shrink: 0;
-        position: relative;
-        width: 180px;
-        height: 180px;
-    }
-
-    .photo-ring-outer {
-        position: absolute;
-        inset: -12px;
-        border-radius: 50%;
-        border: 1.5px solid transparent;
-        background: linear-gradient(135deg, #7c3aed, #06b6d4, #7c3aed) border-box;
-        -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
-        -webkit-mask-composite: destination-out;
-        mask-composite: exclude;
-        animation: border-spin 6s linear infinite;
-    }
-
-    @keyframes border-spin {
-        to {
-            transform: rotate(360deg);
-        }
-    }
-
-    .photo-glow {
-        position: absolute;
-        inset: -8px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(124, 58, 237, 0.4), transparent 70%);
-        animation: pulse-glow 3s ease-in-out infinite;
-    }
-
-    @keyframes pulse-glow {
-
-        0%,
-        100% {
-            opacity: 0.5;
-            transform: scale(1);
-        }
-
-        50% {
-            opacity: 1;
-            transform: scale(1.05);
-        }
-    }
-
-    .photo-img {
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        object-fit: cover;
-        object-position: top;
-        border: 3px solid rgba(255, 255, 255, 0.1);
-        position: relative;
-        z-index: 2;
-        display: block;
-    }
-
-    .photo-fallback {
-        display: none;
-        width: 180px;
-        height: 180px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #7c3aed, #4f46e5);
-        align-items: center;
-        justify-content: center;
-        font-size: 4rem;
-        font-weight: 800;
-        color: white;
-        position: relative;
-        z-index: 2;
-    }
-
-    /* ── Hero text ── */
-    .hero-text {
-        color: white;
-    }
-
-    .hero-chip {
+    .intro-chip {
         display: inline-flex;
         align-items: center;
-        gap: 6px;
-        padding: 5px 14px;
-        border-radius: 100px;
+        gap: 7px;
         background: rgba(124, 58, 237, 0.2);
-        border: 1px solid rgba(124, 58, 237, 0.5);
+        border: 1px solid rgba(124, 58, 237, 0.45);
         color: #c4b5fd;
         font-size: 11px;
         font-weight: 700;
         letter-spacing: 1.5px;
         text-transform: uppercase;
-        margin-bottom: 18px;
+        padding: 5px 16px;
+        border-radius: 100px;
+        margin-bottom: 20px;
     }
 
-    .hero-chip .dot {
-        width: 6px;
-        height: 6px;
-        background: #a78bfa;
-        border-radius: 50%;
-        animation: blink 1.5s ease-in-out infinite;
-    }
-
-    @keyframes blink {
-
-        0%,
-        100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: 0.3;
-        }
-    }
-
-    .hero-name {
-        font-size: 3rem;
+    .intro-title {
+        font-size: 2.5rem;
         font-weight: 900;
-        line-height: 1;
-        margin: 0 0 10px 0;
-        background: linear-gradient(135deg, #fff 0%, #a78bfa 50%, #67e8f9 100%);
+        line-height: 1.15;
+        background: linear-gradient(135deg, #fff 0%, #a78bfa 55%, #67e8f9 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
+        margin: 0 0 14px;
     }
 
-    .hero-role {
-        font-size: 1.05rem;
+    .intro-sub {
         color: #94a3b8;
-        margin: 0 0 26px 0;
-        line-height: 1.5;
-    }
-
-    .hero-role strong {
-        color: #c4b5fd;
-    }
-
-    .hero-links {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 10px;
-    }
-
-    .hlink {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 9px 20px;
-        border-radius: 10px;
-        font-size: 13px;
-        font-weight: 600;
-        text-decoration: none;
-        transition: all 0.2s ease;
-        cursor: pointer;
-    }
-
-    .hlink-email {
-        background: rgba(255, 255, 255, 0.07);
-        color: #e2e8f0;
-        border: 1px solid rgba(255, 255, 255, 0.12);
-    }
-
-    .hlink-github {
-        background: rgba(124, 58, 237, 0.2);
-        color: #c4b5fd;
-        border: 1px solid rgba(124, 58, 237, 0.4);
-    }
-
-    .hlink-li {
-        background: rgba(6, 182, 212, 0.15);
-        color: #67e8f9;
-        border: 1px solid rgba(6, 182, 212, 0.3);
-    }
-
-    .hlink:hover {
-        transform: translateY(-2px);
-        filter: brightness(1.2);
-        text-decoration: none;
-    }
-
-    /* ── Stats strip ── */
-    .stats-strip {
-        background: linear-gradient(135deg, #1e1b4b, #0f172a);
-        border-top: 1px solid rgba(124, 58, 237, 0.2);
-        border-bottom: 1px solid rgba(6, 182, 212, 0.15);
-        padding: 28px 0;
-    }
-
-    .stats-inner {
-        max-width: 960px;
-        margin: 0 auto;
-        padding: 0 28px;
-        display: flex;
-        justify-content: center;
-        gap: 60px;
-    }
-
-    .stat-item {
-        text-align: center;
-    }
-
-    .stat-number {
-        font-size: 2rem;
-        font-weight: 900;
-        background: linear-gradient(135deg, #a78bfa, #67e8f9);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        line-height: 1;
-    }
-
-    .stat-label {
-        font-size: 11px;
-        color: #64748b;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        margin-top: 4px;
-        font-weight: 600;
+        font-size: 1rem;
+        line-height: 1.7;
+        margin: 0;
     }
 
     /* ── Body ── */
     .dev-body {
-        max-width: 960px;
-        margin: 60px auto;
-        padding: 0 28px;
+        max-width: 980px;
+        margin: 56px auto;
+        padding: 0 24px;
     }
 
-    /* Section header */
+    /* ── Section header ── */
     .sec-head {
         display: flex;
         align-items: center;
         gap: 12px;
-        margin-bottom: 28px;
+        margin-bottom: 24px;
     }
 
     .sec-icon {
@@ -325,26 +106,178 @@
         align-items: center;
         justify-content: center;
         font-size: 1.1rem;
+        flex-shrink: 0;
+    }
+
+    .si-indigo {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
     }
 
     .si-purple {
-        background: rgba(124, 58, 237, 0.12);
+        background: rgba(139, 92, 246, 0.1);
         color: #8b5cf6;
     }
 
-    .si-blue {
-        background: rgba(59, 130, 246, 0.12);
-        color: #3b82f6;
-    }
-
     .si-teal {
-        background: rgba(20, 184, 166, 0.12);
+        background: rgba(20, 184, 166, 0.1);
         color: #14b8a6;
     }
 
     .si-orange {
-        background: rgba(249, 115, 22, 0.12);
+        background: rgba(249, 115, 22, 0.1);
         color: #ea580c;
+    }
+
+    .sec-head h2 {
+        font-size: 1.2rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0;
+    }
+
+    .sec-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, #e2e8f0, transparent);
+    }
+
+    /* ── Features grid ── */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 18px;
+    }
+
+    .feat-card {
+        background: #fff;
+        border: 1px solid #e8eaf0;
+        border-radius: 16px;
+        padding: 22px 20px;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.25s ease;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .feat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+    }
+
+    .feat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, 0.09);
+    }
+
+    .fc-1::before {
+        background: linear-gradient(to right, #6366f1, #8b5cf6);
+    }
+
+    .fc-2::before {
+        background: linear-gradient(to right, #14b8a6, #3b82f6);
+    }
+
+    .fc-3::before {
+        background: linear-gradient(to right, #f59e0b, #ef4444);
+    }
+
+    .fc-4::before {
+        background: linear-gradient(to right, #ec4899, #f43f5e);
+    }
+
+    .fc-5::before {
+        background: linear-gradient(to right, #22c55e, #14b8a6);
+    }
+
+    .fc-6::before {
+        background: linear-gradient(to right, #3b82f6, #6366f1);
+    }
+
+    .fc-7::before {
+        background: linear-gradient(to right, #8b5cf6, #ec4899);
+    }
+
+    .fc-8::before {
+        background: linear-gradient(to right, #f97316, #eab308);
+    }
+
+    .fc-9::before {
+        background: linear-gradient(to right, #0ea5e9, #22c55e);
+    }
+
+    .feat-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+
+    .fi-1 {
+        background: rgba(99, 102, 241, 0.1);
+        color: #6366f1;
+    }
+
+    .fi-2 {
+        background: rgba(20, 184, 166, 0.1);
+        color: #14b8a6;
+    }
+
+    .fi-3 {
+        background: rgba(245, 158, 11, 0.1);
+        color: #d97706;
+    }
+
+    .fi-4 {
+        background: rgba(236, 72, 153, 0.1);
+        color: #db2777;
+    }
+
+    .fi-5 {
+        background: rgba(34, 197, 94, 0.1);
+        color: #16a34a;
+    }
+
+    .fi-6 {
+        background: rgba(59, 130, 246, 0.1);
+        color: #2563eb;
+    }
+
+    .fi-7 {
+        background: rgba(139, 92, 246, 0.1);
+        color: #7c3aed;
+    }
+
+    .fi-8 {
+        background: rgba(249, 115, 22, 0.1);
+        color: #ea580c;
+    }
+
+    .fi-9 {
+        background: rgba(14, 165, 233, 0.1);
+        color: #0284c7;
+    }
+
+    .feat-card h5 {
+        font-size: 0.92rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 6px;
+    }
+
+    .feat-card p {
+        font-size: 0.8rem;
+        color: #64748b;
+        line-height: 1.6;
+        margin: 0;
     }
 
     /* ── Team cards ── */
@@ -358,14 +291,14 @@
         background: white;
         border: 1px solid #e8eaf0;
         border-radius: 18px;
-        padding: 28px 24px;
-        display: flex;
-        align-items: flex-start;
-        gap: 18px;
+        padding: 28px 22px;
         transition: all 0.3s ease;
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
         position: relative;
         overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
     }
 
     .team-card::before {
@@ -378,105 +311,17 @@
         border-radius: 18px 18px 0 0;
     }
 
+    .team-card.tc-purple::before {
+        background: linear-gradient(to right, #8b5cf6, #6366f1);
+    }
+
     .team-card.tc-pink::before {
         background: linear-gradient(to right, #ec4899, #f43f5e);
     }
 
-    .team-card.tc-orange::before {
-        background: linear-gradient(to right, #f97316, #eab308);
-    }
-
     .team-card:hover {
         transform: translateY(-4px);
-        box-shadow: 0 14px 36px rgba(0, 0, 0, 0.09);
-    }
-
-    .team-avatar {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.4rem;
-        font-weight: 800;
-        color: white;
-        flex-shrink: 0;
-    }
-
-    .av-pink {
-        background: linear-gradient(135deg, #ec4899, #f43f5e);
-    }
-
-    .av-orange {
-        background: linear-gradient(135deg, #f97316, #eab308);
-    }
-
-    .team-info h5 {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 4px 0;
-    }
-
-    .team-info .team-role {
-        font-size: 0.82rem;
-        color: #64748b;
-        margin: 0 0 8px 0;
-        line-height: 1.4;
-    }
-
-    .team-badge {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 11px;
-        font-weight: 700;
-        padding: 3px 10px;
-        border-radius: 100px;
-        margin-bottom: 8px;
-    }
-
-    .tb-pink {
-        background: #fce7f3;
-        color: #be185d;
-    }
-
-    .tb-orange {
-        background: #fff7ed;
-        color: #c2410c;
-    }
-
-    .collab-tag {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        font-size: 11px;
-        background: #f1f5f9;
-        color: #475569;
-        padding: 4px 10px;
-        border-radius: 6px;
-        font-weight: 600;
-    }
-
-    .projects-list {
-        display: flex;
-        flex-direction: column;
-        gap: 6px;
-        margin-top: 10px;
-        padding-top: 10px;
-        border-top: 1px dashed #e2e8f0;
-    }
-
-    @media (max-width: 640px) {
-        .team-grid {
-            grid-template-columns: 1fr;
-        }
-    }
-
-    /* ── Extended teammate card styles ── */
-    .team-card.tc-purple::before {
-        background: linear-gradient(to right, #8b5cf6, #6366f1);
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.09);
     }
 
     .team-card-top {
@@ -486,7 +331,6 @@
         margin-bottom: 16px;
     }
 
-    /* ── Teammate photo ── */
     .teammate-photo-wrap {
         flex-shrink: 0;
         width: 72px;
@@ -523,13 +367,41 @@
         background: linear-gradient(135deg, #ec4899, #f43f5e);
     }
 
-    /* ── Badges ── */
+    .team-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 11px;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 100px;
+        margin-bottom: 6px;
+    }
+
     .tb-purple {
         background: #ede9fe;
         color: #6d28d9;
     }
 
-    /* ── Mini links ── */
+    .tb-pink {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .team-info h5 {
+        font-size: 1rem;
+        font-weight: 800;
+        color: #1e293b;
+        margin: 0 0 3px;
+    }
+
+    .team-role {
+        font-size: 0.82rem;
+        color: #64748b;
+        margin: 0 0 8px;
+        line-height: 1.4;
+    }
+
     .mini-link {
         display: inline-flex;
         align-items: center;
@@ -557,7 +429,12 @@
         text-decoration: none;
     }
 
-    /* ── Project rows inside team card ── */
+    .projects-list {
+        margin-top: 12px;
+        padding-top: 12px;
+        border-top: 1px dashed #e2e8f0;
+    }
+
     .proj-list-label {
         font-size: 11px;
         font-weight: 800;
@@ -635,234 +512,7 @@
         font-size: 0.8rem;
         color: #64748b;
         line-height: 1.5;
-        margin: 3px 0 0 0;
-    }
-
-    .sec-head h2 {
-        font-size: 1.25rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0;
-    }
-
-    .sec-line {
-        flex: 1;
-        height: 1px;
-        background: linear-gradient(to right, #e2e8f0, transparent);
-    }
-
-    /* ── Education card ── */
-    .edu-card {
-        background: linear-gradient(135deg, #fafaff, #fff);
-        border: 1px solid #e2e8f0;
-        border-radius: 20px;
-        padding: 30px 32px;
-        display: flex;
-        align-items: flex-start;
-        gap: 22px;
-        box-shadow: 0 4px 24px rgba(124, 58, 237, 0.06);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-    }
-
-    .edu-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        bottom: 0;
-        width: 4px;
-        background: linear-gradient(to bottom, #8b5cf6, #06b6d4);
-        border-radius: 4px 0 0 4px;
-    }
-
-    .edu-card:hover {
-        transform: translateY(-3px);
-        box-shadow: 0 12px 36px rgba(124, 58, 237, 0.12);
-    }
-
-    .edu-logo {
-        width: 56px;
-        height: 56px;
-        border-radius: 14px;
-        background: linear-gradient(135deg, #8b5cf6, #4f46e5);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 1.4rem;
-        flex-shrink: 0;
-        box-shadow: 0 6px 16px rgba(124, 58, 237, 0.3);
-    }
-
-    .edu-info h4 {
-        font-size: 1.1rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 4px 0;
-    }
-
-    .edu-info .uni {
-        color: #64748b;
-        font-size: 0.9rem;
-        margin: 0 0 10px 0;
-    }
-
-    .year-pill {
-        display: inline-flex;
-        align-items: center;
-        gap: 5px;
-        background: linear-gradient(135deg, rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1));
-        border: 1px solid rgba(139, 92, 246, 0.25);
-        color: #7c3aed;
-        font-size: 12px;
-        font-weight: 700;
-        padding: 3px 12px;
-        border-radius: 100px;
-        margin-bottom: 10px;
-    }
-
-    .edu-desc {
-        color: #475569;
-        font-size: 0.9rem;
-        line-height: 1.7;
-        margin: 0;
-    }
-
-    /* ── Project cards ── */
-    .projects-grid {
-        display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 20px;
-    }
-
-    .proj-card {
-        background: white;
-        border: 1px solid #e8eaf0;
-        border-radius: 18px;
-        padding: 26px 22px;
-        position: relative;
-        overflow: hidden;
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.04);
-    }
-
-    .proj-card:hover {
-        transform: translateY(-6px);
-        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.1);
-    }
-
-    .proj-card::after {
-        content: '';
-        position: absolute;
-        inset: 0;
-        opacity: 0;
-        transition: opacity 0.3s;
-        border-radius: 18px;
-    }
-
-    .proj-card:hover::after {
-        opacity: 1;
-    }
-
-    .proj-card.c-purple::after {
-        box-shadow: inset 0 0 0 2px rgba(139, 92, 246, 0.4);
-    }
-
-    .proj-card.c-blue::after {
-        box-shadow: inset 0 0 0 2px rgba(59, 130, 246, 0.4);
-    }
-
-    .proj-card.c-teal::after {
-        box-shadow: inset 0 0 0 2px rgba(20, 184, 166, 0.4);
-    }
-
-    .proj-top-bar {
-        height: 3px;
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        border-radius: 18px 18px 0 0;
-    }
-
-    .bar-purple {
-        background: linear-gradient(to right, #8b5cf6, #6366f1);
-    }
-
-    .bar-blue {
-        background: linear-gradient(to right, #3b82f6, #6366f1);
-    }
-
-    .bar-teal {
-        background: linear-gradient(to right, #14b8a6, #3b82f6);
-    }
-
-    .proj-icon-wrap {
-        width: 48px;
-        height: 48px;
-        border-radius: 13px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 1.3rem;
-        margin-bottom: 14px;
-    }
-
-    .iw-purple {
-        background: rgba(139, 92, 246, 0.1);
-        color: #7c3aed;
-    }
-
-    .iw-blue {
-        background: rgba(59, 130, 246, 0.1);
-        color: #2563eb;
-    }
-
-    .iw-teal {
-        background: rgba(20, 184, 166, 0.1);
-        color: #0f766e;
-    }
-
-    .proj-tag {
-        font-size: 10px;
-        font-weight: 700;
-        padding: 3px 9px;
-        border-radius: 6px;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        display: inline-block;
-        margin-bottom: 10px;
-    }
-
-    .pt-purple {
-        background: #ede9fe;
-        color: #6d28d9;
-    }
-
-    .pt-blue {
-        background: #dbeafe;
-        color: #1e40af;
-    }
-
-    .pt-teal {
-        background: #ccfbf1;
-        color: #0f766e;
-    }
-
-    .proj-card h5 {
-        font-size: 1rem;
-        font-weight: 800;
-        color: #1e293b;
-        margin: 0 0 8px 0;
-    }
-
-    .proj-card p {
-        font-size: 0.82rem;
-        color: #64748b;
-        line-height: 1.6;
-        margin: 0;
+        margin: 3px 0 0;
     }
 
     /* ── Skills ── */
@@ -901,44 +551,24 @@
         opacity: 0.5;
     }
 
-    /* Responsive */
+    /* ── Responsive ── */
     @media (max-width: 768px) {
-        .hero-content {
-            flex-direction: column;
-            text-align: center;
-            gap: 30px;
+        .features-grid {
+            grid-template-columns: 1fr 1fr;
         }
 
-        .hero-links {
-            justify-content: center;
-        }
-
-        .hero-name {
-            font-size: 2.2rem;
-        }
-
-        .stats-inner {
-            gap: 30px;
-            flex-wrap: wrap;
-        }
-
-        .projects-grid {
+        .team-grid {
             grid-template-columns: 1fr;
         }
 
-        .photo-frame {
-            width: 140px;
-            height: 140px;
+        .intro-title {
+            font-size: 1.8rem;
         }
+    }
 
-        .photo-img {
-            width: 140px;
-            height: 140px;
-        }
-
-        .photo-fallback {
-            width: 140px;
-            height: 140px;
+    @media (max-width: 480px) {
+        .features-grid {
+            grid-template-columns: 1fr;
         }
     }
 </style>
@@ -947,150 +577,104 @@
 {% block content %}
 <div class="dev-page">
 
-    <!-- ══ HERO ══ -->
-    <section class="dev-hero">
-        <div class="hero-grid"></div>
-        <div class="hero-content">
-
-            <!-- Photo -->
-            <div class="photo-frame">
-                <div class="photo-glow"></div>
-                <div class="photo-ring-outer"></div>
-                <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Abu Saleem" class="photo-img"
-                    onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-                <div class="photo-fallback">A</div>
-            </div>
-
-            <!-- Text -->
-            <div class="hero-text">
-                <div class="hero-chip">
-                    <span class="dot"></span>
-                    Available for Opportunities
-                </div>
-                <h1 class="hero-name">Abu Saleem</h1>
-                <p class="hero-role">
-                    <strong>Software Engineer</strong> · Mobile &amp; Web Developer<br>
-                    MSc Computer Science · Pondicherry University
-                </p>
-                <div class="hero-links">
-                    <a href="mailto:abusaleem.dev@gmail.com" class="hlink hlink-email">
-                        <i class="fas fa-envelope"></i> abusaleem.dev@gmail.com
-                    </a>
-                    <a href="https://github.com/pyabu" target="_blank" class="hlink hlink-github">
-                        <i class="fab fa-github"></i> pyabu
-                    </a>
-                    <a href="https://www.linkedin.com/in/abu-py/" target="_blank" class="hlink hlink-li">
-                        <i class="fab fa-linkedin"></i> Abu py
-                    </a>
-                </div>
-            </div>
+    <!-- ══ INTRO BANNER ══ -->
+    <section class="intro-banner">
+        <div class="intro-inner">
+            <div class="intro-chip"><i class="fas fa-code"></i> Built by Students · For Students</div>
+            <h1 class="intro-title">CareerGuidance<br>Developer Team</h1>
+            <p class="intro-sub">
+                An MSc Computer Science project by two Pondicherry University batchmates —
+                building technology that helps students find jobs, grow careers, and solve real-world problems.
+            </p>
         </div>
     </section>
-
-    <!-- ══ STATS STRIP ══ -->
-    <div class="stats-strip">
-        <div class="stats-inner">
-            <div class="stat-item">
-                <div class="stat-number">3+</div>
-                <div class="stat-label">Projects Built</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">2</div>
-                <div class="stat-label">Years Experience</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">MSc</div>
-                <div class="stat-label">Degree</div>
-            </div>
-            <div class="stat-item">
-                <div class="stat-number">2026</div>
-                <div class="stat-label">Graduating</div>
-            </div>
-        </div>
-    </div>
 
     <!-- ══ BODY ══ -->
     <div class="dev-body">
 
-        <!-- Education -->
+        <!-- ── Platform Features ── -->
         <div class="mb-5">
             <div class="sec-head">
-                <div class="sec-icon si-purple"><i class="fas fa-graduation-cap"></i></div>
-                <h2>Education</h2>
+                <div class="sec-icon si-indigo"><i class="fas fa-th-large"></i></div>
+                <h2>CareerGuidance — Platform Features</h2>
                 <div class="sec-line"></div>
             </div>
-            <div class="edu-card">
-                <div class="edu-logo"><i class="fas fa-university"></i></div>
-                <div class="edu-info">
-                    <div class="year-pill"><i class="far fa-calendar-alt"></i> 2024 – 2026</div>
-                    <h4>MSc Computer Science</h4>
-                    <p class="uni"><i class="fas fa-map-marker-alt me-1"></i>Pondicherry University, Puducherry, India
-                    </p>
-                    <p class="edu-desc">Completed Master's in Computer Science with focus on software engineering,
-                        mobile application development, and web technologies. Developed <strong>HearAlert</strong> — an
-                        innovative health monitoring application — as final year project.</p>
+
+            <div class="features-grid">
+                <div class="feat-card fc-1">
+                    <div class="feat-icon fi-1"><i class="fas fa-briefcase"></i></div>
+                    <h5>Job Listings Portal</h5>
+                    <p>Browse curated job openings across India and Tamil Nadu — entry-level, fresher, and experienced
+                        roles updated regularly.</p>
+                </div>
+                <div class="feat-card fc-2">
+                    <div class="feat-icon fi-2"><i class="fas fa-search"></i></div>
+                    <h5>Smart Job Search</h5>
+                    <p>Filter and search jobs by keyword, location, category, or experience level with a fast, intuitive
+                        search interface.</p>
+                </div>
+                <div class="feat-card fc-3">
+                    <div class="feat-icon fi-3"><i class="fas fa-map-marker-alt"></i></div>
+                    <h5>Region-Specific Jobs</h5>
+                    <p>Dedicated sections for India-wide and Tamil Nadu–specific jobs, making local career discovery
+                        seamless.</p>
+                </div>
+                <div class="feat-card fc-4">
+                    <div class="feat-icon fi-4"><i class="fas fa-user-circle"></i></div>
+                    <h5>Candidate Profiles</h5>
+                    <p>Students can register, create profiles, and submit their resumes directly through the platform to
+                        potential employers.</p>
+                </div>
+                <div class="feat-card fc-5">
+                    <div class="feat-icon fi-5"><i class="fas fa-building"></i></div>
+                    <h5>Employer Dashboard</h5>
+                    <p>Companies and recruiters can post job openings and manage applications with a clean, dedicated
+                        employer interface.</p>
+                </div>
+                <div class="feat-card fc-6">
+                    <div class="feat-icon fi-6"><i class="fas fa-newspaper"></i></div>
+                    <h5>Tech Articles & Blogs</h5>
+                    <p>Career advice, interview preparation tips, and industry news curated for students and fresh
+                        graduates.</p>
+                </div>
+                <div class="feat-card fc-7">
+                    <div class="feat-icon fi-7"><i class="fas fa-shield-alt"></i></div>
+                    <h5>Admin Control Panel</h5>
+                    <p>A powerful dark-themed admin dashboard to manage users, job posts, signups, platform health, and
+                        site configuration.</p>
+                </div>
+                <div class="feat-card fc-8">
+                    <div class="feat-icon fi-8"><i class="fas fa-mobile-alt"></i></div>
+                    <h5>Mobile Responsive</h5>
+                    <p>Fully responsive design optimised for mobile, tablet, and desktop — accessible anywhere, any
+                        device.</p>
+                </div>
+                <div class="feat-card fc-9">
+                    <div class="feat-icon fi-9"><i class="fas fa-chart-line"></i></div>
+                    <h5>SEO Optimised</h5>
+                    <p>Comprehensive sitemap, meta tags, and keyword strategy ensuring strong visibility on Google for
+                        job searchers.</p>
                 </div>
             </div>
         </div>
 
-        <!-- Projects -->
-        <div class="mb-5">
-            <div class="sec-head">
-                <div class="sec-icon si-blue"><i class="fas fa-laptop-code"></i></div>
-                <h2>Projects &amp; Portfolio</h2>
-                <div class="sec-line"></div>
-            </div>
-            <div class="projects-grid">
-
-                <div class="proj-card c-purple">
-                    <div class="proj-top-bar bar-purple"></div>
-                    <div class="proj-icon-wrap iw-purple"><i class="fas fa-heartbeat"></i></div>
-                    <div class="proj-tag pt-purple">Final Year Project</div>
-                    <h5>HearAlert</h5>
-                    <p>An innovative health monitoring mobile application (APK) with real-time acoustic sound detection
-                        &amp; smart alert systems built in Android.</p>
-                </div>
-
-                <div class="proj-card c-blue">
-                    <div class="proj-top-bar bar-blue"></div>
-                    <div class="proj-icon-wrap iw-blue"><i class="fas fa-running"></i></div>
-                    <div class="proj-tag pt-blue">Application</div>
-                    <h5>Health Tracker</h5>
-                    <p>A comprehensive digital system to track, organize, and visualize personal health metrics through
-                        interactive dashboards.</p>
-                </div>
-
-                <div class="proj-card c-teal">
-                    <div class="proj-top-bar bar-teal"></div>
-                    <div class="proj-icon-wrap iw-teal"><i class="fas fa-code"></i></div>
-                    <div class="proj-tag pt-teal">Portfolio Website</div>
-                    <h5>Developer Portfolio</h5>
-                    <p>Personal showcase website demonstrating project history, software engineering experience, and
-                        full-stack development capabilities.</p>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Team / Collaborators -->
+        <!-- ── Team ── -->
         <div class="mb-5">
             <div class="sec-head">
                 <div class="sec-icon si-orange"><i class="fas fa-users"></i></div>
-                <h2>Core Team &amp; Collaborators</h2>
+                <h2>Core Developer Team</h2>
                 <div class="sec-line"></div>
             </div>
 
-            <!-- team note -->
-            <p
-                style="color:#64748b; font-size:0.88rem; margin: -10px 0 20px; display:flex; align-items:center; gap:6px;">
+            <p style="color:#64748b; font-size:0.88rem; margin:-8px 0 20px; display:flex; align-items:center; gap:6px;">
                 <i class="fas fa-handshake text-warning"></i>
-                Both teammates are MSc Computer Science batchmates at Pondicherry University (2024–2026) who
-                collaborated on the following projects together.
+                MSc Computer Science batchmates at Pondicherry University (2024–2026) who collaborated to build this
+                platform and multiple other projects.
             </p>
 
             <div class="team-grid">
 
-                <!-- ── Abu Saleem ── -->
+                <!-- Abu Saleem -->
                 <div class="team-card tc-purple">
                     <div class="team-card-top">
                         <div class="teammate-photo-wrap">
@@ -1135,8 +719,8 @@
                             <div class="proj-dot dot-teal"></div>
                             <div>
                                 <strong>Dengue Connect 2024</strong><span class="proj-type">Collaborative</span>
-                                <p class="proj-desc">Community health platform for dengue awareness and case tracking
-                                    built during 2024 with Sindhu Bharathi.</p>
+                                <p class="proj-desc">Community health platform for dengue awareness and case tracking,
+                                    co-built with Sindhu Bharathi.</p>
                             </div>
                         </div>
                         <div class="proj-row">
@@ -1150,15 +734,15 @@
                         <div class="proj-row">
                             <div class="proj-dot dot-orange"></div>
                             <div>
-                                <strong>Developer Portfolio</strong><span class="proj-type">Web</span>
-                                <p class="proj-desc">Personal career guidance platform &amp; portfolio website
-                                    showcasing projects and skills.</p>
+                                <strong>CareerGuidance Platform</strong><span class="proj-type">Web · Lead Dev</span>
+                                <p class="proj-desc">Full-featured career guidance &amp; job portal website with admin
+                                    panel, SEO, employer &amp; candidate modules.</p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- ── Sindhu Bharathi ── -->
+                <!-- Sindhu Bharathi -->
                 <div class="team-card tc-pink">
                     <div class="team-card-top">
                         <div class="teammate-photo-wrap">
@@ -1186,7 +770,7 @@
                                 <strong>Tamil Text to Text Summarization</strong><span class="proj-type">Final Year ·
                                     NLP</span>
                                 <p class="proj-desc">Deep learning NLP project to automatically summarize Tamil-language
-                                    text documents using transformer-based models.</p>
+                                    text using transformer-based models.</p>
                             </div>
                         </div>
                         <div class="proj-row">
@@ -1194,7 +778,7 @@
                             <div>
                                 <strong>Dengue Connect 2024</strong><span class="proj-type">Collaborative</span>
                                 <p class="proj-desc">Community health platform for dengue awareness and case tracking,
-                                    developed collaboratively with Abu Saleem in 2024.</p>
+                                    co-built with Abu Saleem in 2024.</p>
                             </div>
                         </div>
                         <div class="proj-row">
@@ -1211,16 +795,17 @@
             </div>
         </div>
 
-        <!-- Skills -->
+        <!-- ── Skills ── -->
         <div class="mb-5">
             <div class="sec-head">
                 <div class="sec-icon si-teal"><i class="fas fa-tools"></i></div>
-                <h2>Skills &amp; Technologies</h2>
+                <h2>Tech Stack &amp; Skills</h2>
                 <div class="sec-line"></div>
             </div>
             <div class="skills-cloud">
                 {% for skill in ['Python', 'Flask', 'JavaScript', 'HTML & CSS', 'Android / Java', 'Mobile Development',
-                'REST API', 'Supabase', 'PostgreSQL', 'Git & GitHub', 'Machine Learning', 'TensorFlow Lite'] %}
+                'REST API', 'Supabase', 'PostgreSQL', 'Git & GitHub', 'Machine Learning', 'TensorFlow Lite', 'NLP /
+                Transformers', 'Jinja2'] %}
                 <div class="skill-chip">
                     <span class="dot-skill"></span>{{ skill }}
                 </div>
