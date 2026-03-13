@@ -42,7 +42,7 @@ INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
 def sitemap():
     from flask import Response
     import xml.etree.ElementTree as ET
-    domain = "https://carrierguidancepro.me"
+    domain = "https://careerguidance.me"
     static_urls = [
         ("/", 1.0),
         ("/jobs", 0.8),
