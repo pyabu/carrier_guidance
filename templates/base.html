@@ -5,9 +5,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
-    <title>{% block title %}CareerPath Pro{% endblock %} | Career Guidance & Job Portal</title>
+    <title>{% block title %}careerguidancepro{% endblock %} | Career Guidance & Job Portal</title>
     <meta name="description"
-        content="{% block meta_desc %}CareerPath Pro – India's #1 career guidance, job search, and hiring platform for Indian students, freshers, and professionals.{% endblock %}">
+        content="{% block meta_desc %}careerguidancepro – India's #1 career guidance, job search, and hiring platform for Indian students, freshers, and professionals.{% endblock %}">
     <meta name="keywords"
         content="{% block meta_keywords %}jobs, career guidance, hiring, India, freshers, students, internships, remote jobs, software engineering{% endblock %}">
     {% block meta_robots %}
@@ -24,7 +24,7 @@
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:image"
         content="{% block og_image %}{{ url_for('static', filename='images/og-default.jpg', _external=True) }}{% endblock %}">
-    <meta property="og:site_name" content="CareerPath Pro">
+    <meta property="og:site_name" content="careerguidancepro">
 
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">
@@ -70,11 +70,11 @@
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
             <a href="/" class="nav-link" style="display:flex; align-items:center; gap:8px;">
-                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="CareerPath Pro Logo"
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="careerguidancepro Logo"
                     style="height:32px; width:auto; object-fit:contain;">
                 <span
-                    style="font-size:1.2rem;font-weight:700;letter-spacing:-0.5px;color:var(--text-primary);">CareerPath<strong
-                        style="color:var(--accent);">Pro</strong></span>
+                    style="font-size:1.2rem;font-weight:700;letter-spacing:-0.5px;color:var(--text-primary);">careerguidance<strong
+                        style="color:var(--accent);">pro</strong></span>
             </a>
 
             <ul class="nav-menu" id="navMenu">
@@ -131,7 +131,8 @@
                 </button>
                 {% if session.get('user_id') %}
                 <div style="display: flex; gap: 8px; align-items: center;">
-                    <a href="/profile" class="btn btn-outline btn-sm" title="My Profile" style="border:none;padding:6px 10px;">
+                    <a href="/profile" class="btn btn-outline btn-sm" title="My Profile"
+                        style="border:none;padding:6px 10px;">
                         <i class="fas fa-user"></i>
                     </a>
                     <a href="/student-dashboard" class="btn btn-primary btn-sm">
@@ -223,31 +224,38 @@
 
     <!-- ═══════════ LOGIN PROMPT MODAL ═══════════ -->
     {% if not session.get('user_id') %}
-    <div id="loginModal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
-        <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;">
-            <button onclick="closeLoginModal()" style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
-            <div style="width:64px;height:64px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+    <div id="loginModal"
+        style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div
+            style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;">
+            <button onclick="closeLoginModal()"
+                style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
+            <div
+                style="width:64px;height:64px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
                 <i class="fas fa-lock" style="color:white;font-size:1.5rem;"></i>
             </div>
             <h3 id="loginModalTitle" style="margin:0 0 8px;color:var(--text-primary);">Login Required</h3>
-            <p id="loginModalMsg" style="color:var(--text-secondary);margin-bottom:24px;">Sign in to unlock this feature and get the full CareerPath Pro experience.</p>
-            <a href="/login" class="btn btn-primary" style="display:flex;width:100%;justify-content:center;margin-bottom:12px;gap:8px;padding:12px 20px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.95rem;">
+            <p id="loginModalMsg" style="color:var(--text-secondary);margin-bottom:24px;">Sign in to unlock this feature
+                and get the full CareerPath Pro experience.</p>
+            <a href="/login" class="btn btn-primary"
+                style="display:flex;width:100%;justify-content:center;margin-bottom:12px;gap:8px;padding:12px 20px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.95rem;">
                 <i class="fas fa-sign-in-alt"></i> Login to Continue
             </a>
-            <p style="font-size:0.85rem;color:var(--text-secondary);">Don't have an account? <a href="/signup" style="color:var(--accent);font-weight:600;">Sign up free</a></p>
+            <p style="font-size:0.85rem;color:var(--text-secondary);">Don't have an account? <a href="/signup"
+                    style="color:var(--accent);font-weight:600;">Sign up free</a></p>
         </div>
     </div>
     <script>
-    function showLoginModal(title, msg) {
-        var m = document.getElementById('loginModal');
-        if (title) document.getElementById('loginModalTitle').textContent = title;
-        if (msg) document.getElementById('loginModalMsg').textContent = msg;
-        m.style.display = 'flex';
-    }
-    function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
-    document.getElementById('loginModal').addEventListener('click', function(e) { if (e.target === this) closeLoginModal(); });
-    var __isLoggedIn = false;
-    function requireLogin(title, msg, evt) { if (evt) { evt.preventDefault(); evt.stopPropagation(); } showLoginModal(title, msg); return false; }
+        function showLoginModal(title, msg) {
+            var m = document.getElementById('loginModal');
+            if (title) document.getElementById('loginModalTitle').textContent = title;
+            if (msg) document.getElementById('loginModalMsg').textContent = msg;
+            m.style.display = 'flex';
+        }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        document.getElementById('loginModal').addEventListener('click', function (e) { if (e.target === this) closeLoginModal(); });
+        var __isLoggedIn = false;
+        function requireLogin(title, msg, evt) { if (evt) { evt.preventDefault(); evt.stopPropagation(); } showLoginModal(title, msg); return false; }
     </script>
     {% else %}
     <script>var __isLoggedIn = true;</script>
