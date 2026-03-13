@@ -38,7 +38,7 @@ os.makedirs(DATA_DIR, exist_ok=True)
 JOBS_FILE = os.path.join(DATA_DIR, "jobs.json")
 TN_JOBS_FILE = os.path.join(DATA_DIR, "tn_jobs.json")
 INDIA_JOBS_FILE = os.path.join(DATA_DIR, "india_jobs.json")
-@app.route("/sitemap.xml")
+@app.route("/sitemap")
 def sitemap():
     from flask import Response
     import xml.etree.ElementTree as ET
