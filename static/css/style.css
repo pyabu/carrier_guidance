@@ -3449,3 +3449,66 @@ section {
 
 /* ── Mobile overrides for portals ────────────────────────────────────── */
 /* Deleted redundant block to unify logic */
+
+/* ═══════════════════════════════════════════════════════════════════════
+   GLOBAL RESPONSIVE PATCH FOR ALL PAGES
+   ═══════════════════════════════════════════════════════════════════════ */
+img,
+video,
+iframe,
+canvas {
+    max-width: 100%;
+    height: auto;
+}
+
+* {
+    max-width: 100vw;
+}
+
+body {
+    overflow-x: hidden;
+}
+
+@media (max-width: 768px) {
+
+    /* Auto-collapse any row flex layouts */
+    .flex-row,
+    .d-flex {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+
+    /* Ensure tables can scroll horizontally instead of breaking layout */
+    table {
+        display: block;
+        max-width: 100%;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+
+    /* Make embedded iframes responsive */
+    iframe {
+        width: 100% !important;
+    }
+
+    /* Ensure text breaks properly */
+    p,
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6,
+    a,
+    span {
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    /* Fix deeply nested grids */
+    .grid,
+    [style*="display: grid"],
+    [style*="display:grid"] {
+        grid-template-columns: 1fr !important;
+    }
+}
