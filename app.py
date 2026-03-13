@@ -842,15 +842,22 @@ def get_all_jobs_admin():
         india_data = load_india_jobs()
         tn_data = load_tn_jobs()
         
+        main_ts = main_data.get("last_updated", "---")
+        india_ts = india_data.get("last_updated", "---")
+        tn_ts = tn_data.get("last_updated", "---")
+        
         all_jobs = []
         for j in main_data.get("jobs", []):
             j["_src"] = "Main"
+            j["_scraped_at"] = main_ts
             all_jobs.append(j)
         for j in india_data.get("jobs", []):
             j["_src"] = "India"
+            j["_scraped_at"] = india_ts
             all_jobs.append(j)
         for j in tn_data.get("jobs", []):
             j["_src"] = "Tamil Nadu"
+            j["_scraped_at"] = tn_ts
             all_jobs.append(j)
             
         return jsonify({

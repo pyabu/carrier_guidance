@@ -512,6 +512,7 @@
                                     <th>Organization</th>
                                     <th>Location</th>
                                     <th>Data Provider</th>
+                                    <th>Scraped At</th>
                                     <th>Status</th>
                                     <th>Manage</th>
                                 </tr>
@@ -746,6 +747,7 @@
                 <td>${j.company}</td>
                 <td>${j.location || 'Remote'}</td>
                 <td><span style="font-size:10px; padding:2px 6px; background:#f3f4f6; border-radius:4px; font-weight:700;">${j._src}</span></td>
+                <td><div style="font-size:10px; color:var(--text-dim);">${j._scraped_at || '---'}</div></td>
                 <td><span style="color:#10b981;"><i class="fas fa-check-circle"></i> ACTIVE</span></td>
                 <td>
                     <a href="${j.apply_url}" target="_blank" class="mini-btn"><i class="fas fa-external-link-alt"></i></a>
