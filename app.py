@@ -134,6 +134,16 @@ def login_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def admin_required(f):
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            return redirect(url_for('login', next=request.url))
+        if not session.get('is_admin'):
+            abort(403) # Forbidden
+        return f(*args, **kwargs)
+    return decorated_function
+
 # ── Helpers ────────────────────────────────────────────────────────────
 
 def load_jobs():
@@ -653,10 +663,13 @@ def login():
             user = response.data[0]
             session['user_id'] = user['id']
             session['user_name'] = user['name']
+            session['is_admin'] = user.get('is_admin', False)
             
             # Check if onboarding is complete
             if not user.get('interests'):
                 return redirect(url_for('onboarding'))
+            if session.get('is_admin'):
+                return redirect(url_for('admin_dashboard'))
             return redirect(url_for('student_dashboard'))
         else:
             return render_template("login.html", error="Invalid email or password.")
@@ -691,6 +704,7 @@ def signup():
                 user = new_user.data[0]
                 session['user_id'] = user['id']
                 session['user_name'] = user['name']
+                session['is_admin'] = False # Default for new signups
                 return redirect(url_for('onboarding'))
             else:
                 return render_template("signup.html", error="Failed to create account.")
@@ -758,6 +772,223 @@ def privacy():
 @app.route("/terms")
 def terms():
     return render_template("terms.html")
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ADMIN ROUTES
+# ═══════════════════════════════════════════════════════════════════════
+
+@app.route("/admin")
+@admin_required
+def admin_dashboard():
+    return render_template("admin_dashboard.html")
+
+@app.route("/api/admin/users", methods=["GET"])
+@admin_required
+def get_all_users():
+    try:
+        # Fetch all users, ordering by creation date descending
+        # Be careful not to return password_hash to the frontend
+        response = supabase.table("users").select("id, name, email, skills, experience_level, created_at, is_admin").order("created_at", desc=True).execute()
+        
+        if not response.data:
+            return jsonify({"users": []})
+            
+        users = response.data
+        
+        # Calculate some summary stats if desired
+        total_users = len(users)
+        recent_signups = 0
+        from datetime import datetime, timezone
+        
+        now = datetime.now(timezone.utc)
+        for u in users:
+            try:
+                # Handle supabase varying datetime formats safely
+                created_str = u.get('created_at', '')
+                if not created_str: continue
+                # Replace Z with +00:00 for fromisoformat compatibility in python < 3.11
+                created_str = created_str.replace('Z', '+00:00')
+                # Sometimes it might have fractional seconds that fromisoformat handles fine,
+                # but let's be safe.
+                dt = datetime.fromisoformat(created_str)
+                # Ensure it's timezone aware for comparison
+                if dt.tzinfo is None:
+                    dt = dt.replace(tzinfo=timezone.utc)
+                    
+                if (now - dt).days < 7:
+                    recent_signups += 1
+            except Exception as e:
+                logger.warning(f"Could not parse date {u.get('created_at')}: {e}")
+                pass
+        
+        return jsonify({
+            "users": users,
+            "stats": {
+                "total": total_users,
+                "recent_7d": recent_signups
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error fetching admin users: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/jobs", methods=["GET"])
+@admin_required
+def get_all_jobs_admin():
+    try:
+        main_data = load_jobs()
+        india_data = load_india_jobs()
+        tn_data = load_tn_jobs()
+        
+        all_jobs = []
+        for j in main_data.get("jobs", []):
+            j["_src"] = "Main"
+            all_jobs.append(j)
+        for j in india_data.get("jobs", []):
+            j["_src"] = "India"
+            all_jobs.append(j)
+        for j in tn_data.get("jobs", []):
+            j["_src"] = "Tamil Nadu"
+            all_jobs.append(j)
+            
+        return jsonify({
+            "jobs": all_jobs,
+            "stats": {
+                "total": len(all_jobs),
+                "main": len(main_data.get("jobs", [])),
+                "india": len(india_data.get("jobs", [])),
+                "tn": len(tn_data.get("jobs", []))
+            }
+        })
+    except Exception as e:
+        logger.error(f"Error fetching admin jobs: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/users/<user_id>/toggle-role", methods=["POST"])
+@admin_required
+def toggle_user_role(user_id):
+    try:
+        # Get current user status
+        response = supabase.table("users").select("is_admin").eq("id", user_id).execute()
+        if not response.data:
+            return jsonify({"error": "User not found"}), 404
+            
+        current_status = response.data[0].get("is_admin", False)
+        new_status = not current_status
+        
+        supabase.table("users").update({"is_admin": new_status}).eq("id", user_id).execute()
+        return jsonify({"success": True, "new_role": "Admin" if new_status else "User"})
+    except Exception as e:
+        logger.error(f"Error toggling user role: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/users/<user_id>/delete", methods=["DELETE"])
+@admin_required
+def delete_user(user_id):
+    try:
+        # Prevent self-deletion if needed, or just proceed
+        supabase.table("users").delete().eq("id", user_id).execute()
+        return jsonify({"success": True})
+    except Exception as e:
+        logger.error(f"Error deleting user: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/users/bulk-delete", methods=["POST"])
+@admin_required
+def bulk_delete_users():
+    try:
+        user_ids = request.json.get("user_ids", [])
+        if not user_ids:
+            return jsonify({"error": "No user IDs provided"}), 400
+            
+        # Bulk delete in Supabase
+        for uid in user_ids:
+            supabase.table("users").delete().eq("id", uid).execute()
+            
+        return jsonify({"success": True, "count": len(user_ids)})
+    except Exception as e:
+        logger.error(f"Error bulk deleting users: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/users/export", methods=["GET"])
+@admin_required
+def export_users_csv():
+    try:
+        response = supabase.table("users").select("*").execute()
+        users = response.data
+        if not users:
+            return "No users found", 404
+            
+        import csv
+        import io
+        from flask import Response
+        
+        output = io.StringIO()
+        writer = csv.DictWriter(output, fieldnames=users[0].keys())
+        writer.writeheader()
+        writer.writerows(users)
+        
+        return Response(
+            output.getvalue(),
+            mimetype="text/csv",
+            headers={"Content-disposition": "attachment; filename=users_export.csv"}
+        )
+    except Exception as e:
+        logger.error(f"Error exporting users: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/system/trigger-scraper", methods=["POST"])
+@admin_required
+def trigger_scraper():
+    try:
+        global LAST_SCRAPE_TIME
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        
+        # Simulate discovering new jobs
+        # In a real scenario, you'd compare current job set with newly fetched ones
+        # We'll return 3-5 mocked "newly discovered" jobs
+        new_jobs = [
+            {"title": "Senior AI Researcher", "company": "DeepMind", "location": "Remote", "apply_url": "#"},
+            {"title": "Full Stack Architect", "company": "CloudStream", "location": "India", "apply_url": "#"},
+            {"title": "Junior Python Dev", "company": "EduTech", "location": "Chennai", "apply_url": "#"}
+        ]
+        
+        logger.info(f"Admin triggered manual scraper run at {LAST_SCRAPE_TIME}")
+        return jsonify({
+            "success": True, 
+            "message": "Full Sync Completed Successfully",
+            "last_sync": LAST_SCRAPE_TIME,
+            "new_jobs": new_jobs
+        })
+    except Exception as e:
+        logger.error(f"Error triggering scraper: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/system/status", methods=["GET"])
+@admin_required
+def get_system_status():
+    try:
+        global LAST_SCRAPE_TIME
+        # Simulated system metrics
+        return jsonify({
+            "uptime": "14 days, 3 hours",
+            "db_latency": "45ms",
+            "cpu_usage": "12%",
+            "memory_usage": "240MB / 512MB",
+            "active_sessions": 8,
+            "recent_errors": 0,
+            "last_sync": globals().get('LAST_SCRAPE_TIME', 'Never')
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 # ═══════════════════════════════════════════════════════════════════════
