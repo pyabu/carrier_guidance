@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Command Center{% endblock %}
+{% block title %}Admin Control{% endblock %}
 
 {% block extra_head %}
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -9,18 +9,20 @@
     :root {
         --sidebar-width: 240px;
         --sidebar-collapsed-width: 70px;
-        --sidebar-bg: #111827;
-        --sidebar-accent: #3b82f6;
-        --bg-main: #f9fafb;
-        --card-bg: #ffffff;
-        --border-color: #e5e7eb;
-        --text-dim: #6b7280;
+        --sidebar-bg: #0f172a;
+        --sidebar-accent: #8b5cf6;
+        --bg-main: #020617;
+        --card-bg: #1e293b;
+        --border-color: #334155;
+        --text-dim: #94a3b8;
+        --text-main: #f8fafc;
     }
 
     body {
         margin: 0;
         font-family: 'Inter', sans-serif;
         background: var(--bg-main);
+        color: var(--text-main);
         font-size: 13px;
     }
 
@@ -127,7 +129,7 @@
 
     .top-toolbar {
         height: 60px;
-        background: white;
+        background: var(--card-bg);
         border-bottom: 1px solid var(--border-color);
         padding: 0 24px;
         display: flex;
@@ -157,9 +159,9 @@
         align-items: center;
         gap: 8px;
         padding: 4px 10px;
-        background: #ecfdf5;
-        color: #059669;
-        border: 1px solid #d1fae5;
+        background: rgba(16, 185, 129, 0.1);
+        color: #34d399;
+        border: 1px solid rgba(16, 185, 129, 0.2);
         border-radius: 100px;
         font-weight: 600;
         font-size: 11px;
@@ -187,7 +189,7 @@
     }
 
     .stat-box {
-        background: white;
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         padding: 16px;
@@ -204,12 +206,12 @@
     .stat-val {
         font-size: 1.5rem;
         font-weight: 700;
-        color: #111827;
+        color: var(--text-main);
     }
 
     /* Table Container */
     .table-card {
-        background: white;
+        background: var(--card-bg);
         border: 1px solid var(--border-color);
         border-radius: 12px;
         overflow: hidden;
@@ -221,7 +223,7 @@
         display: flex;
         gap: 12px;
         align-items: center;
-        background: #fbfbfb;
+        background: rgba(0, 0, 0, 0.1);
     }
 
     .search-box {
@@ -239,12 +241,15 @@
         font-size: 0.8rem;
     }
 
-    .search-box input {
+    .search-box input,
+    #src-filter {
         width: 100%;
         padding: 6px 12px 6px 35px;
         border: 1px solid var(--border-color);
         border-radius: 6px;
         font-size: 12px;
+        background: var(--sidebar-bg);
+        color: var(--text-main);
     }
 
     .admin-data-table {
@@ -256,7 +261,7 @@
     .admin-data-table th {
         padding: 8px 20px;
         text-align: left;
-        background: #f3f4f6;
+        background: rgba(0, 0, 0, 0.2);
         color: var(--text-dim);
         font-weight: 600;
         text-transform: uppercase;
@@ -271,7 +276,7 @@
     }
 
     .admin-data-table tr:hover {
-        background: #f9fafb;
+        background: rgba(255, 255, 255, 0.02);
     }
 
     /* Mini Action Buttons */
@@ -283,7 +288,7 @@
         justify-content: center;
         border-radius: 6px;
         border: 1px solid var(--border-color);
-        background: white;
+        background: var(--sidebar-bg);
         cursor: pointer;
         color: var(--text-dim);
         transition: 0.2s;
@@ -293,13 +298,13 @@
     .mini-btn:hover {
         border-color: var(--sidebar-accent);
         color: var(--sidebar-accent);
-        background: #f0f7ff;
+        background: rgba(139, 92, 246, 0.1);
     }
 
     .mini-btn.danger:hover {
-        border-color: #ef4444;
-        color: #ef4444;
-        background: #fef2f2;
+        border-color: #f87171;
+        color: #f87171;
+        background: rgba(239, 68, 68, 0.1);
     }
 
     .checkbox-col {
@@ -364,8 +369,8 @@
     <!-- ── Sidebar ── -->
     <nav class="admin-sidebar" id="sidebar">
         <div class="sidebar-brand">
-            <div class="brand-icon">C</div>
-            <span class="brand-text" style="font-weight: 800; font-size: 1.1rem; color: white;">COMMAND CENTER</span>
+            <div class="brand-icon">A</div>
+            <span class="brand-text" style="font-weight: 800; font-size: 1.1rem; color: white;">ADMIN CONTROL</span>
         </div>
 
         <div class="nav-items">
@@ -394,7 +399,8 @@
             <div class="toolbar-left">
                 <button class="collapse-toggle" onclick="toggleSidebar()"><i class="fas fa-outdent"
                         id="toggle-icon"></i></button>
-                <div id="view-title" style="font-weight: 700; color: #111827; font-size: 1.1rem;">Overview</div>
+                <div id="view-title" style="font-weight: 700; color: var(--text-main); font-size: 1.1rem;">Overview
+                </div>
             </div>
             <div class="toolbar-right" style="display: flex; gap: 15px; align-items: center;">
                 <div class="status-badge"><i class="fas fa-circle" style="font-size: 6px;"></i> SERVER: OPERATIONAL
@@ -436,16 +442,17 @@
                         <div style="margin-bottom: 20px;">
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>CPU
                                     Usage</span><span id="sys-cpu">--</span></div>
-                            <div style="height:4px; background:#f3f4f6; border-radius:2px;">
-                                <div id="bar-cpu" style="height:100%; width:0%; background:#3b82f6; border-radius:2px;">
+                            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
+                                <div id="bar-cpu"
+                                    style="height:100%; width:0%; background:var(--sidebar-accent); border-radius:2px;">
                                 </div>
                             </div>
                         </div>
                         <div>
                             <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Memory
                                     Load</span><span id="sys-mem">--</span></div>
-                            <div style="height:4px; background:#f3f4f6; border-radius:2px;">
-                                <div id="bar-mem" style="height:100%; width:0%; background:#10b981; border-radius:2px;">
+                            <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
+                                <div id="bar-mem" style="height:100%; width:0%; background:#34d399; border-radius:2px;">
                                 </div>
                             </div>
                         </div>
@@ -578,7 +585,7 @@
                     </div>
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom: 30px;">
                         <input type="checkbox" id="maint-mode">
-                        <label for="maint-mode" style="font-weight:700; color: #ef4444;">ENABLE BROADCAST MAINTENANCE
+                        <label for="maint-mode" style="font-weight:700; color: #f87171;">ENABLE BROADCAST MAINTENANCE
                             MODE</label>
                     </div>
                     <button
@@ -672,7 +679,7 @@
                 <td class="checkbox-col"><input type="checkbox" value="${u.id}" class="user-check" onchange="updateBulkUI()"></td>
                 <td><div style="font-weight:700;">${u.name || '---'}</div></td>
                 <td>${u.email}</td>
-                <td><span style="font-weight:700; color:${u.is_admin ? '#3b82f6' : '#10b981'};">${u.is_admin ? '<i class="fas fa-shield-alt"></i> ADMIN' : '<i class="fas fa-user"></i> STUDENT'}</span></td>
+                <td><span style="font-weight:700; color:${u.is_admin ? 'var(--sidebar-accent)' : '#34d399'};">${u.is_admin ? '<i class="fas fa-shield-alt"></i> ADMIN' : '<i class="fas fa-user"></i> STUDENT'}</span></td>
                 <td>${new Date(u.created_at).toLocaleDateString()}</td>
                 <td>
                     <div style="display:flex; gap:5px;">
@@ -746,9 +753,9 @@
                 <td><div style="font-weight:700;">${j.title}</div></td>
                 <td>${j.company}</td>
                 <td>${j.location || 'Remote'}</td>
-                <td><span style="font-size:10px; padding:2px 6px; background:#f3f4f6; border-radius:4px; font-weight:700;">${j._src}</span></td>
+                <td><span style="font-size:10px; padding:2px 6px; background:rgba(255,255,255,0.1); border-radius:4px; font-weight:700;">${j._src}</span></td>
                 <td><div style="font-size:10px; color:var(--text-dim);">${j._scraped_at || '---'}</div></td>
-                <td><span style="color:#10b981;"><i class="fas fa-check-circle"></i> ACTIVE</span></td>
+                <td><span style="color:#34d399;"><i class="fas fa-check-circle"></i> ACTIVE</span></td>
                 <td>
                     <a href="${j.apply_url}" target="_blank" class="mini-btn"><i class="fas fa-external-link-alt"></i></a>
                 </td>
@@ -781,10 +788,10 @@
                 // Show new jobs
                 if (data.new_jobs && data.new_jobs.length > 0) {
                     newJobsList.innerHTML = data.new_jobs.map(j => `
-                        <div style="background: #f0fdf4; border: 1px solid #bbf7d0; padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
-                                <div style="font-weight: 700; color: #166534;">${j.title}</div>
-                                <div style="font-size: 11px; color: #15803d;">${j.company} • ${j.location}</div>
+                                <div style="font-weight: 700; color: #34d399;">${j.title}</div>
+                                <div style="font-size: 11px; color: #10b981;">${j.company} • ${j.location}</div>
                             </div>
                             <a href="${j.apply_url}" target="_blank" class="mini-btn"><i class="fas fa-arrow-right"></i></a>
                         </div>
