@@ -434,13 +434,15 @@
 
                 <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
                     <div class="table-card" style="padding: 24px;">
-                        <h4 style="margin: 0 0 20px 0;">Signups Trend (Last 30 Days)</h4>
+                        <h4 style="margin: 0 0 20px 0; color: var(--text-main);">Signups Trend (Last 30 Days)</h4>
                         <canvas id="growthChart" height="200"></canvas>
                     </div>
                     <div class="table-card" style="padding: 24px;">
-                        <h4 style="margin: 0 0 15px 0;">Platform Health</h4>
+                        <h4 style="margin: 0 0 15px 0; color: var(--text-main);">Platform Health</h4>
                         <div style="margin-bottom: 20px;">
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>CPU
+                            <div
+                                style="display:flex; justify-content:space-between; margin-bottom:5px; color: var(--text-dim);">
+                                <span>CPU
                                     Usage</span><span id="sys-cpu">--</span></div>
                             <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
                                 <div id="bar-cpu"
@@ -449,7 +451,9 @@
                             </div>
                         </div>
                         <div>
-                            <div style="display:flex; justify-content:space-between; margin-bottom:5px;"><span>Memory
+                            <div
+                                style="display:flex; justify-content:space-between; margin-bottom:5px; color: var(--text-dim);">
+                                <span>Memory
                                     Load</span><span id="sys-mem">--</span></div>
                             <div style="height:4px; background:rgba(255,255,255,0.1); border-radius:2px;">
                                 <div id="bar-mem" style="height:100%; width:0%; background:#34d399; border-radius:2px;">
@@ -534,10 +538,10 @@
             <div id="view-scraper" class="view-view">
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap:24px;">
                     <div class="table-card" style="padding: 24px;">
-                        <h4 style="margin:0 0 10px 0;">Control Node</h4>
+                        <h4 style="margin:0 0 10px 0; color: var(--text-main);">Control Node</h4>
                         <div style="margin-bottom: 15px; font-size: 11px; color: var(--text-dim);">
                             <i class="fas fa-history"></i> LAST FETCHED: <span id="last-sync-time"
-                                style="font-weight:700; color: #111827;">Never</span>
+                                style="font-weight:700; color: var(--text-main);">Never</span>
                         </div>
                         <button id="trigger-btn"
                             style="width:100%; padding:12px; background:var(--sidebar-accent); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer;"
@@ -552,7 +556,7 @@
                     </div>
                     <div class="table-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
                         <div>
-                            <h4 style="margin:0 0 15px 0;">Real-time Stream Console</h4>
+                            <h4 style="margin:0 0 15px 0; color: var(--text-main);">Real-time Stream Console</h4>
                             <div class="console-box" id="scraper-console">
                                 <div class="console-line"><span class="timestamp">[12:44:02]</span> SYSTEM: Awaiting
                                     command...</div>
@@ -573,15 +577,17 @@
             <!-- ── View: Settings ── -->
             <div id="view-settings" class="view-view">
                 <div class="table-card" style="padding: 30px; max-width: 600px;">
-                    <h3 style="margin-top:0;">Site Config</h3>
+                    <h3 style="margin-top:0; color: var(--text-main);">Site Config</h3>
                     <div style="margin-bottom: 20px;">
-                        <label style="display:block; margin-bottom:8px; font-weight:700;">Admin Maintenance Key</label>
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Admin
+                            Maintenance Key</label>
                         <input type="text" value="XP-8829-ADMIN" class="search-box"
-                            style="padding-left:15px; border:1px solid var(--border-color); width:100%; border-radius:8px; height:35px;">
+                            style="padding-left:15px; border:1px solid var(--border-color); width:100%; border-radius:8px; height:35px; background: var(--sidebar-bg); color: var(--text-main);">
                     </div>
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom: 20px;">
                         <input type="checkbox" checked id="allow-reg">
-                        <label for="allow-reg" style="font-weight:700;">Allow New User Registrations</label>
+                        <label for="allow-reg" style="font-weight:700; color: var(--text-main);">Allow New User
+                            Registrations</label>
                     </div>
                     <div style="display:flex; align-items:center; gap:10px; margin-bottom: 30px;">
                         <input type="checkbox" id="maint-mode">
@@ -589,7 +595,7 @@
                             MODE</label>
                     </div>
                     <button
-                        style="padding: 10px 24px; background:#111827; color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;"
+                        style="padding: 10px 24px; background:var(--sidebar-accent); color:white; border:none; border-radius:8px; font-weight:700; cursor:pointer;"
                         onclick="alert('Configuration persistense triggered.')">Update Node Settings</button>
                 </div>
             </div>
