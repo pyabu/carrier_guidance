@@ -2347,6 +2347,7 @@ section {
         position: static;
         opacity: 1;
         visibility: visible;
+        pointer-events: auto;
         transform: none;
         box-shadow: none;
         border: none;
