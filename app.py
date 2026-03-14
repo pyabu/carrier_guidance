@@ -346,7 +346,6 @@ def refresh_india_jobs():
             "region": "India",
             "total": len(india_jobs),
             "states_covered": len(set(j.get("location_state", "") for j in india_jobs if j.get("location_state"))),
-            "cities_covered": len(set(j.get("location_city", "") for j in india_jobs if j.get("location_city"))),
         }
         save_india_jobs(india_data)
         logger.info(f"✅ Saved {len(india_jobs)} All-India jobs")
@@ -374,6 +373,7 @@ MAX_HISTORY = 10
 MAX_ERRORS = 5
 
 
+# ── Scheduler Helper Functions ──────────────────────────────────────────
 def tracked_refresh():
     """Wrapper around refresh_jobs that tracks timing & history."""
     start = datetime.now()
@@ -404,112 +404,20 @@ def tracked_refresh():
         logger.error(f"❌ Auto-refresh failed: {e}")
         return 0
 
-
 def is_data_stale():
     """Check if job data is older than STALE_THRESHOLD_HOURS."""
     try:
-        data = load_jobs()
-        last_updated = data.get("last_updated")
-        if not last_updated:
-            return True
-        last_dt = datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
-        age_hours = (datetime.now() - last_dt).total_seconds() / 3600
-        return age_hours >= STALE_THRESHOLD_HOURS
+        if os.path.exists(JOBS_FILE):
+             mtime = os.path.getmtime(JOBS_FILE)
+             age_hours = (datetime.now() - datetime.fromtimestamp(mtime)).total_seconds() / 3600
+             return age_hours >= STALE_THRESHOLD_HOURS
+        return True
     except Exception:
         return True
 
 
-# ── Threading-based fallback scheduler ─────────────────────────────────
-class SimpleScheduler:
-    """Lightweight repeating-timer scheduler (zero dependencies)."""
-
-    def __init__(self, interval_hours=12):
-        self.interval = interval_hours * 3600
-        self._timer = None
-        self._running = False
-
-    def _run(self):
-        if self._running:
-            tracked_refresh()
-            self._schedule_next()
-
-    def _schedule_next(self):
-        self._timer = threading.Timer(self.interval, self._run)
-        self._timer.daemon = True
-        self._timer.start()
-        scheduler_info["next_run"] = (
-            datetime.now() + timedelta(seconds=self.interval)
-        ).strftime("%Y-%m-%d %H:%M:%S")
-
-    def start(self):
-        self._running = True
-        self._schedule_next()
-
-    def stop(self):
-        self._running = False
-        if self._timer:
-            self._timer.cancel()
-
-
-# ── Start scheduler – local dev only (Vercel uses cron endpoint) ──────
-if not IS_VERCEL:
-    _scheduler_started = False
-
-    # 1) Try APScheduler (preferred)
-    try:
-        from apscheduler.schedulers.background import BackgroundScheduler
-        scheduler = BackgroundScheduler(daemon=True)
-        scheduler.add_job(
-            tracked_refresh, "interval",
-            hours=REFRESH_INTERVAL_HOURS,
-            id="refresh_interval",
-            next_run_time=datetime.now() + timedelta(minutes=5),  # first run 5 min after boot
-        )
-        scheduler.add_job(
-            tracked_refresh, "cron",
-            hour=6, minute=0,
-            id="daily_6am",
-        )
-        scheduler.start()
-        _scheduler_started = True
-        scheduler_info["active"] = True
-        scheduler_info["type"] = "apscheduler"
-        scheduler_info["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-
-        # Track next run time
-        job = scheduler.get_job("refresh_interval")
-        if job and job.next_run_time:
-            scheduler_info["next_run"] = job.next_run_time.strftime("%Y-%m-%d %H:%M:%S")
-
-        logger.info(f"🗓️  APScheduler running – every {REFRESH_INTERVAL_HOURS}h + daily 6 AM")
-    except ImportError:
-        logger.warning("⚠️  APScheduler not installed – trying fallback scheduler")
-    except Exception as e:
-        logger.warning(f"⚠️  APScheduler error: {e} – trying fallback scheduler")
-
-    # 2) Fallback to simple threading scheduler
-    if not _scheduler_started:
-        try:
-            _simple = SimpleScheduler(interval_hours=REFRESH_INTERVAL_HOURS)
-            _simple.start()
-            _scheduler_started = True
-            scheduler_info["active"] = True
-            scheduler_info["type"] = "threading"
-            scheduler_info["started_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-            logger.info(f"🗓️  Simple scheduler running – every {REFRESH_INTERVAL_HOURS}h")
-        except Exception as e:
-            logger.error(f"❌ All schedulers failed: {e}")
-
-    # 3) Startup freshness check – refresh immediately if data is stale
-    if is_data_stale():
-        logger.info("📦 Data is stale (>24h) or missing – refreshing on startup …")
-        threading.Thread(target=tracked_refresh, daemon=True).start()
-    else:
-        data = load_jobs()
-        logger.info(f"📦 Data is fresh – {len(data.get('jobs', []))} jobs, last updated {data.get('last_updated', 'N/A')}")
-
-
 # ═══════════════════════════════════════════════════════════════════════
+
 # PAGE ROUTES
 # ═══════════════════════════════════════════════════════════════════════
 
