@@ -42,6 +42,7 @@
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --container-max: 1240px;
     --glow: 0 0 20px rgba(15, 76, 117, 0.12);
+    --bg-primary-rgb: 255, 255, 255;
 }
 
 /* ── Dark Theme ──────────────────────────────────────────────────────── */
@@ -63,6 +64,7 @@
     --shadow-lg: 0 8px 30px rgba(0, 0, 0, 0.5);
     --shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.6);
     --glow: 0 0 20px rgba(50, 130, 184, 0.2);
+    --bg-primary-rgb: 11, 17, 32;
 }
 
 /* ── Reset & Base ────────────────────────────────────────────────────── */
@@ -463,27 +465,49 @@ select.form-control {
     border-color: var(--accent);
 }
 
-/* Mobile nav toggle */
+/* Mobile nav toggle (Hamburger) */
 .nav-toggle {
     display: none;
     flex-direction: column;
-    gap: 5px;
-    background: none;
-    border: none;
+    justify-content: center;
+    align-items: center;
+    width: 44px;
+    height: 44px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 12px;
     cursor: pointer;
-    padding: 4px;
     z-index: 1001;
-    /* Ensure above mobile menu */
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    padding: 0;
+}
+
+.nav-toggle:hover {
+    background: var(--accent);
+    border-color: var(--accent);
+}
+
+.nav-toggle:hover span {
+    background: white;
 }
 
 .nav-toggle span {
-    width: 24px;
-    height: 3px;
+    width: 20px;
+    height: 2px;
     background: var(--text-primary);
-    border-radius: 3px;
-    transition: var(--transition);
-    transform-origin: left center;
+    border-radius: 2px;
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: absolute;
 }
+
+.nav-toggle span:nth-child(1) { transform: translateY(-7px); }
+.nav-toggle span:nth-child(2) { width: 14px; transform: translateX(-3px); }
+.nav-toggle span:nth-child(3) { transform: translateY(7px); }
+
+.nav-toggle.active span:nth-child(1) { transform: rotate(45deg); }
+.nav-toggle.active span:nth-child(2) { opacity: 0; transform: translateX(20px); }
+.nav-toggle.active span:nth-child(3) { transform: rotate(-45deg); }
 
 /* Mobile auth links - hidden on desktop */
 .nav-mobile-auth {
@@ -2308,30 +2332,61 @@ section {
 
     .nav-menu {
         position: fixed;
-        top: 70px;
+        top: 0;
         left: 0;
         width: 100%;
         height: 100vh;
         height: 100dvh;
-        padding-bottom: 90px;
-        /* Safe area */
-        background: var(--bg-primary);
+        background: rgba(var(--bg-primary-rgb), 0.85);
+        backdrop-filter: blur(25px) saturate(180%);
+        -webkit-backdrop-filter: blur(25px) saturate(180%);
         display: flex;
         flex-direction: column;
-        padding-left: 24px;
-        padding-right: 24px;
-        padding-top: 24px;
-        gap: 4px;
-        transform: translateX(100%);
-        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        justify-content: center;
+        align-items: center;
+        padding: 80px 40px;
+        gap: 20px;
+        transform: translateY(-100%);
+        transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.4s ease, visibility 0.4s ease;
         overflow-y: auto;
         z-index: 999;
         visibility: hidden;
+        opacity: 0;
     }
 
     .nav-menu.open {
-        transform: translateX(0);
+        transform: translateY(0);
         visibility: visible;
+        opacity: 1;
+    }
+
+    .nav-menu li {
+        width: 100%;
+        text-align: center;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.4s ease;
+    }
+
+    .nav-menu.open li {
+        opacity: 1;
+        transform: translateY(0);
+    }
+
+    .nav-menu.open li:nth-child(1) { transition-delay: 0.1s; }
+    .nav-menu.open li:nth-child(2) { transition-delay: 0.15s; }
+    .nav-menu.open li:nth-child(3) { transition-delay: 0.2s; }
+    .nav-menu.open li:nth-child(4) { transition-delay: 0.25s; }
+    .nav-menu.open li:nth-child(5) { transition-delay: 0.3s; }
+    .nav-menu.open li:nth-child(6) { transition-delay: 0.35s; }
+
+    .nav-link {
+        font-size: 1.5rem !important;
+        font-weight: 600 !important;
+        justify-content: center !important;
+        width: 100%;
+        padding: 12px !important;
+        color: var(--text-primary) !important;
     }
 
     .nav-toggle {

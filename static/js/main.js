@@ -69,16 +69,9 @@ function initMobileMenu() {
     toggle?.addEventListener('click', () => {
         menu?.classList.toggle('open');
         toggle.classList.toggle('active');
-        const spans = toggle.querySelectorAll('span');
         if (menu?.classList.contains('open')) {
-            spans[0].style.transform = 'rotate(45deg) translate(5px, 5px)';
-            spans[1].style.opacity = '0';
-            spans[2].style.transform = 'rotate(-45deg) translate(5px, -5px)';
             document.body.style.overflow = 'hidden';
         } else {
-            spans[0].style.transform = 'none';
-            spans[1].style.opacity = '1';
-            spans[2].style.transform = 'none';
             document.body.style.overflow = '';
         }
     });
@@ -111,10 +104,6 @@ function initMobileMenu() {
             // Reset hamburger icon
             if (toggle && toggle.classList.contains('active')) {
                 toggle.classList.remove('active');
-                const spans = toggle.querySelectorAll('span');
-                spans[0].style.transform = 'none';
-                spans[1].style.opacity = '1';
-                spans[2].style.transform = 'none';
             }
             
             document.body.style.overflow = ''; 
