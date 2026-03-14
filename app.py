@@ -48,6 +48,9 @@ SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
 TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
+# Upload folder for resumes
+UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
+
 # Create directories safely
 for d in [DATA_DIR, UPLOAD_DIR]:
     try:
