@@ -2945,5 +2945,25 @@ def dashboard_stats():
     return jsonify(stats)
 
 
+@app.route("/favicon.ico")
+def favicon():
+    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
+
+@app.route("/robots.txt")
+def robots():
+    return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
+
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
+
+@app.route("/google25c1f4c7795c1819.html")
+def src_google_1():
+    return send_from_directory(app.root_path, 'google25c1f4c7795c1819.html', mimetype='text/html')
+
+@app.route("/googlec70fbf2c9abb6b21.html")
+def src_google_2():
+    return send_from_directory(app.root_path, 'googlec70fbf2c9abb6b21.html', mimetype='text/html')
+
 if __name__ == "__main__":
-    app.run(port=8080, debug=True)
+    app.run(debug=True, port=5001)
