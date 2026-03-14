@@ -48,9 +48,13 @@ SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "jobs.json")
 TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
-# Upload folder for resumes
-UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
-os.makedirs(UPLOAD_DIR, exist_ok=True)
+# Create directories safely
+for d in [DATA_DIR, UPLOAD_DIR]:
+    try:
+        os.makedirs(d, exist_ok=True)
+    except Exception as e:
+        logger.warning(f"Failed to create directory {d}: {e}")
+
 ALLOWED_EXTENSIONS = {'pdf', 'doc', 'docx'}
 
 def allowed_file(filename):
