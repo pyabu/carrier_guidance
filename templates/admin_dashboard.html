@@ -1054,10 +1054,8 @@
     }
 
     function logToConsole(msg) {
-        const console = document.getElementById('scraper-console');
         const ts = new Date().toLocaleTimeString();
-        console.innerHTML += `<div class="console-line"><span class="timestamp">[${ts}]</span> ${msg}</div>`;
-        console.scrollTop = console.scrollHeight;
+        appendLogLine(`[${ts}] ${msg}`);
     }
 
     // --- Global Filtering ---
@@ -1234,6 +1232,50 @@
     // ENHANCED SCRAPER CONTROL
     // ═══════════════════════════
     let _scraperPolling = null;
+    let _logSSE = null;
+
+    function connectScraperLogs() {
+        if (_logSSE) return; // already connected
+        
+        console.log("Connecting to live scraper log stream...");
+        _logSSE = new EventSource('/api/admin/scraper/logs');
+        
+        _logSSE.onmessage = function(e) {
+            if (e.data === ':keepalive') return;
+            appendLogLine(e.data);
+        };
+        
+        _logSSE.onerror = function(e) {
+            console.error("Scraper log stream disconnected. Reconnecting in 5s...");
+            _logSSE.close();
+            _logSSE = null;
+            setTimeout(connectScraperLogs, 5000);
+        };
+    }
+
+    function appendLogLine(msg) {
+        const consoleEl = document.getElementById('scraper-console');
+        if (!consoleEl) return;
+        
+        const div = document.createElement('div');
+        div.className = 'console-line';
+        
+        // Check if there's a timestamp in square brackets
+        const tsMatch = msg.match(/^(\[[^\]]+\])\s*(.*)/);
+        if (tsMatch) {
+            div.innerHTML = `<span class="timestamp">${tsMatch[1]}</span> ${tsMatch[2]}`;
+        } else {
+            div.textContent = msg;
+        }
+        
+        consoleEl.appendChild(div);
+        consoleEl.scrollTop = consoleEl.scrollHeight;
+        
+        // Limit console to 500 lines for performance
+        while (consoleEl.children.length > 500) {
+            consoleEl.removeChild(consoleEl.firstChild);
+        }
+    }
 
     async function loadScraperStatus() {
         try {
@@ -1289,6 +1331,7 @@
         const d = await res.json();
         if (d.success) {
             showToast('<i class="fas fa-robot"></i> Scraper started!', 'success');
+            connectScraperLogs(); // Start real-time log stream
             logToConsole(`✓ ${d.message}`);
             loadScraperStatus();
             // Poll status every 5s while running
@@ -1345,6 +1388,7 @@
 
     // Initial Load
     refreshDashboard();
+    connectScraperLogs(); // Start live log connection
     setInterval(refreshDashboard, 60000); // Periodic refresh
 </script>
 {% endblock %}

@@ -884,11 +884,8 @@ def get_system_status():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-
-
-
 # ═══════════════════════════════════════════════════════════════════════
-# ADMIN: SEO MANAGER
+# SEO & SCRAPER – CONFIG FILES
 # ═══════════════════════════════════════════════════════════════════════
 
 SEO_SETTINGS_FILE = os.path.join(DATA_DIR, "seo_settings.json")
@@ -940,6 +937,144 @@ def _save_scraper_config(data):
         json.dump(data, f, indent=2)
 
 
+# ── Inject SEO settings into every request via flask.g ──────────────────
+from flask import g
+
+@app.before_request
+def inject_seo_globals():
+    """Make SEO settings available to all templates as g.seo"""
+    g.seo = _load_seo_settings()
+
+
+# ── Real-time scraper log buffer (SSE) ──────────────────────────────────
+from collections import deque
+import queue as _queue
+
+_scraper_log_buffer = deque(maxlen=200)   # last 200 log lines, ring buffer
+_scraper_log_queue  = _queue.Queue()      # live tail for SSE clients
+
+def _scraper_log(msg: str):
+    """Write a log line to both the ring buffer and SSE queue."""
+    ts = datetime.now().strftime("%H:%M:%S")
+    line = f"[{ts}] {msg}"
+    _scraper_log_buffer.append(line)
+    try:
+        _scraper_log_queue.put_nowait(line)
+    except _queue.Full:
+        pass
+
+
+@app.route("/api/admin/scraper/logs")
+@admin_required
+def scraper_logs_sse():
+    """Server-Sent Events endpoint – streams live scraper log lines."""
+    def event_stream():
+        # First: replay recent history
+        for line in list(_scraper_log_buffer):
+            yield f"data: {line}\n\n"
+        # Then: stream new lines as they arrive
+        while True:
+            try:
+                line = _scraper_log_queue.get(timeout=25)
+                yield f"data: {line}\n\n"
+            except _queue.Empty:
+                yield "data: :keepalive\n\n"   # keep connection alive
+    from flask import Response, stream_with_context
+    return Response(
+        stream_with_context(event_stream()),
+        mimetype="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "X-Accel-Buffering": "no",
+        }
+    )
+
+
+# ── APScheduler – auto-run scraper on saved schedule ───────────────────
+def _scheduled_scraper_job():
+    """Called by APScheduler – runs all configured sources."""
+    global _scraper_running, LAST_SCRAPE_TIME
+    if _scraper_running:
+        _scraper_log("SCHEDULER: scraper already running, skipping.")
+        return
+    config = _load_scraper_config()
+    sources = config.get("sources", ["main", "india", "tamilnadu"])
+    _scraper_log(f"SCHEDULER: auto-run started for {sources}")
+    _scraper_running = True
+    LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    try:
+        import subprocess, sys
+        env = dict(os.environ)
+        env["PYTHONPATH"] = app.root_path
+        for src, module in [("main", "scraper.job_scraper"),
+                            ("tamilnadu", "scraper.tamilnadu_scraper"),
+                            ("india", "scraper.india_scraper")]:
+            if src in sources:
+                _scraper_log(f"SCHEDULER: running {module}…")
+                proc = subprocess.run(
+                    [sys.executable, "-m", module],
+                    cwd=app.root_path, env=env, timeout=600,
+                    capture_output=True, text=True
+                )
+                for line in (proc.stdout or "").splitlines():
+                    _scraper_log(f"  {line}")
+    except Exception as ex:
+        _scraper_log(f"SCHEDULER ERROR: {ex}")
+    finally:
+        _scraper_running = False
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        _scraper_log(f"SCHEDULER: run complete. Finished at {LAST_SCRAPE_TIME}")
+        if config.get("auto_dedup", True):
+            _scraper_log("SCHEDULER: running auto-dedup…")
+            try:
+                for label, load_fn, save_fn in [
+                    ("main", load_jobs, save_jobs),
+                    ("india", load_india_jobs, save_india_jobs),
+                    ("tamilnadu", load_tn_jobs, save_tn_jobs)
+                ]:
+                    d = load_fn()
+                    jobs_list = d.get("jobs", [])
+                    seen = set()
+                    unique = [j for j in jobs_list if (k := j.get("apply_url") or j.get("title")) not in seen and not seen.add(k)]
+                    if len(unique) < len(jobs_list):
+                        d["jobs"] = unique
+                        d["total"] = len(unique)
+                        save_fn(d)
+                        _scraper_log(f"  Auto-dedup {label}: removed {len(jobs_list)-len(unique)} dupes")
+            except Exception as ex:
+                _scraper_log(f"  Auto-dedup error: {ex}")
+
+
+def _start_scheduler():
+    """Start APScheduler with the saved interval/hour config."""
+    if IS_VERCEL:
+        return   # Vercel is serverless – no background threads
+    try:
+        from apscheduler.schedulers.background import BackgroundScheduler
+        config = _load_scraper_config()
+        interval_hours = config.get("schedule_interval_hours", 12)
+        sched = BackgroundScheduler()
+        sched.add_job(
+            _scheduled_scraper_job,
+            trigger="interval",
+            hours=int(interval_hours),
+            id="auto_scraper",
+            replace_existing=True,
+        )
+        sched.start()
+        logger.info(f"⏲  APScheduler started: every {interval_hours}h")
+        app.config["_scheduler"] = sched
+    except Exception as e:
+        logger.warning(f"Failed to start scheduler: {e}")
+
+_start_scheduler()
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ADMIN: SEO MANAGER ROUTES
+# ═══════════════════════════════════════════════════════════════════════
+
+
 @app.route("/api/admin/seo/settings", methods=["GET", "POST"])
 @admin_required
 def seo_settings():
@@ -984,20 +1119,21 @@ def generate_sitemap():
     <priority>{priority}</priority>
   </url>""")
 
-        # Add individual job pages if they have dedicated URLs
-        try:
-            data = load_jobs()
-            for job in data.get("jobs", [])[:500]:   # cap at 500 job URLs
-                slug = job.get("id", "")
-                if slug:
-                    urls_xml.append(f"""  <url>
+        # Add individual job pages from all datasets
+        for load_fn in (load_jobs, load_india_jobs, load_tn_jobs):
+            try:
+                data = load_fn()
+                for job in data.get("jobs", [])[:500]:   # cap at 500 job URLs per source
+                    slug = job.get("id", "")
+                    if slug:
+                        urls_xml.append(f"""  <url>
     <loc>{base_url}/job/{slug}</loc>
     <lastmod>{today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>""")
-        except Exception:
-            pass
+            except Exception:
+                pass
 
         sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
         sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
@@ -1043,19 +1179,28 @@ def seo_keywords():
         import re
 
         stopwords = {"the", "and", "for", "with", "in", "of", "to", "a", "at",
-                     "an", "is", "are", "or", "on", "be", "as", "by", "this", "-", "&"}
+                     "an", "is", "are", "or", "on", "be", "as", "by", "this", "-", "&",
+                     "job", "jobs", "apply", "now", "work", "new", "role", "position",
+                     "experience", "required", "years", "salary", "openings", "company"}
         keyword_counter = Counter()
 
-        try:
-            data = load_jobs()
-            for job in data.get("jobs", []):
-                text = f"{job.get('title', '')} {job.get('category', '')} {job.get('skills', '')}"
-                words = re.findall(r"[a-zA-Z]{3,}", text.lower())
-                for w in words:
-                    if w not in stopwords:
-                        keyword_counter[w] += 1
-        except Exception:
-            pass
+        # Aggregate from all three datasets for comprehensive keyword pool
+        for load_fn in (load_jobs, load_india_jobs, load_tn_jobs):
+            try:
+                data = load_fn()
+                for job in data.get("jobs", []):
+                    text = " ".join(filter(None, [
+                        job.get("title", ""),
+                        job.get("category", ""),
+                        job.get("skills", ""),
+                        job.get("description", "")[:200],  # first 200 chars of desc
+                    ]))
+                    words = re.findall(r"[a-zA-Z]{3,}", text.lower())
+                    for w in words:
+                        if w not in stopwords:
+                            keyword_counter[w] += 1
+            except Exception:
+                pass
 
         top_keywords = [{"keyword": kw, "count": cnt} for kw, cnt in keyword_counter.most_common(50)]
         seo = _load_seo_settings()
@@ -1131,26 +1276,48 @@ def scraper_start():
                 import subprocess, sys
                 env = dict(os.environ)
                 env["PYTHONPATH"] = app.root_path
-                if "main" in sources:
-                    subprocess.run(
-                        [sys.executable, "-m", "scraper.job_scraper"],
-                        cwd=app.root_path, env=env, timeout=600
-                    )
-                if "tamilnadu" in sources:
-                    subprocess.run(
-                        [sys.executable, "-m", "scraper.tamilnadu_scraper"],
-                        cwd=app.root_path, env=env, timeout=600
-                    )
-                if "india" in sources:
-                    subprocess.run(
-                        [sys.executable, "-m", "scraper.india_scraper"],
-                        cwd=app.root_path, env=env, timeout=600
-                    )
+                for src, module in [("main", "scraper.job_scraper"),
+                                    ("tamilnadu", "scraper.tamilnadu_scraper"),
+                                    ("india", "scraper.india_scraper")]:
+                    if src in sources:
+                        _scraper_log(f"▶ Starting {module}…")
+                        proc = subprocess.Popen(
+                            [sys.executable, "-m", module],
+                            cwd=app.root_path, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, bufsize=1
+                        )
+                        for line in proc.stdout:
+                            line = line.rstrip()
+                            if line:
+                                _scraper_log(f"  [{src}] {line}")
+                        proc.wait()
+                        _scraper_log(f"✓ {module} finished (exit {proc.returncode})")
+                if config.get("auto_dedup", True):
+                    _scraper_log("🧹 Running auto-dedup…")
+                    for label, load_fn, save_fn in [
+                        ("main", load_jobs, save_jobs),
+                        ("india", load_india_jobs, save_india_jobs),
+                        ("tamilnadu", load_tn_jobs, save_tn_jobs)
+                    ]:
+                        try:
+                            d = load_fn()
+                            jobs_list = d.get("jobs", [])
+                            seen = set()
+                            unique = [j for j in jobs_list if (k := j.get("apply_url") or j.get("title")) not in seen and not seen.add(k)]
+                            if len(unique) < len(jobs_list):
+                                d["jobs"] = unique; d["total"] = len(unique)
+                                save_fn(d)
+                                _scraper_log(f"  Dedup {label}: -{len(jobs_list)-len(unique)} dupes")
+                        except Exception as ex:
+                            _scraper_log(f"  Dedup {label} error: {ex}")
             except Exception as ex:
                 logger.error(f"Scraper thread error: {ex}")
+                _scraper_log(f"✗ ERROR: {ex}")
             finally:
                 _scraper_running = False
                 LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                _scraper_log(f"✔ All done. Finished at {LAST_SCRAPE_TIME}")
 
         import threading
         _scraper_thread = threading.Thread(target=_run_scraper, daemon=True)
