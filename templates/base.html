@@ -32,14 +32,16 @@
         href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
         rel="stylesheet">
 
-    <!-- Font Awesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Font Awesome Icons (Deferred) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
 
-    <!-- AOS Animations -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css">
+    <!-- AOS Animations (Deferred) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"></noscript>
 
-    <!-- Main Stylesheet -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <!-- Main Stylesheet (Minified) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
     <style>
         /* Prevent FOUC */
         .main-content {
@@ -246,10 +248,15 @@
     <script>var __isLoggedIn = true;</script>
     {% endif %}
 
-    <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"></script>
-    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
-    <script>document.querySelector('.main-content')?.classList.add('loaded');</script>
+    <!-- Scripts (Deferred to prevent parsing blocks) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script>
+        // Wait for deferred scripts to execute before marking as loaded if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.main-content')?.classList.add('loaded');
+        });
+    </script>
     {% block extra_scripts %}{% endblock %}
 </body>
 
