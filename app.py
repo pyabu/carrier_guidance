@@ -127,12 +127,15 @@ def admin_required(f):
 
 def load_jobs():
     """Load cached jobs from JSON file, falling back to Supabase then seed on Vercel."""
-    last_updated = "Never"
     if os.path.exists(JOBS_FILE):
-        mtime = os.path.getmtime(JOBS_FILE)
-        last_updated = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
         with open(JOBS_FILE, "r") as f:
-            return json.load(f), last_updated
+            data = json.load(f)
+            # Ensure last_updated is present if not already in JSON
+            if "last_updated" not in data:
+                mtime = os.path.getmtime(JOBS_FILE)
+                data["last_updated"] = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            return data
+
     # On Vercel: try Supabase first (persisted from last scrape)
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("jobs")
@@ -141,8 +144,10 @@ def load_jobs():
             with open(JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
             logger.info("☁️  Loaded jobs from Supabase → /tmp")
-            return sb_data, sb_data.get('updated_at', 'Recently')
-    return {"jobs": [], "total": 0, "sources": {}}, last_updated
+            return sb_data
+
+    # Final fallback
+    return {"jobs": [], "total": 0, "sources": {}, "last_updated": "Never"}
 
 
 def load_tn_jobs():
