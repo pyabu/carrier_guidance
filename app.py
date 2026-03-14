@@ -33,7 +33,11 @@ if IS_VERCEL:
     DATA_DIR = "/tmp/data"
 else:
     DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
-os.makedirs(DATA_DIR, exist_ok=True)
+
+try:
+    os.makedirs(DATA_DIR, exist_ok=True)
+except Exception as e:
+    logger.warning(f"Failed to create DATA_DIR {DATA_DIR}: {e}")
 
 JOBS_FILE = os.path.join(DATA_DIR, "jobs.json")
 TN_JOBS_FILE = os.path.join(DATA_DIR, "tn_jobs.json")
