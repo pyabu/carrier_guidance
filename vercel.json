@@ -8,10 +8,6 @@
         "maxLambdaSize": "50mb",
         "maxDuration": 60
       }
-    },
-    {
-      "src": "(robots.txt|sitemap.xml|google*.html)",
-      "use": "@vercel/static"
     }
   ],
   "routes": [
