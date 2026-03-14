@@ -576,7 +576,7 @@ def robots():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_from_directory(app.static_folder, 'sitemap.xml', mimetype='application/xml')
+    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
 
 @app.route("/")
 def home():
