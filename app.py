@@ -17,8 +17,8 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory
 from flask_cors import CORS
-from apscheduler.schedulers.background import BackgroundJobScheduler
-from scraper.job_scraper import JobScraper
+# from apscheduler.schedulers.background import BackgroundJobScheduler # Moved to lazy load
+# from scraper.job_scraper import JobScraper # Moved to lazy load
 
 # ── Vercel detection ───────────────────────────────────────────────────
 IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
@@ -3088,6 +3088,7 @@ def run_daily_scrape():
     """Run all scrapers and update both local files and Supabase."""
     logger.info("⏰ Starting daily job scrape...")
     try:
+        from scraper.job_scraper import JobScraper
         scraper = JobScraper()
         jobs = scraper.scrape_all()
         # The scrape_all() in JobScraper already saves to JOBS_FILE and handles Indian jobs if implemented.
@@ -3109,21 +3110,31 @@ def run_daily_scrape():
     except Exception as e:
         logger.error(f"❌ Daily scrape failed: {e}")
 
-# Initialize and start the scheduler (only if not on Vercel, as Vercel kills background threads)
+# Initialize and start the scheduler (only if not on Vercel)
 if not IS_VERCEL:
-    scheduler = BackgroundJobScheduler()
-    # Schedule daily at 2:00 AM
-    scheduler.add_job(func=run_daily_scrape, trigger="cron", hour=2, minute=0)
-    # Also run once on startup in a separate thread if local cache is empty or very old
-    def run_initial_scrape_if_needed():
-        if not os.path.exists(JOBS_FILE) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(JOBS_FILE))).days >= 1:
-             run_daily_scrape()
+    try:
+        from apscheduler.schedulers.background import BackgroundJobScheduler
+        scheduler = BackgroundJobScheduler()
+        # Schedule daily at 2:00 AM
+        scheduler.add_job(func=run_daily_scrape, trigger="cron", hour=2, minute=0)
+        
+        # Only start if it's the main entry point to avoid double initialization in some environments
+        if __name__ == "__main__":
+            # Also run once on startup in a separate thread if local cache is empty or very old
+            def run_initial_scrape_if_needed():
+                try:
+                    if not os.path.exists(JOBS_FILE) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(JOBS_FILE))).days >= 1:
+                        run_daily_scrape()
+                except Exception as e:
+                    logger.warning(f"Startup scrape check failed: {e}")
 
-    startup_thread = threading.Thread(target=run_initial_scrape_if_needed, daemon=True)
-    startup_thread.start()
-    
-    scheduler.start()
-    logger.info("📅 Job Scraper Scheduler started (2:00 AM daily).")
+            startup_thread = threading.Thread(target=run_initial_scrape_if_needed, daemon=True)
+            startup_thread.start()
+            
+            scheduler.start()
+            logger.info("📅 Background Scheduler started (2:00 AM daily).")
+    except Exception as e:
+        logger.error(f"Failed to start scheduler: {e}")
 
 if __name__ == "__main__":
     app.run()
