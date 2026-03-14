@@ -1,8 +1,37 @@
 {% extends "base.html" %}
 
-{% block title %}Developer Team | CareerGuidance{% endblock %}
+{% block title %}Abu Saleem | Lead Developer | CareerGuidance{% endblock %}
+
+{% block meta_desc %}View the portfolio and projects of Abu Saleem, Lead Developer of CareerGuidance. Specializing in Python, Flask, Machine Learning, and Android development.{% endblock %}
 
 {% block extra_head %}
+<!-- SEO Metadata for Abu Saleem -->
+<meta property="og:title" content="Abu Saleem - Lead Developer">
+<meta property="og:description" content="View the portfolio and projects of Abu Saleem, Lead Developer of CareerGuidance.">
+<meta property="og:type" content="profile">
+<meta property="profile:first_name" content="Abu">
+<meta property="profile:last_name" content="Saleem">
+
+<!-- JSON-LD Structured Data for Person -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Person",
+  "name": "Abu Saleem",
+  "jobTitle": "Lead Developer",
+  "url": "https://careerguidance.me/developer",
+  "sameAs": [
+    "https://github.com/pyabu",
+    "https://www.linkedin.com/in/abu-py/"
+  ],
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Pondicherry University"
+  },
+  "knowsAbout": ["Python", "Flask", "Machine Learning", "Android Development", "Web Development"]
+}
+</script>
+
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>

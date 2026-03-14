@@ -574,6 +574,10 @@ def google_verification_new():
 def robots():
     return send_from_directory(app.root_path, 'robots.txt')
 
+@app.route("/sitemap.xml")
+def sitemap():
+    return send_from_directory(app.static_folder, 'sitemap.xml', mimetype='application/xml')
+
 @app.route("/")
 def home():
     data = load_jobs()
