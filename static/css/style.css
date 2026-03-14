@@ -106,8 +106,7 @@ img {
     display: block;
 }
 
-ul,
-ol {
+ul {
     list-style: none;
 }
 
@@ -122,8 +121,7 @@ h1,
 h2,
 h3,
 h4,
-h5,
-h6 {
+h5 {
     font-family: var(--font-heading);
     font-weight: 700;
     line-height: 1.2;
@@ -218,22 +216,6 @@ h4 {
     color: var(--accent-hover);
     transform: translateY(-2px);
     box-shadow: 0 8px 25px rgba(255, 255, 255, 0.2);
-}
-
-.btn-success {
-    background: var(--success);
-    color: white;
-}
-
-.btn-success:hover {
-    background: #2db84e;
-    transform: translateY(-2px);
-    color: white;
-}
-
-.btn-danger {
-    background: var(--danger);
-    color: white;
 }
 
 .btn-ghost {
@@ -533,50 +515,6 @@ select.form-control {
 }
 
 /* ── User Dropdown Menu ──────────────────────────────────────────────── */
-.user-dropdown {
-    display: none;
-    position: absolute;
-    top: calc(100% + 10px);
-    right: 0;
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    box-shadow: var(--shadow-lg);
-    min-width: 200px;
-    z-index: 1000;
-    padding: 8px 0;
-    opacity: 0;
-    transform: translateY(-8px);
-    transition: opacity .2s, transform .2s;
-}
-
-.user-dropdown.show {
-    display: block;
-    opacity: 1;
-    transform: translateY(0);
-}
-
-.user-dropdown a {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 16px;
-    font-size: .85rem;
-    font-weight: 500;
-    color: var(--text-primary);
-    text-decoration: none;
-    transition: background .15s;
-}
-
-.user-dropdown a:hover {
-    background: var(--bg-tertiary);
-}
-
-.user-dropdown a i {
-    width: 16px;
-    text-align: center;
-    color: var(--text-tertiary);
-}
 
 /* ═══════════════════════════════════════════════════════════════════════
    HERO SECTION
@@ -695,9 +633,6 @@ select.form-control {
 }
 
 /* Remove typed cursor flash */
-.typed-cursor {
-    display: none;
-}
 
 .hero p {
     color: rgba(255, 255, 255, 0.95);
@@ -956,11 +891,6 @@ section {
     font-weight: 700;
     color: var(--success);
     font-size: 0.95rem;
-}
-
-.job-posted {
-    color: var(--text-tertiary);
-    font-size: 0.8rem;
 }
 
 .job-card-actions {
@@ -1498,19 +1428,6 @@ section {
 /* ── Dashboard ───────────────────────────────────────────────────────── */
 .dashboard {
     padding: 100px 0 60px;
-}
-
-.dashboard-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 32px;
-    flex-wrap: wrap;
-    gap: 16px;
-}
-
-.dashboard-header .btn {
-    flex-shrink: 0;
 }
 
 .dashboard-grid {
@@ -2250,16 +2167,8 @@ section {
     color: var(--accent);
 }
 
-.text-success {
-    color: var(--success);
-}
-
 .text-muted {
     color: var(--text-secondary);
-}
-
-.mt-1 {
-    margin-top: 8px;
 }
 
 .mt-2 {
@@ -2272,14 +2181,6 @@ section {
 
 .mt-4 {
     margin-top: 32px;
-}
-
-.mb-1 {
-    margin-bottom: 8px;
-}
-
-.mb-2 {
-    margin-bottom: 16px;
 }
 
 .mb-3 {
@@ -2308,10 +2209,6 @@ section {
 
 .justify-between {
     justify-content: space-between;
-}
-
-.justify-center {
-    justify-content: center;
 }
 
 /* ═══════════════════════════════════════════════════════════════════════
@@ -2783,13 +2680,6 @@ section {
 }
 
 /* ── Typed Cursor ────────────────────────────────────────────────────── */
-.typed-cursor {
-    display: inline-block;
-    color: #5eead4;
-    animation: blink 0.8s step-end infinite;
-    font-weight: 300;
-    margin-left: 2px;
-}
 
 @keyframes blink {
 
@@ -2948,43 +2838,10 @@ section {
 }
 
 /* ── Glassmorphism Cards (for special sections) ──────────────────────── */
-.glass-card {
-    background: rgba(255, 255, 255, 0.06);
-    backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: var(--radius-md);
-}
 
 /* ── Gradient Text Utility ───────────────────────────────────────────── */
-.gradient-text {
-    background: var(--bg-accent);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-}
 
 /* ── Filter Tag Styling ──────────────────────────────────────────────── */
-.filter-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: var(--bg-accent);
-    color: #fff;
-    padding: 4px 12px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 500;
-}
-
-.filter-tag i {
-    cursor: pointer;
-    opacity: 0.8;
-    transition: opacity 0.15s;
-}
-
-.filter-tag i:hover {
-    opacity: 1;
-}
 
 /* ── Pulse Animation on Section Badges ───────────────────────────────── */
 .section-badge {
@@ -3262,16 +3119,11 @@ section {
     }
 
     .job-card,
-    .portal-card,
     .category-card,
     .ai-feature-card,
     .roadmap-card,
     .guidance-card {
         padding: 16px;
-    }
-
-    .job-tags {
-        gap: 6px;
     }
 
     .hero-search {
@@ -3280,10 +3132,6 @@ section {
     }
 
     .hero-stats {
-        grid-template-columns: 1fr;
-    }
-
-    .portal-stats {
         grid-template-columns: 1fr;
     }
 
@@ -3302,14 +3150,6 @@ section {
    ═══════════════════════════════════════════════════════════════════════ */
 
 /* ── Hero Quick Tags ─────────────────────────────────────────────────── */
-.hero-quick-tags {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-top: 14px;
-    justify-content: center;
-    align-items: center;
-}
 
 .hero-tags-label {
     font-size: 0.78rem;
@@ -3340,157 +3180,8 @@ section {
 }
 
 /* ── Portal Cards Section ────────────────────────────────────────────── */
-.portals-section {
-    background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-    padding: 80px 0;
-}
-
-.portals-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
-    gap: 28px;
-}
-
-.portal-card {
-    background: var(--bg-card);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-lg);
-    padding: 32px;
-    transition: var(--transition);
-    position: relative;
-    overflow: hidden;
-}
-
-.portal-card::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 4px;
-}
-
-.portal-india::before {
-    background: linear-gradient(90deg, #ff9933, #fff, #138808);
-}
-
-.portal-tn::before {
-    background: linear-gradient(90deg, #0f4c75, #3282b8, #5eead4);
-}
-
-.portal-card:hover {
-    transform: translateY(-6px);
-    box-shadow: var(--shadow-lg), var(--glow);
-    border-color: var(--accent);
-}
-
-.portal-card-header {
-    margin-bottom: 24px;
-}
-
-.portal-icon {
-    font-size: 2rem;
-    margin-bottom: 8px;
-}
-
-.portal-card-header h3 {
-    font-size: 1.3rem;
-    margin-bottom: 8px;
-}
-
-.portal-card-header p {
-    color: var(--text-secondary);
-    font-size: 0.88rem;
-    line-height: 1.5;
-}
-
-.portal-stats {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    margin-bottom: 20px;
-}
-
-.portal-stat {
-    text-align: center;
-    padding: 12px 8px;
-    background: var(--bg-secondary);
-    border-radius: var(--radius-sm);
-}
-
-.portal-stat-num {
-    display: block;
-    font-size: 1.4rem;
-    font-weight: 800;
-    color: var(--accent);
-    font-family: var(--font-heading);
-}
-
-.portal-stat-label {
-    display: block;
-    font-size: 0.68rem;
-    color: var(--text-tertiary);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-top: 2px;
-}
-
-.portal-cities {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    margin-bottom: 20px;
-}
-
-.portal-cities a {
-    padding: 5px 14px;
-    border-radius: 20px;
-    font-size: 0.78rem;
-    font-weight: 500;
-    background: var(--bg-tertiary);
-    color: var(--text-secondary);
-    text-decoration: none;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}
-
-.portal-cities a:hover {
-    background: var(--accent);
-    color: #fff;
-    border-color: var(--accent);
-}
-
-.portal-btn {
-    width: 100%;
-    justify-content: center;
-}
 
 /* ── Search Results Section ──────────────────────────────────────────── */
-.search-results-section {
-    background: var(--bg-secondary);
-    padding: 40px 0;
-}
-
-.search-results-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-    flex-wrap: wrap;
-    gap: 10px;
-}
-
-.search-results-header h2 {
-    font-size: 1.3rem;
-    margin: 0;
-}
-
-.search-source-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    flex-wrap: wrap;
-}
 
 .search-tab {
     padding: 6px 16px;
@@ -3502,30 +3193,10 @@ section {
     transition: all 0.2s;
 }
 
-.tab-global {
-    background: #0f4c75;
-}
-
-.tab-india {
-    background: #ff9933;
-}
-
-.tab-tn {
-    background: #3282b8;
-}
-
 .search-tab:hover {
     opacity: 0.85;
     transform: translateY(-1px);
     color: #fff;
-}
-
-.search-more-links {
-    display: flex;
-    gap: 12px;
-    justify-content: center;
-    margin-top: 24px;
-    flex-wrap: wrap;
 }
 
 /* ── Mobile overrides for portals ────────────────────────────────────── */
@@ -3535,8 +3206,6 @@ section {
    GLOBAL RESPONSIVE PATCH FOR ALL PAGES
    ═══════════════════════════════════════════════════════════════════════ */
 img,
-video,
-iframe,
 canvas {
     max-width: 100%;
     height: auto;
@@ -3550,7 +3219,7 @@ body {
 @media (max-width: 768px) {
 
     /* Ensure tables can scroll horizontally instead of breaking layout */
-    .table-responsive,
+    
     table {
         display: block;
         max-width: 100%;
@@ -3560,9 +3229,6 @@ body {
     }
 
     /* Make embedded iframes responsive */
-    iframe {
-        width: 100% !important;
-    }
 
     /* Ensure text sequences break properly */
     p,
@@ -3571,7 +3237,6 @@ body {
     h3,
     h4,
     h5,
-    h6,
     a,
     span {
         word-wrap: break-word;
