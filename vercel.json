@@ -6,14 +6,14 @@
       "use": "@vercel/python",
       "config": {
         "maxLambdaSize": "50mb",
-        "maxDuration": 60
+        "maxDuration": 60,
+        "includeFiles": ["templates/**", "static/**", "data/**"]
       }
     }
   ],
   "routes": [
     {
-      "src": "/static/(.*)",
-      "dest": "/static/$1"
+      "handle": "filesystem"
     },
     {
       "src": "/(.*)",
