@@ -67,10 +67,12 @@ function initMobileMenu() {
     const toggle = document.getElementById('navToggle');
     const menu = document.getElementById('navMenu');
     toggle?.addEventListener('click', () => {
-        menu?.classList.toggle('open');
+        const isOpen = menu?.classList.toggle('open');
         toggle.classList.toggle('active');
-        if (menu?.classList.contains('open')) {
+        
+        if (isOpen) {
             document.body.style.overflow = 'hidden';
+            // Add a slight delay for staggered entry if not already handled by CSS
         } else {
             document.body.style.overflow = '';
         }
