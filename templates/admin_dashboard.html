@@ -337,14 +337,164 @@
     }
 
     @keyframes fadeIn {
-        from {
-            opacity: 0;
-        }
-
-        to {
-            opacity: 1;
-        }
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(1.4); }
+    }
+
+    /* SEO / Scraper specific */
+    .seo-field {
+        margin-bottom: 20px;
+    }
+
+    .seo-field label {
+        display: block;
+        font-weight: 700;
+        color: var(--text-main);
+        margin-bottom: 6px;
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .seo-field input,
+    .seo-field textarea {
+        width: 100%;
+        padding: 10px 14px;
+        background: var(--sidebar-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        color: var(--text-main);
+        font-size: 13px;
+        resize: vertical;
+        box-sizing: border-box;
+        transition: border-color 0.2s;
+    }
+
+    .seo-field input:focus,
+    .seo-field textarea:focus {
+        outline: none;
+        border-color: var(--sidebar-accent);
+    }
+
+    .char-count {
+        font-size: 11px;
+        color: var(--text-dim);
+        text-align: right;
+        margin-top: 4px;
+    }
+
+    .char-count.warn { color: #f59e0b; }
+    .char-count.over  { color: #ef4444; }
+
+    .action-btn {
+        padding: 10px 20px;
+        border-radius: 8px;
+        border: none;
+        font-weight: 700;
+        cursor: pointer;
+        font-size: 12px;
+        transition: 0.2s;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .action-btn.primary {
+        background: var(--sidebar-accent);
+        color: white;
+    }
+
+    .action-btn.primary:hover { filter: brightness(1.15); }
+
+    .action-btn.success {
+        background: #059669;
+        color: white;
+    }
+
+    .action-btn.danger {
+        background: #dc2626;
+        color: white;
+    }
+
+    .action-btn.secondary {
+        background: rgba(255,255,255,0.08);
+        color: var(--text-main);
+        border: 1px solid var(--border-color);
+    }
+
+    .action-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    .scraper-status-indicator {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #6b7280;
+        display: inline-block;
+        margin-right: 6px;
+    }
+
+    .scraper-status-indicator.running {
+        background: #10b981;
+        animation: pulse-dot 1s ease-in-out infinite;
+    }
+
+    .source-checkbox {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 12px;
+        border: 1px solid var(--border-color);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: 0.2s;
+        margin-bottom: 8px;
+    }
+
+    .source-checkbox:hover { border-color: var(--sidebar-accent); background: rgba(139,92,246,0.05); }
+    .source-checkbox input { accent-color: var(--sidebar-accent); }
+
+    .keyword-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 3px 10px;
+        background: rgba(139,92,246,0.15);
+        border: 1px solid rgba(139,92,246,0.3);
+        border-radius: 100px;
+        font-size: 11px;
+        color: var(--text-main);
+        cursor: pointer;
+        transition: 0.2s;
+        margin: 3px;
+    }
+
+    .keyword-tag:hover { background: rgba(139,92,246,0.3); }
+
+    .notification-toast {
+        position: fixed;
+        bottom: 24px;
+        right: 24px;
+        padding: 12px 20px;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 13px;
+        z-index: 9999;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+        animation: fadeIn 0.3s;
+        display: none;
+    }
+
+    .notification-toast.success { background: #059669; color: white; }
+    .notification-toast.error   { background: #dc2626; color: white; }
+    .notification-toast.info    { background: var(--sidebar-accent); color: white; }
 
     /* Responsive */
     @media (max-width: 768px) {
@@ -352,14 +502,8 @@
             transform: translateX(-100%);
             width: var(--sidebar-width) !important;
         }
-
-        .admin-sidebar.open {
-            transform: translateX(0);
-        }
-
-        .admin-panel {
-            margin-left: 0 !important;
-        }
+        .admin-sidebar.open { transform: translateX(0); }
+        .admin-panel { margin-left: 0 !important; }
     }
 </style>
 {% endblock %}
@@ -374,16 +518,12 @@
         </div>
 
         <div class="nav-items">
-            <div class="nav-btn active" onclick="switchTab('dashboard', this)"><i class="fas fa-desktop"></i> <span
-                    class="brand-text">Overview</span></div>
-            <div class="nav-btn" onclick="switchTab('users', this)"><i class="fas fa-user-friends"></i> <span
-                    class="brand-text">Users List</span></div>
-            <div class="nav-btn" onclick="switchTab('jobs', this)"><i class="fas fa-briefcase"></i> <span
-                    class="brand-text">Jobs Bank</span></div>
-            <div class="nav-btn" onclick="switchTab('scraper', this)"><i class="fas fa-robot"></i> <span
-                    class="brand-text">Scraper Control</span></div>
-            <div class="nav-btn" onclick="switchTab('settings', this)"><i class="fas fa-sliders-h"></i> <span
-                    class="brand-text">System Settings</span></div>
+            <div class="nav-btn active" onclick="switchTab('dashboard', this)"><i class="fas fa-desktop"></i> <span class="brand-text">Overview</span></div>
+            <div class="nav-btn" onclick="switchTab('users', this)"><i class="fas fa-user-friends"></i> <span class="brand-text">Users List</span></div>
+            <div class="nav-btn" onclick="switchTab('jobs', this)"><i class="fas fa-briefcase"></i> <span class="brand-text">Jobs Bank</span></div>
+            <div class="nav-btn" onclick="switchTab('scraper', this)"><i class="fas fa-robot"></i> <span class="brand-text">Scraper Control</span></div>
+            <div class="nav-btn" onclick="switchTab('seo', this)"><i class="fas fa-search"></i> <span class="brand-text">SEO Manager</span></div>
+            <div class="nav-btn" onclick="switchTab('settings', this)"><i class="fas fa-sliders-h"></i> <span class="brand-text">System Settings</span></div>
         </div>
 
         <div class="sidebar-foot">
@@ -534,41 +674,148 @@
                 </div>
             </div>
 
-            <!-- ── View: Scraper Control ── -->
+            <!-- ── View: Scraper Control (Enhanced) ── -->
             <div id="view-scraper" class="view-view">
                 <div style="display: grid; grid-template-columns: 1fr 2fr; gap:24px;">
-                    <div class="table-card" style="padding: 24px;">
-                        <h4 style="margin:0 0 10px 0; color: var(--text-main);">Control Node</h4>
-                        <div style="margin-bottom: 15px; font-size: 11px; color: var(--text-dim);">
-                            <i class="fas fa-history"></i> LAST FETCHED: <span id="last-sync-time"
-                                style="font-weight:700; color: var(--text-main);">Never</span>
-                        </div>
-                        <button id="trigger-btn"
-                            style="width:100%; padding:12px; background:var(--sidebar-accent); color:white; border:none; border-radius:8px; font-weight:800; cursor:pointer;"
-                            onclick="runScraperManually()">
-                            <i class="fas fa-play"></i> INITIATE FULL SYNC
-                        </button>
-                        <hr style="margin:20px 0; border:none; border-top:1px solid var(--border-color);">
-                        <p style="color:var(--text-dim); line-height:1.5; font-size: 12px;">Manual synchronization
-                            triggers the AI
-                            parsing engine to discover and ingest new job postings from configured external gateways.
-                        </p>
-                    </div>
-                    <div class="table-card" style="padding: 24px; display: flex; flex-direction: column; gap: 20px;">
-                        <div>
-                            <h4 style="margin:0 0 15px 0; color: var(--text-main);">Real-time Stream Console</h4>
-                            <div class="console-box" id="scraper-console">
-                                <div class="console-line"><span class="timestamp">[12:44:02]</span> SYSTEM: Awaiting
-                                    command...</div>
+                    <!-- Left: Control Panel -->
+                    <div style="display: flex; flex-direction: column; gap: 16px;">
+                        <!-- Status Card -->
+                        <div class="table-card" style="padding: 20px;">
+                            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:16px;">
+                                <h4 style="margin:0; color:var(--text-main);">Scraper Status</h4>
+                                <span id="scraper-running-badge" style="display:flex; align-items:center; font-size:11px; font-weight:700; padding:4px 10px; border-radius:100px; background:rgba(107,114,128,0.15); color:#9ca3af;">
+                                    <span class="scraper-status-indicator" id="scraper-pulse"></span>
+                                    <span id="scraper-status-text">IDLE</span>
+                                </span>
                             </div>
+                            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-bottom:16px;">
+                                <div style="background:var(--sidebar-bg); border-radius:8px; padding:10px; text-align:center;">
+                                    <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">MAIN</div>
+                                    <div id="sc-count-main" style="font-weight:800; color:var(--sidebar-accent);">–</div>
+                                </div>
+                                <div style="background:var(--sidebar-bg); border-radius:8px; padding:10px; text-align:center;">
+                                    <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">INDIA</div>
+                                    <div id="sc-count-india" style="font-weight:800; color:#34d399;">–</div>
+                                </div>
+                                <div style="background:var(--sidebar-bg); border-radius:8px; padding:10px; text-align:center;">
+                                    <div style="font-size:10px; color:var(--text-dim); margin-bottom:4px;">TN</div>
+                                    <div id="sc-count-tn" style="font-weight:800; color:#f59e0b;">–</div>
+                                </div>
+                            </div>
+                            <div style="font-size:11px; color:var(--text-dim); margin-bottom:16px;">
+                                <i class="fas fa-clock"></i> LAST RUN: <span id="sc-last-run" style="color:var(--text-main); font-weight:700;">Never</span>
+                            </div>
+                            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                                <button class="action-btn primary" id="start-scraper-btn" onclick="startScraper()" style="flex:1;">
+                                    <i class="fas fa-play"></i> Start Scrape
+                                </button>
+                                <button class="action-btn danger" id="stop-scraper-btn" onclick="stopScraper()" disabled style="flex:1;">
+                                    <i class="fas fa-stop"></i> Stop
+                                </button>
+                            </div>
+                            <button class="action-btn secondary" onclick="removeDuplicates()" style="width:100%; margin-top:10px;">
+                                <i class="fas fa-broom"></i> Remove Duplicates
+                            </button>
+                        </div>
+                        <!-- Sources -->
+                        <div class="table-card" style="padding: 20px;">
+                            <h4 style="margin:0 0 14px 0; color:var(--text-main);">Source Selection</h4>
+                            <label class="source-checkbox">
+                                <input type="checkbox" id="src-main" checked> <span>🌐 Main Repository</span>
+                            </label>
+                            <label class="source-checkbox">
+                                <input type="checkbox" id="src-india" checked> <span>🇮🇳 India Jobs</span>
+                            </label>
+                            <label class="source-checkbox">
+                                <input type="checkbox" id="src-tn" checked> <span>🏛️ Tamil Nadu Jobs</span>
+                            </label>
+                        </div>
+                        <!-- Schedule -->
+                        <div class="table-card" style="padding: 20px;">
+                            <h4 style="margin:0 0 14px 0; color:var(--text-main);">Auto Schedule</h4>
+                            <div class="seo-field">
+                                <label>Run Every (hours)</label>
+                                <input type="number" id="sched-interval" min="1" max="72" value="12" style="height:36px;">
+                            </div>
+                            <div class="seo-field" style="margin-bottom:0;">
+                                <label>Preferred Hour (0-23 UTC)</label>
+                                <input type="number" id="sched-hour" min="0" max="23" value="3" style="height:36px;">
+                            </div>
+                            <button class="action-btn primary" onclick="saveSchedule()" style="width:100%; margin-top:14px;">
+                                <i class="fas fa-save"></i> Save Schedule
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Right: Console -->
+                    <div class="table-card" style="padding: 24px;">
+                        <h4 style="margin:0 0 15px 0; color:var(--text-main);">Live Console</h4>
+                        <div class="console-box" id="scraper-console">
+                            <div class="console-line"><span class="timestamp">[--:--:--]</span> SYSTEM: Awaiting command...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ── View: SEO Manager ── -->
+            <div id="view-seo" class="view-view">
+                <div style="display:grid; grid-template-columns:1fr 1fr; gap:24px;">
+                    <!-- Left: Meta Editor + Actions -->
+                    <div style="display:flex; flex-direction:column; gap:20px;">
+                        <div class="table-card" style="padding:24px;">
+                            <h4 style="margin:0 0 20px 0; color:var(--text-main);"><i class="fas fa-edit" style="color:var(--sidebar-accent);"></i> Meta Tags Editor</h4>
+                            <div class="seo-field">
+                                <label>Meta Title <span style="color:var(--text-dim); font-weight:400;">(50-60 chars ideal)</span></label>
+                                <input type="text" id="seo-title" placeholder="Page title for Google..." oninput="updateCharCount('seo-title','seo-title-count',60)">
+                                <div class="char-count" id="seo-title-count">0 / 60</div>
+                            </div>
+                            <div class="seo-field">
+                                <label>Meta Description <span style="color:var(--text-dim); font-weight:400;">(150-160 chars ideal)</span></label>
+                                <textarea id="seo-desc" rows="3" placeholder="Compelling page description for Google..." oninput="updateCharCount('seo-desc','seo-desc-count',160)"></textarea>
+                                <div class="char-count" id="seo-desc-count">0 / 160</div>
+                            </div>
+                            <button class="action-btn primary" onclick="saveSeoSettings()" style="width:100%;">
+                                <i class="fas fa-save"></i> Save Meta Settings
+                            </button>
                         </div>
 
-                        <div id="new-jobs-container" style="display:none;">
-                            <h4 style="margin:0 0 10px 0; color: #10b981;"><i class="fas fa-sparkles"></i> NEW JOBS
-                                DISCOVERED</h4>
-                            <div id="new-jobs-list" style="display: flex; flex-direction: column; gap: 8px;">
-                                <!-- Dynamic results -->
+                        <div class="table-card" style="padding:24px;">
+                            <h4 style="margin:0 0 16px 0; color:var(--text-main);"><i class="fas fa-sitemap" style="color:#34d399;"></i> Sitemap Manager</h4>
+                            <div style="display:grid; gap:10px;">
+                                <button class="action-btn success" onclick="generateSitemap()" style="width:100%;">
+                                    <i class="fas fa-sync-alt"></i> Regenerate sitemap.xml
+                                </button>
+                                <button class="action-btn primary" onclick="submitSitemap()" style="width:100%;">
+                                    <i class="fab fa-google"></i> Submit to Google
+                                </button>
                             </div>
+                            <div id="sitemap-status" style="margin-top:14px; padding:12px; background:var(--sidebar-bg); border-radius:8px; font-size:12px; color:var(--text-dim); display:none;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Right: Keyword Tracker -->
+                    <div class="table-card" style="padding:24px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                            <h4 style="margin:0; color:var(--text-main);"><i class="fas fa-tags" style="color:#f59e0b;"></i> Keyword Tracker</h4>
+                            <button class="action-btn secondary" onclick="loadKeywords()" style="padding:6px 12px; font-size:11px;">
+                                <i class="fas fa-redo"></i> Refresh
+                            </button>
+                        </div>
+                        <div id="keyword-tags-area" style="margin-bottom:16px; min-height:40px;"></div>
+                        <hr style="border:none; border-top:1px solid var(--border-color); margin:16px 0;">
+                        <h5 style="margin:0 0 12px 0; color:var(--text-dim); font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">Top 20 Keywords from Jobs</h5>
+                        <div style="overflow-y:auto; max-height:380px;">
+                            <table class="admin-data-table" id="keyword-table">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Keyword</th>
+                                        <th>Frequency</th>
+                                        <th>Track</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="keyword-rows"><tr><td colspan="4" style="text-align:center; color:var(--text-dim);">Loading...</td></tr></tbody>
+                            </table>
                         </div>
                     </div>
                 </div>
@@ -604,18 +851,9 @@
     </main>
 </div>
 
-<!-- Bulk Actions Toast -->
-<div id="bulk-bar"
-    style="display:none; position:fixed; bottom:30px; left:50%; transform:translateX(-50%); background:#111827; color:white; padding:12px 24px; border-radius:100px; box-shadow:0 10px 30px rgba(0,0,0,0.3); align-items:center; gap:20px; z-index:2000;">
-    <span id="bulk-count">0 items selected</span>
-    <div style="display:flex; gap:10px;">
-        <button onclick="bulkDeleteUsers()"
-            style="background:#ef4444; color:white; border:none; padding:6px 15px; border-radius:20px; cursor:pointer; font-weight:700;">Delete
-            All</button>
-        <button onclick="unselectAll()"
-            style="background:#374151; color:white; border:none; padding:6px 15px; border-radius:20px; cursor:pointer;">Cancel</button>
-    </div>
-</div>
+<!-- Notification Toast -->
+<div class="notification-toast" id="notif-toast"></div>
+
 
 <script>
     // --- Global State ---
@@ -640,6 +878,9 @@
         document.querySelectorAll('.view-view').forEach(v => v.classList.remove('active'));
         document.getElementById('view-' + viewId).classList.add('active');
         document.getElementById('view-title').innerText = el.innerText.trim();
+        // Auto-load data for specific tabs
+        if (viewId === 'scraper') loadScraperStatus();
+        if (viewId === 'seo')     { loadSeoSettings(); loadKeywords(); }
     }
 
     // --- Backend Sync ---
@@ -846,6 +1087,260 @@
             },
             options: { plugins: { legend: { display: false } }, scales: { y: { display: false } } }
         });
+    }
+
+    // ═══════════════════════════
+    // NOTIFICATION TOAST
+    // ═══════════════════════════
+    let _toastTimeout = null;
+    function showToast(msg, type = 'info') {
+        const t = document.getElementById('notif-toast');
+        t.className = `notification-toast ${type}`;
+        t.innerHTML = msg;
+        t.style.display = 'block';
+        clearTimeout(_toastTimeout);
+        _toastTimeout = setTimeout(() => t.style.display = 'none', 3500);
+    }
+
+    // ═══════════════════════════
+    // SEO MANAGER
+    // ═══════════════════════════
+    let _trackedKeywords = [];
+
+    function updateCharCount(inputId, countId, max) {
+        const el = document.getElementById(inputId);
+        const counter = document.getElementById(countId);
+        const len = el.value.length;
+        counter.textContent = `${len} / ${max}`;
+        counter.className = 'char-count' + (len > max ? ' over' : len > max * 0.85 ? ' warn' : '');
+    }
+
+    async function loadSeoSettings() {
+        try {
+            const res = await fetch('/api/admin/seo/settings');
+            const s = await res.json();
+            document.getElementById('seo-title').value = s.meta_title || '';
+            document.getElementById('seo-desc').value = s.meta_description || '';
+            _trackedKeywords = s.keywords || [];
+            updateCharCount('seo-title', 'seo-title-count', 60);
+            updateCharCount('seo-desc',  'seo-desc-count',  160);
+            renderTrackedKeywords();
+        } catch(e) { console.error('SEO load failed', e); }
+    }
+
+    async function saveSeoSettings() {
+        const title = document.getElementById('seo-title').value.trim();
+        const desc  = document.getElementById('seo-desc').value.trim();
+        const res = await fetch('/api/admin/seo/settings', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ meta_title: title, meta_description: desc, keywords: _trackedKeywords })
+        });
+        if (res.ok) showToast('<i class="fas fa-check-circle"></i> SEO settings saved!', 'success');
+        else        showToast('<i class="fas fa-times-circle"></i> Save failed', 'error');
+    }
+
+    async function generateSitemap() {
+        const btn = event.currentTarget;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating...';
+        const status = document.getElementById('sitemap-status');
+        try {
+            const res = await fetch('/api/admin/seo/generate-sitemap', { method: 'POST' });
+            const d = await res.json();
+            status.style.display = 'block';
+            if (d.success) {
+                status.style.color = '#34d399';
+                status.innerHTML = `✅ Sitemap regenerated with <strong>${d.url_count}</strong> URLs.`;
+                showToast('<i class="fas fa-sitemap"></i> Sitemap regenerated!', 'success');
+            } else {
+                status.style.color = '#f87171';
+                status.textContent = '❌ Error: ' + (d.error || 'Unknown error');
+            }
+        } catch(e) {
+            status.style.display = 'block';
+            status.style.color = '#f87171';
+            status.textContent = '❌ Network error: ' + e.message;
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fas fa-sync-alt"></i> Regenerate sitemap.xml';
+        }
+    }
+
+    async function submitSitemap() {
+        const btn = event.currentTarget;
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+        const status = document.getElementById('sitemap-status');
+        try {
+            const res = await fetch('/api/admin/seo/submit-sitemap', { method: 'POST' });
+            const d = await res.json();
+            status.style.display = 'block';
+            status.style.color = '#34d399';
+            status.innerHTML = `✅ Submitted to Google! Status: <strong>${d.ping_status}</strong>.<br><small>URL: ${d.sitemap_url}</small>`;
+            showToast('<i class="fab fa-google"></i> Sitemap submitted to Google!', 'success');
+        } catch(e) {
+            showToast('Submission failed: ' + e.message, 'error');
+        } finally {
+            btn.disabled = false;
+            btn.innerHTML = '<i class="fab fa-google"></i> Submit to Google';
+        }
+    }
+
+    async function loadKeywords() {
+        document.getElementById('keyword-rows').innerHTML = '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);"><i class="fas fa-spinner fa-spin"></i> Loading...</td></tr>';
+        try {
+            const res = await fetch('/api/admin/seo/keywords');
+            const d = await res.json();
+            _trackedKeywords = d.tracked_keywords || [];
+            renderTrackedKeywords();
+            const top = d.top_keywords || [];
+            document.getElementById('keyword-rows').innerHTML = top.slice(0, 20).map((k, i) => `
+                <tr>
+                    <td style="color:var(--text-dim);">${i+1}</td>
+                    <td><strong>${k.keyword}</strong></td>
+                    <td><span style="color:var(--sidebar-accent); font-weight:700;">${k.count}</span></td>
+                    <td><button class="mini-btn" onclick="trackKeyword('${k.keyword}')" title="Track"><i class="fas fa-plus"></i></button></td>
+                </tr>
+            `).join('') || '<tr><td colspan="4" style="text-align:center; color:var(--text-dim);">No keywords found</td></tr>';
+        } catch(e) { console.error('Keyword load failed', e); }
+    }
+
+    function trackKeyword(kw) {
+        if (!_trackedKeywords.includes(kw)) {
+            _trackedKeywords.push(kw);
+            renderTrackedKeywords();
+            showToast(`<i class="fas fa-tag"></i> Tracking: ${kw}`, 'info');
+        }
+    }
+
+    function untrackKeyword(kw) {
+        _trackedKeywords = _trackedKeywords.filter(k => k !== kw);
+        renderTrackedKeywords();
+    }
+
+    function renderTrackedKeywords() {
+        const area = document.getElementById('keyword-tags-area');
+        if (_trackedKeywords.length === 0) {
+            area.innerHTML = '<span style="color:var(--text-dim); font-size:12px;">No tracked keywords yet. Click + in the table to track them.</span>';
+            return;
+        }
+        area.innerHTML = _trackedKeywords.map(kw =>
+            `<span class="keyword-tag" onclick="untrackKeyword('${kw}')">${kw} <i class="fas fa-times" style="font-size:9px;"></i></span>`
+        ).join('');
+    }
+
+    // ═══════════════════════════
+    // ENHANCED SCRAPER CONTROL
+    // ═══════════════════════════
+    let _scraperPolling = null;
+
+    async function loadScraperStatus() {
+        try {
+            const res = await fetch('/api/admin/scraper/status');
+            const d = await res.json();
+            // Running badge
+            const pulse = document.getElementById('scraper-pulse');
+            const statusText = document.getElementById('scraper-status-text');
+            if (d.running) {
+                pulse.classList.add('running');
+                statusText.textContent = 'RUNNING';
+                document.getElementById('scraper-running-badge').style.background = 'rgba(16,185,129,0.15)';
+                document.getElementById('scraper-running-badge').style.color = '#34d399';
+                document.getElementById('start-scraper-btn').disabled = true;
+                document.getElementById('stop-scraper-btn').disabled = false;
+            } else {
+                pulse.classList.remove('running');
+                statusText.textContent = 'IDLE';
+                document.getElementById('scraper-running-badge').style.background = 'rgba(107,114,128,0.15)';
+                document.getElementById('scraper-running-badge').style.color = '#9ca3af';
+                document.getElementById('start-scraper-btn').disabled = false;
+                document.getElementById('stop-scraper-btn').disabled = true;
+            }
+            // Counts
+            document.getElementById('sc-count-main').textContent  = d.job_counts?.main       ?? '–';
+            document.getElementById('sc-count-india').textContent = d.job_counts?.india      ?? '–';
+            document.getElementById('sc-count-tn').textContent    = d.job_counts?.tamilnadu  ?? '–';
+            document.getElementById('sc-last-run').textContent    = d.last_run || 'Never';
+            // Schedule
+            if (d.config) {
+                document.getElementById('sched-interval').value = d.config.schedule_interval_hours || 12;
+                document.getElementById('sched-hour').value     = d.config.schedule_hour || 3;
+                const sources = d.config.sources || [];
+                document.getElementById('src-main').checked  = sources.includes('main');
+                document.getElementById('src-india').checked = sources.includes('india');
+                document.getElementById('src-tn').checked    = sources.includes('tamilnadu');
+            }
+        } catch(e) { console.error('Scraper status load failed', e); }
+    }
+
+    async function startScraper() {
+        const sources = [];
+        if (document.getElementById('src-main').checked)  sources.push('main');
+        if (document.getElementById('src-india').checked) sources.push('india');
+        if (document.getElementById('src-tn').checked)    sources.push('tamilnadu');
+        if (sources.length === 0) { showToast('Select at least one source', 'error'); return; }
+        logToConsole(`Initiating scrape for: ${sources.join(', ')}...`);
+        const res = await fetch('/api/admin/scraper/start', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sources })
+        });
+        const d = await res.json();
+        if (d.success) {
+            showToast('<i class="fas fa-robot"></i> Scraper started!', 'success');
+            logToConsole(`✓ ${d.message}`);
+            loadScraperStatus();
+            // Poll status every 5s while running
+            clearInterval(_scraperPolling);
+            _scraperPolling = setInterval(async () => {
+                await loadScraperStatus();
+                const statusText = document.getElementById('scraper-status-text').textContent;
+                if (statusText === 'IDLE') {
+                    clearInterval(_scraperPolling);
+                    logToConsole('✓ Scraper finished. Job counts updated.');
+                    showToast('<i class="fas fa-check"></i> Scrape complete!', 'success');
+                }
+            }, 5000);
+        } else {
+            showToast(d.message || 'Start failed', 'error');
+            logToConsole('✗ ' + (d.message || 'Start failed'));
+        }
+    }
+
+    async function stopScraper() {
+        const res = await fetch('/api/admin/scraper/stop', { method: 'POST' });
+        const d = await res.json();
+        clearInterval(_scraperPolling);
+        logToConsole('⏹ Stop signal sent.');
+        showToast('<i class="fas fa-stop"></i> Stop signal sent', 'info');
+        setTimeout(loadScraperStatus, 1000);
+    }
+
+    async function removeDuplicates() {
+        logToConsole('🧹 Scanning for duplicate jobs...');
+        const res = await fetch('/api/admin/scraper/remove-duplicates', { method: 'POST' });
+        const d = await res.json();
+        if (d.success) {
+            logToConsole(`✓ ${d.message} (datasets updated: ${d.files_updated.join(', ') || 'none'})`);
+            showToast(`<i class="fas fa-broom"></i> ${d.message}`, 'success');
+            loadScraperStatus();
+        } else {
+            logToConsole('✗ Error: ' + (d.error || 'Unknown'));
+            showToast('Remove duplicates failed', 'error');
+        }
+    }
+
+    async function saveSchedule() {
+        const interval = parseInt(document.getElementById('sched-interval').value);
+        const hour     = parseInt(document.getElementById('sched-hour').value);
+        const res = await fetch('/api/admin/scraper/schedule', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ schedule_interval_hours: interval, schedule_hour: hour })
+        });
+        if (res.ok) showToast('<i class="fas fa-check"></i> Schedule saved!', 'success');
+        else        showToast('Failed to save schedule', 'error');
     }
 
     // Initial Load

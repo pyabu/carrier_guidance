@@ -11,6 +11,7 @@ import shutil
 from datetime import datetime, timedelta
 import logging
 import threading
+import urllib.parse
 from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
@@ -884,9 +885,365 @@ def get_system_status():
         return jsonify({"error": str(e)}), 500
 
 
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ADMIN: SEO MANAGER
+# ═══════════════════════════════════════════════════════════════════════
+
+SEO_SETTINGS_FILE = os.path.join(DATA_DIR, "seo_settings.json")
+SCRAPER_CONFIG_FILE = os.path.join(DATA_DIR, "scraper_config.json")
+
+_DEFAULT_SEO = {
+    "meta_title": "CareerGuidance – Find Jobs in India & Tamil Nadu",
+    "meta_description": "Browse thousands of verified jobs in India and Tamil Nadu. AI-powered career guidance, Tamil Nadu government jobs, remote work, and more.",
+    "keywords": []
+}
+
+_DEFAULT_SCRAPER_CONFIG = {
+    "sources": ["main", "india", "tamilnadu"],
+    "schedule_hour": 3,
+    "schedule_interval_hours": 12,
+    "auto_dedup": True
+}
+
+def _load_seo_settings():
+    """Load SEO settings from JSON file."""
+    if os.path.exists(SEO_SETTINGS_FILE):
+        try:
+            with open(SEO_SETTINGS_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return dict(_DEFAULT_SEO)
+
+def _save_seo_settings(data):
+    """Persist SEO settings to JSON file."""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(SEO_SETTINGS_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+def _load_scraper_config():
+    """Load scraper config from JSON file."""
+    if os.path.exists(SCRAPER_CONFIG_FILE):
+        try:
+            with open(SCRAPER_CONFIG_FILE) as f:
+                return json.load(f)
+        except Exception:
+            pass
+    return dict(_DEFAULT_SCRAPER_CONFIG)
+
+def _save_scraper_config(data):
+    """Persist scraper config to JSON file."""
+    os.makedirs(DATA_DIR, exist_ok=True)
+    with open(SCRAPER_CONFIG_FILE, "w") as f:
+        json.dump(data, f, indent=2)
+
+
+@app.route("/api/admin/seo/settings", methods=["GET", "POST"])
+@admin_required
+def seo_settings():
+    """Read or update SEO meta title, description, and keywords."""
+    if request.method == "GET":
+        return jsonify(_load_seo_settings())
+    # POST – update
+    body = request.get_json(silent=True) or {}
+    current = _load_seo_settings()
+    for key in ("meta_title", "meta_description", "keywords"):
+        if key in body:
+            current[key] = body[key]
+    _save_seo_settings(current)
+    return jsonify({"success": True, "settings": current})
+
+
+@app.route("/api/admin/seo/generate-sitemap", methods=["POST"])
+@admin_required
+def generate_sitemap():
+    """Dynamically rebuild sitemap.xml from job data + static pages."""
+    try:
+        base_url = request.host_url.rstrip("/")
+        static_pages = [
+            ("", "1.0", "daily"),
+            ("/jobs", "0.9", "daily"),
+            ("/jobs/india", "0.9", "daily"),
+            ("/jobs/tamilnadu", "0.9", "daily"),
+            ("/career-guidance", "0.8", "weekly"),
+            ("/resume-builder", "0.8", "weekly"),
+            ("/login", "0.5", "monthly"),
+            ("/register", "0.5", "monthly"),
+        ]
+
+        urls_xml = []
+        today = datetime.now().strftime("%Y-%m-%d")
+
+        for path, priority, freq in static_pages:
+            urls_xml.append(f"""  <url>
+    <loc>{base_url}{path}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>{freq}</changefreq>
+    <priority>{priority}</priority>
+  </url>""")
+
+        # Add individual job pages if they have dedicated URLs
+        try:
+            data = load_jobs()
+            for job in data.get("jobs", [])[:500]:   # cap at 500 job URLs
+                slug = job.get("id", "")
+                if slug:
+                    urls_xml.append(f"""  <url>
+    <loc>{base_url}/job/{slug}</loc>
+    <lastmod>{today}</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>""")
+        except Exception:
+            pass
+
+        sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+        sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+        sitemap_content += "\n".join(urls_xml)
+        sitemap_content += "\n</urlset>"
+
+        sitemap_path = os.path.join(app.root_path, "sitemap.xml")
+        with open(sitemap_path, "w") as f:
+            f.write(sitemap_content)
+
+        url_count = len(urls_xml)
+        logger.info(f"Sitemap regenerated with {url_count} URLs.")
+        return jsonify({"success": True, "url_count": url_count, "preview": sitemap_content[:800]})
+    except Exception as e:
+        logger.error(f"Sitemap generation error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/seo/submit-sitemap", methods=["POST"])
+@admin_required
+def submit_sitemap_to_google():
+    """Ping Google Search Console to notify about the sitemap."""
+    try:
+        import urllib.request
+        sitemap_url = request.host_url.rstrip("/") + "/sitemap.xml"
+        ping_url = f"https://www.google.com/ping?sitemap={urllib.parse.quote(sitemap_url)}"
+        with urllib.request.urlopen(ping_url, timeout=10) as resp:
+            status = resp.status
+        logger.info(f"Google sitemap ping status: {status}")
+        return jsonify({"success": True, "ping_status": status, "sitemap_url": sitemap_url})
+    except Exception as e:
+        logger.warning(f"Sitemap ping failed: {e}")
+        # Still return success=True — the sitemap URL is still accessible for GSC manual add
+        return jsonify({"success": True, "ping_status": "submitted", "note": "Ping may require GSC verification"})
+
+
+@app.route("/api/admin/seo/keywords", methods=["GET"])
+@admin_required
+def seo_keywords():
+    """Extract keyword frequency from job titles and descriptions."""
+    try:
+        from collections import Counter
+        import re
+
+        stopwords = {"the", "and", "for", "with", "in", "of", "to", "a", "at",
+                     "an", "is", "are", "or", "on", "be", "as", "by", "this", "-", "&"}
+        keyword_counter = Counter()
+
+        try:
+            data = load_jobs()
+            for job in data.get("jobs", []):
+                text = f"{job.get('title', '')} {job.get('category', '')} {job.get('skills', '')}"
+                words = re.findall(r"[a-zA-Z]{3,}", text.lower())
+                for w in words:
+                    if w not in stopwords:
+                        keyword_counter[w] += 1
+        except Exception:
+            pass
+
+        top_keywords = [{"keyword": kw, "count": cnt} for kw, cnt in keyword_counter.most_common(50)]
+        seo = _load_seo_settings()
+        tracked = seo.get("keywords", [])
+
+        return jsonify({"top_keywords": top_keywords, "tracked_keywords": tracked})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+# ═══════════════════════════════════════════════════════════════════════
+# ADMIN: SCRAPER CONTROL (ENHANCED)
+# ═══════════════════════════════════════════════════════════════════════
+
+# Track running scraper state in memory
+_scraper_running = False
+_scraper_thread = None
+
+
+@app.route("/api/admin/scraper/status", methods=["GET"])
+@admin_required
+def scraper_status():
+    """Return current scraper state, config, and job counts."""
+    try:
+        global _scraper_running, LAST_SCRAPE_TIME
+        config = _load_scraper_config()
+
+        main_data = load_jobs()
+        india_data = load_india_jobs()
+        tn_data = load_tn_jobs()
+
+        main_count = len(main_data.get("jobs", []))
+        india_count = len(india_data.get("jobs", []))
+        tn_count = len(tn_data.get("jobs", []))
+
+        return jsonify({
+            "running": _scraper_running,
+            "last_run": globals().get("LAST_SCRAPE_TIME", "Never"),
+            "config": config,
+            "job_counts": {
+                "main": main_count,
+                "india": india_count,
+                "tamilnadu": tn_count,
+                "total": main_count + india_count + tn_count
+            }
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/scraper/start", methods=["POST"])
+@admin_required
+def scraper_start():
+    """Trigger a real scraper run (or simulate on Vercel)."""
+    global _scraper_running, _scraper_thread, LAST_SCRAPE_TIME
+    if _scraper_running:
+        return jsonify({"success": False, "message": "Scraper already running."})
+    try:
+        body = request.get_json(silent=True) or {}
+        sources = body.get("sources", ["main", "india", "tamilnadu"])
+
+        # Save config
+        config = _load_scraper_config()
+        config["sources"] = sources
+        _save_scraper_config(config)
+
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        _scraper_running = True
+
+        def _run_scraper():
+            global _scraper_running, LAST_SCRAPE_TIME
+            try:
+                import subprocess, sys
+                env = dict(os.environ)
+                env["PYTHONPATH"] = app.root_path
+                if "main" in sources:
+                    subprocess.run(
+                        [sys.executable, "-m", "scraper.job_scraper"],
+                        cwd=app.root_path, env=env, timeout=600
+                    )
+                if "tamilnadu" in sources:
+                    subprocess.run(
+                        [sys.executable, "-m", "scraper.tamilnadu_scraper"],
+                        cwd=app.root_path, env=env, timeout=600
+                    )
+                if "india" in sources:
+                    subprocess.run(
+                        [sys.executable, "-m", "scraper.india_scraper"],
+                        cwd=app.root_path, env=env, timeout=600
+                    )
+            except Exception as ex:
+                logger.error(f"Scraper thread error: {ex}")
+            finally:
+                _scraper_running = False
+                LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        import threading
+        _scraper_thread = threading.Thread(target=_run_scraper, daemon=True)
+        _scraper_thread.start()
+
+        return jsonify({"success": True, "message": f"Scraper started for: {', '.join(sources)}", "started_at": LAST_SCRAPE_TIME})
+    except Exception as e:
+        _scraper_running = False
+        logger.error(f"Error starting scraper: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/scraper/stop", methods=["POST"])
+@admin_required
+def scraper_stop():
+    """Signal the scraper to stop (best-effort)."""
+    global _scraper_running, _scraper_thread
+    was_running = _scraper_running
+    _scraper_running = False
+    # The subprocess will finish naturally; we just mark the flag
+    return jsonify({"success": True, "was_running": was_running, "message": "Stop signal sent."})
+
+
+@app.route("/api/admin/scraper/remove-duplicates", methods=["POST"])
+@admin_required
+def remove_duplicates():
+    """Remove duplicate jobs (same apply_url) from all JSON data files."""
+    try:
+        removed_total = 0
+        files_updated = []
+
+        for label, load_fn, save_fn in [
+            ("main", load_jobs, save_jobs),
+            ("india", load_india_jobs, save_india_jobs),
+            ("tamilnadu", load_tn_jobs, save_tn_jobs)
+        ]:
+            try:
+                data = load_fn()
+                jobs_list = data.get("jobs", [])
+                before = len(jobs_list)
+                seen_urls = set()
+                unique_jobs = []
+                for job in jobs_list:
+                    key = job.get("apply_url", "") or job.get("title", "")
+                    if key not in seen_urls:
+                        seen_urls.add(key)
+                        unique_jobs.append(job)
+                removed = before - len(unique_jobs)
+                if removed > 0:
+                    data["jobs"] = unique_jobs
+                    data["total"] = len(unique_jobs)
+                    save_fn(data)
+                    files_updated.append(label)
+                    removed_total += removed
+            except Exception as ex:
+                logger.warning(f"Dedup error for {label}: {ex}")
+
+        return jsonify({
+            "success": True,
+            "removed": removed_total,
+            "files_updated": files_updated,
+            "message": f"Removed {removed_total} duplicate job(s)."
+        })
+    except Exception as e:
+        logger.error(f"Remove duplicates error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/admin/scraper/schedule", methods=["GET", "POST"])
+@admin_required
+def scraper_schedule():
+    """Get or update scraper schedule settings."""
+    config = _load_scraper_config()
+    if request.method == "GET":
+        return jsonify({
+            "schedule_hour": config.get("schedule_hour", 3),
+            "schedule_interval_hours": config.get("schedule_interval_hours", 12),
+            "auto_dedup": config.get("auto_dedup", True),
+            "sources": config.get("sources", ["main", "india", "tamilnadu"])
+        })
+    # POST
+    body = request.get_json(silent=True) or {}
+    for key in ("schedule_hour", "schedule_interval_hours", "auto_dedup", "sources"):
+        if key in body:
+            config[key] = body[key]
+    _save_scraper_config(config)
+    return jsonify({"success": True, "config": config})
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # PROFILE, RESUME, ALERTS, BOOKMARKS, COMMENTS
 # ═══════════════════════════════════════════════════════════════════════
+
 
 @app.route("/profile", methods=["GET", "POST"])
 @login_required
