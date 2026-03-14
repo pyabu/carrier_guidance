@@ -4,12 +4,12 @@ import "./FAQ.css";
 
 const faqData = [
   {
-    question: "What is CareerPath Pro?",
+    question: "What is Careerguidance?",
     answer:
-      "CareerPath Pro is India's all-in-one career guidance and job portal that helps Indian students, freshers, and professionals. We provide job listings from top Indian & global companies (scraped daily), career roadmaps for B.Tech/MCA/BCA graduates, resume building tools tailored for the Indian market, campus placement preparation guides, and AI-powered career recommendations — all completely free.",
+      "Careerguidance is India's all-in-one career guidance and job portal that helps Indian students, freshers, and professionals. We provide job listings from top Indian & global companies (scraped daily), career roadmaps for B.Tech/MCA/BCA graduates, resume building tools tailored for the Indian market, campus placement preparation guides, and AI-powered career recommendations — all completely free.",
   },
   {
-    question: "Is CareerPath Pro free to use?",
+    question: "Is Careerguidance free to use?",
     answer:
       "Yes! All core features including job browsing, career guidance, resume builder, and career roadmaps are completely free for Indian students and professionals. We believe every Indian engineering student deserves quality career guidance regardless of their college tier. We plan to offer premium features like AI resume analysis and advanced analytics in the future.",
   },
@@ -42,7 +42,7 @@ const faqData = [
   {
     question: "How can I contact support?",
     answer:
-      "You can reach us through our Contact page, email us at support@careerpathpro.com, or call us at +91 98765 43210. We respond to all inquiries within 24 hours during business hours (Mon-Fri, 9AM-6PM IST).",
+      "You can reach us through our Contact page, email us at support@careerguidance.com, or call us at +91 98765 43210. We respond to all inquiries within 24 hours during business hours (Mon-Fri, 9AM-6PM IST).",
     hasContactLink: true,
   },
 ];
@@ -68,7 +68,7 @@ function FAQItem({ faq, index, activeIndex, onToggle }) {
             <>
               You can reach us through our{" "}
               <Link to="/contact">Contact page</Link>, email us at
-              support@careerpathpro.com, or call us at +91 98765 43210. We
+              support@careerguidance.com, or call us at +91 98765 43210. We
               respond to all inquiries within 24 hours during business hours
               (Mon-Fri, 9AM-6PM IST).
             </>
@@ -106,7 +106,7 @@ export default function FAQ() {
           </div>
           <h1>❓ Frequently Asked Questions</h1>
           <p>
-            Find answers to the most common questions about CareerPath Pro
+            Find answers to the most common questions about Careerguidance
           </p>
         </div>
       </div>

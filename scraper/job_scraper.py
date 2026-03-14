@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Production Multi-Source Job Scraper
+Careerguidance – Production Multi-Source Job Scraper
 ═══════════════════════════════════════════════════════════
 Pulls REAL jobs daily from 8+ public job APIs / feeds:
   1. Remotive          – remote jobs (free, no key)
@@ -790,7 +790,7 @@ class JobScraper:
         for page in range(1, 4):
             try:
                 url = f"https://www.arbeitnow.com/api/job-board-api?page={page}"
-                resp = self._get(url, timeout=12)
+                resp = self._get(url, timeout=12, extra_headers={"Accept": "application/json"})
                 if not resp or resp.status_code != 200:
                     break
                 data = resp.json()
@@ -807,7 +807,7 @@ class JobScraper:
                         description=self._clean_html(item.get("description", "")),
                         skills=tags[:6],
                         apply_url=item.get("url", "#"),
-                        posted=item.get("created_at", "")[:10] if item.get("created_at") else "",
+                        posted=datetime.fromtimestamp(item.get("created_at")).strftime("%Y-%m-%d") if item.get("created_at") else "",
                         salary="",
                         source="Arbeitnow",
                     ))
@@ -1550,17 +1550,21 @@ class JobScraper:
 
                 for card in cards[:6]:
                     # Title
-                    title_el = card.find("a", class_="view_detail_button") or \
-                               card.find("h3", class_="heading_4_5") or \
+                    title_el = card.find("h3", class_="job-internship-name") or \
                                card.find("a", class_="job-title-href") or \
+                               card.find("a", class_="view_detail_button") or \
+                               card.find("h3", class_="heading_4_5") or \
                                card.find("h3")
-                    company_el = card.find("p", class_="company_name") or \
+                    company_el = card.find("p", class_="company-name") or \
+                                 card.find("p", class_="company_name") or \
                                  card.find("a", class_="link_display_like_text") or \
                                  card.find("h4")
-                    loc_el = card.find("a", class_="location_link") or \
+                    loc_el = card.find("div", class_="row-1-item locations") or \
+                             card.find("a", class_="location_link") or \
                              card.find("p", class_="location") or \
                              card.find("span", class_="location")
-                    stipend_el = card.find("span", class_="stipend") or \
+                    stipend_el = card.find("span", class_="mobile-stipend") or \
+                                 card.find("span", class_="stipend") or \
                                  card.find("span", class_="desktop-text") or \
                                  card.find("span", attrs={"class": lambda c: c and "stipend" in str(c).lower()})
 
@@ -1892,7 +1896,7 @@ class JobScraper:
                 "skills": role["skills"],
                 "apply_url": f"https://careers.{company['name'].lower().replace(' ', '').replace('/', '').replace('(', '').replace(')', '')}.com",
                 "posted_date": posted_date,
-                "source": "CareerPath Pro",
+                "source": "Careerguidance",
             })
         return jobs
 

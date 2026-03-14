@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Scrapy Middlewares
+Careerguidance – Scrapy Middlewares
 Rotating user-agents and anti-blocking strategies.
 """
 

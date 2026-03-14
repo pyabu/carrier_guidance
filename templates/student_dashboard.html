@@ -305,10 +305,18 @@
             <h3><i class="fas fa-user text-accent"></i> My Profile</h3>
             <div class="dash-profile-grid">
                 <div class="text-center">
-                    <div
-                        style="width:110px;height:110px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;margin:0 auto 12px;text-transform:uppercase;">
-                        {{ user.name[0] }}</div>
-                    <button class="btn btn-ghost btn-sm"><i class="fas fa-camera"></i> Change Photo</button>
+                    {% if extra and extra.get('profile_pic') %}
+                    <div style="width:110px;height:110px;border-radius:50%;margin:0 auto 12px;overflow:hidden;border:2px solid var(--border);">
+                        <img src="/static/uploads/{{ extra.profile_pic }}" style="width:100%;height:100%;object-fit:cover;" alt="Profile Picture">
+                    </div>
+                    {% else %}
+                    <div style="width:110px;height:110px;border-radius:50%;background:var(--bg-accent);color:white;display:flex;align-items:center;justify-content:center;font-size:2.8rem;font-weight:700;margin:0 auto 12px;text-transform:uppercase;">
+                        {{ user.name[0] }}
+                    </div>
+                    {% endif %}
+                    <button class="btn btn-ghost btn-sm" onclick="document.getElementById('profilePicInput').click()"><i class="fas fa-camera"></i> Change Photo</button>
+                    <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePic(this)">
+                    <div id="profilePicStatus" style="font-size:0.8rem; margin-top:4px;"></div>
                 </div>
                 <div>
                     <form>
@@ -480,6 +488,37 @@
 </section>
 
 <script>
+    function uploadProfilePic(input) {
+        if (!input.files || !input.files[0]) return;
+        const file = input.files[0];
+        if (file.size > 2 * 1024 * 1024) {
+            document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">File too large (max 2MB)</span>';
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('profile_pic', file);
+
+        document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>';
+
+        fetch('/api/upload-profile-pic', {
+            method: 'POST',
+            body: formData
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.error) {
+                document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">' + data.error + '</span>';
+            } else {
+                document.getElementById('profilePicStatus').innerHTML = '<span style="color:#059669;">Photo updated!</span>';
+                location.reload();
+            }
+        })
+        .catch(err => {
+            document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">Upload failed.</span>';
+        });
+    }
+
     (function () {
         const skillsList = {{ user.skills_list | tojson | safe
     }} || [];

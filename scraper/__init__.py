@@ -1,1 +1,1 @@
-# CareerPath Pro – Job Scraper Package
+# Careerguidance – Job Scraper Package

@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Scrapy Spider: Tamil Nadu & Pondicherry Jobs
+Careerguidance – Scrapy Spider: Tamil Nadu & Pondicherry Jobs
 ═══════════════════════════════════════════════════════════════
 Focused spider for jobs in Tamil Nadu cities + Puducherry.
 Scrapes from multiple sources filtering by TN locations.

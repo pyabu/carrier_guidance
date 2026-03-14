@@ -87,7 +87,16 @@
         <div class="profile-sidebar">
             <!-- Avatar Card -->
             <div class="profile-card" style="text-align:center;">
+                {% if extra and extra.get('profile_pic') %}
+                <div style="width:110px;height:110px;border-radius:50%;margin:0 auto 12px;overflow:hidden;border:2px solid var(--border);">
+                    <img src="/static/uploads/{{ extra.profile_pic }}" style="width:100%;height:100%;object-fit:cover;" alt="Profile Picture">
+                </div>
+                {% else %}
                 <div class="profile-avatar">{{ user.name[0]|upper }}</div>
+                {% endif %}
+                <button type="button" class="btn btn-ghost btn-sm" onclick="document.getElementById('profilePicInput').click()"><i class="fas fa-camera"></i> Change Photo</button>
+                <input type="file" id="profilePicInput" accept="image/*" style="display:none;" onchange="uploadProfilePic(this)">
+                <div id="profilePicStatus" style="font-size:0.8rem; margin-top:4px;"></div>
                 <div class="profile-name">{{ user.name }}</div>
                 <div class="profile-email">{{ user.email }}</div>
                 <div class="profile-mini-stats">
@@ -174,6 +183,7 @@
                                 <option value="1-2 years" {% if user.get('experience_level')=='1-2 years' %}selected{% endif %}>1-2 Years</option>
                                 <option value="3-5 years" {% if user.get('experience_level')=='3-5 years' %}selected{% endif %}>3-5 Years</option>
                                 <option value="5+ years" {% if user.get('experience_level')=='5+ years' %}selected{% endif %}>5+ Years</option>
+                                <option value="Working Professional" {% if user.get('experience_level')=='Working Professional' %}selected{% endif %}>Working Professional</option>
                             </select>
                         </div>
                     </div>
@@ -223,6 +233,37 @@
 
 {% block extra_scripts %}
 <script>
+function uploadProfilePic(input) {
+    if (!input.files || !input.files[0]) return;
+    const file = input.files[0];
+    if (file.size > 2 * 1024 * 1024) {
+        document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">File too large (max 2MB)</span>';
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('profile_pic', file);
+
+    document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--primary);"><i class="fas fa-spinner fa-spin"></i> Uploading...</span>';
+
+    fetch('/api/upload-profile-pic', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) {
+            document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">' + data.error + '</span>';
+        } else {
+            document.getElementById('profilePicStatus').innerHTML = '<span style="color:#059669;">Photo updated!</span>';
+            location.reload();
+        }
+    })
+    .catch(err => {
+        document.getElementById('profilePicStatus').innerHTML = '<span style="color:var(--danger);">Upload failed.</span>';
+    });
+}
+
 // Resume upload
 function uploadResume(input) {
     if (!input.files.length) return;

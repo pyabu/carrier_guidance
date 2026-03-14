@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Company Intelligence Scraper
+Careerguidance – Company Intelligence Scraper
 ═══════════════════════════════════════════════
 Scrapes real-time company data from public sources:
   1. Company profiles (Glassdoor, LinkedIn, Crunchbase)

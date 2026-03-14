@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Anti-Blocking Utilities
+Careerguidance – Anti-Blocking Utilities
 ═══════════════════════════════════════════════
 Shared session factory & request helpers that bypass common
 anti-bot protections (Cloudflare, TLS fingerprinting, rate limiting).
@@ -152,18 +152,22 @@ def safe_get(session, url: str, max_retries: int = 3, timeout: int = 15,
 
     Returns Response object or None if all retries exhausted.
     """
+    # Fetch any extra headers outside loop
+    req_headers = kwargs.get("headers", {})
+
     for attempt in range(max_retries):
         try:
-            # Rotate headers on each attempt
+            # Rotate UA and headers on each attempt
             headers = get_browser_headers()
             if extra_headers:
                 headers.update(extra_headers)
 
             # Merge with any headers in kwargs
-            req_headers = kwargs.pop("headers", {})
             headers.update(req_headers)
 
-            resp = session.get(url, timeout=timeout, headers=headers, **kwargs)
+            # Make copy of kwargs without 'headers' to pass to session.get
+            get_kwargs = {k: v for k, v in kwargs.items() if k != "headers"}
+            resp = session.get(url, timeout=timeout, headers=headers, **get_kwargs)
 
             if resp.status_code == 200:
                 return resp

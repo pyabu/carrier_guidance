@@ -1,5 +1,5 @@
 """
-CareerPath Pro – AI-Powered Job Processor
+Careerguidance – AI-Powered Job Processor
 ═══════════════════════════════════════════
 Uses AI (OpenAI / free fallback) to:
   1. Smart categorize & tag jobs
@@ -327,7 +327,7 @@ class AIJobProcessor:
         if job.get("posted_date"):
             score += QUALITY_WEIGHTS["has_posted_date"]
 
-        if job.get("source", "") != "CareerPath Pro":
+        if job.get("source", "") != "Careerguidance":
             score += QUALITY_WEIGHTS["has_apply_url"]
 
         return min(100, int(score))

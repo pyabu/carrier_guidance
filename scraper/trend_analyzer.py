@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Job Market Trend Analyzer
+Careerguidance – Job Market Trend Analyzer
 ═══════════════════════════════════════════
 Analyzes job market data to produce:
   1. Trending skills (rising demand)

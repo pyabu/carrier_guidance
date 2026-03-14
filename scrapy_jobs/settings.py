@@ -1,9 +1,9 @@
 """
-CareerPath Pro – Scrapy Settings
+Careerguidance – Scrapy Settings
 Anti-blocking, polite crawling, and pipeline configuration.
 """
 
-BOT_NAME = "careerpathpro"
+BOT_NAME = "careerguidance"
 SPIDER_MODULES = ["scrapy_jobs.spiders"]
 NEWSPIDER_MODULE = "scrapy_jobs.spiders"
 

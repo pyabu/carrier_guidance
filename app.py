@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Flask Application
+Careerguidance – Flask Application
 Complete career guidance and job portal backend
 Works both locally and on Vercel (serverless).
 """
@@ -16,6 +16,8 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory
 from flask_cors import CORS
+from apscheduler.schedulers.background import BackgroundJobScheduler
+from scraper.job_scraper import JobScraper
 
 # ── Vercel detection ───────────────────────────────────────────────────
 IS_VERCEL = bool(os.environ.get("VERCEL") or os.environ.get("VERCEL_ENV"))
@@ -124,9 +126,12 @@ def admin_required(f):
 
 def load_jobs():
     """Load cached jobs from JSON file, falling back to Supabase then seed on Vercel."""
+    last_updated = "Never"
     if os.path.exists(JOBS_FILE):
+        mtime = os.path.getmtime(JOBS_FILE)
+        last_updated = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
         with open(JOBS_FILE, "r") as f:
-            return json.load(f)
+            return json.load(f), last_updated
     # On Vercel: try Supabase first (persisted from last scrape)
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("jobs")
@@ -135,15 +140,8 @@ def load_jobs():
             with open(JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
             logger.info("☁️  Loaded jobs from Supabase → /tmp")
-            return sb_data
-        # Fallback to seed file
-        if os.path.exists(SEED_FILE):
-            os.makedirs(DATA_DIR, exist_ok=True)
-            shutil.copy2(SEED_FILE, JOBS_FILE)
-            logger.info("📦 Copied seed jobs.json to /tmp for Vercel cold-start")
-            with open(JOBS_FILE, "r") as f:
-                return json.load(f)
-    return {"jobs": [], "last_updated": None}
+            return sb_data, sb_data.get('updated_at', 'Recently')
+    return {"jobs": [], "total": 0, "sources": {}}, last_updated
 
 
 def load_tn_jobs():
@@ -605,7 +603,16 @@ def student_dashboard():
     except:
         user['interests_list'] = [i.strip() for i in str(user.get('interests', '')).split(',') if i.strip()]
 
-    return render_template("student_dashboard.html", user=user)
+    # Load extra profile data for profile pic
+    extra = {}
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{session['user_id']}").execute()
+        if resp.data:
+            extra = resp.data[0].get("data", {})
+    except Exception:
+        pass
+
+    return render_template("student_dashboard.html", user=user, extra=extra)
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -993,8 +1000,10 @@ def profile():
             "interests": json.dumps(interests) if isinstance(interests, list) else interests,
             "experience_level": experience,
         }
-        # Store extra fields in scraped_data (flexible storage)
-        extra = {"bio": bio, "linkedin": linkedin, "github": github, "phone": phone}
+        # Fetch existing extra fields to preserve profile_pic
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{uid}").execute()
+        extra = resp.data[0].get("data", {}) if resp.data else {}
+        extra.update({"bio": bio, "linkedin": linkedin, "github": github, "phone": phone})
         try:
             supabase.table("users").update(update_data).eq("id", uid).execute()
             supabase.table("scraped_data").upsert({
@@ -1056,6 +1065,40 @@ def profile():
         pass
 
     return render_template("profile.html", user=user, extra=extra, resume_info=resume_info, stats=stats)
+
+
+@app.route("/api/upload-profile-pic", methods=["POST"])
+@login_required
+def upload_profile_pic():
+    if 'profile_pic' not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    f = request.files['profile_pic']
+    if f.filename == '':
+        return jsonify({"error": "No file selected"}), 400
+    
+    ext = f.filename.rsplit('.', 1)[1].lower() if '.' in f.filename else ''
+    if ext not in {'png', 'jpg', 'jpeg', 'gif', 'webp'}:
+        return jsonify({"error": "Only image files allowed"}), 400
+
+    uid = session['user_id']
+    filename = secure_filename(f"profile_{uid}_{f.filename}")
+    filepath = os.path.join(UPLOAD_DIR, filename)
+    f.save(filepath)
+
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{uid}").execute()
+        extra = resp.data[0].get("data", {}) if resp.data else {}
+        extra['profile_pic'] = filename
+        supabase.table("scraped_data").upsert({
+            "kind": f"user_profile_{uid}",
+            "data": extra,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+    except Exception as e:
+        logger.error(f"Profile pic save error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+    return jsonify({"status": "success", "filename": filename})
 
 
 @app.route("/api/upload-resume", methods=["POST"])
@@ -1847,7 +1890,7 @@ def api_search_all():
 
     from collections import Counter
     source_counts = Counter(j.get("_source_db", "main") for j in all_jobs)
-    portal_counts = Counter(j.get("source", "CareerPath Pro") for j in all_jobs)
+    portal_counts = Counter(j.get("source", "Careerguidance") for j in all_jobs)
 
     # Keep source_db for frontend link building, rename to cleaner key
     paginated = all_jobs[:per_page]
@@ -2708,7 +2751,7 @@ def not_found(e):
             '<p style="margin-top:16px;"><a href="/" style="color:#3282b8;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Back to Home</a></p>'
         )
     return f"""
-    <html><head><title>CareerPath Pro</title>
+    <html><head><title>Careerguidance</title>
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -2975,6 +3018,48 @@ def src_google_1():
 def src_google_2():
     return send_from_directory(app.root_path, 'googlec70fbf2c9abb6b21.html', mimetype='text/html')
 
+
+# ── Background Scraper Scheduler ──────────────────────────────────────
+def run_daily_scrape():
+    """Run all scrapers and update both local files and Supabase."""
+    logger.info("⏰ Starting daily job scrape...")
+    try:
+        scraper = JobScraper()
+        jobs = scraper.scrape_all()
+        # The scrape_all() in JobScraper already saves to JOBS_FILE and handles Indian jobs if implemented.
+        # We also need to save to Supabase for Vercel persistence.
+        
+        # Load the newly saved JOBS_FILE to get the full metadata payload
+        if os.path.exists(JOBS_FILE):
+            with open(JOBS_FILE, 'r') as f:
+                jobs_data = json.load(f)
+                _supabase_save_jobs("global", jobs_data)
+        
+        # Similar for india_jobs.json if it was updated
+        if os.path.exists(INDIA_JOBS_FILE):
+            with open(INDIA_JOBS_FILE, 'r') as f:
+                india_data = json.load(f)
+                _supabase_save_jobs("india", india_data)
+                
+        logger.info(f"✅ Daily scrape completed. Total jobs: {len(jobs)}")
+    except Exception as e:
+        logger.error(f"❌ Daily scrape failed: {e}")
+
+# Initialize and start the scheduler (only if not on Vercel, as Vercel kills background threads)
+if not IS_VERCEL:
+    scheduler = BackgroundJobScheduler()
+    # Schedule daily at 2:00 AM
+    scheduler.add_job(func=run_daily_scrape, trigger="cron", hour=2, minute=0)
+    # Also run once on startup in a separate thread if local cache is empty or very old
+    def run_initial_scrape_if_needed():
+        if not os.path.exists(JOBS_FILE) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(JOBS_FILE))).days >= 1:
+             run_daily_scrape()
+
+    startup_thread = threading.Thread(target=run_initial_scrape_if_needed, daemon=True)
+    startup_thread.start()
+    
+    scheduler.start()
+    logger.info("📅 Job Scraper Scheduler started (2:00 AM daily).")
 
 if __name__ == "__main__":
     app.run()

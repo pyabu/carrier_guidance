@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Scrapy Pipelines
+Careerguidance – Scrapy Pipelines
 ═════════════════════════════════════
 1. CleaningPipeline   – Normalize text, fix encoding, clean HTML
 2. DedupPipeline      – Remove duplicate jobs by title+company
@@ -166,7 +166,7 @@ class AIEnrichmentPipeline:
 class JsonExportPipeline:
     """
     Collects all items and exports to JSON files compatible with
-    the existing CareerPath Pro data format.
+    the existing Careerguidance data format.
     """
 
     def __init__(self):

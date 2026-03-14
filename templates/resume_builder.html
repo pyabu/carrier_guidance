@@ -150,6 +150,7 @@
     </div>
 </section>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
 function updatePreview() {
     document.getElementById('prevName').textContent = document.getElementById('rName').value || 'Your Name';
@@ -246,21 +247,67 @@ function addEducation() {
     </div>`;
     document.getElementById('educationFields').insertAdjacentHTML('beforeend', html);
 }
-
 function downloadResume() {
     const el = document.getElementById('resumePreview');
-    // Simple print-based PDF download
-    const win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Resume - ${document.getElementById('rName').value || 'Resume'}</title>
-        <style>body{font-family:'Inter',Arial,sans-serif;padding:40px;color:#1a1d23;line-height:1.6;}
-        h2{font-size:24px;border-bottom:2px solid #667eea;padding-bottom:8px;margin-bottom:8px;}
-        h3{color:#667eea;font-size:13px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;}
-        p{font-size:13px;color:#444;}strong{color:#1a1d23;}
-        </style></head><body>${el.innerHTML}</body></html>`);
-    win.document.close();
-    win.print();
-}
+    const name = (document.getElementById('rName').value || 'Resume').replace(/[^a-zA-Z0-9_-]/g, '_');
 
+    const btn = document.querySelector('button[onclick="downloadResume()"]');
+    if (!btn) return;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Generating Processing...';
+    btn.disabled = true;
+
+    // Create a styled container for accurate PDF generation
+    const container = document.createElement('div');
+    container.innerHTML = el.innerHTML;
+    container.style.cssText = "font-family:'Inter',Arial,sans-serif;padding:40px;color:#1a1d23;line-height:1.6;background:white;";
+    
+    // Apply essential typography styles inline for html2pdf compatibility
+    Array.from(container.querySelectorAll('h2')).forEach(h => {
+        h.style.cssText = "font-size:24px;border-bottom:2px solid #667eea;padding-bottom:8px;margin-bottom:8px;";
+    });
+    Array.from(container.querySelectorAll('h3')).forEach(h => {
+        h.style.cssText = "color:#667eea;font-size:13px;margin:16px 0 8px;text-transform:uppercase;letter-spacing:1px;";
+    });
+    Array.from(container.querySelectorAll('p, span')).forEach(p => {
+        if (!p.style.cssText) p.style.cssText = "font-size:13px;color:#444;";
+    });
+
+    const opt = {
+        margin:       [0.5, 0.5, 0.5, 0.5],
+        filename:     name + '.pdf',
+        image:        { type: 'jpeg', quality: 0.98 },
+        html2canvas:  { scale: 2 },
+        jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+    };
+
+    // Generate blob for cloud upload
+    html2pdf().set(opt).from(container).outputPdf('blob').then(function(pdfBlob) {
+        const formData = new FormData();
+        formData.append('resume', pdfBlob, name + '.pdf');
+
+        // Upload to cloud silently
+        fetch('/api/upload-resume', {
+            method: 'POST',
+            body: formData
+        }).then(res => res.json())
+        .then(data => {
+            // Generate actual download file for the user
+            html2pdf().set(opt).from(container).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+                if (!data.error) alert('Resume saved to your cloud profile!');
+            });
+        }).catch(err => {
+            console.error('Error uploading pdf:', err);
+            // Even if upload fails, give user the PDF
+            html2pdf().set(opt).from(container).save().then(() => {
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            });
+        });
+    });
+}
 function resetForm() {
     document.querySelectorAll('.resume-form input, .resume-form textarea').forEach(el => el.value = '');
     const expFields = document.getElementById('experienceFields');

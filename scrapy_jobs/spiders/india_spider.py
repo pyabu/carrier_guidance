@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Scrapy Spider: India Jobs (Multiple Sources)
+Careerguidance – Scrapy Spider: India Jobs (Multiple Sources)
 ═══════════════════════════════════════════════════════════════
 Scrapes real job listings from APIs and job boards that serve Indian jobs.
 Targets sources with public APIs / scrapeable pages for Indian market.

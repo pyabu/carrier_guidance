@@ -1,5 +1,5 @@
 """
-CareerPath Pro – All-India Mega Job Scraper
+Careerguidance – All-India Mega Job Scraper
 ═══════════════════════════════════════════════════════════
 Comprehensive scraper targeting ALL of India:
   • 28 States + 8 Union Territories
@@ -764,7 +764,7 @@ class IndiaJobScraper:
             "salary_max": kwargs.get("salary_max", ""),
             "description": kwargs.get("description", ""),
             "apply_url": kwargs.get("apply_url", "#"),
-            "source": kwargs.get("source", "CareerPath Pro"),
+            "source": kwargs.get("source", "Careerguidance"),
             "posted_date": kwargs.get("posted_date", datetime.now().strftime("%Y-%m-%d")),
             "is_india": True,
             "region": "India",
@@ -1380,7 +1380,7 @@ class IndiaJobScraper:
                 description=random.choice(description_templates),
                 apply_url=_get_apply_url(company["name"], title, city),
                 posted_date=posted,
-                source="CareerPath Pro",
+                source="Careerguidance",
                 quality_score=random.randint(55, 85),
             )
 

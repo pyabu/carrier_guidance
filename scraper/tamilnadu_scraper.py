@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Tamil Nadu & Pondicherry Job Scraper
+Careerguidance – Tamil Nadu & Pondicherry Job Scraper
 ═══════════════════════════════════════════════════════════
 Dedicated scraper for jobs across ALL Tamil Nadu cities + Puducherry.
 

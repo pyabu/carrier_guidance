@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CareerPath Pro – Daily Cron Script
+Careerguidance – Daily Cron Script
 ═══════════════════════════════════════════════
 Run this script once a day (via cron, launchd, or Task Scheduler)
 to refresh all job listings from 8+ real sources.
@@ -51,7 +51,7 @@ logger = logging.getLogger("daily_refresh")
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CareerPath Pro – Daily Job Refresh")
+    parser = argparse.ArgumentParser(description="Careerguidance – Daily Job Refresh")
     parser.add_argument("--dry-run", action="store_true", help="Preview only; don't save to disk")
     args = parser.parse_args()
 

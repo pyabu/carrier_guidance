@@ -253,7 +253,7 @@
                     <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Internshala" onchange="applyTNFilters()"> Internshala <span class="fc" data-tfc="source:Internshala"></span></label>
                     <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="TimesJobs" onchange="applyTNFilters()"> TimesJobs <span class="fc" data-tfc="source:TimesJobs"></span></label>
                     <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Freshersworld" onchange="applyTNFilters()"> Freshersworld <span class="fc" data-tfc="source:Freshersworld"></span></label>
-                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="CareerPath Pro" onchange="applyTNFilters()"> CareerPath Pro <span class="fc" data-tfc="source:CareerPath Pro"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Careerguidance" onchange="applyTNFilters()"> Careerguidance <span class="fc" data-tfc="source:Careerguidance"></span></label>
                 </div>
 
                 <!-- Job Type -->
@@ -726,7 +726,7 @@ function renderTNJobCard(job) {
     var colors = {
         'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Foundit':'#FF5722',
         'Internshala':'#00BCD4','TimesJobs':'#9C27B0','Freshersworld':'#FF9800',
-        'CareerPath Pro':'#667eea','Shine.com':'#4CAF50'
+        'Careerguidance':'#667eea','Shine.com':'#4CAF50'
     };
     var clr = colors[job.source] || '#667eea';
     var salary = job.salary_min ? (esc(job.salary_min) + (job.salary_max ? ' – ' + esc(job.salary_max) : '')) : '<span style="opacity:.5">Not specified</span>';

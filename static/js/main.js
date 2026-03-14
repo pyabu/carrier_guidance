@@ -1,5 +1,5 @@
 /* ════════════════════════════════════════════════════════════════════════
-   CareerPath Pro – Main JavaScript
+   Careerguidance – Main JavaScript
    Handles: Autocomplete, Dark/Light Mode, Navbar, Animations, etc.
    ════════════════════════════════════════════════════════════════════════ */
 

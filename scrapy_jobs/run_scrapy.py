@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CareerPath Pro – Scrapy Orchestrator
+Careerguidance – Scrapy Orchestrator
 ═════════════════════════════════════════
 Runs all Scrapy spiders sequentially and applies AI enrichment.
 
@@ -197,7 +197,7 @@ def _print_summary(data_dir, spider_name):
 
 
 def main():
-    parser = argparse.ArgumentParser(description="CareerPath Pro – Scrapy Job Scraper")
+    parser = argparse.ArgumentParser(description="Careerguidance – Scrapy Job Scraper")
     parser.add_argument("--spider", choices=["india", "tn"],
                         help="Run specific spider (default: all)")
     parser.add_argument("--dry-run", action="store_true",

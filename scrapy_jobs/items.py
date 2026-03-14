@@ -1,5 +1,5 @@
 """
-CareerPath Pro – Scrapy Items
+Careerguidance – Scrapy Items
 Defines the data model for scraped job listings.
 """
 

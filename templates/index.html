@@ -542,7 +542,7 @@
         const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : '/job/' + j.id + '?source=' + (j.source_db || 'main');
         const srcDb = j.source_db || 'main';
         const detailUrl = '/job/' + (j.id || 0) + '?source=' + srcDb;
-        const srcColors = { 'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Naukri.com': '#2196F3', 'Internshala': '#00BCD4', 'TimesJobs': '#9C27B0', 'Foundit': '#FF5722', 'Freshersworld': '#FF9800', 'Himalayas': '#8b5cf6', 'Remotive': '#00D4AA', 'CareerPath Pro': '#667eea' };
+        const srcColors = { 'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Naukri.com': '#2196F3', 'Internshala': '#00BCD4', 'TimesJobs': '#9C27B0', 'Foundit': '#FF5722', 'Freshersworld': '#FF9800', 'Himalayas': '#8b5cf6', 'Remotive': '#00D4AA', 'Careerguidance': '#667eea' };
         const srcClr = srcColors[j.source] || '#667eea';
         const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';
         const scoreBadge = j.composite_score > 70 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;">★ ' + Math.round(j.composite_score) + '</span> ' : '';

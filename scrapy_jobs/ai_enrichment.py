@@ -1,5 +1,5 @@
 """
-CareerPath Pro – AI Job Enrichment Engine
+Careerguidance – AI Job Enrichment Engine
 ═════════════════════════════════════════════
 Uses Google Gemini (free tier) or OpenAI to:
   1. Extract & validate skills from job descriptions
