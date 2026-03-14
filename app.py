@@ -500,10 +500,6 @@ if not IS_VERCEL:
 # PAGE ROUTES
 # ═══════════════════════════════════════════════════════════════════════
 
-@app.route("/favicon.ico")
-def favicon():
-    return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
-
 
 @app.route("/")
 def home():
