@@ -87,9 +87,13 @@
         <div class="profile-sidebar">
             <!-- Avatar Card -->
             <div class="profile-card" style="text-align:center;">
-                {% if extra and extra.get('profile_pic') %}
+                {% if extra and (extra.get('profile_pic_b64') or extra.get('profile_pic')) %}
                 <div style="width:110px;height:110px;border-radius:50%;margin:0 auto 12px;overflow:hidden;border:2px solid var(--border);">
+                    {% if extra.get('profile_pic_b64') %}
+                    <img src="/api/cloud-file/user_profile_{{ session['user_id'] }}" style="width:100%;height:100%;object-fit:cover;" alt="Profile Picture">
+                    {% else %}
                     <img src="/static/uploads/{{ extra.profile_pic }}" style="width:100%;height:100%;object-fit:cover;" alt="Profile Picture">
+                    {% endif %}
                 </div>
                 {% else %}
                 <div class="profile-avatar">{{ user.name[0]|upper }}</div>
@@ -119,14 +123,14 @@
             <div class="profile-card">
                 <h3><i class="fas fa-file-alt"></i> Resume</h3>
                 {% if resume_info %}
-                <div class="resume-info" id="resumeDisplay">
+                <a href="/api/cloud-file/user_resume_{{ session['user_id'] }}" target="_blank" class="resume-info" id="resumeDisplay" style="text-decoration:none; color:inherit;">
                     <i class="fas fa-file-pdf"></i>
                     <div class="resume-info-text">
                         <strong>{{ resume_info.filename }}</strong>
                         <small>Uploaded {{ resume_info.uploaded_at[:10] if resume_info.uploaded_at else '' }}</small>
                     </div>
-                    <button onclick="deleteResume()" class="alert-remove" title="Delete resume"><i class="fas fa-trash"></i></button>
-                </div>
+                </a>
+                <button onclick="deleteResume()" class="alert-remove" title="Delete resume" style="position:absolute; right:40px; top:50%; transform:translateY(-50%); z-index:2;"><i class="fas fa-trash"></i></button>
                 {% endif %}
                 <div class="resume-area" id="resumeDropzone" onclick="document.getElementById('resumeInput').click()" {% if resume_info %}style="display:none;"{% endif %}>
                     <i class="fas fa-cloud-upload-alt"></i>

@@ -6,6 +6,7 @@ Works both locally and on Vercel (serverless).
 
 import os
 import json
+import base64
 import shutil
 from datetime import datetime, timedelta
 import logging
@@ -1085,10 +1086,21 @@ def upload_profile_pic():
     filepath = os.path.join(UPLOAD_DIR, filename)
     f.save(filepath)
 
+    # Convert to Base64 for cloud persistence
+    try:
+        with open(filepath, "rb") as image_file:
+            b64_content = base64.b64encode(image_file.read()).decode('utf-8')
+    except Exception as e:
+        logger.error(f"Failed to b64 encode profile pic: {e}")
+        b64_content = None
+
     try:
         resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{uid}").execute()
         extra = resp.data[0].get("data", {}) if resp.data else {}
         extra['profile_pic'] = filename
+        if b64_content:
+            extra['profile_pic_b64'] = b64_content
+        
         supabase.table("scraped_data").upsert({
             "kind": f"user_profile_{uid}",
             "data": extra,
@@ -1117,12 +1129,23 @@ def upload_resume():
     filepath = os.path.join(UPLOAD_DIR, filename)
     f.save(filepath)
 
+    # Convert to Base64 for cloud persistence
+    try:
+        with open(filepath, "rb") as resume_file:
+            b64_content = base64.b64encode(resume_file.read()).decode('utf-8')
+    except Exception as e:
+        logger.error(f"Failed to b64 encode resume: {e}")
+        b64_content = None
+
     resume_data = {
         "filename": f.filename,
         "stored_as": filename,
         "uploaded_at": datetime.now().isoformat(),
         "size": os.path.getsize(filepath),
     }
+    if b64_content:
+        resume_data["content_b64"] = b64_content
+
     try:
         supabase.table("scraped_data").upsert({
             "kind": f"user_resume_{uid}",
@@ -1148,6 +1171,47 @@ def delete_resume():
                 os.remove(filepath)
             supabase.table("scraped_data").delete().eq("kind", f"user_resume_{uid}").execute()
         return jsonify({"status": "deleted"})
+    except Exception as e:
+        logger.error(f"Resume delete error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+@app.route("/api/cloud-file/<kind>")
+@login_required
+def serve_cloud_file(kind):
+    uid = session['user_id']
+    # Restrict to user's own files
+    if not kind.endswith(str(uid)):
+        abort(403)
+        
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", kind).execute()
+        if not resp.data:
+            abort(404)
+        
+        data = resp.data[0].get("data", {})
+        
+        # Determine if it's a profile pic or resume
+        if "profile" in kind:
+            b64 = data.get("profile_pic_b64")
+            if not b64: abort(404)
+            import io
+            from flask import send_file
+            buffer = io.BytesIO(base64.b64decode(b64))
+            return send_file(buffer, mimetype="image/jpeg") # Simplified
+        elif "resume" in kind:
+            b64 = data.get("content_b64")
+            if not b64: abort(404)
+            import io
+            from flask import send_file
+            buffer = io.BytesIO(base64.b64decode(b64))
+            filename = data.get("filename", "resume.pdf")
+            return send_file(buffer, as_attachment=True, download_name=filename, mimetype="application/pdf")
+        
+        abort(404)
+    except Exception as e:
+        logger.error(f"Cloud file serve error: {e}")
+        abort(500)
     except Exception as e:
         logger.error(f"Resume delete error: {e}")
         return jsonify({"error": str(e)}), 500
