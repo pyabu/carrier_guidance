@@ -98,7 +98,7 @@
                 onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job.id }}'">
                 <div class="job-card-header">
                     <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}"
-                        class="job-card-logo"
+                        class="job-card-logo" loading="lazy"
                         onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
                     <div class="job-card-info">
                         <h3>{{ job.title }}</h3>
@@ -291,73 +291,73 @@
         </div>
         <div class="companies-grid" data-aos="fade-up" data-aos-delay="200">
             <div class="company-card">
-                <img src="https://logo.clearbit.com/tcs.com" alt="TCS"
+                <img src="https://logo.clearbit.com/tcs.com" alt="TCS" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=TCS&background=2B6CB0&color=fff'">
                 <h4>TCS</h4>
                 <p>250+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys"
+                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
                 <h4>Infosys</h4>
                 <p>200+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro"
+                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=W&background=3F1D8E&color=fff'">
                 <h4>Wipro</h4>
                 <p>150+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart"
+                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=F&background=F7C948&color=000'">
                 <h4>Flipkart</h4>
                 <p>80+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay"
+                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=R&background=0A62C9&color=fff'">
                 <h4>Razorpay</h4>
                 <p>60+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/google.com" alt="Google India"
+                <img src="https://logo.clearbit.com/google.com" alt="Google India" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
                 <h4>Google India</h4>
                 <p>120+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India"
+                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
                 <h4>Microsoft India</h4>
                 <p>95+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India"
+                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
                 <h4>Amazon India</h4>
                 <p>180+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy"
+                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=S&background=FC8019&color=fff'">
                 <h4>Swiggy</h4>
                 <p>50+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato"
+                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=Z&background=E23744&color=fff'">
                 <h4>Zomato</h4>
                 <p>45+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks"
+                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=FW&background=16C172&color=fff'">
                 <h4>Freshworks</h4>
                 <p>70+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe"
+                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe" loading="lazy"
                     onerror="this.src='https://ui-avatars.com/api/?name=P&background=5F259F&color=fff'">
                 <h4>PhonePe</h4>
                 <p>40+ openings</p>
@@ -549,7 +549,7 @@
 
         return '<div class="job-card fade-in" style="cursor:pointer;" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'' + detailUrl + '\'">'
             + '<div class="job-card-header">'
-            + '<img src="' + logo + '" alt="' + escH(j.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
+            + '<img src="' + logo + '" alt="' + escH(j.company || '') + '" class="job-card-logo" loading="lazy" onerror="this.src=\'' + fallback + '\'">'
             + '<div class="job-card-info"><h3>' + escH(j.title || 'Untitled') + ' ' + scoreBadge + '</h3><span class="job-card-company">' + escH(j.company || '') + '</span></div>'
             + '</div>'
             + '<div class="job-card-meta">'

@@ -736,7 +736,7 @@ function renderTNJobCard(job) {
 
     return '<div class="tn-job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
         + '<div class="tn-job-header">'
-        +   '<img src="' + logo + '" alt="' + esc(job.company||'') + '" class="tn-job-logo" onerror="this.src=\'' + fallback + '\'">'
+        +   '<img src="' + logo + '" alt="' + esc(job.company||'') + '" class="tn-job-logo" loading="lazy" onerror="this.src=\'' + fallback + '\'">'
         +   '<div class="tn-job-info"><h3>' + esc(job.title||'Untitled') + cityBadge + '</h3>'
         +   '<span class="company">' + esc(job.company||'Unknown') + '</span></div>'
         + '</div>'
