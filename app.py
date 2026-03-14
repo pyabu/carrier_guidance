@@ -504,21 +504,6 @@ if not IS_VERCEL:
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
-@app.route("/google25c1f4c7795c1819.html")
-def google_verification():
-    return send_from_directory(app.root_path, 'google25c1f4c7795c1819.html')
-
-@app.route("/googlec70fbf2c9abb6b21.html")
-def google_verification_new():
-    return send_from_directory(app.root_path, 'googlec70fbf2c9abb6b21.html')
-
-@app.route("/robots.txt")
-def robots():
-    return send_from_directory(app.root_path, 'robots.txt')
-
-@app.route("/sitemap.xml")
-def sitemap():
-    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
 
 @app.route("/")
 def home():
