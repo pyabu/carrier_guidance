@@ -52,4 +52,29 @@
         <changefreq>yearly</changefreq>
         <priority>0.5</priority>
     </url>
+    <url>
+        <loc>https://careerguidance.me/sitemap-html</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.7</priority>
+    </url>
+    <url>
+        <loc>https://careerguidance.me/blog</loc>
+        <changefreq>weekly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
+        <loc>https://careerguidance.me/faq</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.6</priority>
+    </url>
+    <url>
+        <loc>https://careerguidance.me/privacy</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.4</priority>
+    </url>
+    <url>
+        <loc>https://careerguidance.me/terms</loc>
+        <changefreq>yearly</changefreq>
+        <priority>0.4</priority>
+    </url>
 </urlset>
