@@ -105,6 +105,31 @@ def _supabase_load_jobs(kind: str):
     return None
 
 
+# ── Supabase SEO Persistence ───────────────────────────────────────────
+def _supabase_save_seo(data: dict):
+    """Upsert SEO settings JSON into Supabase `scraped_data` table."""
+    try:
+        supabase.table("scraped_data").upsert({
+            "kind": "seo_settings",
+            "data": data,
+            "updated_at": datetime.now().isoformat(),
+        }).execute()
+        logger.info("☁️  Saved SEO settings to Supabase")
+    except Exception as e:
+        logger.warning(f"⚠️  Supabase SEO save failed: {e}")
+
+
+def _supabase_load_seo():
+    """Load SEO settings JSON from Supabase `scraped_data` table."""
+    try:
+        resp = supabase.table("scraped_data").select("data").eq("kind", "seo_settings").execute()
+        if resp.data:
+            return resp.data[0]["data"]
+    except Exception as e:
+        logger.warning(f"⚠️  Supabase SEO load failed: {e}")
+    return None
+
+
 # ── Authentication Helper ──────────────────────────────────────────────
 def login_required(f):
     @wraps(f)
@@ -892,7 +917,7 @@ SEO_SETTINGS_FILE = os.path.join(DATA_DIR, "seo_settings.json")
 SCRAPER_CONFIG_FILE = os.path.join(DATA_DIR, "scraper_config.json")
 
 _DEFAULT_SEO = {
-    "meta_title": "CareerGuidance – Find Jobs in India & Tamil Nadu",
+    "meta_title": "Career Guidance – Find Jobs in India & Tamil Nadu",
     "meta_description": "Browse thousands of verified jobs in India and Tamil Nadu. AI-powered career guidance, Tamil Nadu government jobs, remote work, and more.",
     "keywords": []
 }
@@ -912,13 +937,33 @@ def _load_seo_settings():
                 return json.load(f)
         except Exception:
             pass
+
+    # On Vercel: try Supabase fallback
+    if IS_VERCEL:
+        sb_data = _supabase_load_seo()
+        if sb_data:
+            # Try to cache locally even if it fails (read-only FS)
+            try:
+                os.makedirs(DATA_DIR, exist_ok=True)
+                with open(SEO_SETTINGS_FILE, "w") as f:
+                    json.dump(sb_data, f)
+            except Exception:
+                pass
+            return sb_data
+
     return dict(_DEFAULT_SEO)
 
 def _save_seo_settings(data):
-    """Persist SEO settings to JSON file."""
-    os.makedirs(DATA_DIR, exist_ok=True)
-    with open(SEO_SETTINGS_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    """Persist SEO settings to JSON file (+ Supabase on Vercel)."""
+    try:
+        os.makedirs(DATA_DIR, exist_ok=True)
+        with open(SEO_SETTINGS_FILE, "w") as f:
+            json.dump(data, f, indent=2)
+    except Exception as e:
+        logger.warning(f"Local SEO save failed: {e}")
+
+    if IS_VERCEL:
+        _supabase_save_seo(data)
 
 def _load_scraper_config():
     """Load scraper config from JSON file."""
@@ -3510,6 +3555,10 @@ def robots():
 @app.route("/sitemap.xml")
 def sitemap():
     return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
+
+@app.route("/sitemap-html")
+def sitemap_html():
+    return render_template("sitemap_html.html")
 
 @app.route("/google25c1f4c7795c1819.html")
 def src_google_1():

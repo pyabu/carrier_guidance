@@ -6,11 +6,42 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f4c75">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
-    <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'careerguidance') }}{% endblock %} | Career Guidance & Job Portal</title>
+    <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
+    <link rel="canonical" href="{{ request.url }}">
+    <meta name="robots" content="index, follow">
     <meta name="description"
         content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Careerguidance. Discover the best fresher jobs, IT roles, remote work, and free expert career guidance in India.') }}{% endblock %}">
     <meta name="keywords"
-        content="{% block meta_keywords %}{{ g.get('seo', {}).get('keywords', []) | join(', ') }}{% endblock %}, py abu, Abu Saleem, Abu Saleem Developer, P G Sindhu Bharathi, Sindhu Bharathi, Sindhu Bharathi P G, pyabu dev, abusaleem dev, sindhu nlp, pondicherry job portal, india job portal, pondicherry university, pondicherry university alumni, crawl, crawler, indexing, sitemap, robots.txt, best job portal in india, free career counseling, fresher jobs 2026, off-campus placements, walk-in interviews today, IT jobs for freshers, entry level remote jobs, free resume builder tool, career guidance for college students, top companies hiring freshers, software engineer roadmap, tech internships, high salary jobs in india, job search engine, career guidance, python developer jobs, flask web development, full stack developer india, frontend engineer chennai, backend developer bangalore, data scientist roles, machine learning careers, nlp specialist, software engineering intern, part-time jobs for students, work from home opportunities, startup jobs india, big tech hiring, software development life cycle, system design interview, coding practice, competitive programming, java developer vacancies, react.js engineer, node.js developer, cloud computing jobs, aws certifications, azure professional, devops engineer roles, cybersecurity specialist, database administrator, ui/ux designer projects, product management careers, qa automation engineer, mobile app development android, ios developer jobs, tech interview preparation, soft skills for developers, professional networking, linkedin optimization for engineers, career growth strategies, resume writing service, cover letter tips, job application tracking, salary negotiation guide, technical blog, coding tutorials, open source contribution, git and github guide, vercel deployment, serverless functions, supabase database, postgresql queries, web scraping with scrapy, automated job alerts, hiring in tamil nadu, puducherry employment, careers in research, computer science hub, engineering student portal, vocational training india">
+        content="{% block meta_keywords %}{{ g.get('seo', {}).get('keywords', []) | join(', ') }}{% endblock %}, Career Guidance, Job Portal India, Fresher Jobs 2026, IT Jobs India, Remote Work, Tamil Nadu Jobs, Resume Builder, Career Roadmaps, AI Job Search, Abu Saleem, Sindhu Bharathi">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
+    <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
+    <meta property="og:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
+    <meta property="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
+    <meta property="twitter:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+
+    <!-- JSON-LD WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0] }}",
+      "url": "https://careerguidance.me/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://careerguidance.me/jobs?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
 
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
@@ -63,7 +94,7 @@
         <div class="container nav-container">
             <a href="/" class="nav-logo">
                 <i class="fas fa-rocket"></i>
-                <span>careerguidance</span>
+                <span>{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0] }}</span>
             </a>
 
             <ul class="nav-menu" id="navMenu">
@@ -160,7 +191,7 @@
                 <div class="footer-brand">
                     <a href="/" class="footer-logo">
                         <i class="fas fa-rocket"></i>
-                        <span>Careerguidance</span>
+                        <span>{{ g.get('seo', {}).get('meta_title', 'careerguidance').split(' – ')[0].split(' | ')[0] }}</span>
                     </a>
                     <p>India's leading career guidance, job search, and hiring platform. Empowering Indian students,
                         freshers, and professionals across Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai &
@@ -194,6 +225,7 @@
                     <a href="/about">About Us</a>
                     <a href="/developer">Developer Profile</a>
                     <a href="/contact">Contact</a>
+                    <a href="/sitemap-html">HTML Sitemap</a>
                 </div>
                 <div class="footer-links">
                     <h4>Legal</h4>
@@ -203,7 +235,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2026 Careerguidance. All rights reserved. Built with ❤️ in India for career success.</p>
+                <p>&copy; 2026 {{ g.get('seo', {}).get('meta_title', 'careerguidance').split(' – ')[0].split(' | ')[0] }}. All rights reserved. Built with ❤️ in India for career success.</p>
                 <p class="footer-update" id="lastUpdate">Jobs updated daily via AI-powered scraper</p>
             </div>
         </div>
