@@ -6,7 +6,7 @@ Works both locally and on Vercel (serverless).
 
 import os
 import json
-import base64
+
 import shutil
 from datetime import datetime, timedelta
 import logging
@@ -56,7 +56,7 @@ TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
 # Upload folder for resumes
-UPLOAD_DIR = os.path.join(DATA_DIR, "uploads")
+UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
 
 # Create directories safely
 for d in [DATA_DIR, UPLOAD_DIR]:
@@ -914,6 +914,8 @@ def get_system_status():
 # ═══════════════════════════════════════════════════════════════════════
 
 SEO_SETTINGS_FILE = os.path.join(DATA_DIR, "seo_settings.json")
+# Seed file bundled with the repo (always present on Vercel via includeFiles)
+SEO_SEED_FILE = os.path.join(BASE_DIR, "data", "seo_settings.json")
 SCRAPER_CONFIG_FILE = os.path.join(DATA_DIR, "scraper_config.json")
 
 _DEFAULT_SEO = {
@@ -930,40 +932,33 @@ _DEFAULT_SCRAPER_CONFIG = {
 }
 
 def _load_seo_settings():
-    """Load SEO settings from JSON file."""
-    if os.path.exists(SEO_SETTINGS_FILE):
-        try:
-            with open(SEO_SETTINGS_FILE) as f:
-                return json.load(f)
-        except Exception:
-            pass
-
-    # On Vercel: try Supabase fallback
-    if IS_VERCEL:
-        sb_data = _supabase_load_seo()
-        if sb_data:
-            # Try to cache locally even if it fails (read-only FS)
+    """Load SEO settings — repo seed file first (bundled with deploy), then writable copy, then defaults.
+    No Supabase required for SEO.
+    """
+    # 1. Try the repo-bundled seed file (always present on Vercel via includeFiles)
+    for path in [SEO_SEED_FILE, SEO_SETTINGS_FILE]:
+        if os.path.exists(path):
             try:
-                os.makedirs(DATA_DIR, exist_ok=True)
-                with open(SEO_SETTINGS_FILE, "w") as f:
-                    json.dump(sb_data, f)
+                with open(path) as f:
+                    return json.load(f)
             except Exception:
                 pass
-            return sb_data
 
     return dict(_DEFAULT_SEO)
 
 def _save_seo_settings(data):
-    """Persist SEO settings to JSON file (+ Supabase on Vercel)."""
-    try:
-        os.makedirs(DATA_DIR, exist_ok=True)
-        with open(SEO_SETTINGS_FILE, "w") as f:
-            json.dump(data, f, indent=2)
-    except Exception as e:
-        logger.warning(f"Local SEO save failed: {e}")
-
-    if IS_VERCEL:
-        _supabase_save_seo(data)
+    """Persist SEO settings.
+    Writes to the repo data dir (local dev) and to /tmp/data (Vercel writable copy).
+    Also updates the seed file so next deploy picks up the latest settings.
+    """
+    # Save to writable runtime path
+    for path in [SEO_SETTINGS_FILE, SEO_SEED_FILE]:
+        try:
+            os.makedirs(os.path.dirname(path), exist_ok=True)
+            with open(path, "w") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            logger.warning(f"SEO save to {path} failed: {e}")
 
 def _load_scraper_config():
     """Load scraper config from JSON file."""
@@ -1558,31 +1553,23 @@ def upload_profile_pic():
     f = request.files['profile_pic']
     if f.filename == '':
         return jsonify({"error": "No file selected"}), 400
-    
+
     ext = f.filename.rsplit('.', 1)[1].lower() if '.' in f.filename else ''
     if ext not in {'png', 'jpg', 'jpeg', 'gif', 'webp'}:
         return jsonify({"error": "Only image files allowed"}), 400
 
     uid = session['user_id']
     filename = secure_filename(f"profile_{uid}_{f.filename}")
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     filepath = os.path.join(UPLOAD_DIR, filename)
     f.save(filepath)
 
-    # Convert to Base64 for cloud persistence
-    try:
-        with open(filepath, "rb") as image_file:
-            b64_content = base64.b64encode(image_file.read()).decode('utf-8')
-    except Exception as e:
-        logger.error(f"Failed to b64 encode profile pic: {e}")
-        b64_content = None
-
+    # Store only the filename reference in Supabase (no binary data)
     try:
         resp = supabase.table("scraped_data").select("data").eq("kind", f"user_profile_{uid}").execute()
         extra = resp.data[0].get("data", {}) if resp.data else {}
+        extra.pop('profile_pic_b64', None)  # remove old blob if present
         extra['profile_pic'] = filename
-        if b64_content:
-            extra['profile_pic_b64'] = b64_content
-        
         supabase.table("scraped_data").upsert({
             "kind": f"user_profile_{uid}",
             "data": extra,
@@ -1608,26 +1595,17 @@ def upload_resume():
 
     uid = session['user_id']
     filename = secure_filename(f"{uid}_{f.filename}")
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
     filepath = os.path.join(UPLOAD_DIR, filename)
     f.save(filepath)
 
-    # Convert to Base64 for cloud persistence
-    try:
-        with open(filepath, "rb") as resume_file:
-            b64_content = base64.b64encode(resume_file.read()).decode('utf-8')
-    except Exception as e:
-        logger.error(f"Failed to b64 encode resume: {e}")
-        b64_content = None
-
+    # Save only metadata to Supabase – no binary content
     resume_data = {
         "filename": f.filename,
         "stored_as": filename,
         "uploaded_at": datetime.now().isoformat(),
         "size": os.path.getsize(filepath),
     }
-    if b64_content:
-        resume_data["content_b64"] = b64_content
-
     try:
         supabase.table("scraped_data").upsert({
             "kind": f"user_resume_{uid}",
@@ -1637,7 +1615,7 @@ def upload_resume():
     except Exception as e:
         logger.error(f"Resume meta save error: {e}")
 
-    return jsonify({"status": "success", "filename": f.filename})
+    return jsonify({"status": "success", "filename": f.filename, "stored_as": filename})
 
 
 @app.route("/api/delete-resume", methods=["POST"])
@@ -1658,45 +1636,16 @@ def delete_resume():
         return jsonify({"error": str(e)}), 500
 
 
-@app.route("/api/cloud-file/<kind>")
+@app.route("/api/serve-upload/<path:filename>")
 @login_required
-def serve_cloud_file(kind):
-    uid = session['user_id']
-    # Restrict to user's own files
-    if not kind.endswith(str(uid)):
+def serve_upload(filename):
+    """Serve a user-uploaded file (profile pic or resume) from the local uploads dir."""
+    uid = str(session['user_id'])
+    # Only allow files that belong to this user (filename starts with uid or 'profile_<uid>')
+    if not (filename.startswith(f"profile_{uid}_") or filename.startswith(f"{uid}_")):
         abort(403)
-        
-    try:
-        resp = supabase.table("scraped_data").select("data").eq("kind", kind).execute()
-        if not resp.data:
-            abort(404)
-        
-        data = resp.data[0].get("data", {})
-        
-        # Determine if it's a profile pic or resume
-        if "profile" in kind:
-            b64 = data.get("profile_pic_b64")
-            if not b64: abort(404)
-            import io
-            from flask import send_file
-            buffer = io.BytesIO(base64.b64decode(b64))
-            return send_file(buffer, mimetype="image/jpeg") # Simplified
-        elif "resume" in kind:
-            b64 = data.get("content_b64")
-            if not b64: abort(404)
-            import io
-            from flask import send_file
-            buffer = io.BytesIO(base64.b64decode(b64))
-            filename = data.get("filename", "resume.pdf")
-            return send_file(buffer, as_attachment=True, download_name=filename, mimetype="application/pdf")
-        
-        abort(404)
-    except Exception as e:
-        logger.error(f"Cloud file serve error: {e}")
-        abort(500)
-    except Exception as e:
-        logger.error(f"Resume delete error: {e}")
-        return jsonify({"error": str(e)}), 500
+    from flask import send_from_directory
+    return send_from_directory(UPLOAD_DIR, filename)
 
 
 @app.route("/api/toggle-alert", methods=["POST"])

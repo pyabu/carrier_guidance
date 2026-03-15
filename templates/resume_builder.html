@@ -281,31 +281,10 @@ function downloadResume() {
         jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
     };
 
-    // Generate blob for cloud upload
-    html2pdf().set(opt).from(container).outputPdf('blob').then(function(pdfBlob) {
-        const formData = new FormData();
-        formData.append('resume', pdfBlob, name + '.pdf');
-
-        // Upload to cloud silently
-        fetch('/api/upload-resume', {
-            method: 'POST',
-            body: formData
-        }).then(res => res.json())
-        .then(data => {
-            // Generate actual download file for the user
-            html2pdf().set(opt).from(container).save().then(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-                if (!data.error) alert('Resume saved to your cloud profile!');
-            });
-        }).catch(err => {
-            console.error('Error uploading pdf:', err);
-            // Even if upload fails, give user the PDF
-            html2pdf().set(opt).from(container).save().then(() => {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            });
-        });
+    // Generate and download directly
+    html2pdf().set(opt).from(container).save().then(() => {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
     });
 }
 function resetForm() {
