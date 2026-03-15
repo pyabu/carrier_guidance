@@ -149,7 +149,7 @@
                     <i class="fas fa-moon"></i>
                 </button>
                 {% if session.get('user_id') %}
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="nav-auth-desktop">
                     {% if session.get('is_admin') %}
                     <a href="/admin" class="btn btn-outline btn-sm" style="border: none;">
                         <i class="fas fa-shield-alt"></i> Admin
@@ -163,7 +163,7 @@
                     </a>
                 </div>
                 {% else %}
-                <div style="display: flex; gap: 8px; align-items: center;">
+                <div class="nav-auth-desktop">
                     <a href="/login" class="btn btn-primary btn-sm">
                         <i class="fas fa-sign-in-alt"></i> Login
                     </a>

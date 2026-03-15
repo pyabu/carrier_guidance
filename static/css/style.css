@@ -322,6 +322,10 @@ select.form-control {
     flex-shrink: 0;
 }
 
+.nav-logo span {
+    white-space: nowrap;
+}
+
 .nav-logo i {
     color: var(--accent);
     font-size: 1.5rem;
@@ -426,6 +430,12 @@ select.form-control {
     align-items: center;
     gap: 12px;
     flex-shrink: 0;
+}
+
+.nav-auth-desktop {
+    display: flex;
+    gap: 8px;
+    align-items: center;
 }
 
 .theme-toggle {
@@ -2234,6 +2244,14 @@ section {
 @media (max-width: 768px) {
     .container {
         padding: 0 16px;
+    }
+
+    .nav-container {
+        gap: 12px;
+    }
+
+    .nav-auth-desktop {
+        display: none !important;
     }
 
     .nav-menu {
