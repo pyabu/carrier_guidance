@@ -7,15 +7,34 @@
 <style>
     /* ── High-Density Design System ── */
     :root {
+        /* Layout Variables */
         --sidebar-width: 240px;
         --sidebar-collapsed-width: 70px;
+        --sidebar-accent: #6366f1;
+        
+        /* Dark Theme Variables (Default) */
         --sidebar-bg: #0f172a;
-        --sidebar-accent: #8b5cf6;
         --bg-main: #020617;
         --card-bg: #1e293b;
         --border-color: #334155;
         --text-dim: #94a3b8;
         --text-main: #f8fafc;
+        --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4);
+        --glass-bg: rgba(30, 41, 59, 0.8);
+    }
+
+    [data-admin-theme="light"] {
+        --sidebar-bg: #ffffff;
+        --bg-main: #f8fafc;
+        --card-bg: #ffffff;
+        --border-color: #e2e8f0;
+        --text-dim: #64748b;
+        --text-main: #0f172a;
+        --sidebar-accent: #4f46e5;
+        --shadow-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
+        --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.1);
+        --glass-bg: rgba(255, 255, 255, 0.8);
     }
 
     body {
@@ -40,12 +59,13 @@
     .admin-sidebar {
         width: var(--sidebar-width);
         background: var(--sidebar-bg);
-        color: white;
+        color: var(--text-main);
         transition: width 0.3s ease;
         position: fixed;
         height: 100vh;
         z-index: 1001;
         overflow: hidden;
+        border-right: 1px solid var(--border-color);
     }
 
     .admin-sidebar.collapsed {
@@ -82,7 +102,7 @@
         display: flex;
         align-items: center;
         gap: 15px;
-        color: #9ca3af;
+        color: var(--text-dim);
         text-decoration: none;
         transition: 0.2s;
         border-left: 3px solid transparent;
@@ -92,13 +112,15 @@
 
     .nav-btn:hover,
     .nav-btn.active {
-        background: rgba(255, 255, 255, 0.05);
-        color: white;
+        background: rgba(99, 102, 241, 0.08); /* Accent with opacity */
+        color: var(--text-main);
     }
 
     .nav-btn.active {
         border-left-color: var(--sidebar-accent);
-        color: white;
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--sidebar-accent);
+        font-weight: 600;
     }
 
     .nav-btn i {
@@ -129,7 +151,9 @@
 
     .top-toolbar {
         height: 60px;
-        background: var(--card-bg);
+        background: var(--glass-bg);
+        backdrop-filter: blur(12px);
+        -webkit-backdrop-filter: blur(12px);
         border-bottom: 1px solid var(--border-color);
         padding: 0 24px;
         display: flex;
@@ -138,6 +162,7 @@
         position: sticky;
         top: 0;
         z-index: 900;
+        box-shadow: var(--shadow-sm);
     }
 
     .toolbar-left {
@@ -191,8 +216,15 @@
     .stat-box {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
-        padding: 16px;
+        border-radius: 16px;
+        padding: 20px;
+        box-shadow: var(--shadow-sm);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-box:hover {
+        transform: translateY(-2px);
+        box-shadow: var(--shadow-md);
     }
 
     .stat-label {
@@ -213,8 +245,9 @@
     .table-card {
         background: var(--card-bg);
         border: 1px solid var(--border-color);
-        border-radius: 12px;
+        border-radius: 16px;
         overflow: hidden;
+        box-shadow: var(--shadow-sm);
     }
 
     .table-actions {
@@ -261,7 +294,7 @@
     .admin-data-table th {
         padding: 8px 20px;
         text-align: left;
-        background: rgba(0, 0, 0, 0.2);
+        background: var(--sidebar-bg);
         color: var(--text-dim);
         font-weight: 600;
         text-transform: uppercase;
@@ -275,8 +308,12 @@
         vertical-align: middle;
     }
 
+    .admin-data-table tr {
+        transition: background 0.2s;
+    }
+
     .admin-data-table tr:hover {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(99, 102, 241, 0.05); /* very light accent */
     }
 
     /* Mini Action Buttons */
@@ -514,7 +551,7 @@
     <nav class="admin-sidebar" id="sidebar">
         <div class="sidebar-brand">
             <div class="brand-icon">A</div>
-            <span class="brand-text" style="font-weight: 800; font-size: 1.1rem; color: white;">ADMIN CONTROL</span>
+            <span class="brand-text" style="font-weight: 800; font-size: 1.1rem; color: var(--text-main);">ADMIN CONTROL</span>
         </div>
 
         <div class="nav-items">
@@ -543,6 +580,9 @@
                 </div>
             </div>
             <div class="toolbar-right" style="display: flex; gap: 15px; align-items: center;">
+                <button id="theme-toggle" class="mini-btn secondary" onclick="toggleAdminTheme()" title="Toggle Theme">
+                    <i class="fas fa-moon"></i>
+                </button>
                 <div class="status-badge"><i class="fas fa-circle" style="font-size: 6px;"></i> SERVER: OPERATIONAL
                 </div>
                 <div style="font-weight: 600; color: var(--text-dim);">{{ session.get('user_name') }} (Admin)</div>
@@ -1129,13 +1169,15 @@
     async function saveSeoSettings() {
         const title = document.getElementById('seo-title').value.trim();
         const desc  = document.getElementById('seo-desc').value.trim();
+        const pwd = prompt("Are you sure you want to save SEO settings? Enter Admin Password to confirm:");
+        if (!pwd) return;
         const res = await fetch('/api/admin/seo/settings', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ meta_title: title, meta_description: desc, keywords: _trackedKeywords })
+            body: JSON.stringify({ meta_title: title, meta_description: desc, keywords: _trackedKeywords, password: pwd })
         });
         if (res.ok) showToast('<i class="fas fa-check-circle"></i> SEO settings saved!', 'success');
-        else        showToast('<i class="fas fa-times-circle"></i> Save failed', 'error');
+        else        showToast('<i class="fas fa-times-circle"></i> Save failed (Invalid Password?)', 'error');
     }
 
     async function generateSitemap() {
@@ -1167,16 +1209,26 @@
 
     async function submitSitemap() {
         const btn = event.currentTarget;
+        const pwd = prompt("Are you sure you want to submit sitemap to Google? Enter Admin Password to confirm:");
+        if (!pwd) return;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
         const status = document.getElementById('sitemap-status');
         try {
-            const res = await fetch('/api/admin/seo/submit-sitemap', { method: 'POST' });
+            const res = await fetch('/api/admin/seo/submit-sitemap', { 
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password: pwd })
+            });
             const d = await res.json();
-            status.style.display = 'block';
-            status.style.color = '#34d399';
-            status.innerHTML = `✅ Submitted to Google! Status: <strong>${d.ping_status}</strong>.<br><small>URL: ${d.sitemap_url}</small>`;
-            showToast('<i class="fab fa-google"></i> Sitemap submitted to Google!', 'success');
+            if (res.ok && res.status !== 401) {
+                status.style.display = 'block';
+                status.style.color = '#34d399';
+                status.innerHTML = `✅ Submitted to Google! Status: <strong>${d.ping_status}</strong>.<br><small>URL: ${d.sitemap_url}</small>`;
+                showToast('<i class="fab fa-google"></i> Sitemap submitted to Google!', 'success');
+            } else {
+                showToast(d.message || 'Submission failed (Invalid Password?)', 'error');
+            }
         } catch(e) {
             showToast('Submission failed: ' + e.message, 'error');
         } finally {
@@ -1322,11 +1374,15 @@
         if (document.getElementById('src-india').checked) sources.push('india');
         if (document.getElementById('src-tn').checked)    sources.push('tamilnadu');
         if (sources.length === 0) { showToast('Select at least one source', 'error'); return; }
+        
+        const pwd = prompt("Are you sure you want to start the scraper? Enter Admin Password to confirm:");
+        if (!pwd) return;
+
         logToConsole(`Initiating scrape for: ${sources.join(', ')}...`);
         const res = await fetch('/api/admin/scraper/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sources })
+            body: JSON.stringify({ sources, password: pwd })
         });
         const d = await res.json();
         if (d.success) {
@@ -1377,18 +1433,51 @@
     async function saveSchedule() {
         const interval = parseInt(document.getElementById('sched-interval').value);
         const hour     = parseInt(document.getElementById('sched-hour').value);
+        const pwd = prompt("Are you sure you want to save schedule settings? Enter Admin Password to confirm:");
+        if (!pwd) return;
         const res = await fetch('/api/admin/scraper/schedule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ schedule_interval_hours: interval, schedule_hour: hour })
+            body: JSON.stringify({ schedule_interval_hours: interval, schedule_hour: hour, password: pwd })
         });
-        if (res.ok) showToast('<i class="fas fa-check"></i> Schedule saved!', 'success');
-        else        showToast('Failed to save schedule', 'error');
+        if (res.ok) {
+            showToast('<i class="fas fa-check"></i> Schedule saved!', 'success');
+        } else {
+            const d = await res.json().catch(() => ({}));
+            showToast(d.message || 'Failed to save schedule (Invalid Password?)', 'error');
+        }
     }
 
     // Initial Load
     refreshDashboard();
     connectScraperLogs(); // Start live log connection
     setInterval(refreshDashboard, 60000); // Periodic refresh
+
+    // Theme Management
+    function loadAdminTheme() {
+        const savedTheme = localStorage.getItem('adminTheme') || 'dark';
+        document.documentElement.setAttribute('data-admin-theme', savedTheme);
+        updateThemeIcon(savedTheme);
+    }
+
+    function toggleAdminTheme() {
+        const currentTheme = document.documentElement.getAttribute('data-admin-theme') || 'dark';
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-admin-theme', newTheme);
+        localStorage.setItem('adminTheme', newTheme);
+        updateThemeIcon(newTheme);
+    }
+
+    function updateThemeIcon(theme) {
+        const btn = document.getElementById('theme-toggle');
+        if (theme === 'light') {
+            btn.innerHTML = '<i class="fas fa-sun" style="color: #f59e0b;"></i>';
+        } else {
+            btn.innerHTML = '<i class="fas fa-moon" style="color: #cbd5e1;"></i>';
+        }
+    }
+
+    loadAdminTheme();
+
 </script>
 {% endblock %}

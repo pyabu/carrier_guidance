@@ -94,7 +94,7 @@
         <div class="container nav-container">
             <a href="/" class="nav-logo">
                 <i class="fas fa-rocket"></i>
-                <span>{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0] }}</span>
+                <span style="white-space: nowrap;">{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0].replace(' ', '') }}</span>
             </a>
 
             <ul class="nav-menu" id="navMenu">
@@ -191,7 +191,7 @@
                 <div class="footer-brand">
                     <a href="/" class="footer-logo">
                         <i class="fas fa-rocket"></i>
-                        <span>{{ g.get('seo', {}).get('meta_title', 'careerguidance').split(' – ')[0].split(' | ')[0] }}</span>
+                        <span style="white-space: nowrap;">{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0].replace(' ', '') }}</span>
                     </a>
                     <p>India's leading career guidance, job search, and hiring platform. Empowering Indian students,
                         freshers, and professionals across Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai &

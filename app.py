@@ -131,6 +131,22 @@ def _supabase_load_seo():
 
 
 # ── Authentication Helper ──────────────────────────────────────────────
+def _verify_admin_password(password: str) -> bool:
+    """Check if the provided password matches the currently logged in admin's password."""
+    if not password:
+        return False
+    uid = session.get('user_id')
+    if not uid:
+        return False
+    try:
+        response = supabase.table("users").select("password_hash").eq("id", uid).execute()
+        if response.data:
+            hashed_pw = response.data[0].get("password_hash")
+            return check_password_hash(hashed_pw, password)
+    except Exception as e:
+        logger.error(f"Error checking admin password: {e}")
+    return False
+
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -1123,6 +1139,10 @@ def seo_settings():
         return jsonify(_load_seo_settings())
     # POST – update
     body = request.get_json(silent=True) or {}
+    password = body.get("password", "")
+    if not _verify_admin_password(password):
+        return jsonify({"success": False, "message": "Invalid admin password."}), 401
+    
     current = _load_seo_settings()
     for key in ("meta_title", "meta_description", "keywords"):
         if key in body:
@@ -1196,6 +1216,10 @@ def generate_sitemap():
 @admin_required
 def submit_sitemap_to_google():
     """Ping Google Search Console to notify about the sitemap."""
+    body = request.get_json(silent=True) or {}
+    password = body.get("password", "")
+    if not _verify_admin_password(password):
+        return jsonify({"success": False, "message": "Invalid admin password."}), 401
     try:
         import urllib.request
         sitemap_url = request.host_url.rstrip("/") + "/sitemap.xml"
@@ -1298,8 +1322,13 @@ def scraper_start():
     global _scraper_running, _scraper_thread, LAST_SCRAPE_TIME
     if _scraper_running:
         return jsonify({"success": False, "message": "Scraper already running."})
+    
+    body = request.get_json(silent=True) or {}
+    password = body.get("password", "")
+    if not _verify_admin_password(password):
+        return jsonify({"success": False, "message": "Invalid admin password."}), 401
+        
     try:
-        body = request.get_json(silent=True) or {}
         sources = body.get("sources", ["main", "india", "tamilnadu"])
 
         # Save config
@@ -1440,11 +1469,106 @@ def scraper_schedule():
         })
     # POST
     body = request.get_json(silent=True) or {}
+    password = body.get("password", "")
+    if not _verify_admin_password(password):
+        return jsonify({"success": False, "message": "Invalid admin password."}), 401
+        
     for key in ("schedule_hour", "schedule_interval_hours", "auto_dedup", "sources"):
         if key in body:
             config[key] = body[key]
     _save_scraper_config(config)
     return jsonify({"success": True, "config": config})
+
+
+@app.route("/api/cron/scraper", methods=["GET", "POST"])
+def cron_scraper():
+    """Triggered by Vercel Cron. Runs only if current hour matches schedule_hour."""
+    # Auth verification (optional but recommended on Vercel)
+    auth_header = request.headers.get("Authorization")
+    cron_secret = os.environ.get("CRON_SECRET")
+    if cron_secret and auth_header != f"Bearer {cron_secret}":
+        return jsonify({"error": "Unauthorized"}), 401
+
+    config = _load_scraper_config()
+    target_hour = int(config.get("schedule_hour", 3))
+    interval = int(config.get("schedule_interval_hours", 12))
+    
+    # Simple check: does the current hour match target_hour?
+    import pytz
+    from datetime import datetime
+    
+    # Vercel Cron fires on UTC
+    now_utc = datetime.now(pytz.utc)
+    # The cron runs hourly. If current hour mod interval != target_hour mod interval, skip.
+    if now_utc.hour % interval != target_hour % interval:
+        return jsonify({"success": True, "message": f"Skipped. Current UTC hour {now_utc.hour} doesn't align with {target_hour} (interval {interval})."}), 200
+        
+    global _scraper_running, _scraper_thread, LAST_SCRAPE_TIME
+    if _scraper_running:
+        return jsonify({"success": True, "message": "Already running"}), 200
+        
+    try:
+        sources = config.get("sources", ["main", "india", "tamilnadu"])
+        _scraper_running = True
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+
+        def _run_scraper():
+            global _scraper_running, LAST_SCRAPE_TIME
+            try:
+                import subprocess, sys
+                env = dict(os.environ)
+                env["PYTHONPATH"] = app.root_path
+                for src, module in [("main", "scraper.job_scraper"),
+                                    ("tamilnadu", "scraper.tamilnadu_scraper"),
+                                    ("india", "scraper.india_scraper")]:
+                    if src in sources:
+                        _scraper_log(f"▶ Starting {module}…")
+                        proc = subprocess.Popen(
+                            [sys.executable, "-m", module],
+                            cwd=app.root_path, env=env,
+                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
+                            text=True, bufsize=1
+                        )
+                        for line in proc.stdout:
+                            line = line.rstrip()
+                            if line:
+                                _scraper_log(f"  [{src}] {line}")
+                        proc.wait()
+                        _scraper_log(f"✓ {module} finished (exit {proc.returncode})")
+                if config.get("auto_dedup", True):
+                    _scraper_log("🧹 Running auto-dedup…")
+                    for label, load_fn, save_fn in [
+                        ("main", load_jobs, save_jobs),
+                        ("india", load_india_jobs, save_india_jobs),
+                        ("tamilnadu", load_tn_jobs, save_tn_jobs)
+                    ]:
+                        try:
+                            d = load_fn()
+                            jobs_list = d.get("jobs", [])
+                            seen = set()
+                            unique = [j for j in jobs_list if (k := j.get("apply_url") or j.get("title")) not in seen and not seen.add(k)]
+                            if len(unique) < len(jobs_list):
+                                d["jobs"] = unique; d["total"] = len(unique)
+                                save_fn(d)
+                                _scraper_log(f"  Dedup {label}: -{len(jobs_list)-len(unique)} dupes")
+                        except Exception as ex:
+                            _scraper_log(f"  Dedup {label} error: {ex}")
+            except Exception as ex:
+                logger.error(f"Scraper thread error: {ex}")
+                _scraper_log(f"✗ ERROR: {ex}")
+            finally:
+                _scraper_running = False
+                LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                _scraper_log(f"✔ All done. Finished at {LAST_SCRAPE_TIME}")
+
+        import threading
+        _scraper_thread = threading.Thread(target=_run_scraper, daemon=True)
+        _scraper_thread.start()
+
+        return jsonify({"success": True, "message": "Cron scrape started."})
+    except Exception as e:
+        _scraper_running = False
+        return jsonify({"error": str(e)}), 500
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -3544,8 +3668,8 @@ def run_daily_scrape():
 # Initialize and start the scheduler (only if not on Vercel)
 if not IS_VERCEL:
     try:
-        from apscheduler.schedulers.background import BackgroundJobScheduler
-        scheduler = BackgroundJobScheduler()
+        from apscheduler.schedulers.background import BackgroundScheduler
+        scheduler = BackgroundScheduler()
         # Schedule daily at 2:00 AM
         scheduler.add_job(func=run_daily_scrape, trigger="cron", hour=2, minute=0)
         

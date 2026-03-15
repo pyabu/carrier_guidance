@@ -22,16 +22,8 @@
   ],
   "crons": [
     {
-      "path": "/api/cron",
-      "schedule": "0 6 * * *"
-    },
-    {
-      "path": "/api/cron/tn",
-      "schedule": "15 6 * * *"
-    },
-    {
-      "path": "/api/cron/india",
-      "schedule": "30 6 * * *"
+      "path": "/api/cron/scraper",
+      "schedule": "0 * * * *"
     }
   ]
 }
