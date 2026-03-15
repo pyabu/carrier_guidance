@@ -1,0 +1,10 @@
+{
+  "sources": [
+    "main",
+    "india",
+    "tamilnadu"
+  ],
+  "schedule_hour": 3,
+  "schedule_interval_hours": 12,
+  "auto_dedup": true
+}
