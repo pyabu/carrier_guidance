@@ -8,4 +8,3 @@ Disallow: /profile
 Disallow: /onboarding
 
 Sitemap: https://careerguidance.me/sitemap.xml
-Sitemap: https://careerguidance.me/sitemap-html

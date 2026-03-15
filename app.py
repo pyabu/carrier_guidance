@@ -3556,10 +3556,6 @@ def robots():
 def sitemap():
     return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
 
-@app.route("/sitemap-html")
-def sitemap_html():
-    return render_template("sitemap_html.html")
-
 @app.route("/google25c1f4c7795c1819.html")
 def src_google_1():
     return send_from_directory(app.root_path, 'google25c1f4c7795c1819.html', mimetype='text/html')
