@@ -1000,6 +1000,17 @@ from flask import g
 def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
+    
+    # Calculate canonical URL
+    # Always point to the production domain for indexing
+    base_url = "https://careerguidance.me"
+    path = request.path
+    
+    # Preserve necessary query params if any (optional, usually better to strip for canonical)
+    # For this site, we generally want clean URLs.
+    # If we need specific filters (like country=India on /jobs), we could add them here.
+    # For now, let's keep it clean as per the plan.
+    g.canonical_url = f"{base_url}{path}"
 
 import time
 _jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}

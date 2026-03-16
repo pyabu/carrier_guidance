@@ -7,7 +7,7 @@
     <meta name="theme-color" content="#0f4c75">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
     <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
-    <link rel="canonical" href="{{ request.url }}">
+    <link rel="canonical" href="{{ g.canonical_url }}">
     <meta name="robots" content="index, follow, max-image-preview:large">
     <meta name="description"
         content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance. Discover the best fresher jobs, IT roles, and remote work in Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR, and across India.') }}{% endblock %}">
@@ -16,14 +16,14 @@
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
-    <meta property="og:url" content="{{ request.url }}">
+    <meta property="og:url" content="{{ g.canonical_url }}">
     <meta property="og:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
     <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
     <meta property="og:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
 
     <!-- Twitter -->
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ request.url }}">
+    <meta property="twitter:url" content="{{ g.canonical_url }}">
     <meta property="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
     <meta property="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
     <meta property="twitter:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
