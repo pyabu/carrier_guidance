@@ -1,90 +1,90 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <!-- Homepage -->
+
+    <!-- ═══ Tier 1: Core / High Traffic ═══ -->
     <url>
         <loc>https://careerguidance.me/</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>daily</changefreq>
         <priority>1.0</priority>
     </url>
-
-    <!-- Jobs - Highest Traffic Pages -->
     <url>
         <loc>https://careerguidance.me/jobs</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.9</priority>
+        <priority>0.95</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/jobs/india</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.9</priority>
+        <priority>0.95</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/jobs/tamilnadu</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>daily</changefreq>
-        <priority>0.9</priority>
+        <priority>0.95</priority>
     </url>
 
-    <!-- Career Resources -->
+    <!-- ═══ Tier 2: Career Resources ═══ -->
     <url>
         <loc>https://careerguidance.me/career-guidance</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
+        <priority>0.85</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/resume-builder</loc>
-        <lastmod>2026-03-15</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.8</priority>
+        <lastmod>2026-03-16</lastmod>
+        <changefreq>weekly</changefreq>
+        <priority>0.85</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/blog</loc>
-        <lastmod>2026-03-15</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-
-    <!-- Developer Profile (Author SEO) -->
-    <url>
-        <loc>https://careerguidance.me/developer</loc>
-        <lastmod>2026-03-15</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.7</priority>
-    </url>
-
-    <!-- Supporting Pages -->
-    <url>
-        <loc>https://careerguidance.me/about</loc>
-        <lastmod>2026-03-15</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>https://careerguidance.me/contact</loc>
-        <lastmod>2026-03-01</lastmod>
-        <changefreq>yearly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.80</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/faq</loc>
-        <lastmod>2026-03-01</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>monthly</changefreq>
-        <priority>0.5</priority>
+        <priority>0.70</priority>
+    </url>
+
+    <!-- ═══ Tier 3: Supporting / Informational ═══ -->
+    <url>
+        <loc>https://careerguidance.me/about</loc>
+        <lastmod>2026-03-16</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.60</priority>
     </url>
     <url>
+        <loc>https://careerguidance.me/contact</loc>
+        <lastmod>2026-03-16</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.55</priority>
+    </url>
+    <url>
+        <loc>https://careerguidance.me/developer</loc>
+        <lastmod>2026-03-16</lastmod>
+        <changefreq>monthly</changefreq>
+        <priority>0.50</priority>
+    </url>
+
+    <!-- ═══ Tier 4: Legal / Low Priority ═══ -->
+    <url>
         <loc>https://careerguidance.me/privacy</loc>
-        <lastmod>2026-01-01</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.3</priority>
+        <priority>0.30</priority>
     </url>
     <url>
         <loc>https://careerguidance.me/terms</loc>
-        <lastmod>2026-01-01</lastmod>
+        <lastmod>2026-03-16</lastmod>
         <changefreq>yearly</changefreq>
-        <priority>0.3</priority>
+        <priority>0.30</priority>
     </url>
+
 </urlset>
