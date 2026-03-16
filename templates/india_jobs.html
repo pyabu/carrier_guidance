@@ -164,6 +164,29 @@
 /* Loading skeleton */
 .skeleton{background:linear-gradient(90deg,var(--border) 25%,rgba(255,255,255,.1) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
 @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Jobs",
+    "item": "https://careerguidance.me/jobs"
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "All India Jobs",
+    "item": "{{ g.canonical_url }}"
+  }]
+}
+</script>
 </style>
 {% endblock %}
 

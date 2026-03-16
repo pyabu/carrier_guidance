@@ -477,6 +477,11 @@ def home():
     # Stats for the homepage
     companies = set(j.get("company", "") for j in jobs)
     cities = set(j.get("location_city", "") for j in jobs if j.get("location_city"))
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Career Guidance – Find Jobs in India & Tamil Nadu"
+    g.seo['meta_description'] = "Discover thousands of job opportunities across India. Get career guidance, build your resume, and connect with top employers — all in one place."
+    
     return render_template(
         "index.html",
         featured_jobs=featured,
@@ -489,6 +494,10 @@ def home():
 
 @app.route("/jobs")
 def jobs_page():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Browse Jobs | AI-Powered Job Search | Career Guidance"
+    g.seo['meta_description'] = "Search for jobs across India and globally. AI-powered search for software, data science, design, marketing, and more. Real-time listings from LinkedIn, Indeed, and Naukri."
     return render_template("jobs.html")
 
 
@@ -524,16 +533,31 @@ def job_detail(job_id):
 
     if not job:
         abort(404)
+    
+    # Inject dynamic SEO for the specific job
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = f"{job.get('title')} at {job.get('company')} | Career Guidance"
+    g.seo['meta_description'] = f"Apply for {job.get('title')} position at {job.get('company')} in {job.get('location')}. {job.get('description', '')[:150]}..."
+    
     return render_template("job_detail.html", job=job)
 
 
 @app.route("/career-guidance")
 def career_guidance():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Career Guidance & Roadmaps | AI-Powered Career Planning"
+    g.seo['meta_description'] = "Get expert career guidance and detailed roadmaps for AI, Web Development, Data Science, and more. Plan your career path with Career Guidance."
     return render_template("career_guidance.html")
 
 
 @app.route("/resume-builder")
 def resume_builder():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "AI Resume Builder | Create ATS-Friendly Resumes"
+    g.seo['meta_description'] = "Build a professional, ATS-friendly resume in minutes with our AI-powered builder. Get expert tips to stand out to employers and land your dream job."
     return render_template("resume_builder.html")
 
 
@@ -2706,6 +2730,10 @@ def api_career_paths():
 @app.route("/jobs/tamilnadu")
 def tn_jobs_page():
     """Dedicated Tamil Nadu & Pondicherry jobs page."""
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Tamil Nadu & Pondicherry Jobs | Career Guidance"
+    g.seo['meta_description'] = "Browse latest job openings across all cities in Tamil Nadu & Pondicherry. Find jobs in Chennai, Coimbatore, Madurai, Trichy, Salem, Puducherry & 50+ cities."
     return render_template("tn_jobs.html")
 
 
@@ -2951,6 +2979,10 @@ def _get_tn_cities():
 @app.route("/jobs/india")
 def india_jobs_page():
     """Dedicated All-India jobs page with AI-powered organization."""
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "All India Jobs – AI-Powered Job Portal | Career Guidance"
+    g.seo['meta_description'] = "Browse 500+ AI-organized job listings across all 28 states and 8 union territories of India. Powered by real-time scraping from Naukri, LinkedIn, Indeed, and more."
     return render_template("india_jobs.html")
 
 

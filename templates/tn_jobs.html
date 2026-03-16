@@ -115,6 +115,29 @@
 .tn-refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:.78rem;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);background:transparent;cursor:pointer;transition:all .2s;margin-top:12px}
 .tn-refresh-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.4);color:#fff}
 .tn-refresh-btn.spinning i{animation:tn-spin 1s linear infinite}
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Jobs",
+    "item": "https://careerguidance.me/jobs"
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "Tamil Nadu & Pondicherry Jobs",
+    "item": "{{ g.canonical_url }}"
+  }]
+}
+</script>
 </style>
 {% endblock %}
 
