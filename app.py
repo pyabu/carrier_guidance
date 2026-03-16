@@ -1001,6 +1001,22 @@ def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
 
+import time
+_jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}
+
+@app.context_processor
+def inject_jobs_last_updated():
+    """Inject jobs_last_updated into all templates, caching for 60 seconds."""
+    now = time.time()
+    if now - _jobs_last_updated_cache["checked_at"] > 60:
+        try:
+            data = load_jobs()
+            _jobs_last_updated_cache["time"] = data.get("last_updated", "2026-03-15 06:56:04")
+        except Exception as e:
+            logger.warning(f"Failed to fetch last_updated for context processor: {e}")
+        _jobs_last_updated_cache["checked_at"] = now
+    return dict(jobs_last_updated=_jobs_last_updated_cache["time"])
+
 
 # ── Real-time scraper log buffer (SSE) ──────────────────────────────────
 from collections import deque
