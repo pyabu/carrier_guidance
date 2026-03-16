@@ -3621,6 +3621,10 @@ def dashboard_stats():
 def favicon():
     return send_from_directory(app.static_folder, 'favicon.ico', mimetype='image/vnd.microsoft.icon')
 
+@app.route("/googled8e4a208a1e8c152.html")
+def google_verification():
+    return send_from_directory(app.root_path, 'googled8e4a208a1e8c152.html', mimetype='text/html')
+
 @app.route("/robots.txt")
 def robots():
     return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
