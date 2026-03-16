@@ -1,7 +1,9 @@
 User-agent: *
 Allow: /
+Allow: /api/stats
+Allow: /api/jobs/search-all
 Disallow: /admin
-Disallow: /api
+Disallow: /api/
 Disallow: /login
 Disallow: /register
 Disallow: /profile
