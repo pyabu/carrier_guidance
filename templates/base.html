@@ -71,8 +71,8 @@
     <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
     <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"></noscript>
 
-    <!-- Main Stylesheet (Minified) -->
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.min.css') }}">
+    <!-- Main Stylesheet (Unminified with Cache Buster) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='1.1') }}">
     <style>
         /* Prevent FOUC */
         .main-content {
