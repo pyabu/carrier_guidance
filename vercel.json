@@ -23,7 +23,7 @@
   "crons": [
     {
       "path": "/api/cron/scraper",
-      "schedule": "0 2 * * *"
+      "schedule": "0 * * * *"
     }
   ]
 }

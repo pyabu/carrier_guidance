@@ -218,6 +218,10 @@ def save_tn_jobs(data):
     """Persist Tamil Nadu jobs to JSON file (+ Supabase on Vercel)."""
     with open(TN_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    
+    # Invalidate the last_updated cache for the context processor
+    _jobs_last_updated_cache["checked_at"] = 0
+    
     if IS_VERCEL:
         _supabase_save_jobs("tn_jobs", data)
 
@@ -1476,7 +1480,7 @@ def cron_scraper():
 
     config = _load_scraper_config()
     target_hour = int(config.get("schedule_hour", 3))
-    interval = int(config.get("schedule_interval_hours", 12))
+    interval = int(config.get("schedule_interval_hours", 6))
     
     # Simple check: does the current hour match target_hour?
     import pytz
@@ -3710,29 +3714,27 @@ if not IS_VERCEL:
         # Schedule every 6 hours
         scheduler.add_job(func=run_daily_scrape, trigger="interval", hours=REFRESH_INTERVAL_HOURS)
         
-        # Only start if it's the main entry point to avoid double initialization in some environments
-        if __name__ == "__main__":
-            # Also run once on startup in a separate thread if local cache is empty or very old
-            def run_initial_scrape_if_needed():
-                try:
-                    is_empty = not os.path.exists(JOBS_FILE) or os.path.getsize(JOBS_FILE) < 100
-                    is_old = False
-                    if os.path.exists(JOBS_FILE):
-                        mtime = os.path.getmtime(JOBS_FILE)
-                        if (datetime.now() - datetime.fromtimestamp(mtime)).total_seconds() > REFRESH_INTERVAL_HOURS * 3600:
-                            is_old = True
-                            
-                    if is_empty or is_old:
-                        logger.info("🚀 Initial startup scrape triggered...")
-                        run_daily_scrape()
-                except Exception as e:
-                    logger.warning(f"Startup scrape check failed: {e}")
+        scheduler.start()
+        logger.info(f"📅 Background Scheduler started (Every {REFRESH_INTERVAL_HOURS} hours).")
 
-            startup_thread = threading.Thread(target=run_initial_scrape_if_needed, daemon=True)
-            startup_thread.start()
-            
-            scheduler.start()
-            logger.info(f"📅 Background Scheduler started (Every {REFRESH_INTERVAL_HOURS} hours).")
+        # Also run once on startup in a separate thread if local cache is empty or very old
+        def run_initial_scrape_if_needed():
+            try:
+                is_empty = not os.path.exists(JOBS_FILE) or os.path.getsize(JOBS_FILE) < 100
+                is_old = False
+                if os.path.exists(JOBS_FILE):
+                    mtime = os.path.getmtime(JOBS_FILE)
+                    if (datetime.now() - datetime.fromtimestamp(mtime)).total_seconds() > REFRESH_INTERVAL_HOURS * 3600:
+                        is_old = True
+                        
+                if is_empty or is_old:
+                    logger.info("🚀 Initial startup scrape triggered...")
+                    run_daily_scrape()
+            except Exception as e:
+                logger.warning(f"Startup scrape check failed: {e}")
+
+        startup_thread = threading.Thread(target=run_initial_scrape_if_needed, daemon=True)
+        startup_thread.start()
     except Exception as e:
         logger.error(f"Failed to start scheduler: {e}")
 
