@@ -165,6 +165,14 @@ def admin_required(f):
         return f(*args, **kwargs)
     return decorated_function
 
+def _check_cron_secret():
+    """Verify the CRON_SECRET for incoming Vercel Cron requests."""
+    auth_header = request.headers.get("Authorization")
+    cron_secret = os.environ.get("CRON_SECRET")
+    if not cron_secret:
+        return True # Default to allow if not set (for local dev)
+    return auth_header == f"Bearer {cron_secret}"
+
 # ── Helpers ────────────────────────────────────────────────────────────
 
 def load_jobs():
@@ -1331,26 +1339,24 @@ def scraper_start():
         def _run_scraper():
             global _scraper_running, LAST_SCRAPE_TIME
             try:
-                import subprocess, sys
-                env = dict(os.environ)
-                env["PYTHONPATH"] = app.root_path
-                for src, module in [("main", "scraper.job_scraper"),
-                                    ("tamilnadu", "scraper.tamilnadu_scraper"),
-                                    ("india", "scraper.india_scraper")]:
-                    if src in sources:
-                        _scraper_log(f"▶ Starting {module}…")
-                        proc = subprocess.Popen(
-                            [sys.executable, "-m", module],
-                            cwd=app.root_path, env=env,
-                            stdout=subprocess.PIPE, stderr=subprocess.STDOUT,
-                            text=True, bufsize=1
-                        )
-                        for line in proc.stdout:
-                            line = line.rstrip()
-                            if line:
-                                _scraper_log(f"  [{src}] {line}")
-                        proc.wait()
-                        _scraper_log(f"✓ {module} finished (exit {proc.returncode})")
+                # Main jobs
+                if "main" in sources:
+                    _scraper_log("▶ Starting main job scraper…")
+                    main_res = refresh_jobs()
+                    _scraper_log(f"✓ Main scraper finished: {main_res} jobs")
+                
+                # Tamil Nadu jobs
+                if "tamilnadu" in sources:
+                    _scraper_log("▶ Starting Tamil Nadu scraper…")
+                    tn_res = refresh_tn_jobs()
+                    _scraper_log(f"✓ TN scraper finished: {tn_res} jobs")
+                
+                # India jobs
+                if "india" in sources:
+                    _scraper_log("▶ Starting All-India mega scraper…")
+                    india_res = refresh_india_jobs()
+                    _scraper_log(f"✓ India scraper finished: {india_res} jobs")
+
                 if config.get("auto_dedup", True):
                     _scraper_log("🧹 Running auto-dedup…")
                     for label, load_fn, save_fn in [
@@ -1392,11 +1398,42 @@ def scraper_start():
 @admin_required
 def scraper_stop():
     """Signal the scraper to stop (best-effort)."""
-    global _scraper_running, _scraper_thread
+    global _scraper_running
     was_running = _scraper_running
     _scraper_running = False
-    # The subprocess will finish naturally; we just mark the flag
+    _scraper_log("⏹ Stop signal received.")
     return jsonify({"success": True, "was_running": was_running, "message": "Stop signal sent."})
+
+@app.route("/api/cron/scraper", methods=["GET", "POST"])
+def cron_scraper():
+    """Triggered by Vercel Cron every 6 hours (defined in vercel.json)."""
+    if not _check_cron_secret():
+        return jsonify({"error": "Unauthorized"}), 401
+    
+    global _scraper_running, LAST_SCRAPE_TIME
+    if _scraper_running:
+        return jsonify({"success": True, "message": "Already running"}), 200
+    
+    try:
+        _scraper_running = True
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        _scraper_log("▶ Starting cron scraper (Main)...")
+        
+        count = refresh_jobs()
+        
+        _scraper_running = False
+        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        _scraper_log(f"✓ Cron scraper finished: {count} jobs")
+        
+        return jsonify({
+            "status": "success",
+            "jobs_scraped": count,
+            "timestamp": LAST_SCRAPE_TIME
+        })
+    except Exception as e:
+        _scraper_running = False
+        logger.error(f"❌ Cron scraper failed: {e}")
+        return jsonify({"status": "error", "error": str(e)}), 500
 
 
 @app.route("/api/admin/scraper/remove-duplicates", methods=["POST"])
@@ -2024,20 +2061,21 @@ def api_jobs():
         ]
 
     # ── Multi-value filters (comma-separated) ─────────────────────
-    job_type = request.args.get("type", "").strip()
-    experience = request.args.get("experience", "").strip()
-    category = request.args.get("category", "").strip()
-    source = request.args.get("source", "").strip()
-
+    job_type = request.args.get("type", "").strip() # Define job_type here
+    experience = request.args.get("experience", "").strip() # Define experience here
     if job_type:
         type_vals = [t.strip().lower() for t in job_type.split(",") if t.strip()]
         jobs = [j for j in jobs if any(tv in j.get("type", "").lower() for tv in type_vals)]
     if experience:
         exp_vals = [e.strip().lower() for e in experience.split(",") if e.strip()]
         jobs = [j for j in jobs if any(ev in j.get("experience", "").lower() for ev in exp_vals)]
+    
+    category = request.args.get("category", "").strip()
     if category:
         cat_vals = [c.strip().lower() for c in category.split(",") if c.strip()]
         jobs = [j for j in jobs if any(cv in j.get("category", "").lower() for cv in cat_vals)]
+    
+    source = request.args.get("source", "").strip()
     if source:
         src_vals = [s.strip().lower() for s in source.split(",") if s.strip()]
         jobs = [j for j in jobs if any(sv in j.get("source", "").lower() for sv in src_vals)]
@@ -2089,7 +2127,7 @@ def api_jobs():
         "page": page,
         "per_page": per_page,
         "total_pages": (total + per_page - 1) // per_page,
-        "last_updated": data.get("last_updated"),
+        "last_updated": LAST_SCRAPE_TIME,
         "filter_counts": {
             "types": dict(type_counts),
             "experience": dict(exp_counts),
