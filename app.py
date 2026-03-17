@@ -248,6 +248,10 @@ def save_india_jobs(data):
     """Persist All-India jobs to JSON file (+ Supabase on Vercel)."""
     with open(INDIA_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    
+    # Invalidate the last_updated cache for the context processor
+    _jobs_last_updated_cache["checked_at"] = 0
+    
     if IS_VERCEL:
         _supabase_save_jobs("india_jobs", data)
 
@@ -256,6 +260,10 @@ def save_jobs(data):
     """Persist jobs to JSON file (+ Supabase on Vercel)."""
     with open(JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
+    
+    # Invalidate the last_updated cache for the context processor
+    _jobs_last_updated_cache["checked_at"] = 0
+    
     if IS_VERCEL:
         _supabase_save_jobs("jobs", data)
 
@@ -307,7 +315,9 @@ def refresh_jobs():
                     key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
                     existing_keys.add(key)
                 new_tn = []
-                for j in tn_jobs:
+                for j in (tn_jobs or []):
+                    if not isinstance(j, dict):
+                        continue
                     key = f"{j.get('title','')}-{j.get('company','')}-{j.get('location','')}".lower()
                     if key not in existing_keys:
                         existing_keys.add(key)
@@ -414,7 +424,7 @@ scheduler_info = {
     "started_at": None,
 }
 
-REFRESH_INTERVAL_HOURS = 12
+REFRESH_INTERVAL_HOURS = 6
 STALE_THRESHOLD_HOURS = 24
 MAX_HISTORY = 10
 MAX_ERRORS = 5
@@ -432,7 +442,7 @@ def tracked_refresh():
         entry = {
             "time": end.strftime("%Y-%m-%d %H:%M:%S"),
             "jobs": count,
-            "duration_seconds": round(elapsed, 1),
+            "duration_seconds": float(round(elapsed, 1)),
             "status": "success",
         }
         scheduler_info["last_refresh"] = end.strftime("%Y-%m-%d %H:%M:%S")
@@ -967,7 +977,7 @@ _DEFAULT_SEO = {
 _DEFAULT_SCRAPER_CONFIG = {
     "sources": ["main", "india", "tamilnadu"],
     "schedule_hour": 3,
-    "schedule_interval_hours": 12,
+    "schedule_interval_hours": 6,
     "auto_dedup": True
 }
 
@@ -1030,10 +1040,10 @@ def inject_seo_globals():
     base_url = "https://careerguidance.me"
     path = request.path
     
-    # Preserve necessary query params if any (optional, usually better to strip for canonical)
-    # For this site, we generally want clean URLs.
-    # If we need specific filters (like country=India on /jobs), we could add them here.
-    # For now, let's keep it clean as per the plan.
+    # Standardize: strip trailing slash except for root
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+        
     g.canonical_url = f"{base_url}{path}"
 
 import time
@@ -1097,84 +1107,8 @@ def scraper_logs_sse():
     )
 
 
-# ── APScheduler – auto-run scraper on saved schedule ───────────────────
-def _scheduled_scraper_job():
-    """Called by APScheduler – runs all configured sources."""
-    global _scraper_running, LAST_SCRAPE_TIME
-    if _scraper_running:
-        _scraper_log("SCHEDULER: scraper already running, skipping.")
-        return
-    config = _load_scraper_config()
-    sources = config.get("sources", ["main", "india", "tamilnadu"])
-    _scraper_log(f"SCHEDULER: auto-run started for {sources}")
-    _scraper_running = True
-    LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-    try:
-        import subprocess, sys
-        env = dict(os.environ)
-        env["PYTHONPATH"] = app.root_path
-        for src, module in [("main", "scraper.job_scraper"),
-                            ("tamilnadu", "scraper.tamilnadu_scraper"),
-                            ("india", "scraper.india_scraper")]:
-            if src in sources:
-                _scraper_log(f"SCHEDULER: running {module}…")
-                proc = subprocess.run(
-                    [sys.executable, "-m", module],
-                    cwd=app.root_path, env=env, timeout=600,
-                    capture_output=True, text=True
-                )
-                for line in (proc.stdout or "").splitlines():
-                    _scraper_log(f"  {line}")
-    except Exception as ex:
-        _scraper_log(f"SCHEDULER ERROR: {ex}")
-    finally:
-        _scraper_running = False
-        LAST_SCRAPE_TIME = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        _scraper_log(f"SCHEDULER: run complete. Finished at {LAST_SCRAPE_TIME}")
-        if config.get("auto_dedup", True):
-            _scraper_log("SCHEDULER: running auto-dedup…")
-            try:
-                for label, load_fn, save_fn in [
-                    ("main", load_jobs, save_jobs),
-                    ("india", load_india_jobs, save_india_jobs),
-                    ("tamilnadu", load_tn_jobs, save_tn_jobs)
-                ]:
-                    d = load_fn()
-                    jobs_list = d.get("jobs", [])
-                    seen = set()
-                    unique = [j for j in jobs_list if (k := j.get("apply_url") or j.get("title")) not in seen and not seen.add(k)]
-                    if len(unique) < len(jobs_list):
-                        d["jobs"] = unique
-                        d["total"] = len(unique)
-                        save_fn(d)
-                        _scraper_log(f"  Auto-dedup {label}: removed {len(jobs_list)-len(unique)} dupes")
-            except Exception as ex:
-                _scraper_log(f"  Auto-dedup error: {ex}")
 
-
-def _start_scheduler():
-    """Start APScheduler with the saved interval/hour config."""
-    if IS_VERCEL:
-        return   # Vercel is serverless – no background threads
-    try:
-        from apscheduler.schedulers.background import BackgroundScheduler
-        config = _load_scraper_config()
-        interval_hours = config.get("schedule_interval_hours", 12)
-        sched = BackgroundScheduler()
-        sched.add_job(
-            _scheduled_scraper_job,
-            trigger="interval",
-            hours=int(interval_hours),
-            id="auto_scraper",
-            replace_existing=True,
-        )
-        sched.start()
-        logger.info(f"⏲  APScheduler started: every {interval_hours}h")
-        app.config["_scheduler"] = sched
-    except Exception as e:
-        logger.warning(f"Failed to start scheduler: {e}")
-
-_start_scheduler()
+# ═══════════════════════════════════════════════════════════════════════
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -3690,50 +3624,106 @@ def robots():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    return send_from_directory(app.root_path, 'sitemap.xml', mimetype='application/xml')
+    """Generate a dynamic sitemap including static pages and recent jobs."""
+    base_url = "https://careerguidance.me"
+    pages = []
+    
+    # Static core pages
+    static_urls = [
+        {"loc": "/", "priority": "1.0", "changefreq": "daily"},
+        {"loc": "/jobs", "priority": "0.95", "changefreq": "daily"},
+        {"loc": "/jobs/india", "priority": "0.95", "changefreq": "daily"},
+        {"loc": "/jobs/tamilnadu", "priority": "0.95", "changefreq": "daily"},
+        {"loc": "/career-guidance", "priority": "0.85", "changefreq": "weekly"},
+        {"loc": "/resume-builder", "priority": "0.85", "changefreq": "weekly"},
+        {"loc": "/blog", "priority": "0.80", "changefreq": "weekly"},
+        {"loc": "/faq", "priority": "0.70", "changefreq": "monthly"},
+        {"loc": "/about", "priority": "0.60", "changefreq": "monthly"},
+        {"loc": "/contact", "priority": "0.55", "changefreq": "monthly"},
+        {"loc": "/developer", "priority": "0.50", "changefreq": "monthly"},
+        {"loc": "/privacy", "priority": "0.30", "changefreq": "yearly"},
+        {"loc": "/terms", "priority": "0.30", "changefreq": "yearly"},
+    ]
+    
+    today = datetime.now().strftime("%Y-%m-%d")
+    for url in static_urls:
+        pages.append({
+            "loc": f"{base_url}{url['loc']}",
+            "lastmod": today,
+            "changefreq": url["changefreq"],
+            "priority": url["priority"]
+        })
+        
+    # Dynamic Job pages (Latest 200)
+    try:
+        data = load_jobs()
+        jobs = data.get("jobs", [])
+        # Sort by ID or date if available to get latest
+        # Here we just take the first 200 as they are usually recent from scraper
+        recent_jobs = jobs[:200]
+        
+        last_updated = data.get("last_updated", today)
+        if " " in last_updated:
+            last_updated = last_updated.split(" ")[0]
+            
+        for job in recent_jobs:
+            pages.append({
+                "loc": f"{base_url}/job/{job['id']}",
+                "lastmod": last_updated,
+                "changefreq": "weekly",
+                "priority": "0.6"
+            })
+    except Exception as e:
+        logger.error(f"Error adding jobs to sitemap: {e}")
+
+    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    for page in pages:
+        sitemap_xml += '    <url>\n'
+        sitemap_xml += f'        <loc>{page["loc"]}</loc>\n'
+        sitemap_xml += f'        <lastmod>{page["lastmod"]}</lastmod>\n'
+        sitemap_xml += f'        <changefreq>{page["changefreq"]}</changefreq>\n'
+        sitemap_xml += f'        <priority>{page["priority"]}</priority>\n'
+        sitemap_xml += '    </url>\n'
+    sitemap_xml += '</urlset>'
+    
+    return sitemap_xml, 200, {'Content-Type': 'application/xml'}
 
 
 # ── Background Scraper Scheduler ──────────────────────────────────────
 def run_daily_scrape():
     """Run all scrapers and update both local files and Supabase."""
-    logger.info("⏰ Starting daily job scrape...")
+    logger.info("⏰ Starting scheduled job refresh...")
     try:
-        from scraper.job_scraper import JobScraper
-        scraper = JobScraper()
-        jobs = scraper.scrape_all()
-        # The scrape_all() in JobScraper already saves to JOBS_FILE and handles Indian jobs if implemented.
-        # We also need to save to Supabase for Vercel persistence.
-        
-        # Load the newly saved JOBS_FILE to get the full metadata payload
-        if os.path.exists(JOBS_FILE):
-            with open(JOBS_FILE, 'r') as f:
-                jobs_data = json.load(f)
-                _supabase_save_jobs("global", jobs_data)
-        
-        # Similar for india_jobs.json if it was updated
-        if os.path.exists(INDIA_JOBS_FILE):
-            with open(INDIA_JOBS_FILE, 'r') as f:
-                india_data = json.load(f)
-                _supabase_save_jobs("india", india_data)
-                
-        logger.info(f"✅ Daily scrape completed. Total jobs: {len(jobs)}")
+        # We call refresh_jobs() which already handles JobScraper.scrape_all()
+        # and saves to both local file and Supabase (if on Vercel).
+        count = refresh_jobs()
+        logger.info(f"✅ Scheduled refresh completed. Total jobs: {count}")
     except Exception as e:
-        logger.error(f"❌ Daily scrape failed: {e}")
+        logger.error(f"❌ Scheduled refresh failed: {e}")
 
 # Initialize and start the scheduler (only if not on Vercel)
 if not IS_VERCEL:
     try:
         from apscheduler.schedulers.background import BackgroundScheduler
         scheduler = BackgroundScheduler()
-        # Schedule daily at 2:00 AM
-        scheduler.add_job(func=run_daily_scrape, trigger="cron", hour=2, minute=0)
+        # Schedule every 6 hours
+        scheduler.add_job(func=run_daily_scrape, trigger="interval", hours=REFRESH_INTERVAL_HOURS)
         
         # Only start if it's the main entry point to avoid double initialization in some environments
         if __name__ == "__main__":
             # Also run once on startup in a separate thread if local cache is empty or very old
             def run_initial_scrape_if_needed():
                 try:
-                    if not os.path.exists(JOBS_FILE) or (datetime.now() - datetime.fromtimestamp(os.path.getmtime(JOBS_FILE))).days >= 1:
+                    is_empty = not os.path.exists(JOBS_FILE) or os.path.getsize(JOBS_FILE) < 100
+                    is_old = False
+                    if os.path.exists(JOBS_FILE):
+                        mtime = os.path.getmtime(JOBS_FILE)
+                        if (datetime.now() - datetime.fromtimestamp(mtime)).total_seconds() > REFRESH_INTERVAL_HOURS * 3600:
+                            is_old = True
+                            
+                    if is_empty or is_old:
+                        logger.info("🚀 Initial startup scrape triggered...")
                         run_daily_scrape()
                 except Exception as e:
                     logger.warning(f"Startup scrape check failed: {e}")
@@ -3742,7 +3732,7 @@ if not IS_VERCEL:
             startup_thread.start()
             
             scheduler.start()
-            logger.info("📅 Background Scheduler started (2:00 AM daily).")
+            logger.info(f"📅 Background Scheduler started (Every {REFRESH_INTERVAL_HOURS} hours).")
     except Exception as e:
         logger.error(f"Failed to start scheduler: {e}")
 
