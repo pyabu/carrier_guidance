@@ -1279,6 +1279,7 @@ def seo_keywords():
 # Track running scraper state in memory
 _scraper_running = False
 _scraper_thread = None
+LAST_SCRAPE_TIME = "Never"
 
 
 @app.route("/api/admin/scraper/status", methods=["GET"])
@@ -2145,42 +2146,6 @@ def api_job_detail(job_id):
     if not job:
         return jsonify({"error": "Job not found"}), 404
     return jsonify(job)
-
-
-@app.route("/api/refresh", methods=["POST"])
-def api_refresh():
-    """Manual refresh trigger."""
-    count = tracked_refresh()
-    return jsonify({"status": "success", "message": f"Refreshed {count} jobs", "count": count})
-
-
-@app.route("/api/cron")
-def api_cron():
-    """
-    Vercel Cron endpoint – called daily by vercel.json cron config.
-    Also callable manually: GET /api/cron?secret=YOUR_SECRET
-    """
-    # Optional secret check
-    expected = os.environ.get("CRON_SECRET", "")
-    provided = request.args.get("secret", "") or request.headers.get("Authorization", "").replace("Bearer ", "")
-    if expected and provided != expected:
-        return jsonify({"error": "Unauthorized"}), 401
-
-    count = tracked_refresh()
-    return jsonify({
-        "status": "success",
-        "jobs_scraped": count,
-        "timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-    })
-
-
-def _check_cron_secret():
-    """Shared secret check for cron endpoints."""
-    expected = os.environ.get("CRON_SECRET", "")
-    provided = request.args.get("secret", "") or request.headers.get("Authorization", "").replace("Bearer ", "")
-    if expected and provided != expected:
-        return False
-    return True
 
 
 @app.route("/api/cron/tn")
