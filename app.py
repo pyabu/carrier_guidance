@@ -1914,8 +1914,8 @@ def personalized_guidance():
 # API ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════
 
-@app.route("/api/jobs")
-def api_jobs():
+@app.route("/api/search")
+def api_search():
     """
     Return jobs with advanced filtering:
       ?keyword=      – title / company / category / skills (comma-sep for OR)
