@@ -3575,31 +3575,32 @@ def sitemap():
         all_jobs = []
         # Main jobs
         main_data = load_jobs()
-        all_jobs.extend([(j, "main") for j in main_data.get("jobs", [])])
+        if isinstance(main_data, dict):
+            all_jobs.extend([(j, "main") for j in (main_data.get("jobs") or []) if isinstance(j, dict)])
         
         # India jobs
         india_data = load_india_jobs()
-        all_jobs.extend([(j, "india") for j in india_data.get("jobs", [])])
+        if isinstance(india_data, dict):
+            all_jobs.extend([(j, "india") for j in (india_data.get("jobs") or []) if isinstance(j, dict)])
         
         # TN jobs
         tn_data = load_tn_jobs()
-        all_jobs.extend([(j, "tamilnadu") for j in tn_data.get("jobs", [])])
+        if isinstance(tn_data, dict):
+            all_jobs.extend([(j, "tamilnadu") for j in (tn_data.get("jobs") or []) if isinstance(j, dict)])
         
-        # Sort and take latest 1000 for sitemap safety
-        # We don't have a reliable formal date field for sorting across all sources easily,
-        # so we take a slice of each or just the first 1000 total.
+        # Take latest 1000 for sitemap safety
         recent_jobs = all_jobs[:1000]
         
         for job, src in recent_jobs:
             job_id = job.get("id")
             if not job_id: continue
             
-            # Use source hint if possible to ensure detail page loads correctly
+            # Use source hint to ensure detail page loads correctly
             loc = f"{base_url}/job/{job_id}?source={src}"
             
             pages.append({
                 "loc": loc,
-                "lastmod": today, # Jobs are updated daily
+                "lastmod": today,
                 "changefreq": "weekly",
                 "priority": "0.6"
             })
@@ -3617,7 +3618,9 @@ def sitemap():
         sitemap_xml += '    </url>\n'
     sitemap_xml += '</urlset>'
     
-    return sitemap_xml, 200, {'Content-Type': 'application/xml'}
+    response = make_response(sitemap_xml)
+    response.headers["Content-Type"] = "application/xml"
+    return response
 
 
 # ── Background Scraper Scheduler ──────────────────────────────────────
