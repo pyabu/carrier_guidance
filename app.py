@@ -16,9 +16,8 @@ from supabase import create_client, Client
 from werkzeug.security import generate_password_hash, check_password_hash
 from werkzeug.utils import secure_filename
 from functools import wraps
-from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory
+from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory, make_response, g
 from flask_cors import CORS
-from flask_compress import Compress
 # from apscheduler.schedulers.background import BackgroundJobScheduler # Moved to lazy load
 # from scraper.job_scraper import JobScraper # Moved to lazy load
 
@@ -1041,7 +1040,6 @@ def _save_scraper_config(data):
 
 
 # ── Inject SEO settings into every request via flask.g ──────────────────
-from flask import g
 
 @app.before_request
 def inject_seo_globals():
