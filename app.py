@@ -18,6 +18,7 @@ from werkzeug.utils import secure_filename
 from functools import wraps
 from flask import Flask, render_template, jsonify, request, abort, session, redirect, url_for, flash, send_from_directory
 from flask_cors import CORS
+from flask_compress import Compress
 # from apscheduler.schedulers.background import BackgroundJobScheduler # Moved to lazy load
 # from scraper.job_scraper import JobScraper # Moved to lazy load
 
@@ -1048,11 +1049,10 @@ def inject_seo_globals():
     g.seo = _load_seo_settings()
     
     # Calculate canonical URL
-    # Always point to the production domain for indexing
     base_url = "https://careerguidance.me"
     path = request.path
     
-    # Standardize: strip trailing slash except for root
+    # Standardize: strip trailing slash except for root, and remove query params
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
         
@@ -3540,11 +3540,11 @@ def robots():
 
 @app.route("/sitemap.xml")
 def sitemap():
-    """Generate a dynamic sitemap including static pages and recent jobs."""
+    """Generate a dynamic sitemap including static pages and all job sources."""
     base_url = "https://careerguidance.me"
     pages = []
     
-    # Static core pages
+    # 1. Static core pages
     static_urls = [
         {"loc": "/", "priority": "1.0", "changefreq": "daily"},
         {"loc": "/jobs", "priority": "0.95", "changefreq": "daily"},
@@ -3570,22 +3570,36 @@ def sitemap():
             "priority": url["priority"]
         })
         
-    # Dynamic Job pages (Latest 200)
+    # 2. Dynamic Job pages from all sources
     try:
-        data = load_jobs()
-        jobs = data.get("jobs", [])
-        # Sort by ID or date if available to get latest
-        # Here we just take the first 200 as they are usually recent from scraper
-        recent_jobs = jobs[:200]
+        all_jobs = []
+        # Main jobs
+        main_data = load_jobs()
+        all_jobs.extend([(j, "main") for j in main_data.get("jobs", [])])
         
-        last_updated = data.get("last_updated", today)
-        if " " in last_updated:
-            last_updated = last_updated.split(" ")[0]
+        # India jobs
+        india_data = load_india_jobs()
+        all_jobs.extend([(j, "india") for j in india_data.get("jobs", [])])
+        
+        # TN jobs
+        tn_data = load_tn_jobs()
+        all_jobs.extend([(j, "tamilnadu") for j in tn_data.get("jobs", [])])
+        
+        # Sort and take latest 1000 for sitemap safety
+        # We don't have a reliable formal date field for sorting across all sources easily,
+        # so we take a slice of each or just the first 1000 total.
+        recent_jobs = all_jobs[:1000]
+        
+        for job, src in recent_jobs:
+            job_id = job.get("id")
+            if not job_id: continue
             
-        for job in recent_jobs:
+            # Use source hint if possible to ensure detail page loads correctly
+            loc = f"{base_url}/job/{job_id}?source={src}"
+            
             pages.append({
-                "loc": f"{base_url}/job/{job['id']}",
-                "lastmod": last_updated,
+                "loc": loc,
+                "lastmod": today, # Jobs are updated daily
                 "changefreq": "weekly",
                 "priority": "0.6"
             })

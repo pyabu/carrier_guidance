@@ -1,71 +1,12 @@
 # ─── robots.txt for careerguidance.me ───────────────────────────────────────
-# Last updated: 2026-03-17
+# Comprehensive SEO optimization. Last updated: 2026-03-18
 
-# ── Default: all crawlers ────────────────────────────────────────────────────
 User-agent: *
 Allow: /
-Allow: /jobs
-Allow: /jobs/india
-Allow: /jobs/tamilnadu
-Allow: /career-guidance
-Allow: /resume-builder
-Allow: /blog
-Allow: /faq
-Allow: /about
-Allow: /contact
-Allow: /developer
-Allow: /privacy
-Allow: /terms
 
-# Public API endpoints (used on homepage/job pages — crawlable content)
-Allow: /api/stats
-Allow: /api/jobs/search-all
-
-# Block private / auth / admin routes
+# Block sensitive / internal paths for crawl efficiency
 Disallow: /admin
-Disallow: /admin/
-Disallow: /api/admin/
-Disallow: /api/cron/
-Disallow: /login
-Disallow: /signup
-Disallow: /logout
-Disallow: /register
-Disallow: /profile
-Disallow: /onboarding
-Disallow: /student-dashboard
-
-# Block user-specific and upload paths
-Disallow: /api/upload-profile-pic
-Disallow: /api/upload-resume
-Disallow: /api/delete-resume
-Disallow: /api/serve-upload/
-Disallow: /api/toggle-alert
-Disallow: /api/alerts
-Disallow: /api/bookmark-company
-Disallow: /api/bookmarked-companies
-Disallow: /api/job-comment
-Disallow: /api/personalized-guidance
-
-# ── Googlebot specific ───────────────────────────────────────────────────────
-User-agent: Googlebot
-Allow: /
-Allow: /jobs
-Allow: /jobs/india
-Allow: /jobs/tamilnadu
-Allow: /career-guidance
-Allow: /resume-builder
-Allow: /blog
-Allow: /faq
-Allow: /about
-Allow: /contact
-Allow: /developer
-Allow: /privacy
-Allow: /terms
-Allow: /api/stats
-Allow: /api/jobs/search-all
-Disallow: /admin
-Disallow: /api/admin/
-Disallow: /api/cron/
+Disallow: /api/
 Disallow: /login
 Disallow: /signup
 Disallow: /logout
@@ -73,5 +14,5 @@ Disallow: /profile
 Disallow: /onboarding
 Disallow: /student-dashboard
 
-# ── Sitemap ──────────────────────────────────────────────────────────────────
+# Sitemap discovery
 Sitemap: https://careerguidance.me/sitemap.xml
