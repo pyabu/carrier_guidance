@@ -3618,6 +3618,7 @@ def sitemap():
     
     response = make_response(sitemap_xml)
     response.headers["Content-Type"] = "application/xml"
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"
     return response
 
 
