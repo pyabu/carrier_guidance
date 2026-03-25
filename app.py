@@ -935,6 +935,48 @@ def logout():
     return redirect(url_for('home'))
 
 
+@app.route("/api/ai_sync_profile", methods=["POST"])
+@login_required
+def ai_sync_profile():
+    import google.generativeai as genai
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    
+    data = request.get_json()
+    if not data or not data.get("text"):
+        return jsonify({"error": "No text provided"}), 400
+        
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        prompt = f"""
+        Analyze the following text (from a resume or bio) and extract the profile information strictly in JSON format.
+        Do not include any markdown formatting or backticks in your response. Only return raw JSON.
+        
+        Format:
+        {{
+            "skills": "comma separated string of top technical skills found",
+            "experience_level": "choose one: Student / Fresher, Junior, Mid-Level, Senior, Working Professional",
+            "interests": ["array of exact matches from: Software Engineering, Data Science, AI & Machine Learning, Cloud & DevOps, Cybersecurity, Web Development, Mobile App Development, Product Management, UI/UX Design, Digital Marketing"]
+        }}
+        
+        Text to analyze:
+        {data.get("text")}
+        """
+        response = model.generate_content(prompt)
+        clean_text = response.text.strip()
+        if clean_text.startswith("```json"):
+            clean_text = clean_text[7:]
+        elif clean_text.startswith("```"):
+            clean_text = clean_text[3:]
+        if clean_text.endswith("```"):
+            clean_text = clean_text[:-3]
+            
+        result = json.loads(clean_text.strip())
+        return jsonify(result)
+    except Exception as e:
+        logger.error(f"AI Sync API Error: {str(e)}")
+        return jsonify({"error": "Failed to analyze profile text."}), 500
+
+
 @app.route("/onboarding", methods=["GET", "POST"])
 @login_required
 def onboarding():
