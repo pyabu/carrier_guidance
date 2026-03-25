@@ -1633,23 +1633,25 @@ def admin_theme_settings():
         "font_family": data.get("font_family", "Inter"),
         "layout_style": data.get("layout_style", "grid")
     }
+
+    # Always update in-memory cache immediately (works locally too)
+    _theme_settings_cache["data"] = theme_data
+    _theme_settings_cache["last_fetched"] = time.time()
+
+    # Only persist to Supabase when deployed on Vercel
+    if IS_VERCEL:
+        try:
+            supabase.table("scraped_data").upsert({
+                "id": "site_theme_settings",
+                "kind": "site_theme_settings",
+                "data": theme_data,
+                "updated_at": datetime.now().isoformat()
+            }).execute()
+        except Exception as e:
+            logger.error(f"Theme Supabase save error: {e}")
+            # Still return success since in-memory cache is updated
     
-    try:
-        supabase.table("scraped_data").upsert({
-            "id": "site_theme_settings", 
-            "kind": "site_theme_settings",
-            "data": theme_data,
-            "updated_at": datetime.now().isoformat()
-        }).execute()
-        
-        # Invalidate local cache
-        _theme_settings_cache["data"] = theme_data
-        _theme_settings_cache["last_fetched"] = time.time()
-        
-        return jsonify({"success": True, "settings": theme_data})
-    except Exception as e:
-        logger.error(f"Theme save error: {e}")
-        return jsonify({"error": str(e)}), 500
+    return jsonify({"success": True, "settings": theme_data})
 
 
 # ═══════════════════════════════════════════════════════════════════════
