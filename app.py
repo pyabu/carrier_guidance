@@ -748,6 +748,11 @@ def terms():
     return render_template("terms.html")
 
 
+@app.route("/job-trends")
+def job_trends():
+    return render_template("job_trends.html")
+
+
 # ═══════════════════════════════════════════════════════════════════════
 # ADMIN ROUTES
 # ═══════════════════════════════════════════════════════════════════════
