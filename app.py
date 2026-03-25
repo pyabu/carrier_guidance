@@ -695,8 +695,85 @@ def student_dashboard():
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# AUTHENTICATION ROUTES
+# AUTHENTICATION ROUTES (Including Google OAuth)
 # ═══════════════════════════════════════════════════════════════════════
+
+from authlib.integrations.flask_client import OAuth
+oauth = OAuth(app)
+google = oauth.register(
+    name='google',
+    client_id=os.environ.get('GOOGLE_CLIENT_ID', ''),
+    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
+    client_kwargs={'scope': 'openid email profile'}
+)
+
+@app.route("/login/google")
+def login_google():
+    """Trigger Google OAuth login flow."""
+    redirect_uri = url_for('auth_google_callback', _external=True)
+    return google.authorize_redirect(redirect_uri)
+
+@app.route("/auth/google/callback")
+def auth_google_callback():
+    """Handle callback from Google OAuth."""
+    try:
+        token = google.authorize_access_token()
+        resp = google.get('userinfo')
+        user_info = resp.json()
+    except Exception as e:
+        logger.error(f"Google auth error: {e}")
+        return redirect(url_for('login', error="Google sign-in failed/cancelled. Please try again."))
+    
+    email = user_info.get('email')
+    name = user_info.get('name', 'Google User')
+    
+    if not email:
+        return redirect(url_for('login', error="No email provided by Google."))
+    
+    # Check if user already exists
+    response = supabase.table("users").select("*").eq("email", email).execute()
+    
+    if response.data:
+        # Log them in automatically
+        user = response.data[0]
+        session['user_id'] = user['id']
+        session['user_name'] = user['name']
+        session['is_admin'] = user.get('is_admin', False)
+        
+        if not user.get('interests'):
+            return redirect(url_for('onboarding'))
+        if session.get('is_admin'):
+            return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('student_dashboard'))
+        
+    else:
+        # Create a new user automatically
+        import secrets
+        random_pw = secrets.token_urlsafe(16)
+        hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
+        
+        try:
+            new_user = supabase.table("users").insert({
+                "name": name,
+                "email": email,
+                "password_hash": hashed_pw,
+                "skills": "",
+                "interests": "",
+                "experience_level": ""
+            }).execute()
+            
+            if new_user.data:
+                user = new_user.data[0]
+                session['user_id'] = user['id']
+                session['user_name'] = user['name']
+                session['is_admin'] = False
+                return redirect(url_for('onboarding'))
+            else:
+                return redirect(url_for('signup', error="Failed to create account from Google data."))
+        except Exception as e:
+            return redirect(url_for('signup', error=f"Database error: {str(e)}"))
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
