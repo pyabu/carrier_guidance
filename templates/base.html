@@ -85,6 +85,31 @@
         }
     </style>
 
+    <!-- Theme Settings Injection -->
+    {% if theme_settings %}
+        {% if theme_settings.get('font_family') and theme_settings.font_family != 'Inter' %}
+        <link href="https://fonts.googleapis.com/css2?family={{ theme_settings.font_family.replace(' ', '+') }}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        {% endif %}
+    <style>
+        :root, [data-theme="light"], [data-theme="dark"] {
+            {% if theme_settings.get('primary_color') %}
+            --accent: {{ theme_settings.primary_color }} !important;
+            --accent-hover: {{ theme_settings.primary_color }} !important;
+            --bg-accent: {{ theme_settings.primary_color }} !important;
+            --accent2: {{ theme_settings.primary_color }} !important;
+            {% endif %}
+            {% if theme_settings.get('sec_color') %}
+            --bg-primary: {{ theme_settings.sec_color }} !important;
+            {% endif %}
+        }
+        {% if theme_settings.get('font_family') %}
+        body, h1, h2, h3, h4, h5, h6, .nav-logo, .job-title, .brand-text {
+            font-family: '{{ theme_settings.font_family }}', sans-serif !important;
+        }
+        {% endif %}
+    </style>
+    {% endif %}
+
     {% block extra_head %}{% endblock %}
 </head>
 

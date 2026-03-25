@@ -326,7 +326,7 @@
                         <option value="company">Sort: Company A-Z</option>
                     </select>
                 </div>
-                <div class="jobs-grid" id="jobsGrid">
+                <div class="jobs-grid {% if theme_settings and theme_settings.get('layout_style') == 'list' %}list-layout{% endif %}" id="jobsGrid">
                     <div class="loading-spinner">
                         <div class="spinner"></div>
                     </div>
@@ -567,7 +567,7 @@
                 if (data.ai_powered) showAIInsights(data, masterJobs);
             } else {
                 // Standard API — fetch up to 500 jobs for client-side filtering
-                var url = '/api/jobs?per_page=500';
+                var url = '/api/search?per_page=500';
                 if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
                 if (location) url += '&location=' + encodeURIComponent(location);
                 if (country) url += '&country=' + encodeURIComponent(country);

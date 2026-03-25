@@ -558,6 +558,7 @@
             <div class="nav-btn active" onclick="switchTab('dashboard', this)"><i class="fas fa-desktop"></i> <span class="brand-text">Overview</span></div>
             <div class="nav-btn" onclick="switchTab('users', this)"><i class="fas fa-user-friends"></i> <span class="brand-text">Users List</span></div>
             <div class="nav-btn" onclick="switchTab('jobs', this)"><i class="fas fa-briefcase"></i> <span class="brand-text">Jobs Bank</span></div>
+            <div class="nav-btn" onclick="switchTab('theme', this)"><i class="fas fa-paint-roller"></i> <span class="brand-text">Theme Customizer</span></div>
             <div class="nav-btn" onclick="switchTab('scraper', this)"><i class="fas fa-robot"></i> <span class="brand-text">Scraper Control</span></div>
             <div class="nav-btn" onclick="switchTab('seo', this)"><i class="fas fa-search"></i> <span class="brand-text">SEO Manager</span></div>
             <div class="nav-btn" onclick="switchTab('settings', this)"><i class="fas fa-sliders-h"></i> <span class="brand-text">System Settings</span></div>
@@ -858,6 +859,53 @@
                             </table>
                         </div>
                     </div>
+                </div>
+            </div>
+
+            <!-- ── View: Theme Customizer ── -->
+            <div id="view-theme" class="view-view">
+                <div class="table-card" style="padding: 30px; max-width: 600px;">
+                    <h3 style="margin-top:0; color: var(--text-main);">Theme & Layout Settings</h3>
+                    <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 24px;">Change the visual aesthetics globally across the entire website.</p>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Primary Accent Color</label>
+                        <div style="display:flex; align-items:center; gap: 10px;">
+                            <input type="color" id="theme-primary" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
+                            <span id="theme-primary-val" style="font-family: monospace; color: var(--text-dim);">#667eea</span>
+                        </div>
+                    </div>
+                    
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Secondary / Background Color</label>
+                        <div style="display:flex; align-items:center; gap: 10px;">
+                            <input type="color" id="theme-secondary" style="width: 40px; height: 40px; padding: 0; border: none; border-radius: 8px; cursor: pointer;">
+                            <span id="theme-secondary-val" style="font-family: monospace; color: var(--text-dim);">#ffffff</span>
+                        </div>
+                    </div>
+
+                    <div style="margin-bottom: 20px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Global Font Family</label>
+                        <select id="theme-font" class="search-box" style="padding: 10px 15px; border:1px solid var(--border-color); width:100%; border-radius:8px; background: var(--sidebar-bg); color: var(--text-main); font-size: 13px;">
+                            <option value="Inter">Inter (Default Modern)</option>
+                            <option value="Roboto">Roboto (Google Standard)</option>
+                            <option value="Poppins">Poppins (Geometric Sans)</option>
+                            <option value="Open Sans">Open Sans (Highly Legible)</option>
+                            <option value="Outfit">Outfit (Clean Look)</option>
+                        </select>
+                    </div>
+
+                    <div style="margin-bottom: 30px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Job Cards Layout Style</label>
+                        <select id="theme-layout" class="search-box" style="padding: 10px 15px; border:1px solid var(--border-color); width:100%; border-radius:8px; background: var(--sidebar-bg); color: var(--text-main); font-size: 13px;">
+                            <option value="grid">Grid View (Default)</option>
+                            <option value="list">List View (Compact Row)</option>
+                        </select>
+                    </div>
+
+                    <button class="action-btn primary" onclick="saveThemeSettings()" style="width:100%; justify-content: center; padding: 12px; font-size: 14px;">
+                        <i class="fas fa-save"></i> Apply Theme Globally
+                    </button>
                 </div>
             </div>
 
@@ -1448,8 +1496,65 @@
         }
     }
 
+    // --- Theme Customizer Data API ---
+    async function loadSiteThemeSettings() {
+        try {
+            const res = await fetch('/api/admin/theme');
+            const data = await res.json();
+            
+            document.getElementById('theme-primary').value = data.primary_color || '#667eea';
+            document.getElementById('theme-primary-val').textContent = data.primary_color || '#667eea';
+            
+            document.getElementById('theme-secondary').value = data.sec_color || '#ffffff';
+            document.getElementById('theme-secondary-val').textContent = data.sec_color || '#ffffff';
+            
+            document.getElementById('theme-font').value = data.font_family || 'Inter';
+            document.getElementById('theme-layout').value = data.layout_style || 'grid';
+
+            // Setup listeners for color hex labels
+            document.getElementById('theme-primary').addEventListener('input', e => {
+                document.getElementById('theme-primary-val').textContent = e.target.value;
+            });
+            document.getElementById('theme-secondary').addEventListener('input', e => {
+                document.getElementById('theme-secondary-val').textContent = e.target.value;
+            });
+        } catch (err) {
+            console.error('Failed to load theme settings', err);
+        }
+    }
+
+    async function saveThemeSettings() {
+        const pwd = prompt("Enter Admin Password to apply theme changes globally:");
+        if (!pwd) return;
+
+        const payload = {
+            password: pwd,
+            primary_color: document.getElementById('theme-primary').value,
+            sec_color: document.getElementById('theme-secondary').value,
+            font_family: document.getElementById('theme-font').value,
+            layout_style: document.getElementById('theme-layout').value
+        };
+
+        try {
+            const res = await fetch('/api/admin/theme', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const d = await res.json();
+            if (d.success) {
+                showToast('<i class="fas fa-paint-roller"></i> Theme applied globally!', 'success');
+            } else {
+                showToast(d.message || 'Failed to apply theme.', 'error');
+            }
+        } catch (err) {
+            showToast('Save error: ' + err, 'error');
+        }
+    }
+
     // Initial Load
     refreshDashboard();
+    loadSiteThemeSettings();
     connectScraperLogs(); // Start live log connection
     setInterval(refreshDashboard, 60000); // Periodic refresh
 

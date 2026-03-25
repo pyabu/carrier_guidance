@@ -175,8 +175,64 @@ def _check_cron_secret():
 
 # ── Helpers ────────────────────────────────────────────────────────────
 
+import concurrent.futures
+
+_jobs_memory_cache = {
+    "jobs": None,
+    "tn_jobs": None,
+    "india_jobs": None
+}
+
+def preload_all_jobs_concurrently():
+    """Concurrently load missing job files from Supabase to prevent cold-start timeouts."""
+    if not IS_VERCEL:
+        return
+        
+    missing = []
+    if not _jobs_memory_cache["jobs"] and not os.path.exists(JOBS_FILE):
+        missing.append("jobs")
+    if not _jobs_memory_cache["tn_jobs"] and not os.path.exists(TN_JOBS_FILE):
+        missing.append("tn_jobs")
+    if not _jobs_memory_cache["india_jobs"] and not os.path.exists(INDIA_JOBS_FILE):
+        missing.append("india_jobs")
+        
+    if not missing:
+        return
+        
+    logger.info(f"⚡ Concurrently pre-loading {missing} from Supabase")
+    
+    def fetch_kind(kind):
+        res = _supabase_load_jobs(kind)
+        return kind, res
+        
+    results = {}
+    with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
+        futures = [executor.submit(fetch_kind, k) for k in missing]
+        for future in concurrent.futures.as_completed(futures):
+            try:
+                kind, res = future.result()
+                results[kind] = res
+            except Exception as e:
+                logger.error(f"Error fetching {kind}: {e}")
+                
+    os.makedirs(DATA_DIR, exist_ok=True)
+    for kind, data in results.items():
+        if data:
+            _jobs_memory_cache[kind] = data
+            file_path = {
+                "jobs": JOBS_FILE,
+                "tn_jobs": TN_JOBS_FILE,
+                "india_jobs": INDIA_JOBS_FILE
+            }.get(kind)
+            with open(file_path, "w") as f:
+                json.dump(data, f)
+            logger.info(f"☁️  Loaded {kind} from Supabase → /tmp & MemCache")
+
 def load_jobs():
     """Load cached jobs from JSON file, falling back to Supabase then seed on Vercel."""
+    if _jobs_memory_cache.get("jobs"):
+        return _jobs_memory_cache["jobs"]
+
     if os.path.exists(JOBS_FILE):
         with open(JOBS_FILE, "r") as f:
             data = json.load(f)
@@ -184,6 +240,7 @@ def load_jobs():
             if "last_updated" not in data:
                 mtime = os.path.getmtime(JOBS_FILE)
                 data["last_updated"] = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            _jobs_memory_cache["jobs"] = data
             return data
 
     # On Vercel: try Supabase first (persisted from last scrape)
@@ -193,6 +250,7 @@ def load_jobs():
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
+            _jobs_memory_cache["jobs"] = sb_data
             logger.info("☁️  Loaded jobs from Supabase → /tmp")
             return sb_data
 
@@ -202,15 +260,21 @@ def load_jobs():
 
 def load_tn_jobs():
     """Load Tamil Nadu & Pondicherry specific jobs."""
+    if _jobs_memory_cache.get("tn_jobs"):
+        return _jobs_memory_cache["tn_jobs"]
+
     if os.path.exists(TN_JOBS_FILE):
         with open(TN_JOBS_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            _jobs_memory_cache["tn_jobs"] = data
+            return data
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("tn_jobs")
         if sb_data:
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(TN_JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
+            _jobs_memory_cache["tn_jobs"] = sb_data
             logger.info("☁️  Loaded TN jobs from Supabase → /tmp")
             return sb_data
         if os.path.exists(TN_SEED_FILE):
@@ -218,12 +282,15 @@ def load_tn_jobs():
             shutil.copy2(TN_SEED_FILE, TN_JOBS_FILE)
             logger.info("📦 Copied TN seed to /tmp")
             with open(TN_JOBS_FILE, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                _jobs_memory_cache["tn_jobs"] = data
+                return data
     return {"jobs": [], "last_updated": None, "region": "Tamil Nadu & Pondicherry"}
 
 
 def save_tn_jobs(data):
     """Persist Tamil Nadu jobs to JSON file (+ Supabase on Vercel)."""
+    _jobs_memory_cache["tn_jobs"] = data
     with open(TN_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
     
@@ -236,15 +303,21 @@ def save_tn_jobs(data):
 
 def load_india_jobs():
     """Load All-India jobs from JSON file."""
+    if _jobs_memory_cache.get("india_jobs"):
+        return _jobs_memory_cache["india_jobs"]
+
     if os.path.exists(INDIA_JOBS_FILE):
         with open(INDIA_JOBS_FILE, "r") as f:
-            return json.load(f)
+            data = json.load(f)
+            _jobs_memory_cache["india_jobs"] = data
+            return data
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("india_jobs")
         if sb_data:
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(INDIA_JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
+            _jobs_memory_cache["india_jobs"] = sb_data
             logger.info("☁️  Loaded India jobs from Supabase → /tmp")
             return sb_data
         if os.path.exists(INDIA_SEED_FILE):
@@ -252,12 +325,15 @@ def load_india_jobs():
             shutil.copy2(INDIA_SEED_FILE, INDIA_JOBS_FILE)
             logger.info("📦 Copied India seed to /tmp")
             with open(INDIA_JOBS_FILE, "r") as f:
-                return json.load(f)
+                data = json.load(f)
+                _jobs_memory_cache["india_jobs"] = data
+                return data
     return {"jobs": [], "last_updated": None, "region": "India"}
 
 
 def save_india_jobs(data):
     """Persist All-India jobs to JSON file (+ Supabase on Vercel)."""
+    _jobs_memory_cache["india_jobs"] = data
     with open(INDIA_JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
     
@@ -270,6 +346,7 @@ def save_india_jobs(data):
 
 def save_jobs(data):
     """Persist jobs to JSON file (+ Supabase on Vercel)."""
+    _jobs_memory_cache["jobs"] = data
     with open(JOBS_FILE, "w") as f:
         json.dump(data, f, indent=2)
     
@@ -1063,10 +1140,38 @@ def inject_seo_globals():
 
 import time
 _jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}
+_theme_settings_cache = {"data": None, "last_fetched": 0}
+
+def _get_theme_settings():
+    """Load theme settings from Supabase, cached for 5 mins."""
+    now = time.time()
+    if not _theme_settings_cache["data"] or now - _theme_settings_cache["last_fetched"] > 300:
+        try:
+            resp = supabase.table("scraped_data").select("data").eq("kind", "site_theme_settings").execute()
+            if resp.data:
+                _theme_settings_cache["data"] = resp.data[0]["data"]
+            else:
+                _theme_settings_cache["data"] = {
+                    "primary_color": "#667eea",
+                    "sec_color": "#ffffff",
+                    "font_family": "Inter",
+                    "layout_style": "grid"
+                }
+            _theme_settings_cache["last_fetched"] = now
+        except Exception as e:
+            logger.error(f"Failed to load theme settings: {e}")
+            if not _theme_settings_cache["data"]:
+                _theme_settings_cache["data"] = {
+                    "primary_color": "#667eea",
+                    "sec_color": "#ffffff",
+                    "font_family": "Inter",
+                    "layout_style": "grid"
+                }
+    return _theme_settings_cache["data"]
 
 @app.context_processor
-def inject_jobs_last_updated():
-    """Inject jobs_last_updated into all templates, caching for 60 seconds."""
+def inject_globals():
+    """Inject jobs_last_updated and theme_settings into all templates."""
     now = time.time()
     if now - _jobs_last_updated_cache["checked_at"] > 60:
         try:
@@ -1075,7 +1180,11 @@ def inject_jobs_last_updated():
         except Exception as e:
             logger.warning(f"Failed to fetch last_updated for context processor: {e}")
         _jobs_last_updated_cache["checked_at"] = now
-    return dict(jobs_last_updated=_jobs_last_updated_cache["time"])
+        
+    return dict(
+        jobs_last_updated=_jobs_last_updated_cache["time"],
+        theme_settings=_get_theme_settings()
+    )
 
 
 # ── Real-time scraper log buffer (SSE) ──────────────────────────────────
@@ -1508,6 +1617,42 @@ def scraper_schedule():
             config[key] = body[key]
     _save_scraper_config(config)
     return jsonify({"success": True, "config": config})
+
+
+@app.route("/api/admin/theme", methods=["GET", "POST"])
+@admin_required
+def admin_theme_settings():
+    if request.method == "GET":
+        return jsonify(_get_theme_settings())
+    
+    data = request.json or {}
+    password = data.get("password", "")
+    if not _verify_admin_password(password):
+        return jsonify({"success": False, "message": "Invalid admin password."}), 401
+
+    theme_data = {
+        "primary_color": data.get("primary_color", "#667eea"),
+        "sec_color": data.get("sec_color", "#ffffff"),
+        "font_family": data.get("font_family", "Inter"),
+        "layout_style": data.get("layout_style", "grid")
+    }
+    
+    try:
+        supabase.table("scraped_data").upsert({
+            "id": "site_theme_settings", 
+            "kind": "site_theme_settings",
+            "data": theme_data,
+            "updated_at": datetime.now().isoformat()
+        }).execute()
+        
+        # Invalidate local cache
+        _theme_settings_cache["data"] = theme_data
+        _theme_settings_cache["last_fetched"] = time.time()
+        
+        return jsonify({"success": True, "settings": theme_data})
+    except Exception as e:
+        logger.error(f"Theme save error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # ═══════════════════════════════════════════════════════════════════════
@@ -2347,6 +2492,8 @@ def api_search_all():
     if not keyword and not location:
         return jsonify({"jobs": [], "total": 0, "sources": {}})
 
+    preload_all_jobs_concurrently()
+
     all_jobs = []
 
     # 1. Main jobs
@@ -2420,7 +2567,7 @@ def api_search_all():
     for j in paginated:
         j["source_db"] = j.pop("_source_db", "main")
 
-    return jsonify({
+    response = make_response(jsonify({
         "jobs": paginated,
         "total": len(all_jobs),
         "returned": len(paginated),
@@ -2430,7 +2577,9 @@ def api_search_all():
             "tamilnadu": source_counts.get("tamilnadu", 0),
         },
         "portals": dict(portal_counts.most_common(10)),
-    })
+    }))
+    response.headers["Cache-Control"] = "public, s-maxage=300, stale-while-revalidate=86400"
+    return response
 
 
 @app.route("/api/trending")
