@@ -711,6 +711,11 @@ google = oauth.register(
 @app.route("/login/google")
 def login_google():
     """Trigger Google OAuth login flow."""
+    # Check if credentials are actually configured
+    if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
+        error_msg = "Google Sign-In is not fully configured yet. Please contact the administrator."
+        return redirect(url_for('login', error=error_msg))
+        
     redirect_uri = url_for('auth_google_callback', _external=True)
     return google.authorize_redirect(redirect_uri)
 
