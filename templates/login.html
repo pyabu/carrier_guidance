@@ -1,47 +1,419 @@
 {% extends "base.html" %}
-{% block title %}Login - Careerguidance{% endblock %}
+{% block title %}Login – CareerGuidance{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background: #0f172a; }
+
+    .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+    }
+
+    /* ── Left panel: branding ── */
+    .auth-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+        background: linear-gradient(135deg, #1e1b4b 0%, #312e81 40%, #0f172a 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(139,92,246,0.25) 0%, transparent 70%);
+        top: -100px;
+        right: -150px;
+    }
+
+    .auth-left::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(99,102,241,0.2) 0%, transparent 70%);
+        bottom: -50px;
+        left: -80px;
+    }
+
+    .auth-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-brand-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: white;
+        box-shadow: 0 4px 20px rgba(139,92,246,0.4);
+    }
+
+    .auth-brand-name {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -0.3px;
+    }
+
+    .auth-hero-text {
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-hero-text h2 {
+        font-size: clamp(1.8rem, 3vw, 2.8rem);
+        font-weight: 800;
+        color: white;
+        line-height: 1.2;
+        margin-bottom: 16px;
+    }
+
+    .auth-hero-text h2 span {
+        background: linear-gradient(90deg, #a78bfa, #60a5fa);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-hero-text p {
+        color: rgba(255,255,255,0.65);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        max-width: 340px;
+        margin-bottom: 40px;
+    }
+
+    .auth-stats {
+        display: flex;
+        gap: 30px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-stat {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .auth-stat-num {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: white;
+    }
+
+    .auth-stat-label {
+        font-size: 0.75rem;
+        color: rgba(255,255,255,0.5);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .auth-floating-cards {
+        position: absolute;
+        right: 40px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 2;
+    }
+
+    .auth-card-chip {
+        background: rgba(255,255,255,0.07);
+        border: 1px solid rgba(255,255,255,0.1);
+        backdrop-filter: blur(10px);
+        border-radius: 12px;
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        animation: floatCard 3s ease-in-out infinite;
+    }
+
+    .auth-card-chip:nth-child(2) { animation-delay: 0.5s; }
+    .auth-card-chip:nth-child(3) { animation-delay: 1s; }
+
+    @keyframes floatCard {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-6px); }
+    }
+
+    .chip-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+    }
+
+    .chip-text { font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 600; white-space: nowrap; }
+    .chip-sub  { font-size: 10px; color: rgba(255,255,255,0.4); }
+
+    /* ── Right panel: form ── */
+    .auth-right {
+        width: min(480px, 100%);
+        background: #0f172a;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+        border-left: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .auth-form-header { margin-bottom: 36px; }
+
+    .auth-form-header h1 {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .auth-form-header p {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.9rem;
+    }
+
+    .auth-field { margin-bottom: 22px; }
+
+    .auth-field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .auth-input-wrap {
+        position: relative;
+    }
+
+    .auth-input-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.25);
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: white;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    .auth-input:focus {
+        border-color: rgba(139,92,246,0.6);
+        background: rgba(139,92,246,0.07);
+        box-shadow: 0 0 0 3px rgba(139,92,246,0.15);
+    }
+
+    .auth-error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.3);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        font-size: 0.87rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #8b5cf6, #6366f1);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 4px 24px rgba(139,92,246,0.4);
+        letter-spacing: 0.3px;
+        margin-top: 8px;
+    }
+
+    .auth-btn:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 32px rgba(139,92,246,0.5);
+    }
+
+    .auth-btn:active { transform: translateY(0); }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 28px 0;
+        color: rgba(255,255,255,0.2);
+        font-size: 0.78rem;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .auth-footer-text {
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        font-size: 0.88rem;
+        margin-top: 4px;
+    }
+
+    .auth-footer-text a {
+        color: #a78bfa;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .auth-footer-text a:hover { color: #c4b5fd; }
+
+    @media (max-width: 860px) {
+        .auth-left { display: none; }
+        .auth-right { width: 100%; padding: 40px 24px; }
+    }
+</style>
+{% endblock %}
 
 {% block content %}
-<section class="page-header">
-    <div class="header-overlay"></div>
-    <div class="container" style="position:relative; z-index:2;">
-        <h1><i class="fas fa-sign-in-alt text-accent"></i> Welcome Back</h1>
-    </div>
-</section>
+<div class="auth-wrapper">
+    <!-- Left Branding Panel -->
+    <div class="auth-left">
+        <div class="auth-brand">
+            <div class="auth-brand-icon"><i class="fas fa-briefcase"></i></div>
+            <span class="auth-brand-name">CareerGuidance</span>
+        </div>
 
-<section class="section" style="padding: clamp(30px, 8vw, 60px) 16px; background: var(--bg-secondary);">
-    <div class="container"
-        style="max-width: 450px; margin: 0 auto; background: var(--surface); padding: clamp(24px, 6vw, 40px); border-radius: 16px; box-shadow: var(--shadow-md);">
+        <div class="auth-hero-text">
+            <h2>Find your <span>dream career</span> today</h2>
+            <p>Thousands of curated jobs in India and Tamil Nadu. AI-powered guidance to help you land the role you deserve.</p>
+
+            <div class="auth-stats">
+                <div class="auth-stat">
+                    <span class="auth-stat-num">10K+</span>
+                    <span class="auth-stat-label">Live Jobs</span>
+                </div>
+                <div class="auth-stat">
+                    <span class="auth-stat-num">500+</span>
+                    <span class="auth-stat-label">Companies</span>
+                </div>
+                <div class="auth-stat">
+                    <span class="auth-stat-num">Free</span>
+                    <span class="auth-stat-label">Always</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="auth-floating-cards">
+            <div class="auth-card-chip">
+                <div class="chip-icon" style="background:rgba(16,185,129,0.15); color:#34d399;"><i class="fas fa-check-circle"></i></div>
+                <div>
+                    <div class="chip-text">New Job Alert</div>
+                    <div class="chip-sub">Software Engineer · Chennai</div>
+                </div>
+            </div>
+            <div class="auth-card-chip">
+                <div class="chip-icon" style="background:rgba(59,130,246,0.15); color:#60a5fa;"><i class="fas fa-robot"></i></div>
+                <div>
+                    <div class="chip-text">AI Career Advice</div>
+                    <div class="chip-sub">Personalized for you</div>
+                </div>
+            </div>
+            <div class="auth-card-chip">
+                <div class="chip-icon" style="background:rgba(245,158,11,0.15); color:#fbbf24;"><i class="fas fa-fire"></i></div>
+                <div>
+                    <div class="chip-text">Trending Skills</div>
+                    <div class="chip-sub">Python, AWS, React</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-right">
+        <div class="auth-form-header">
+            <h1>Welcome back 👋</h1>
+            <p>Sign in to continue your career journey</p>
+        </div>
 
         {% if error %}
-        <div
-            style="background: #fee2e2; color: #dc2626; padding: 12px; border-radius: 8px; margin-bottom: 20px; font-weight: 500;">
+        <div class="auth-error">
             <i class="fas fa-exclamation-circle"></i> {{ error }}
         </div>
         {% endif %}
 
         <form method="POST" action="/login">
-            <div class="form-group" style="margin-bottom: 20px;">
-                <label style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-primary);">Email
-                    Address</label>
-                <input type="email" name="email" class="form-control" required placeholder="you@example.com"
-                    style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+            <div class="auth-field">
+                <label>Email Address</label>
+                <div class="auth-input-wrap">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" class="auth-input" required placeholder="you@example.com">
+                </div>
             </div>
 
-            <div class="form-group" style="margin-bottom: 24px;">
-                <label
-                    style="display:block; margin-bottom:8px; font-weight:600; color:var(--text-primary);">Password</label>
-                <input type="password" name="password" class="form-control" required placeholder="••••••••"
-                    style="width:100%; padding:12px; border:1px solid var(--border-color); border-radius:8px;">
+            <div class="auth-field">
+                <label>Password</label>
+                <div class="auth-input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" class="auth-input" required placeholder="••••••••">
+                </div>
             </div>
 
-            <button type="submit" class="btn btn-primary"
-                style="width:100%; padding:14px; font-size:1.1rem; border-radius:8px;">Login</button>
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-sign-in-alt"></i> Sign In
+            </button>
         </form>
 
-        <p style="text-align: center; margin-top: 24px; color: var(--text-secondary);">
-            Don't have an account? <a href="/signup" style="color: var(--accent); font-weight: 600;">Sign up here</a>
+        <div class="auth-divider">OR</div>
+
+        <p class="auth-footer-text">
+            Don't have an account? <a href="/signup">Create one free →</a>
         </p>
     </div>
-</section>
+</div>
 {% endblock %}
