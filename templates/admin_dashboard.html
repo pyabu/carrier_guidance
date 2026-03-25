@@ -778,9 +778,13 @@
                                 <label>Run Every (hours)</label>
                                 <input type="number" id="sched-interval" min="1" max="72" value="12" style="height:36px;">
                             </div>
-                            <div class="seo-field" style="margin-bottom:0;">
+                            <div class="seo-field">
                                 <label>Preferred Hour (0-23 UTC)</label>
                                 <input type="number" id="sched-hour" min="0" max="23" value="3" style="height:36px;">
+                            </div>
+                            <div style="display:flex; align-items:center; gap:10px; margin:12px 0;">
+                                <input type="checkbox" id="sched-auto-dedup" checked style="width:16px; height:16px; cursor:pointer;">
+                                <label for="sched-auto-dedup" style="font-weight:700; color:var(--text-main); cursor:pointer;">Auto Remove Duplicates</label>
                             </div>
                             <button class="action-btn primary" onclick="saveSchedule()" style="width:100%; margin-top:14px;">
                                 <i class="fas fa-save"></i> Save Schedule
@@ -979,6 +983,7 @@
         document.getElementById('view-title').innerText = el.innerText.trim();
         // Auto-load data for specific tabs
         if (viewId === 'scraper') loadScraperStatus();
+        if (viewId === 'jobs')    { jobs.length === 0 && refreshDashboard(); }
         if (viewId === 'seo')     { loadSeoSettings(); loadKeywords(); }
     }
 
@@ -1419,6 +1424,9 @@
             if (d.config) {
                 document.getElementById('sched-interval').value = d.config.schedule_interval_hours || 12;
                 document.getElementById('sched-hour').value     = d.config.schedule_hour || 3;
+                if (document.getElementById('sched-auto-dedup')) {
+                    document.getElementById('sched-auto-dedup').checked = d.config.auto_dedup !== false;
+                }
                 const sources = d.config.sources || [];
                 document.getElementById('src-main').checked  = sources.includes('main');
                 document.getElementById('src-india').checked = sources.includes('india');
@@ -1433,15 +1441,12 @@
         if (document.getElementById('src-india').checked) sources.push('india');
         if (document.getElementById('src-tn').checked)    sources.push('tamilnadu');
         if (sources.length === 0) { showToast('Select at least one source', 'error'); return; }
-        
-        const pwd = prompt("Are you sure you want to start the scraper? Enter Admin Password to confirm:");
-        if (!pwd) return;
 
         logToConsole(`Initiating scrape for: ${sources.join(', ')}...`);
         const res = await fetch('/api/admin/scraper/start', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sources, password: pwd })
+            body: JSON.stringify({ sources })
         });
         const d = await res.json();
         if (d.success) {
@@ -1490,20 +1495,30 @@
     }
 
     async function saveSchedule() {
-        const interval = parseInt(document.getElementById('sched-interval').value);
-        const hour     = parseInt(document.getElementById('sched-hour').value);
-        const pwd = prompt("Are you sure you want to save schedule settings? Enter Admin Password to confirm:");
-        if (!pwd) return;
+        const interval  = parseInt(document.getElementById('sched-interval').value);
+        const hour      = parseInt(document.getElementById('sched-hour').value);
+        const autoDedup = document.getElementById('sched-auto-dedup')?.checked ?? true;
+        const sources   = [];
+        if (document.getElementById('src-main').checked)  sources.push('main');
+        if (document.getElementById('src-india').checked) sources.push('india');
+        if (document.getElementById('src-tn').checked)    sources.push('tamilnadu');
+
         const res = await fetch('/api/admin/scraper/schedule', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ schedule_interval_hours: interval, schedule_hour: hour, password: pwd })
+            body: JSON.stringify({
+                schedule_interval_hours: interval,
+                schedule_hour: hour,
+                auto_dedup: autoDedup,
+                sources
+            })
         });
-        if (res.ok) {
+        const d = await res.json();
+        if (d.success) {
             showToast('<i class="fas fa-check"></i> Schedule saved!', 'success');
+            logToConsole(`✓ Schedule saved: every ${interval}h at ${hour}:00 UTC, auto-dedup=${autoDedup}`);
         } else {
-            const d = await res.json().catch(() => ({}));
-            showToast(d.message || 'Failed to save schedule (Invalid Password?)', 'error');
+            showToast(d.message || 'Failed to save schedule', 'error');
         }
     }
 

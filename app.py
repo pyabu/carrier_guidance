@@ -1434,9 +1434,6 @@ def scraper_start():
         return jsonify({"success": False, "message": "Scraper already running."})
     
     body = request.get_json(silent=True) or {}
-    password = body.get("password", "")
-    if not _verify_admin_password(password):
-        return jsonify({"success": False, "message": "Invalid admin password."}), 401
         
     try:
         sources = body.get("sources", ["main", "india", "tamilnadu"])
@@ -1608,10 +1605,6 @@ def scraper_schedule():
         })
     # POST
     body = request.get_json(silent=True) or {}
-    password = body.get("password", "")
-    if not _verify_admin_password(password):
-        return jsonify({"success": False, "message": "Invalid admin password."}), 401
-        
     for key in ("schedule_hour", "schedule_interval_hours", "auto_dedup", "sources"):
         if key in body:
             config[key] = body[key]
