@@ -868,6 +868,17 @@
                     <h3 style="margin-top:0; color: var(--text-main);">Theme & Layout Settings</h3>
                     <p style="color: var(--text-dim); font-size: 12px; margin-bottom: 24px;">Change the visual aesthetics globally across the entire website.</p>
                     
+                    <div style="margin-bottom: 24px;">
+                        <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Preset Templates</label>
+                        <div style="display:flex; gap: 8px; flex-wrap: wrap;">
+                            <button class="action-btn" onclick="applyPreset('#667eea', '#ffffff', 'Inter', 'grid')" style="padding: 6px 12px; background: #667eea; color: white; border: none; border-radius: 4px; cursor: pointer;">Modern Default</button>
+                            <button class="action-btn" onclick="applyPreset('#10b981', '#f8fafc', 'Roboto', 'grid')" style="padding: 6px 12px; background: #10b981; color: white; border: none; border-radius: 4px; cursor: pointer;">Emerald</button>
+                            <button class="action-btn" onclick="applyPreset('#8b5cf6', '#faf5ff', 'Poppins', 'list')" style="padding: 6px 12px; background: #8b5cf6; color: white; border: none; border-radius: 4px; cursor: pointer;">Purple List</button>
+                            <button class="action-btn" onclick="applyPreset('#f59e0b', '#fffbeb', 'Open Sans', 'grid')" style="padding: 6px 12px; background: #f59e0b; color: white; border: none; border-radius: 4px; cursor: pointer;">Amber Solar</button>
+                            <button class="action-btn" onclick="applyPreset('#0f172a', '#e2e8f0', 'Outfit', 'list')" style="padding: 6px 12px; background: #0f172a; color: white; border: none; border-radius: 4px; cursor: pointer;">Dark Zinc List</button>
+                        </div>
+                    </div>
+
                     <div style="margin-bottom: 20px;">
                         <label style="display:block; margin-bottom:8px; font-weight:700; color: var(--text-main);">Primary Accent Color</label>
                         <div style="display:flex; align-items:center; gap: 10px;">
@@ -1523,12 +1534,17 @@
         }
     }
 
-    async function saveThemeSettings() {
-        const pwd = prompt("Enter Admin Password to apply theme changes globally:");
-        if (!pwd) return;
+    function applyPreset(primary, sec, font, layout) {
+        document.getElementById('theme-primary').value = primary;
+        document.getElementById('theme-primary-val').textContent = primary;
+        document.getElementById('theme-secondary').value = sec;
+        document.getElementById('theme-secondary-val').textContent = sec;
+        document.getElementById('theme-font').value = font;
+        document.getElementById('theme-layout').value = layout;
+    }
 
+    async function saveThemeSettings() {
         const payload = {
-            password: pwd,
             primary_color: document.getElementById('theme-primary').value,
             sec_color: document.getElementById('theme-secondary').value,
             font_family: document.getElementById('theme-font').value,

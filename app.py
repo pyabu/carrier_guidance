@@ -1626,9 +1626,6 @@ def admin_theme_settings():
         return jsonify(_get_theme_settings())
     
     data = request.json or {}
-    password = data.get("password", "")
-    if not _verify_admin_password(password):
-        return jsonify({"success": False, "message": "Invalid admin password."}), 401
 
     theme_data = {
         "primary_color": data.get("primary_color", "#667eea"),
