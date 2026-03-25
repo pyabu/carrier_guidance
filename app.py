@@ -705,27 +705,10 @@ google = oauth.register(
     client_id=os.environ.get('GOOGLE_CLIENT_ID', ''),
     client_secret=os.environ.get('GOOGLE_CLIENT_SECRET', ''),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid email profile'}
-)
-
-github = oauth.register(
-    name='github',
-    client_id=os.environ.get('GITHUB_CLIENT_ID', ''),
-    client_secret=os.environ.get('GITHUB_CLIENT_SECRET', ''),
-    access_token_url='https://github.com/login/oauth/access_token',
-    access_token_params=None,
-    authorize_url='https://github.com/login/oauth/authorize',
-    authorize_params=None,
-    api_base_url='https://api.github.com/',
-    client_kwargs={'scope': 'user:email'},
-)
-
-linkedin = oauth.register(
-    name='linkedin',
-    client_id=os.environ.get('LINKEDIN_CLIENT_ID', ''),
-    client_secret=os.environ.get('LINKEDIN_CLIENT_SECRET', ''),
-    server_metadata_url='https://www.linkedin.com/oauth/.well-known/openid-configuration',
-    client_kwargs={'scope': 'openid profile email'}
+    client_kwargs={
+        'scope': 'openid email profile',
+        'prompt': 'select_account'
+    }
 )
 
 def _handle_oauth_login(email, name, provider_name):
@@ -799,70 +782,6 @@ def auth_google_callback():
         return redirect(url_for('login', error="No email provided by Google."))
     
     return _handle_oauth_login(email, name, "Google")
-
-
-@app.route("/login/github")
-def login_github():
-    if not os.environ.get('GITHUB_CLIENT_ID') or not os.environ.get('GITHUB_CLIENT_SECRET'):
-        return redirect(url_for('login', error="GitHub Sign-In is not configured yet."))
-    redirect_uri = url_for('auth_github_callback', _external=True)
-    return github.authorize_redirect(redirect_uri)
-
-@app.route("/auth/github/callback")
-def auth_github_callback():
-    try:
-        token = github.authorize_access_token()
-        resp = github.get('user')
-        user_info = resp.json()
-        
-        email = user_info.get('email')
-        name = user_info.get('name') or user_info.get('login', 'GitHub User')
-        
-        if not email:
-            emails_resp = github.get('user/emails')
-            if emails_resp.ok:
-                for e in emails_resp.json():
-                    if e.get('primary'):
-                        email = e.get('email')
-                        break
-                        
-    except Exception as e:
-        logger.error(f"GitHub auth error: {e}")
-        return redirect(url_for('login', error="GitHub sign-in failed. Please try again."))
-        
-    if not email:
-        return redirect(url_for('login', error="No public email provided by GitHub."))
-        
-    return _handle_oauth_login(email, name, "GitHub")
-
-
-@app.route("/login/linkedin")
-def login_linkedin():
-    if not os.environ.get('LINKEDIN_CLIENT_ID') or not os.environ.get('LINKEDIN_CLIENT_SECRET'):
-        return redirect(url_for('login', error="LinkedIn Sign-In is not configured yet."))
-    redirect_uri = url_for('auth_linkedin_callback', _external=True)
-    return linkedin.authorize_redirect(redirect_uri)
-
-@app.route("/auth/linkedin/callback")
-def auth_linkedin_callback():
-    try:
-        token = linkedin.authorize_access_token()
-        user_info = token.get('userinfo')
-        if not user_info:
-            resp = linkedin.get('userinfo')
-            user_info = resp.json()
-            
-        email = user_info.get('email')
-        name = user_info.get('name', 'LinkedIn User')
-        
-    except Exception as e:
-        logger.error(f"LinkedIn auth error: {e}")
-        return redirect(url_for('login', error="LinkedIn sign-in failed. Please try again."))
-        
-    if not email:
-        return redirect(url_for('login', error="No email provided by LinkedIn."))
-        
-    return _handle_oauth_login(email, name, "LinkedIn")
 
 
 @app.route("/login", methods=["GET", "POST"])

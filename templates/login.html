@@ -293,50 +293,13 @@
         margin-top: 16px;
     }
 
-    .auth-btn-google:hover, .auth-btn-github:hover, .auth-btn-linkedin:hover {
+    .auth-btn-google:hover {
         transform: translateY(-1px);
         box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-    }
-
-    .auth-btn-google:hover {
         background: #f8fafc;
     }
 
-    .auth-btn-github {
-        background: #24292e;
-        color: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        text-decoration: none;
-        margin-top: 12px;
-    }
-
-    .auth-btn-github:hover {
-        background: #2f363d;
-        color: white;
-    }
-
-    .auth-btn-linkedin {
-        background: #0077b5;
-        color: white;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        text-decoration: none;
-        margin-top: 12px;
-    }
-
-    .auth-btn-linkedin:hover {
-        background: #005582;
-        color: white;
-    }
-
-    .auth-btn-google img, .auth-btn-github img, .auth-btn-linkedin img {
+    .auth-btn-google img {
         width: 18px;
         height: 18px;
     }
@@ -474,16 +437,6 @@
         <a href="/login/google" class="auth-btn auth-btn-google">
             <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
             Continue with Google
-        </a>
-
-        <a href="/login/github" class="auth-btn auth-btn-github">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/github/github-original.svg" alt="GitHub" style="filter: invert(1);">
-            Continue with GitHub
-        </a>
-
-        <a href="/login/linkedin" class="auth-btn auth-btn-linkedin">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/linkedin/linkedin-original.svg" alt="LinkedIn" style="filter: invert(1) brightness(2);">
-            Continue with LinkedIn
         </a>
 
         <p class="auth-footer-text">
