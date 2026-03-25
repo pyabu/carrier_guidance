@@ -32,6 +32,10 @@ app = Flask(__name__,
 app.secret_key = os.environ.get("FLASK_SECRET_KEY", "super-secret-careerpath-key")
 CORS(app)
 
+if IS_VERCEL:
+    from werkzeug.middleware.proxy_fix import ProxyFix
+    app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1, x_host=1, x_prefix=1)
+
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
@@ -711,66 +715,85 @@ google = oauth.register(
     }
 )
 
-def _handle_oauth_login(email, name, provider_name):
-    """Helper to upsert user and set session based on email."""
+def _handle_oauth_callback_logic(email, name, provider_name, source):
+    """Handles the callback securely with completely separate login and signup paths."""
     # Check if user already exists
     response = supabase.table("users").select("*").eq("email", email).execute()
     
-    if response.data:
-        user = response.data[0]
-        session['user_id'] = user['id']
-        session['user_name'] = user['name']
-        session['is_admin'] = user.get('is_admin', False)
-        
-        if not user.get('interests'):
-            return redirect(url_for('onboarding'))
-        if session.get('is_admin'):
-            return redirect(url_for('admin_dashboard'))
-        return redirect(url_for('student_dashboard'))
-    else:
-        import secrets
-        random_pw = secrets.token_urlsafe(16)
-        hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
-        
-        try:
-            new_user = supabase.table("users").insert({
-                "name": name,
-                "email": email,
-                "password_hash": hashed_pw,
-                "skills": "",
-                "interests": "",
-                "experience_level": ""
-            }).execute()
+    if source == 'signup':
+        if response.data:
+            # User already exists, but they tried to SIGN UP
+            return redirect(url_for('login', error="Account already exists. Please securely log in instead."))
+        else:
+            # User does NOT exist, create them normally
+            import secrets
+            random_pw = secrets.token_urlsafe(16)
+            hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
             
-            if new_user.data:
-                user = new_user.data[0]
-                session['user_id'] = user['id']
-                session['user_name'] = user['name']
-                session['is_admin'] = False
+            try:
+                new_user = supabase.table("users").insert({
+                    "name": name,
+                    "email": email,
+                    "password_hash": hashed_pw,
+                    "skills": "",
+                    "interests": "",
+                    "experience_level": ""
+                }).execute()
+                
+                if new_user.data:
+                    user = new_user.data[0]
+                    session['user_id'] = user['id']
+                    session['user_name'] = user['name']
+                    session['is_admin'] = False
+                    return redirect(url_for('onboarding'))
+                else:
+                    return redirect(url_for('signup', error=f"Failed to create account from {provider_name} data."))
+            except Exception as e:
+                return redirect(url_for('signup', error=f"Database error: {str(e)}"))
+
+    else:
+        # source == 'login'
+        if response.data:
+            # User exists, proceed to log them in securely
+            user = response.data[0]
+            session['user_id'] = user['id']
+            session['user_name'] = user['name']
+            session['is_admin'] = user.get('is_admin', False)
+            
+            if not user.get('interests'):
                 return redirect(url_for('onboarding'))
-            else:
-                return redirect(url_for('signup', error=f"Failed to create account from {provider_name} data."))
-        except Exception as e:
-            return redirect(url_for('signup', error=f"Database error: {str(e)}"))
+            if session.get('is_admin'):
+                return redirect(url_for('admin_dashboard'))
+            return redirect(url_for('student_dashboard'))
+        else:
+            # User does not exist, but they tried to LOG IN
+            return redirect(url_for('signup', error="Account not found. Please create an account first."))
 
 @app.route("/login/google")
 def login_google():
     """Trigger Google OAuth login flow."""
+    source = request.args.get('source', 'login')
+    session['oauth_source'] = source
+    
     # Check if credentials are actually configured
     if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
         error_msg = "Google Sign-In is not fully configured yet. Please contact the administrator."
         return redirect(url_for('login', error=error_msg))
         
     redirect_uri = url_for('auth_google_callback', _external=True)
-    return google.authorize_redirect(redirect_uri, prompt='select_account')
-
+    resp = google.authorize_redirect(redirect_uri, prompt='consent select_account')
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    resp.headers['Pragma'] = 'no-cache'
+    return resp
 @app.route("/auth/google/callback")
 def auth_google_callback():
     """Handle callback from Google OAuth."""
     try:
         token = google.authorize_access_token()
-        resp = google.get('userinfo')
-        user_info = resp.json()
+        if 'userinfo' in token:
+            user_info = token['userinfo']
+        else:
+            user_info = google.userinfo(token=token)
     except Exception as e:
         logger.error(f"Google auth error: {e}")
         return redirect(url_for('login', error="Google sign-in failed/cancelled. Please try again."))
@@ -780,9 +803,8 @@ def auth_google_callback():
     
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
-    
-    return _handle_oauth_login(email, name, "Google")
-
+    source = session.pop('oauth_source', 'login')
+    return _handle_oauth_callback_logic(email, name, "Google", source)
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
