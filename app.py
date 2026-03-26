@@ -4033,5 +4033,12 @@ if not IS_VERCEL:
         logger.error(f"Failed to start scheduler: {e}")
 
 if __name__ == "__main__":
+    import sys
     port = int(os.environ.get("PORT", 5000))
+    # Allow port override via command-line argument: python app.py --port=XXXX
+    if len(sys.argv) > 2 and sys.argv[1] == "--port":
+        try:
+            port = int(sys.argv[2])
+        except Exception:
+            pass
     app.run(host="0.0.0.0", port=port)

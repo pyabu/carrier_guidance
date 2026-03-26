@@ -360,12 +360,14 @@
         </div>
         {% endif %}
 
-        <form method="POST" action="/signup">
+
+        <form method="POST" action="/signup" id="signupForm" autocomplete="on" novalidate>
             <div class="auth-field">
                 <label>Full Name</label>
                 <div class="auth-input-wrap">
                     <i class="fas fa-user"></i>
-                    <input type="text" name="name" class="auth-input" required placeholder="John Doe">
+                    <input type="text" name="name" class="auth-input" id="signup-name" required placeholder="John Doe" autocomplete="name">
+                    <span class="input-error" id="name-error"></span>
                 </div>
             </div>
 
@@ -373,7 +375,8 @@
                 <label>Email Address</label>
                 <div class="auth-input-wrap">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" class="auth-input" required placeholder="you@example.com">
+                    <input type="email" name="email" class="auth-input" id="signup-email" required placeholder="you@example.com" autocomplete="email">
+                    <span class="input-error" id="signup-email-error"></span>
                 </div>
             </div>
 
@@ -381,14 +384,108 @@
                 <label>Password</label>
                 <div class="auth-input-wrap">
                     <i class="fas fa-lock"></i>
-                    <input type="password" name="password" class="auth-input" required minlength="6" placeholder="Min 6 characters">
+                    <input type="password" name="password" class="auth-input" id="signup-password" required minlength="6" placeholder="Min 6 characters" autocomplete="new-password">
+                    <span class="toggle-password" id="toggle-signup-password"><i class="fas fa-eye"></i></span>
+                    <span class="input-error" id="signup-password-error"></span>
                 </div>
             </div>
 
-            <button type="submit" class="auth-btn">
+            <button type="submit" class="auth-btn" id="signup-btn">
                 <i class="fas fa-user-plus"></i> Create Free Account
             </button>
         </form>
+
+        <div class="auth-divider">OR</div>
+
+        <a href="/login/google?source=signup" class="auth-btn auth-btn-google" id="google-signup-btn">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
+            <span id="google-signup-text">Sign up with Google</span>
+            <span class="spinner" id="google-signup-spinner" style="display:none;"></span>
+        </a>
+
+        <p class="auth-terms">
+            By creating an account, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+        </p>
+
+        <div class="auth-divider">Already a member?</div>
+
+        <p class="auth-footer-text">
+            <a href="/login">← Back to login</a>
+        </p>
+
+        <script>
+        // Password visibility toggle
+        document.getElementById('toggle-signup-password').onclick = function() {
+            const pwd = document.getElementById('signup-password');
+            const icon = this.querySelector('i');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        // Real-time validation
+        document.getElementById('signup-email').addEventListener('input', function() {
+            const error = document.getElementById('signup-email-error');
+            if (!this.validity.valid) {
+                error.textContent = 'Enter a valid email.';
+            } else {
+                error.textContent = '';
+            }
+        });
+        document.getElementById('signup-password').addEventListener('input', function() {
+            const error = document.getElementById('signup-password-error');
+            if (this.value.length < 6) {
+                error.textContent = 'Password must be at least 6 characters.';
+            } else {
+                error.textContent = '';
+            }
+        });
+        document.getElementById('signup-name').addEventListener('input', function() {
+            const error = document.getElementById('name-error');
+            if (this.value.trim().length < 2) {
+                error.textContent = 'Enter your full name.';
+            } else {
+                error.textContent = '';
+            }
+        });
+
+        // Animated feedback on submit
+        document.getElementById('signupForm').onsubmit = function(e) {
+            const email = document.getElementById('signup-email');
+            const password = document.getElementById('signup-password');
+            const name = document.getElementById('signup-name');
+            let valid = true;
+            if (!email.validity.valid) {
+                document.getElementById('signup-email-error').textContent = 'Enter a valid email.';
+                email.classList.add('shake');
+                valid = false;
+            }
+            if (password.value.length < 6) {
+                document.getElementById('signup-password-error').textContent = 'Password must be at least 6 characters.';
+                password.classList.add('shake');
+                valid = false;
+            }
+            if (name.value.trim().length < 2) {
+                document.getElementById('name-error').textContent = 'Enter your full name.';
+                name.classList.add('shake');
+                valid = false;
+            }
+            setTimeout(() => { email.classList.remove('shake'); password.classList.remove('shake'); name.classList.remove('shake'); }, 500);
+            if (!valid) e.preventDefault();
+        };
+
+        // Google button spinner
+        document.getElementById('google-signup-btn').onclick = function() {
+            document.getElementById('google-signup-text').style.display = 'none';
+            document.getElementById('google-signup-spinner').style.display = 'inline-block';
+        };
+        </script>
 
         <div class="auth-divider">OR</div>
 

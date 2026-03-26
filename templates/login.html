@@ -410,12 +410,14 @@
         </div>
         {% endif %}
 
-        <form method="POST" action="/login">
+
+        <form method="POST" action="/login" id="loginForm" autocomplete="on" novalidate>
             <div class="auth-field">
                 <label>Email Address</label>
                 <div class="auth-input-wrap">
                     <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" class="auth-input" required placeholder="you@example.com">
+                    <input type="email" name="email" class="auth-input" id="login-email" required placeholder="you@example.com" autocomplete="email">
+                    <span class="input-error" id="email-error"></span>
                 </div>
             </div>
 
@@ -423,14 +425,88 @@
                 <label>Password</label>
                 <div class="auth-input-wrap">
                     <i class="fas fa-lock"></i>
-                    <input type="password" name="password" class="auth-input" required placeholder="••••••••">
+                    <input type="password" name="password" class="auth-input" id="login-password" required placeholder="••••••••" autocomplete="current-password">
+                    <span class="toggle-password" id="toggle-login-password"><i class="fas fa-eye"></i></span>
+                    <span class="input-error" id="password-error"></span>
                 </div>
             </div>
 
-            <button type="submit" class="auth-btn">
+            <button type="submit" class="auth-btn" id="login-btn">
                 <i class="fas fa-sign-in-alt"></i> Sign In
             </button>
         </form>
+
+        <div class="auth-divider">OR</div>
+
+        <a href="/login/google?source=login" class="auth-btn auth-btn-google" id="google-login-btn">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
+            <span id="google-login-text">Continue with Google</span>
+            <span class="spinner" id="google-login-spinner" style="display:none;"></span>
+        </a>
+
+        <p class="auth-footer-text">
+            Don't have an account? <a href="/signup">Create one free →</a>
+        </p>
+
+        <script>
+        // Password visibility toggle
+        document.getElementById('toggle-login-password').onclick = function() {
+            const pwd = document.getElementById('login-password');
+            const icon = this.querySelector('i');
+            if (pwd.type === 'password') {
+                pwd.type = 'text';
+                icon.classList.remove('fa-eye');
+                icon.classList.add('fa-eye-slash');
+            } else {
+                pwd.type = 'password';
+                icon.classList.remove('fa-eye-slash');
+                icon.classList.add('fa-eye');
+            }
+        };
+
+        // Real-time validation
+        document.getElementById('login-email').addEventListener('input', function() {
+            const error = document.getElementById('email-error');
+            if (!this.validity.valid) {
+                error.textContent = 'Enter a valid email.';
+            } else {
+                error.textContent = '';
+            }
+        });
+        document.getElementById('login-password').addEventListener('input', function() {
+            const error = document.getElementById('password-error');
+            if (this.value.length < 6) {
+                error.textContent = 'Password must be at least 6 characters.';
+            } else {
+                error.textContent = '';
+            }
+        });
+
+        // Animated feedback on submit
+        document.getElementById('loginForm').onsubmit = function(e) {
+            const email = document.getElementById('login-email');
+            const password = document.getElementById('login-password');
+            let valid = true;
+            if (!email.validity.valid) {
+                document.getElementById('email-error').textContent = 'Enter a valid email.';
+                email.classList.add('shake');
+                valid = false;
+            }
+            if (password.value.length < 6) {
+                document.getElementById('password-error').textContent = 'Password must be at least 6 characters.';
+                password.classList.add('shake');
+                valid = false;
+            }
+            setTimeout(() => { email.classList.remove('shake'); password.classList.remove('shake'); }, 500);
+            if (!valid) e.preventDefault();
+        };
+
+        // Google button spinner
+        document.getElementById('google-login-btn').onclick = function() {
+            document.getElementById('google-login-text').style.display = 'none';
+            document.getElementById('google-login-spinner').style.display = 'inline-block';
+        };
+        </script>
 
         <div class="auth-divider">OR</div>
 
