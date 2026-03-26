@@ -542,6 +542,23 @@
         .admin-sidebar.open { transform: translateX(0); }
         .admin-panel { margin-left: 0 !important; }
     }
+    /* Dark Theme specific overrides for Theme Customizer */
+    [data-admin-theme="dark"] #view-theme .table-card {
+        background-color: #000000 !important;
+        color: #ffffff !important;
+    }
+    [data-admin-theme="dark"] #view-theme .table-card h3,
+    [data-admin-theme="dark"] #view-theme .table-card label,
+    [data-admin-theme="dark"] #view-theme .table-card p,
+    [data-admin-theme="dark"] #view-theme .table-card span {
+        color: #ffffff !important;
+    }
+    [data-admin-theme="dark"] #view-theme .table-card input.search-box,
+    [data-admin-theme="dark"] #view-theme .table-card select.search-box {
+        background-color: #1a1a1a !important;
+        color: #ffffff !important;
+        border-color: #333333 !important;
+    }
 </style>
 {% endblock %}
 

@@ -716,58 +716,55 @@ google = oauth.register(
 )
 
 def _handle_oauth_callback_logic(email, name, provider_name, source):
-    """Handles the callback securely with completely separate login and signup paths."""
+    """Handles the callback securely, ensuring users are logged in regardless of the source button."""
     # Check if user already exists
     response = supabase.table("users").select("*").eq("email", email).execute()
     
-    if source == 'signup':
-        if response.data:
-            # User already exists, but they tried to SIGN UP
-            return redirect(url_for('login', error="Account already exists. Please securely log in instead."))
-        else:
-            # User does NOT exist, create them normally
-            import secrets
-            random_pw = secrets.token_urlsafe(16)
-            hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
-            
+    if response.data:
+        # User EXISTS: Log them in immediately (even if they clicked 'signup')
+        user = response.data[0]
+        session['user_id'] = user['id']
+        session['user_name'] = user['name']
+        session['is_admin'] = user.get('is_admin', False)
+        
+        # Update name if it was previously 'Google User' or derived from email
+        if user.get('name') in ['Google User', 'User'] or not user.get('name'):
             try:
-                new_user = supabase.table("users").insert({
-                    "name": name,
-                    "email": email,
-                    "password_hash": hashed_pw,
-                    "skills": "",
-                    "interests": "",
-                    "experience_level": ""
-                }).execute()
-                
-                if new_user.data:
-                    user = new_user.data[0]
-                    session['user_id'] = user['id']
-                    session['user_name'] = user['name']
-                    session['is_admin'] = False
-                    return redirect(url_for('onboarding'))
-                else:
-                    return redirect(url_for('signup', error=f"Failed to create account from {provider_name} data."))
-            except Exception as e:
-                return redirect(url_for('signup', error=f"Database error: {str(e)}"))
+                supabase.table("users").update({"name": name}).eq("id", user['id']).execute()
+                session['user_name'] = name
+            except:
+                pass
+
+        if session.get('is_admin'):
+            return redirect(url_for('admin_dashboard'))
+        return redirect(url_for('student_dashboard'))
 
     else:
-        # source == 'login'
-        if response.data:
-            # User exists, proceed to log them in securely
-            user = response.data[0]
-            session['user_id'] = user['id']
-            session['user_name'] = user['name']
-            session['is_admin'] = user.get('is_admin', False)
+        # User does NOT EXIST: Create them (even if they clicked 'login')
+        import secrets
+        random_pw = secrets.token_urlsafe(16)
+        hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
+        
+        try:
+            new_user = supabase.table("users").insert({
+                "name": name,
+                "email": email,
+                "password_hash": hashed_pw,
+                "skills": "",
+                "interests": "",
+                "experience_level": ""
+            }).execute()
             
-            if not user.get('interests'):
-                return redirect(url_for('onboarding'))
-            if session.get('is_admin'):
-                return redirect(url_for('admin_dashboard'))
-            return redirect(url_for('student_dashboard'))
-        else:
-            # User does not exist, but they tried to LOG IN
-            return redirect(url_for('signup', error="Account not found. Please create an account first."))
+            if new_user.data:
+                user = new_user.data[0]
+                session['user_id'] = user['id']
+                session['user_name'] = user['name']
+                session['is_admin'] = False
+                return redirect(url_for('student_dashboard'))
+            else:
+                return redirect(url_for('signup', error=f"Failed to create account from {provider_name} data."))
+        except Exception as e:
+            return redirect(url_for('signup', error=f"Database error: {str(e)}"))
 
 @app.route("/login/google")
 def login_google():
@@ -799,7 +796,14 @@ def auth_google_callback():
         return redirect(url_for('login', error="Google sign-in failed/cancelled. Please try again."))
     
     email = user_info.get('email')
-    name = user_info.get('name', 'Google User')
+    name = user_info.get('name')
+    
+    # If name is missing, derive it from the email ID (e.g., 'john.doe@gmail.com' -> 'John doe')
+    if not name and email:
+        name = email.split('@')[0].replace('.', ' ').capitalize()
+    
+    if not name:
+        name = 'Google User'
     
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
@@ -916,6 +920,72 @@ def ai_sync_profile():
     except Exception as e:
         logger.error(f"AI Sync API Error: {str(e)}")
         return jsonify({"error": "Failed to analyze profile text."}), 500
+
+
+
+@app.route("/api/career_copilot", methods=["POST"])
+def career_copilot():
+    """
+    AI Career Copilot Chatbot API.
+    Provides data-grounded career advice using Gemini and real-time trends.
+    """
+    import google.generativeai as genai
+    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+    
+    data = request.get_json()
+    user_msg = data.get("message", "")
+    if not user_msg:
+        return jsonify({"error": "No message provided"}), 400
+        
+    # Load trend data for grounding
+    trends = {}
+    trends_path = os.path.join(os.path.dirname(__file__), "data", "trends.json")
+    try:
+        if os.path.exists(trends_path):
+            with open(trends_path, "r") as f:
+                trends = json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading trends for chatbot: {e}")
+
+    # Prepare grounding context
+    top_skills = [s['skill'] for s in trends.get("skills", {}).get("top_25", [])[:10]]
+    top_roles = [r['role'] for r in trends.get("roles", {}).get("top_20", [])[:10]]
+    career_paths = trends.get("career_paths", [])[:3] # Sample a few paths
+    
+    context = f"""
+    You are the "AI Career Copilot" for CareerGuidance.me. 
+    Your mission is to provide career advice that is NOT generic, but backed by real-time job market data in India.
+    
+    CURRENT MARKET DATA (Grounding):
+    - Top Trending Skills: {', '.join(top_skills)}
+    - High Demand Roles: {', '.join(top_roles)}
+    - Total Active Jobs Analyzed: {trends.get("total_jobs", "650+")}
+    - Sample Career Paths: {json.dumps(career_paths)}
+    
+    USER QUERY: "{user_msg}"
+    
+    INSTRUCTIONS:
+    1. Answer the user's question clearly.
+    2. Provide the following sections:
+       - 📈 **Career Options**: (Top 2-3 matching roles)
+       - 🔥 **Demand Level**: (High/Medium/Low based on current data)
+       - 🛠️ **Required Skills**: (List 5-6 key skills, prioritize trending ones)
+       - 🗺️ **Personalized Roadmap**: (Step-by-step guide for the next 6-12 months)
+    3. Keep the tone professional, encouraging, and data-driven.
+    4. If the user query is unrelated to careers, politely steer them back.
+    5. Use valid Markdown for the response.
+    """
+    
+    try:
+        model = genai.GenerativeModel('gemini-1.5-flash')
+        response = model.generate_content(context)
+        return jsonify({
+            "response": response.text.strip(),
+            "status": "success"
+        })
+    except Exception as e:
+        logger.error(f"Chatbot Gemini Error: {e}")
+        return jsonify({"error": "I'm having trouble connecting to my brain. Please try again later."}), 500
 
 
 @app.route("/onboarding", methods=["GET", "POST"])
@@ -3963,4 +4033,5 @@ if not IS_VERCEL:
         logger.error(f"Failed to start scheduler: {e}")
 
 if __name__ == "__main__":
-    app.run()
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)

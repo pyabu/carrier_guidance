@@ -693,4 +693,43 @@ document.getElementById('heroLocation')?.addEventListener('keypress', (e) => { i
 })();
 </script>
 
+<!-- ═══════════ AI CAREER COPILOT ═══════════ -->
+<div class="chatbot-toggle" id="chatbotToggle">
+    <div class="pulse"></div>
+    <i class="fas fa-robot"></i>
+</div>
+
+<div class="chatbot-window" id="chatbotWindow">
+    <div class="chatbot-header">
+        <div class="chatbot-header-info">
+            <i class="fas fa-robot"></i>
+            <div class="chatbot-header-text">
+                <h3>Career Copilot</h3>
+                <span>Online | Powered by AI</span>
+            </div>
+        </div>
+        <div class="chatbot-close" id="chatbotClose">
+            <i class="fas fa-times"></i>
+        </div>
+    </div>
+    <div class="chatbot-messages" id="chatbotMessages">
+        <div class="message ai">
+            <p>Hi there! 👋 I'm your AI Career Copilot. Ask me anything about career paths, skills, or job trends in India!</p>
+            <p>Try: <em>"I'm a BCom student, what should I do?"</em></p>
+        </div>
+    </div>
+    <div class="typing-indicator" id="typingIndicator">
+        <div class="typing-dots">
+            <span></span><span></span><span></span>
+        </div>
+    </div>
+    <div class="chatbot-input-area">
+        <input type="text" class="chatbot-input" id="chatbotInput" placeholder="Type your career question...">
+        <button class="chatbot-send" id="chatbotSend">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/chatbot.js') }}"></script>
 {% endblock %}
