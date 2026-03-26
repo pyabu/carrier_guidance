@@ -111,10 +111,12 @@
     {% endif %}
 
     {% block extra_head %}{% endblock %}
+    {% block auth_page_style %}{% endblock %}
 </head>
 
 <body>
     <!-- ═══════════ NAVBAR ═══════════ -->
+    {% if not hide_chrome %}
     <nav class="navbar" id="navbar">
         <div class="container nav-container">
             <a href="/" class="nav-logo">
@@ -204,13 +206,15 @@
             </div>
         </div>
     </nav>
+    {% endif %}
 
     <!-- ═══════════ MAIN CONTENT ═══════════ -->
-    <main class="main-content">
+    <main class="{% if not hide_chrome %}main-content{% endif %}">
         {% block content %}{% endblock %}
     </main>
 
     <!-- ═══════════ FOOTER ═══════════ -->
+    {% if not hide_chrome %}
     <footer class="footer">
         <div class="container">
             <div class="footer-grid">
@@ -265,6 +269,7 @@
             </div>
         </div>
     </footer>
+    {% endif %}
 
     <!-- ═══════════ LOGIN PROMPT MODAL ═══════════ -->
     {% if not session.get('user_id') %}

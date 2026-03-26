@@ -831,9 +831,9 @@ def login():
                 return redirect(url_for('admin_dashboard'))
             return redirect(url_for('student_dashboard'))
         else:
-            return render_template("login.html", error="Invalid email or password.")
+            return render_template("login.html", error="Invalid email or password.", hide_chrome=True)
             
-    return render_template("login.html")
+    return render_template("login.html", hide_chrome=True)
 
 
 @app.route("/signup", methods=["GET", "POST"])
@@ -846,7 +846,7 @@ def signup():
         # Check if email exists
         existing = supabase.table("users").select("id").eq("email", email).execute()
         if existing.data:
-            return render_template("signup.html", error="Email already exists.")
+            return render_template("signup.html", error="Email already exists.", hide_chrome=True)
             
         hashed_pw = generate_password_hash(password, method="pbkdf2:sha256")
         try:
@@ -866,12 +866,12 @@ def signup():
                 session['is_admin'] = False # Default for new signups
                 return redirect(url_for('onboarding'))
             else:
-                return render_template("signup.html", error="Failed to create account.")
+                return render_template("signup.html", error="Failed to create account.", hide_chrome=True)
                 
         except Exception as e:
-            return render_template("signup.html", error=f"Database error: {str(e)}")
+            return render_template("signup.html", error=f"Database error: {str(e)}", hide_chrome=True)
             
-    return render_template("signup.html")
+    return render_template("signup.html", hide_chrome=True)
 
 
 @app.route("/logout")

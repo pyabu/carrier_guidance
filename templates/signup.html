@@ -2,533 +2,814 @@
 {% block title %}Sign Up – CareerGuidance{% endblock %}
 
 {% block extra_head %}
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
-    body { background: #0f172a; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    .auth-wrapper {
+    body {
+        background: #060818;
+        font-family: 'Inter', sans-serif;
         min-height: 100vh;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 32px 0;
-        background: #0f172a;
     }
 
-    /* ── Left panel: branding ── */
+    /* ── Animated background ── */
+    .auth-bg {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        overflow: hidden;
+        background:
+            radial-gradient(ellipse at 15% 50%, rgba(5,150,105,0.15) 0%, transparent 55%),
+            radial-gradient(ellipse at 85% 20%, rgba(16,185,129,0.1) 0%, transparent 50%),
+            radial-gradient(ellipse at 60% 80%, rgba(52,211,153,0.07) 0%, transparent 45%),
+            #060818;
+    }
+
+    .auth-bg-orb {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(80px);
+        animation: orbFloat 8s ease-in-out infinite;
+    }
+
+    .orb1 {
+        width: 500px; height: 500px;
+        background: rgba(5,150,105,0.12);
+        top: -200px; left: -100px;
+        animation-delay: 0s;
+    }
+    .orb2 {
+        width: 400px; height: 400px;
+        background: rgba(16,185,129,0.1);
+        top: 30%; right: -150px;
+        animation-delay: 3s;
+    }
+    .orb3 {
+        width: 300px; height: 300px;
+        background: rgba(52,211,153,0.08);
+        bottom: -100px; left: 30%;
+        animation-delay: 5s;
+    }
+
+    @keyframes orbFloat {
+        0%, 100% { transform: translateY(0) scale(1); }
+        50% { transform: translateY(-30px) scale(1.05); }
+    }
+
+    .auth-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        background-image:
+            linear-gradient(rgba(16,185,129,0.04) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(16,185,129,0.04) 1px, transparent 1px);
+        background-size: 60px 60px;
+        mask-image: radial-gradient(ellipse at center, black 20%, transparent 80%);
+    }
+
+    /* ── Main Layout ── */
+    .auth-wrapper {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+    }
+
+    /* ── Left Panel ── */
     .auth-left {
         flex: 1;
         display: flex;
         flex-direction: column;
         justify-content: center;
-        padding: 60px 50px;
-        background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #0f172a 100%);
+        padding: 60px 50px 60px 70px;
         position: relative;
         overflow: hidden;
     }
 
-    .auth-left::before {
-        content: '';
-        position: absolute;
-        width: 500px;
-        height: 500px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%);
-        top: -100px;
-        right: -150px;
+    .auth-left-content {
+        position: relative;
+        z-index: 2;
+        max-width: 480px;
     }
 
-    .auth-left::after {
-        content: '';
-        position: absolute;
-        width: 300px;
-        height: 300px;
-        border-radius: 50%;
-        background: radial-gradient(circle, rgba(5,150,105,0.2) 0%, transparent 70%);
-        bottom: -50px;
-        left: -80px;
-    }
-
+    /* Brand */
     .auth-brand {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin-bottom: 60px;
-        position: relative;
-        z-index: 2;
+        gap: 14px;
+        margin-bottom: 70px;
     }
 
-    .auth-brand-icon {
-        width: 44px;
-        height: 44px;
-        background: linear-gradient(135deg, #10b981, #059669);
-        border-radius: 12px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        color: white;
-        box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+    .auth-brand-logo {
+        width: 48px; height: 48px;
+        background: linear-gradient(135deg, #059669, #10b981);
+        border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 20px; color: white;
+        box-shadow: 0 0 0 1px rgba(16,185,129,0.3), 0 8px 32px rgba(5,150,105,0.4);
+        position: relative;
+    }
+
+    .auth-brand-logo::after {
+        content: '';
+        position: absolute;
+        inset: -1px;
+        border-radius: 15px;
+        background: linear-gradient(135deg, rgba(110,231,183,0.4), transparent);
+        pointer-events: none;
     }
 
     .auth-brand-name {
-        font-size: 1.3rem;
+        font-size: 1.25rem;
         font-weight: 800;
         color: white;
-        letter-spacing: -0.3px;
+        letter-spacing: -0.5px;
     }
 
-    .auth-hero-text {
-        position: relative;
-        z-index: 2;
+    .auth-brand-name span { color: #34d399; }
+
+    /* Tagline Badge */
+    .auth-tagline {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(16,185,129,0.1);
+        border: 1px solid rgba(16,185,129,0.25);
+        border-radius: 30px;
+        padding: 6px 14px;
+        font-size: 0.75rem;
+        font-weight: 600;
+        color: #6ee7b7;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        margin-bottom: 24px;
     }
 
-    .auth-hero-text h2 {
-        font-size: clamp(1.8rem, 3vw, 2.8rem);
-        font-weight: 800;
+    .auth-tagline-dot {
+        width: 6px; height: 6px;
+        background: #34d399;
+        border-radius: 50%;
+        animation: pulse-dot 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-dot {
+        0%, 100% { opacity: 1; transform: scale(1); }
+        50% { opacity: 0.5; transform: scale(0.8); }
+    }
+
+    /* Hero */
+    .auth-hero-title {
+        font-size: clamp(2rem, 3.5vw, 3.2rem);
+        font-weight: 900;
         color: white;
-        line-height: 1.2;
-        margin-bottom: 16px;
+        line-height: 1.1;
+        letter-spacing: -1.5px;
+        margin-bottom: 20px;
     }
 
-    .auth-hero-text h2 span {
-        background: linear-gradient(90deg, #6ee7b7, #34d399);
+    .auth-hero-title .gradient-text {
+        background: linear-gradient(135deg, #34d399 0%, #60a5fa 50%, #a78bfa 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }
 
-    .auth-hero-text p {
-        color: rgba(255,255,255,0.6);
-        font-size: 1.05rem;
-        line-height: 1.7;
-        max-width: 340px;
+    .auth-hero-sub {
+        color: rgba(255,255,255,0.5);
+        font-size: 1rem;
+        line-height: 1.75;
+        max-width: 380px;
         margin-bottom: 40px;
     }
 
+    /* Benefits List */
     .auth-benefits {
         display: flex;
         flex-direction: column;
         gap: 14px;
-        position: relative;
-        z-index: 2;
+        margin-bottom: 40px;
     }
 
     .auth-benefit {
         display: flex;
         align-items: center;
-        gap: 12px;
-        color: rgba(255,255,255,0.75);
+        gap: 14px;
+        color: rgba(255,255,255,0.65);
         font-size: 0.9rem;
         font-weight: 500;
+        animation: slideInLeft 0.5s cubic-bezier(0.23,1,0.32,1) backwards;
     }
 
-    .benefit-dot {
-        width: 28px;
-        height: 28px;
+    .auth-benefit:nth-child(1) { animation-delay: 0.1s; }
+    .auth-benefit:nth-child(2) { animation-delay: 0.2s; }
+    .auth-benefit:nth-child(3) { animation-delay: 0.3s; }
+    .auth-benefit:nth-child(4) { animation-delay: 0.4s; }
+
+    @keyframes slideInLeft {
+        from { opacity: 0; transform: translateX(-15px); }
+        to { opacity: 1; transform: translateX(0); }
+    }
+
+    .benefit-check {
+        width: 26px; height: 26px;
         border-radius: 50%;
-        background: rgba(16,185,129,0.2);
+        background: rgba(16,185,129,0.15);
         border: 1px solid rgba(16,185,129,0.3);
-        display: flex;
-        align-items: center;
-        justify-content:center;
-        font-size: 11px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10px;
         color: #34d399;
         flex-shrink: 0;
     }
 
-    /* ── Right panel: form ── */
-    .auth-right {
-        width: min(440px, 96vw);
-        background: rgba(17, 24, 39, 0.85);
-        box-shadow: 0 8px 40px rgba(31,41,55,0.18), 0 1.5px 8px rgba(16,185,129,0.08);
-        border-radius: 22px;
-        border: 1.5px solid rgba(16,185,129,0.10);
-        backdrop-filter: blur(12px);
+    /* Trust Line */
+    .auth-trust {
         display: flex;
-        flex-direction: column;
+        align-items: center;
+        gap: 10px;
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.3);
+    }
+
+    .trust-avatars {
+        display: flex;
+    }
+
+    .trust-avatar {
+        width: 28px; height: 28px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: 2px solid #060818;
+        margin-left: -8px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 10px;
+        color: white;
+        font-weight: 700;
+    }
+
+    .trust-avatars .trust-avatar:first-child { margin-left: 0; }
+
+    /* Separator */
+    .auth-separator {
+        width: 1px;
+        background: linear-gradient(to bottom, transparent, rgba(16,185,129,0.2) 30%, rgba(16,185,129,0.2) 70%, transparent);
+        margin: 0 20px;
+        flex-shrink: 0;
+    }
+
+    /* ── Right Panel ── */
+    .auth-right {
+        width: 500px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
         justify-content: center;
-        padding: 48px 32px 36px 32px;
-        margin: 32px 0;
+        padding: 40px 28px;
+    }
+
+    .auth-card {
+        width: 100%;
+        max-width: 420px;
+        background: rgba(255,255,255,0.03);
+        border: 1px solid rgba(255,255,255,0.07);
+        border-radius: 24px;
+        padding: 38px 36px;
+        backdrop-filter: blur(20px);
+        box-shadow:
+            0 0 0 1px rgba(16,185,129,0.08),
+            0 20px 60px rgba(0,0,0,0.4),
+            inset 0 1px 0 rgba(255,255,255,0.05);
+        animation: cardFadeUp 0.7s cubic-bezier(0.23,1,0.32,1) both;
         position: relative;
-        z-index: 10;
-        animation: fadeInUp 0.7s cubic-bezier(.23,1.01,.32,1) both;
+        overflow: hidden;
     }
 
-    @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(40px); }
-        100% { opacity: 1; transform: translateY(0); }
+    .auth-card::before {
+        content: '';
+        position: absolute;
+        top: 0; left: 0; right: 0; height: 1px;
+        background: linear-gradient(90deg, transparent, rgba(16,185,129,0.5), rgba(52,211,153,0.4), transparent);
     }
 
-    .auth-form-header { margin-bottom: 32px; }
+    @keyframes cardFadeUp {
+        from { opacity: 0; transform: translateY(30px) scale(0.97); }
+        to { opacity: 1; transform: translateY(0) scale(1); }
+    }
 
-    .auth-form-header h1 {
-        font-size: 1.9rem;
+    .auth-card-header {
+        margin-bottom: 28px;
+    }
+
+    .auth-card-header h1 {
+        font-size: 1.65rem;
         font-weight: 800;
         color: white;
+        letter-spacing: -0.7px;
         margin-bottom: 8px;
     }
 
-    .auth-form-header p {
-        color: rgba(255,255,255,0.45);
-        font-size: 0.9rem;
+    .auth-card-header p {
+        font-size: 0.88rem;
+        color: rgba(255,255,255,0.38);
     }
 
-    .auth-field { margin-bottom: 20px; }
+    /* Error */
+    .auth-error {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        background: rgba(239,68,68,0.08);
+        border: 1px solid rgba(239,68,68,0.25);
+        border-radius: 12px;
+        padding: 12px 14px;
+        margin-bottom: 22px;
+        font-size: 0.85rem;
+        color: #fca5a5;
+        animation: shake 0.4s ease;
+    }
+
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20% { transform: translateX(-6px); }
+        40% { transform: translateX(6px); }
+        60% { transform: translateX(-4px); }
+        80% { transform: translateX(4px); }
+    }
+
+    .auth-error i { margin-top: 2px; flex-shrink: 0; color: #f87171; }
+
+    /* Field */
+    .auth-field { margin-bottom: 16px; }
 
     .auth-field label {
         display: block;
-        font-size: 0.8rem;
-        font-weight: 700;
-        color: rgba(255,255,255,0.6);
+        font-size: 0.77rem;
+        font-weight: 600;
+        color: rgba(255,255,255,0.5);
         text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 8px;
+        letter-spacing: 0.6px;
+        margin-bottom: 7px;
     }
 
-    .auth-input-wrap {
-        position: relative;
-    }
+    .auth-input-wrap { position: relative; }
 
-    .auth-input-wrap i {
+    .field-icon {
         position: absolute;
-        left: 16px;
+        left: 15px;
         top: 50%;
         transform: translateY(-50%);
-        color: rgba(255,255,255,0.25);
-        font-size: 14px;
+        color: rgba(255,255,255,0.2);
+        font-size: 13px;
         pointer-events: none;
+        transition: color 0.2s;
+    }
+
+    .auth-input-wrap:focus-within .field-icon {
+        color: rgba(16,185,129,0.6);
     }
 
     .auth-input {
         width: 100%;
-        padding: 14px 16px 14px 44px;
-        background: rgba(255,255,255,0.08);
-        border: 1.5px solid rgba(16,185,129,0.10);
-        border-radius: 14px;
+        padding: 12px 16px 12px 42px;
+        background: rgba(255,255,255,0.04);
+        border: 1.5px solid rgba(255,255,255,0.07);
+        border-radius: 12px;
         color: white;
-        font-size: 1rem;
-        transition: border-color 0.22s, background 0.22s, box-shadow 0.22s;
-        box-sizing: border-box;
+        font-size: 0.93rem;
+        font-family: 'Inter', sans-serif;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
         outline: none;
-        box-shadow: 0 1.5px 8px rgba(16,185,129,0.04);
     }
 
-    .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+    .auth-input::placeholder { color: rgba(255,255,255,0.16); }
 
     .auth-input:focus {
-        border-color: #34d399;
-        background: rgba(16,185,129,0.13);
-        box-shadow: 0 0 0 3px rgba(16,185,129,0.18);
+        border-color: rgba(16,185,129,0.5);
+        background: rgba(16,185,129,0.05);
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.1);
     }
 
-    .auth-error {
-        background: rgba(239,68,68,0.1);
-        border: 1px solid rgba(239,68,68,0.3);
-        color: #fca5a5;
-        padding: 12px 16px;
-        border-radius: 10px;
-        margin-bottom: 24px;
-        font-size: 0.87rem;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-    }
-
-    .auth-btn {
-        width: 100%;
-        padding: 15px;
-        background: linear-gradient(135deg, #10b981, #059669);
-        border: none;
-        border-radius: 14px;
-        color: white;
-        font-size: 1.08rem;
-        font-weight: 700;
+    .toggle-password {
+        position: absolute;
+        right: 13px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.22);
         cursor: pointer;
-        transition: opacity 0.22s, transform 0.18s, box-shadow 0.22s;
-        box-shadow: 0 4px 24px rgba(16,185,129,0.32);
+        font-size: 13px;
+        transition: color 0.2s;
+        z-index: 2;
+        padding: 4px;
+    }
+
+    .toggle-password:hover { color: rgba(255,255,255,0.5); }
+
+    .input-error {
+        display: block;
+        font-size: 0.73rem;
+        color: #f87171;
+        margin-top: 5px;
+        min-height: 14px;
+        padding-left: 2px;
+    }
+
+    /* Password strength */
+    .password-strength {
+        display: flex;
+        gap: 4px;
+        margin-top: 8px;
+    }
+
+    .strength-bar {
+        flex: 1;
+        height: 3px;
+        border-radius: 2px;
+        background: rgba(255,255,255,0.08);
+        transition: background 0.3s;
+    }
+
+    .strength-bar.weak   { background: #ef4444; }
+    .strength-bar.fair   { background: #f59e0b; }
+    .strength-bar.good   { background: #10b981; }
+    .strength-bar.strong { background: #34d399; }
+
+    /* Submit Button */
+    .auth-submit-btn {
+        width: 100%;
+        padding: 14px;
+        background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 0.98rem;
+        font-weight: 700;
+        font-family: 'Inter', sans-serif;
+        cursor: pointer;
         letter-spacing: 0.3px;
         margin-top: 8px;
-        will-change: transform, box-shadow;
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.2s, box-shadow 0.2s;
+        box-shadow: 0 4px 20px rgba(5,150,105,0.4);
     }
 
-    .auth-btn:hover {
-        opacity: 0.97;
-        transform: translateY(-2px) scale(1.025);
-        box-shadow: 0 10px 36px rgba(16,185,129,0.38);
+    .auth-submit-btn::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+        opacity: 0;
+        transition: opacity 0.2s;
     }
 
-    .auth-btn:active { transform: translateY(0); }
-
-    .auth-btn-google {
-        background: white;
-        color: #1e293b;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 10px;
-        text-decoration: none;
-        margin-top: 16px;
+    .auth-submit-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 32px rgba(5,150,105,0.5);
     }
 
-    .auth-btn-google:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        background: #f8fafc;
-    }
+    .auth-submit-btn:hover::before { opacity: 1; }
+    .auth-submit-btn:active { transform: translateY(0); }
 
-    .auth-btn-google img {
-        width: 18px;
-        height: 18px;
-    }
-
-    .auth-terms {
-        font-size: 0.78rem;
-        color: rgba(255,255,255,0.3);
-        text-align: center;
-        margin-top: 14px;
-        line-height: 1.5;
-    }
-
-    .auth-terms a { color: rgba(255,255,255,0.5); text-decoration: underline; }
-
+    /* Divider */
     .auth-divider {
         display: flex;
         align-items: center;
-        gap: 12px;
-        margin: 24px 0;
+        gap: 10px;
+        margin: 20px 0;
         color: rgba(255,255,255,0.2);
-        font-size: 0.78rem;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
     }
 
     .auth-divider::before, .auth-divider::after {
         content: '';
         flex: 1;
         height: 1px;
+        background: rgba(255,255,255,0.06);
+    }
+
+    /* Google */
+    .auth-google-btn {
+        width: 100%;
+        display: flex; align-items: center; justify-content: center;
+        gap: 10px;
+        padding: 13px;
+        background: rgba(255,255,255,0.05);
+        border: 1.5px solid rgba(255,255,255,0.09);
+        border-radius: 12px;
+        color: rgba(255,255,255,0.8);
+        font-size: 0.93rem;
+        font-weight: 600;
+        font-family: 'Inter', sans-serif;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+
+    .auth-google-btn:hover {
         background: rgba(255,255,255,0.08);
+        border-color: rgba(255,255,255,0.16);
+        transform: translateY(-1px);
+        color: white;
     }
 
-    .auth-footer-text {
+    .auth-google-btn img { width: 18px; height: 18px; }
+
+    /* Spinner */
+    .spinner {
+        display: inline-block;
+        width: 16px; height: 16px;
+        border: 2px solid rgba(255,255,255,0.3);
+        border-top-color: white;
+        border-radius: 50%;
+        animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Terms */
+    .auth-terms {
+        font-size: 0.74rem;
+        color: rgba(255,255,255,0.28);
         text-align: center;
-        color: rgba(255,255,255,0.4);
-        font-size: 0.88rem;
+        margin-top: 14px;
+        line-height: 1.6;
     }
 
-    .auth-footer-text a {
+    .auth-terms a {
+        color: rgba(255,255,255,0.45);
+        text-decoration: underline;
+        text-underline-offset: 2px;
+        transition: color 0.2s;
+    }
+
+    .auth-terms a:hover { color: #34d399; }
+
+    /* Footer */
+    .auth-footer {
+        text-align: center;
+        margin-top: 20px;
+        font-size: 0.85rem;
+        color: rgba(255,255,255,0.35);
+    }
+
+    .auth-footer a {
         color: #34d399;
-        font-weight: 700;
+        font-weight: 600;
         text-decoration: none;
         transition: color 0.2s;
     }
 
-    .auth-footer-text a:hover { color: #6ee7b7; }
+    .auth-footer a:hover { color: #6ee7b7; }
 
-    @media (max-width: 860px) {
+    /* Responsive */
+    @media (max-width: 900px) {
         .auth-left { display: none; }
+        .auth-separator { display: none; }
         .auth-right {
             width: 100%;
-            padding: 32px 8px 24px 8px;
-            margin: 16px 0;
-            border-radius: 16px;
-        }
-        .auth-wrapper {
+            padding: 24px 16px;
+            min-height: 100vh;
             align-items: flex-start;
-            padding: 12px 0;
+            padding-top: 60px;
         }
+        .auth-card { padding: 30px 22px; }
     }
 </style>
 {% endblock %}
 
 {% block content %}
+<div class="auth-bg">
+    <div class="auth-bg-orb orb1"></div>
+    <div class="auth-bg-orb orb2"></div>
+    <div class="auth-bg-orb orb3"></div>
+</div>
+<div class="auth-grid"></div>
+
 <div class="auth-wrapper">
-    <!-- Left Branding Panel -->
+    <!-- Left Panel -->
     <div class="auth-left">
-        <div class="auth-brand">
-            <div class="auth-brand-icon"><i class="fas fa-briefcase"></i></div>
-            <span class="auth-brand-name">CareerGuidance</span>
-        </div>
+        <div class="auth-left-content">
+            <!-- Brand -->
+            <div class="auth-brand">
+                <div class="auth-brand-logo">
+                    <i class="fas fa-briefcase"></i>
+                </div>
+                <span class="auth-brand-name">Career<span>Guidance</span></span>
+            </div>
 
-        <div class="auth-hero-text">
-            <h2>Start your <span>career journey</span> here</h2>
-            <p>Join thousands of students and professionals finding their dream job across India with AI-powered guidance.</p>
-        </div>
+            <!-- Hero -->
+            <div class="auth-tagline">
+                <div class="auth-tagline-dot"></div>
+                100% Free · No Credit Card
+            </div>
 
-        <div class="auth-benefits">
-            <div class="auth-benefit">
-                <div class="benefit-dot"><i class="fas fa-check"></i></div>
-                Browse 10,000+ live job listings across India
+            <h2 class="auth-hero-title">
+                Start your<br>
+                <span class="gradient-text">career journey</span><br>here
+            </h2>
+
+            <p class="auth-hero-sub">
+                Join thousands of students and professionals who found their dream job across India with AI-powered guidance and curated listings.
+            </p>
+
+            <!-- Benefits -->
+            <div class="auth-benefits">
+                <div class="auth-benefit">
+                    <div class="benefit-check"><i class="fas fa-check"></i></div>
+                    Browse 10,000+ live job listings across India
+                </div>
+                <div class="auth-benefit">
+                    <div class="benefit-check"><i class="fas fa-check"></i></div>
+                    Personalized AI career tips and resume scoring
+                </div>
+                <div class="auth-benefit">
+                    <div class="benefit-check"><i class="fas fa-check"></i></div>
+                    Tamil Nadu & government job alerts
+                </div>
+                <div class="auth-benefit">
+                    <div class="benefit-check"><i class="fas fa-check"></i></div>
+                    100% free — no subscription required
+                </div>
             </div>
-            <div class="auth-benefit">
-                <div class="benefit-dot"><i class="fas fa-check"></i></div>
-                Personalized AI career tips and resume scoring
-            </div>
-            <div class="auth-benefit">
-                <div class="benefit-dot"><i class="fas fa-check"></i></div>
-                Tamil Nadu & government job alerts
-            </div>
-            <div class="auth-benefit">
-                <div class="benefit-dot"><i class="fas fa-check"></i></div>
-                100% free — no credit card required
+
+            <!-- Trust -->
+            <div class="auth-trust">
+                <div class="trust-avatars">
+                    <div class="trust-avatar">A</div>
+                    <div class="trust-avatar">S</div>
+                    <div class="trust-avatar">K</div>
+                    <div class="trust-avatar">R</div>
+                </div>
+                <span>Trusted by 5,000+ job seekers this month</span>
             </div>
         </div>
     </div>
 
-    <!-- Right Form Panel -->
+    <!-- Separator -->
+    <div class="auth-separator"></div>
+
+    <!-- Right Panel -->
     <div class="auth-right">
-        <div class="auth-form-header">
-            <h1>Create your account ✨</h1>
-            <p>It only takes 30 seconds — completely free</p>
-        </div>
+        <div class="auth-card">
+            <div class="auth-card-header">
+                <h1>Create your account ✨</h1>
+                <p>It only takes 30 seconds — completely free</p>
+            </div>
 
-        {% if error %}
-        <div class="auth-error">
-            <i class="fas fa-exclamation-circle"></i> {{ error }}
-        </div>
-        {% endif %}
+            {% if error %}
+            <div class="auth-error">
+                <i class="fas fa-exclamation-circle"></i>
+                <span>{{ error }}</span>
+            </div>
+            {% endif %}
 
+            <!-- Google Signup — Primary CTA -->
+            <a href="/login/google?source=signup" class="auth-google-btn" id="google-signup-btn"
+               style="margin-bottom:4px; padding:14px; font-size:0.97rem;">
+                <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google logo">
+                <span id="google-signup-text">Sign up with Google</span>
+                <span class="spinner" id="google-signup-spinner" style="display:none;"></span>
+            </a>
 
-        <form method="POST" action="/signup" id="signupForm" autocomplete="on" novalidate>
-            <div class="auth-field">
-                <label>Full Name</label>
-                <div class="auth-input-wrap">
-                    <i class="fas fa-user"></i>
-                    <input type="text" name="name" class="auth-input" id="signup-name" required placeholder="John Doe" autocomplete="name">
+            <div class="auth-divider">or sign up with email</div>
+
+            <!-- Email Form -->
+            <form method="POST" action="/signup" id="signupForm" autocomplete="on" novalidate>
+                <div class="auth-field">
+                    <label for="signup-name">Full Name</label>
+                    <div class="auth-input-wrap">
+                        <input type="text" name="name" class="auth-input" id="signup-name"
+                               required placeholder="John Doe" autocomplete="name">
+                        <i class="fas fa-user field-icon"></i>
+                    </div>
                     <span class="input-error" id="name-error"></span>
                 </div>
-            </div>
 
-            <div class="auth-field">
-                <label>Email Address</label>
-                <div class="auth-input-wrap">
-                    <i class="fas fa-envelope"></i>
-                    <input type="email" name="email" class="auth-input" id="signup-email" required placeholder="you@example.com" autocomplete="email">
+                <div class="auth-field">
+                    <label for="signup-email">Email Address</label>
+                    <div class="auth-input-wrap">
+                        <input type="email" name="email" class="auth-input" id="signup-email"
+                               required placeholder="you@example.com" autocomplete="email">
+                        <i class="fas fa-envelope field-icon"></i>
+                    </div>
                     <span class="input-error" id="signup-email-error"></span>
                 </div>
-            </div>
 
-            <div class="auth-field">
-                <label>Password</label>
-                <div class="auth-input-wrap">
-                    <i class="fas fa-lock"></i>
-                    <input type="password" name="password" class="auth-input" id="signup-password" required minlength="6" placeholder="Min 6 characters" autocomplete="new-password">
-                    <span class="toggle-password" id="toggle-signup-password"><i class="fas fa-eye"></i></span>
+                <div class="auth-field">
+                    <label for="signup-password">Password</label>
+                    <div class="auth-input-wrap">
+                        <input type="password" name="password" class="auth-input" id="signup-password"
+                               required minlength="6" placeholder="Min 6 characters" autocomplete="new-password">
+                        <i class="fas fa-lock field-icon"></i>
+                        <span class="toggle-password" id="toggle-signup-password" role="button" tabindex="0" aria-label="Toggle password visibility">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+                    <div class="password-strength" id="strength-bars">
+                        <div class="strength-bar" id="bar1"></div>
+                        <div class="strength-bar" id="bar2"></div>
+                        <div class="strength-bar" id="bar3"></div>
+                        <div class="strength-bar" id="bar4"></div>
+                    </div>
                     <span class="input-error" id="signup-password-error"></span>
                 </div>
+
+                <button type="submit" class="auth-submit-btn" id="signup-btn">
+                    <i class="fas fa-user-plus" style="margin-right:8px;"></i> Create Free Account
+                </button>
+            </form>
+
+            <p class="auth-terms">
+                By creating an account, you agree to our
+                <a href="/terms">Terms of Service</a> and <a href="/privacy">Privacy Policy</a>.
+            </p>
+
+            <div class="auth-footer">
+                Already have an account? <a href="/login">Sign in →</a>
             </div>
-
-            <button type="submit" class="auth-btn" id="signup-btn">
-                <i class="fas fa-user-plus"></i> Create Free Account
-            </button>
-        </form>
-
-        <div class="auth-divider">OR</div>
-
-        <a href="/login/google?source=signup" class="auth-btn auth-btn-google" id="google-signup-btn">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
-            <span id="google-signup-text">Sign up with Google</span>
-            <span class="spinner" id="google-signup-spinner" style="display:none;"></span>
-        </a>
-
-        <p class="auth-terms">
-            By creating an account, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
-        </p>
-
-        <div class="auth-divider">Already a member?</div>
-
-        <p class="auth-footer-text">
-            <a href="/login">← Back to login</a>
-        </p>
-
-        <script>
-        // Password visibility toggle
-        document.getElementById('toggle-signup-password').onclick = function() {
-            const pwd = document.getElementById('signup-password');
-            const icon = this.querySelector('i');
-            if (pwd.type === 'password') {
-                pwd.type = 'text';
-                icon.classList.remove('fa-eye');
-                icon.classList.add('fa-eye-slash');
-            } else {
-                pwd.type = 'password';
-                icon.classList.remove('fa-eye-slash');
-                icon.classList.add('fa-eye');
-            }
-        };
-
-        // Real-time validation
-        document.getElementById('signup-email').addEventListener('input', function() {
-            const error = document.getElementById('signup-email-error');
-            if (!this.validity.valid) {
-                error.textContent = 'Enter a valid email.';
-            } else {
-                error.textContent = '';
-            }
-        });
-        document.getElementById('signup-password').addEventListener('input', function() {
-            const error = document.getElementById('signup-password-error');
-            if (this.value.length < 6) {
-                error.textContent = 'Password must be at least 6 characters.';
-            } else {
-                error.textContent = '';
-            }
-        });
-        document.getElementById('signup-name').addEventListener('input', function() {
-            const error = document.getElementById('name-error');
-            if (this.value.trim().length < 2) {
-                error.textContent = 'Enter your full name.';
-            } else {
-                error.textContent = '';
-            }
-        });
-
-        // Animated feedback on submit
-        document.getElementById('signupForm').onsubmit = function(e) {
-            const email = document.getElementById('signup-email');
-            const password = document.getElementById('signup-password');
-            const name = document.getElementById('signup-name');
-            let valid = true;
-            if (!email.validity.valid) {
-                document.getElementById('signup-email-error').textContent = 'Enter a valid email.';
-                email.classList.add('shake');
-                valid = false;
-            }
-            if (password.value.length < 6) {
-                document.getElementById('signup-password-error').textContent = 'Password must be at least 6 characters.';
-                password.classList.add('shake');
-                valid = false;
-            }
-            if (name.value.trim().length < 2) {
-                document.getElementById('name-error').textContent = 'Enter your full name.';
-                name.classList.add('shake');
-                valid = false;
-            }
-            setTimeout(() => { email.classList.remove('shake'); password.classList.remove('shake'); name.classList.remove('shake'); }, 500);
-            if (!valid) e.preventDefault();
-        };
-
-        // Google button spinner
-        document.getElementById('google-signup-btn').onclick = function() {
-            document.getElementById('google-signup-text').style.display = 'none';
-            document.getElementById('google-signup-spinner').style.display = 'inline-block';
-        };
-        </script>
-
-        <div class="auth-divider">OR</div>
-
-        <a href="/login/google?source=signup" class="auth-btn auth-btn-google">
-            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
-            Sign up with Google
-        </a>
-
-        <p class="auth-terms">
-            By creating an account, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
-        </p>
-
-        <div class="auth-divider">Already a member?</div>
-
-        <p class="auth-footer-text">
-            <a href="/login">← Back to login</a>
-        </p>
+        </div>
     </div>
 </div>
+
+<script>
+// Password toggle
+const toggleBtn = document.getElementById('toggle-signup-password');
+const pwdInput  = document.getElementById('signup-password');
+
+function togglePassword() {
+    const icon = toggleBtn.querySelector('i');
+    if (pwdInput.type === 'password') {
+        pwdInput.type = 'text';
+        icon.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        pwdInput.type = 'password';
+        icon.classList.replace('fa-eye-slash', 'fa-eye');
+    }
+}
+
+toggleBtn.addEventListener('click', togglePassword);
+toggleBtn.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') togglePassword(); });
+
+// Password strength
+pwdInput.addEventListener('input', function() {
+    const val   = this.value;
+    const bars  = [document.getElementById('bar1'), document.getElementById('bar2'),
+                   document.getElementById('bar3'), document.getElementById('bar4')];
+
+    bars.forEach(b => b.className = 'strength-bar');
+
+    let score = 0;
+    if (val.length >= 6)  score++;
+    if (val.length >= 10) score++;
+    if (/[A-Z]/.test(val) && /[0-9]/.test(val)) score++;
+    if (/[^A-Za-z0-9]/.test(val)) score++;
+
+    const levels = ['weak','fair','good','strong'];
+    for (let i = 0; i < score; i++) bars[i].classList.add(levels[Math.min(score - 1, 3)]);
+
+    document.getElementById('signup-password-error').textContent =
+        val.length > 0 && val.length < 6 ? 'Password must be at least 6 characters.' : '';
+});
+
+// Real-time validation
+document.getElementById('signup-email').addEventListener('input', function() {
+    document.getElementById('signup-email-error').textContent =
+        this.validity.valid ? '' : 'Enter a valid email address.';
+});
+
+document.getElementById('signup-name').addEventListener('input', function() {
+    document.getElementById('name-error').textContent =
+        this.value.trim().length < 2 ? 'Enter your full name.' : '';
+});
+
+// Form submit
+document.getElementById('signupForm').addEventListener('submit', function(e) {
+    const name     = document.getElementById('signup-name');
+    const email    = document.getElementById('signup-email');
+    const password = document.getElementById('signup-password');
+    let valid = true;
+
+    if (name.value.trim().length < 2) {
+        document.getElementById('name-error').textContent = 'Enter your full name.';
+        valid = false;
+    }
+    if (!email.validity.valid) {
+        document.getElementById('signup-email-error').textContent = 'Enter a valid email address.';
+        valid = false;
+    }
+    if (password.value.length < 6) {
+        document.getElementById('signup-password-error').textContent = 'Password must be at least 6 characters.';
+        valid = false;
+    }
+    if (!valid) e.preventDefault();
+});
+
+// Google spinner
+document.getElementById('google-signup-btn').addEventListener('click', function() {
+    document.getElementById('google-signup-text').style.display  = 'none';
+    document.getElementById('google-signup-spinner').style.display = 'inline-block';
+});
+</script>
 {% endblock %}
