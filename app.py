@@ -933,13 +933,21 @@ def career_copilot():
     Provides data-grounded career advice using Gemini and real-time trends.
     """
     import google.generativeai as genai
-    genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
-    
+    api_key = os.environ.get("GEMINI_API_KEY", "")
     data = request.get_json()
     user_msg = data.get("message", "")
     if not user_msg:
         return jsonify({"error": "No message provided"}), 400
         
+    # If API key is missing, return a mock response for testing/development
+    if not api_key:
+        return jsonify({
+            "response": f"*(Mock Mode) I received your message:* **'{user_msg}'**\n\nTo get real AI career insights, please add your `GEMINI_API_KEY` to the `.env` file or environment variables.\n\n📈 **Career Options**: Software Engineer, Data Analyst\n🔥 **Demand Level**: High\n🛠️ **Required Skills**: Python, React, SQL\n🗺️ **Personalized Roadmap**: Start with Python basics, build projects, and learn SQL.",
+            "status": "success"
+        })
+
+    genai.configure(api_key=api_key)
+    
     # Load trend data for grounding
     trends = {}
     trends_path = os.path.join(os.path.dirname(__file__), "data", "trends.json")
