@@ -6,6 +6,9 @@ Works both locally and on Vercel (serverless).
 
 import os
 import json
+from dotenv import load_dotenv
+
+load_dotenv()
 
 import shutil
 from datetime import datetime, timedelta
