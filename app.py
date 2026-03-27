@@ -931,6 +931,7 @@ def career_copilot():
     """
     AI Career Copilot Chatbot API.
     Provides data-grounded career advice using Gemini and real-time trends.
+    Falls back to built-in career advice if API quota is exhausted.
     """
     import google.generativeai as genai
     api_key = os.environ.get("GEMINI_API_KEY", "")
@@ -938,13 +939,142 @@ def career_copilot():
     user_msg = data.get("message", "")
     if not user_msg:
         return jsonify({"error": "No message provided"}), 400
-        
-    # If API key is missing, return a mock response for testing/development
+
+    # ── Built-in career advice fallback (keyword-based) ──────────────
+    def _fallback_response(query):
+        q = query.lower()
+        # Career-specific responses
+        if any(w in q for w in ["bcom", "b.com", "commerce", "accounting", "finance"]):
+            return ("Great question! As a **BCom graduate**, you have exciting career paths ahead:\n\n"
+                    "📈 **Career Options**:\n"
+                    "• **Financial Analyst** – Analyze financial data for companies\n"
+                    "• **Data Analyst** – High demand in India, avg ₹6-10 LPA\n"
+                    "• **Digital Marketing Specialist** – Growing 35% YoY\n\n"
+                    "🔥 **Demand Level**: High – Finance & analytics roles are booming in India\n\n"
+                    "🛠️ **Required Skills**: Excel, Tally, SQL, Python, Power BI, Financial Modeling\n\n"
+                    "🗺️ **Personalized Roadmap**:\n"
+                    "1. **Month 1-2**: Learn Excel (advanced) + Tally ERP\n"
+                    "2. **Month 3-4**: Pick up SQL & basic Python\n"
+                    "3. **Month 5-6**: Get certified in Power BI or Google Analytics\n"
+                    "4. **Month 7-8**: Build 2-3 portfolio projects\n"
+                    "5. **Month 9-12**: Apply for internships on Naukri, LinkedIn & Indeed")
+        elif any(w in q for w in ["software", "developer", "programming", "coding", "engineer", "sde"]):
+            return ("**Software Engineering** is one of the hottest career paths in India right now!\n\n"
+                    "📈 **Career Options**:\n"
+                    "• **Full Stack Developer** – ₹8-25 LPA, huge demand\n"
+                    "• **Backend Engineer** – Python, Java, Node.js roles growing 40%\n"
+                    "• **DevOps Engineer** – ₹10-30 LPA, cloud skills critical\n\n"
+                    "🔥 **Demand Level**: Very High – 50,000+ openings across India\n\n"
+                    "🛠️ **Required Skills**: Python, JavaScript, React, Node.js, SQL, Git, AWS/GCP\n\n"
+                    "🗺️ **Personalized Roadmap**:\n"
+                    "1. **Month 1-2**: Master one language (Python or JavaScript)\n"
+                    "2. **Month 3-4**: Learn React + Node.js (Full Stack)\n"
+                    "3. **Month 5-6**: Build 3 real-world projects, push to GitHub\n"
+                    "4. **Month 7-8**: Learn SQL + basic cloud (AWS)\n"
+                    "5. **Month 9-12**: Practice DSA on LeetCode, apply to companies")
+        elif any(w in q for w in ["data science", "data analyst", "analytics", "machine learning", "ml", "ai ", "artificial intelligence"]):
+            return ("**Data Science & AI** is the fastest-growing field in India!\n\n"
+                    "📈 **Career Options**:\n"
+                    "• **Data Scientist** – ₹10-30 LPA, top companies hiring actively\n"
+                    "• **ML Engineer** – ₹12-35 LPA, high demand in Bangalore & Hyderabad\n"
+                    "• **Data Analyst** – ₹5-12 LPA, great entry point\n\n"
+                    "🔥 **Demand Level**: Very High – Growing 45% annually\n\n"
+                    "🛠️ **Required Skills**: Python, SQL, Pandas, Scikit-learn, TensorFlow, Power BI, Statistics\n\n"
+                    "🗺️ **Personalized Roadmap**:\n"
+                    "1. **Month 1-2**: Master Python + Statistics basics\n"
+                    "2. **Month 3-4**: Learn Pandas, NumPy, Matplotlib\n"
+                    "3. **Month 5-6**: Take a ML course (Andrew Ng / fast.ai)\n"
+                    "4. **Month 7-8**: Build 3 portfolio projects with real datasets\n"
+                    "5. **Month 9-12**: Kaggle competitions + apply for roles")
+        elif any(w in q for w in ["web", "frontend", "front-end", "html", "css", "react", "angular"]):
+            return ("**Web Development** remains one of the most accessible and rewarding careers!\n\n"
+                    "📈 **Career Options**:\n"
+                    "• **Frontend Developer** – ₹6-18 LPA, React/Next.js in huge demand\n"
+                    "• **Full Stack Developer** – ₹8-25 LPA\n"
+                    "• **UI/UX Developer** – ₹7-20 LPA, design + code\n\n"
+                    "🔥 **Demand Level**: High – Every company needs web developers\n\n"
+                    "🛠️ **Required Skills**: HTML, CSS, JavaScript, React, TypeScript, Tailwind, Git\n\n"
+                    "🗺️ **Personalized Roadmap**:\n"
+                    "1. **Month 1-2**: Master HTML, CSS, JavaScript fundamentals\n"
+                    "2. **Month 3-4**: Learn React.js + Tailwind CSS\n"
+                    "3. **Month 5-6**: Build 3-4 responsive projects\n"
+                    "4. **Month 7-8**: Learn Next.js + backend basics (Node.js)\n"
+                    "5. **Month 9-12**: Create portfolio site, contribute to open source, apply")
+        elif any(w in q for w in ["fresher", "first job", "entry level", "no experience", "graduate", "placement"]):
+            return ("Starting your career as a **fresher**? Here's your game plan!\n\n"
+                    "📈 **Career Options** (Best for Freshers):\n"
+                    "• **Software Developer** – Mass hiring at TCS, Infosys, Wipro\n"
+                    "• **Business Analyst** – Good for non-tech backgrounds\n"
+                    "• **Digital Marketing** – Low barrier to entry, high growth\n\n"
+                    "🔥 **Demand Level**: High – Companies actively hiring freshers\n\n"
+                    "🛠️ **Required Skills**: Communication, MS Office, any one programming language, aptitude\n\n"
+                    "🗺️ **Personalized Roadmap**:\n"
+                    "1. **Week 1-2**: Update resume + create LinkedIn profile\n"
+                    "2. **Month 1**: Pick one skill track (coding / marketing / analytics)\n"
+                    "3. **Month 2-3**: Get 1-2 free certifications (Google, Coursera)\n"
+                    "4. **Month 3-4**: Apply on Naukri, LinkedIn, Indeed (50+ applications)\n"
+                    "5. **Ongoing**: Practice aptitude tests + mock interviews")
+        elif any(w in q for w in ["resume", "cv", "portfolio"]):
+            return ("A strong **resume** is your ticket to interviews! Here are key tips:\n\n"
+                    "📈 **Resume Best Practices**:\n"
+                    "• Keep it to **1 page** (freshers) or 2 pages (experienced)\n"
+                    "• Use **action verbs**: Built, Designed, Implemented, Optimized\n"
+                    "• Include **measurable results**: 'Improved load time by 40%'\n\n"
+                    "🛠️ **Must-Have Sections**: Contact Info, Summary, Skills, Experience, Projects, Education\n\n"
+                    "🗺️ **Quick Tips**:\n"
+                    "1. Use our **Resume Builder** at /resume-builder\n"
+                    "2. Tailor your resume for each job\n"
+                    "3. Use ATS-friendly formatting (no tables, no images)\n"
+                    "4. Add GitHub/portfolio links\n"
+                    "5. Proofread carefully!")
+        elif any(w in q for w in ["interview", "prepare", "crack", "tips"]):
+            return ("**Interview preparation** is crucial! Here's how to ace it:\n\n"
+                    "📈 **Key Areas to Prepare**:\n"
+                    "• **Technical Round**: DSA, system design, coding problems\n"
+                    "• **HR Round**: Tell me about yourself, strengths/weaknesses\n"
+                    "• **Behavioral**: STAR method (Situation, Task, Action, Result)\n\n"
+                    "🛠️ **Resources**:\n"
+                    "• LeetCode / HackerRank for coding\n"
+                    "• Glassdoor for company-specific questions\n"
+                    "• Mock interviews on Pramp\n\n"
+                    "🗺️ **Preparation Roadmap**:\n"
+                    "1. **Week 1**: Research the company thoroughly\n"
+                    "2. **Week 2**: Practice top 50 coding questions\n"
+                    "3. **Week 3**: Do 2-3 mock interviews\n"
+                    "4. **Day before**: Prepare questions to ask the interviewer\n"
+                    "5. **Day of**: Dress well, be on time, bring copies of resume")
+        elif any(w in q for w in ["hello", "hi ", "hey", "howdy", "good morning", "good evening"]):
+            return ("Hello! 👋 I'm your **AI Career Copilot**. I can help you with:\n\n"
+                    "• 📈 **Career path recommendations** based on your background\n"
+                    "• 🔥 **Job market trends** in India\n"
+                    "• 🛠️ **Skill recommendations** for your dream role\n"
+                    "• 🗺️ **Personalized learning roadmaps**\n\n"
+                    "Try asking me:\n"
+                    "• *\"I'm a BCom student, what should I do?\"*\n"
+                    "• *\"What skills do I need to become a data scientist?\"*\n"
+                    "• *\"How to prepare for software engineering interviews?\"*\n"
+                    "• *\"Best career options for freshers in 2026\"*")
+        else:
+            return (f"Thanks for your question about **\"{query}\"**! Here's some guidance:\n\n"
+                    "📈 **Top Career Paths in India (2026)**:\n"
+                    "• **Software Engineering** – 50,000+ openings, ₹6-30 LPA\n"
+                    "• **Data Science & AI** – Growing 45% annually\n"
+                    "• **Cloud & DevOps** – ₹10-35 LPA, critical shortage\n"
+                    "• **Digital Marketing** – Every business needs it\n"
+                    "• **UI/UX Design** – Creative + tech, ₹7-20 LPA\n\n"
+                    "🔥 **Demand Level**: Tech roles dominate India's job market\n\n"
+                    "🛠️ **Most In-Demand Skills**: Python, JavaScript, React, AWS, SQL, Git\n\n"
+                    "🗺️ **General Roadmap**:\n"
+                    "1. **Identify your interest** – Tech, Business, Creative, or Hybrid?\n"
+                    "2. **Learn one core skill** deeply (3-4 months)\n"
+                    "3. **Build projects** to showcase your abilities\n"
+                    "4. **Get certified** (Google, AWS, or Coursera)\n"
+                    "5. **Apply actively** and network on LinkedIn\n\n"
+                    "*Ask me something more specific for a personalized answer!*")
+
+    # ── Try Gemini AI first, fallback to built-in responses ──────────
     if not api_key:
-        return jsonify({
-            "response": f"*(Mock Mode) I received your message:* **'{user_msg}'**\n\nTo get real AI career insights, please add your `GEMINI_API_KEY` to the `.env` file or environment variables.\n\n📈 **Career Options**: Software Engineer, Data Analyst\n🔥 **Demand Level**: High\n🛠️ **Required Skills**: Python, React, SQL\n🗺️ **Personalized Roadmap**: Start with Python basics, build projects, and learn SQL.",
-            "status": "success"
-        })
+        return jsonify({"response": _fallback_response(user_msg), "status": "success"})
 
     genai.configure(api_key=api_key)
     
@@ -961,7 +1091,7 @@ def career_copilot():
     # Prepare grounding context
     top_skills = [s['skill'] for s in trends.get("skills", {}).get("top_25", [])[:10]]
     top_roles = [r['role'] for r in trends.get("roles", {}).get("top_20", [])[:10]]
-    career_paths = trends.get("career_paths", [])[:3] # Sample a few paths
+    career_paths = trends.get("career_paths", [])[:3]
     
     context = f"""
     You are the "AI Career Copilot" for CareerGuidance.me. 
@@ -984,28 +1114,39 @@ def career_copilot():
        - 🗺️ **Personalized Roadmap**: (Step-by-step guide for the next 6-12 months)
     3. Keep the tone professional, encouraging, and data-driven.
     4. If the user query is unrelated to careers, politely steer them back.
-    5. Use valid Markdown for the response.
+    5. Use valid Markdown for the response. Keep it concise.
     """
     
-    try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
-        response = model.generate_content(context)
-        
-        # Safety check: response might be blocked or empty
-        if not response or not response.text:
-            logger.warning("Gemini returned empty or blocked response")
-            return jsonify({
-                "error": "The AI could not generate a response. Please try rephrasing your question.",
-                "status": "error"
-            }), 500
-        
-        return jsonify({
-            "response": response.text.strip(),
-            "status": "success"
-        })
-    except Exception as e:
-        logger.error(f"Chatbot Gemini Error: {type(e).__name__}: {e}")
-        return jsonify({"error": "I'm having trouble connecting to my brain. Please try again later."}), 500
+    # Try multiple models as fallback
+    models_to_try = ['gemini-2.5-flash', 'gemini-2.0-flash', 'gemini-1.5-flash']
+    
+    for model_name in models_to_try:
+        try:
+            model = genai.GenerativeModel(model_name)
+            response = model.generate_content(context)
+            
+            if response and response.text:
+                return jsonify({
+                    "response": response.text.strip(),
+                    "status": "success"
+                })
+        except Exception as e:
+            error_str = str(e).lower()
+            logger.warning(f"Chatbot model {model_name} failed: {type(e).__name__}: {e}")
+            
+            # If quota exceeded, don't try more models — fall through to built-in
+            if "quota" in error_str or "429" in error_str or "resource_exhausted" in error_str or "resourceexhausted" in error_str:
+                logger.warning("API quota exhausted — using built-in fallback response")
+                break
+            # For other errors, try next model
+            continue
+    
+    # All models failed or quota exhausted — use smart fallback
+    logger.info("Using built-in fallback career advice")
+    return jsonify({
+        "response": _fallback_response(user_msg),
+        "status": "success"
+    })
 
 
 @app.route("/onboarding", methods=["GET", "POST"])
