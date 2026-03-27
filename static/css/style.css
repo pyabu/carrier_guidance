@@ -2711,7 +2711,7 @@ section {
 .back-to-top {
     position: fixed;
     bottom: 32px;
-    right: 32px;
+    left: 32px;
     width: 48px;
     height: 48px;
     border-radius: 50%;
@@ -3156,7 +3156,7 @@ section {
 
     .back-to-top {
         bottom: 20px;
-        right: 20px;
+        left: 20px;
         width: 42px;
         height: 42px;
     }
