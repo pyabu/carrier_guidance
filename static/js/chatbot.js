@@ -3,7 +3,7 @@
  * Handles the chatbot UI interactions and API communication.
  */
 
-function initChatbot() {
+(function() {
     const chatbotToggle = document.getElementById('chatbotToggle');
     const chatbotWindow = document.getElementById('chatbotWindow');
     const chatbotClose = document.getElementById('chatbotClose');
@@ -15,12 +15,16 @@ function initChatbot() {
     if (!chatbotToggle || !chatbotWindow) return;
 
     // Toggle Chat Window
-    chatbotToggle.addEventListener('click', () => {
-        chatbotWindow.classList.add('active');
-        chatbotInput.focus();
+    chatbotToggle.addEventListener('click', (e) => {
+        e.preventDefault();
+        chatbotWindow.classList.toggle('active');
+        if (chatbotWindow.classList.contains('active')) {
+            setTimeout(() => chatbotInput.focus(), 100);
+        }
     });
 
-    chatbotClose.addEventListener('click', () => {
+    chatbotClose.addEventListener('click', (e) => {
+        e.preventDefault();
         chatbotWindow.classList.remove('active');
     });
 
@@ -109,17 +113,14 @@ function initChatbot() {
     };
 
     // Event Listeners for sending
-    chatbotSend.addEventListener('click', sendMessage);
-    chatbotInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            sendMessage();
-        }
-    });
-}
-
-// Ensure execution whether DOM is already loaded or not
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initChatbot);
-} else {
-    initChatbot();
-}
+    if (chatbotSend) {
+        chatbotSend.addEventListener('click', sendMessage);
+    }
+    if (chatbotInput) {
+        chatbotInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+    }
+})();
