@@ -988,14 +988,23 @@ def career_copilot():
     """
     
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
+        model = genai.GenerativeModel('gemini-1.5-flash')
         response = model.generate_content(context)
+        
+        # Safety check: response might be blocked or empty
+        if not response or not response.text:
+            logger.warning("Gemini returned empty or blocked response")
+            return jsonify({
+                "error": "The AI could not generate a response. Please try rephrasing your question.",
+                "status": "error"
+            }), 500
+        
         return jsonify({
             "response": response.text.strip(),
             "status": "success"
         })
     except Exception as e:
-        logger.error(f"Chatbot Gemini Error: {e}")
+        logger.error(f"Chatbot Gemini Error: {type(e).__name__}: {e}")
         return jsonify({"error": "I'm having trouble connecting to my brain. Please try again later."}), 500
 
 
