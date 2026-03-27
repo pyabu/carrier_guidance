@@ -1117,41 +1117,29 @@ def career_copilot():
     5. Use valid Markdown for the response. Keep it concise.
     """
     
-    # Try Gemini with a strict timeout to avoid slow retries on quota errors
-    import threading
+    # Try Gemini AI — disable retries to fail fast on quota errors
+    try:
+        from google.api_core import retry as api_retry
+        model = genai.GenerativeModel('gemini-2.5-flash')
+        response = model.generate_content(
+            context,
+            request_options={
+                "timeout": 10,
+                "retry": api_retry.Retry(
+                    predicate=lambda _: False,  # Never retry
+                    deadline=8.0
+                )
+            }
+        )
+        if response and response.text:
+            return jsonify({
+                "response": response.text.strip(),
+                "status": "success"
+            })
+    except Exception as e:
+        logger.warning(f"Gemini unavailable ({type(e).__name__}), using fallback")
     
-    ai_result = [None]
-    ai_error = [None]
-    
-    def _call_gemini():
-        try:
-            model = genai.GenerativeModel('gemini-2.5-flash')
-            response = model.generate_content(
-                context,
-                request_options={"timeout": 10}
-            )
-            if response and response.text:
-                ai_result[0] = response.text.strip()
-        except Exception as e:
-            ai_error[0] = str(e)
-            logger.warning(f"Chatbot Gemini error: {type(e).__name__}: {e}")
-    
-    thread = threading.Thread(target=_call_gemini)
-    thread.start()
-    thread.join(timeout=12)  # Wait max 12 seconds
-    
-    if ai_result[0]:
-        return jsonify({
-            "response": ai_result[0],
-            "status": "success"
-        })
-    
-    # Gemini failed or timed out — use smart fallback instantly
-    if ai_error[0]:
-        logger.info(f"Gemini unavailable, using fallback: {ai_error[0][:100]}")
-    else:
-        logger.info("Gemini timed out, using fallback")
-    
+    # Gemini failed — use smart built-in fallback instantly
     return jsonify({
         "response": _fallback_response(user_msg),
         "status": "success"
