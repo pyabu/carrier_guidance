@@ -934,7 +934,13 @@ def career_copilot():
     Falls back to built-in career advice if API quota is exhausted.
     """
     import google.generativeai as genai
-    api_key = os.environ.get("GEMINI_API_KEY", "")
+    
+    # Use environment variable first, but fall back to the new working key
+    # since Vercel might still have the old exhausted key configured
+    api_key = os.environ.get("GEMINI_API_KEY")
+    if not api_key or api_key == "AIzaSyC_T8FH9cvxQr8eO4tL6J4cY2zM8kM94_o":
+        api_key = "AIzaSyBcBSU60UVvkia42UDJx6wdMft3stVDqU0"
+        
     data = request.get_json()
     user_msg = data.get("message", "")
     if not user_msg:
@@ -1073,9 +1079,6 @@ def career_copilot():
                     "*Ask me something more specific for a personalized answer!*")
 
     # ── Try Gemini AI first, fallback to built-in responses ──────────
-    if not api_key:
-        return jsonify({"response": _fallback_response(user_msg), "status": "success"})
-
     genai.configure(api_key=api_key)
     
     # Load trend data for grounding
@@ -1117,27 +1120,17 @@ def career_copilot():
     5. Use valid Markdown for the response. Keep it concise.
     """
     
-    # Try Gemini AI — disable retries to fail fast on quota errors
+    # Try Gemini AI natively
     try:
-        from google.api_core import retry as api_retry
         model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(
-            context,
-            request_options={
-                "timeout": 10,
-                "retry": api_retry.Retry(
-                    predicate=lambda _: False,  # Never retry
-                    deadline=8.0
-                )
-            }
-        )
+        response = model.generate_content(context)
         if response and response.text:
             return jsonify({
                 "response": response.text.strip(),
                 "status": "success"
             })
     except Exception as e:
-        logger.warning(f"Gemini unavailable ({type(e).__name__}), using fallback")
+        logger.warning(f"Gemini unavailable ({type(e).__name__}): {e}")
     
     # Gemini failed — use smart built-in fallback instantly
     return jsonify({
