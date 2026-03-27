@@ -3,7 +3,7 @@
  * Handles the chatbot UI interactions and API communication.
  */
 
-document.addEventListener('DOMContentLoaded', () => {
+function initChatbot() {
     const chatbotToggle = document.getElementById('chatbotToggle');
     const chatbotWindow = document.getElementById('chatbotWindow');
     const chatbotClose = document.getElementById('chatbotClose');
@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const chatbotInput = document.getElementById('chatbotInput');
     const chatbotSend = document.getElementById('chatbotSend');
     const typingIndicator = document.getElementById('typingIndicator');
+
+    if (!chatbotToggle || !chatbotWindow) return;
 
     // Toggle Chat Window
     chatbotToggle.addEventListener('click', () => {
@@ -113,4 +115,11 @@ document.addEventListener('DOMContentLoaded', () => {
             sendMessage();
         }
     });
-});
+}
+
+// Ensure execution whether DOM is already loaded or not
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initChatbot);
+} else {
+    initChatbot();
+}
