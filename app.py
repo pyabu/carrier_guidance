@@ -933,8 +933,6 @@ def career_copilot():
     Provides data-grounded career advice using Gemini and real-time trends.
     Falls back to built-in career advice if API quota is exhausted.
     """
-    import google.generativeai as genai
-    
     # Use environment variable first, but fall back to the new working key
     # since Vercel might still have the old exhausted key configured
     api_key = os.environ.get("GEMINI_API_KEY")
@@ -1079,8 +1077,6 @@ def career_copilot():
                     "*Ask me something more specific for a personalized answer!*")
 
     # ── Try Gemini AI first, fallback to built-in responses ──────────
-    genai.configure(api_key=api_key)
-    
     # Load trend data for grounding
     trends = {}
     trends_path = os.path.join(os.path.dirname(__file__), "data", "trends.json")
@@ -1120,17 +1116,28 @@ def career_copilot():
     5. Use valid Markdown for the response. Keep it concise.
     """
     
-    # Try Gemini AI natively
+    # Try Gemini AI via pure REST API to bypass any Vercel/GRPC library hangs
     try:
-        model = genai.GenerativeModel('gemini-2.5-flash')
-        response = model.generate_content(context)
-        if response and response.text:
+        import requests
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+        headers = {"Content-Type": "application/json"}
+        payload = {
+            "contents": [{"parts": [{"text": context}]}]
+        }
+        
+        # 8-second strict timeout to ensure Vercel never hangs past 10s
+        api_response = requests.post(url, headers=headers, json=payload, timeout=8)
+        api_response.raise_for_status()
+        
+        response_data = api_response.json()
+        if "candidates" in response_data and len(response_data["candidates"]) > 0:
+            ai_text = response_data["candidates"][0]["content"]["parts"][0]["text"]
             return jsonify({
-                "response": response.text.strip(),
+                "response": ai_text.strip(),
                 "status": "success"
             })
     except Exception as e:
-        logger.warning(f"Gemini unavailable ({type(e).__name__}): {e}")
+        logger.warning(f"Gemini REST API unavailable ({type(e).__name__}): {e}")
     
     # Gemini failed — use smart built-in fallback instantly
     return jsonify({
