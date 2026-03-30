@@ -1,0 +1,930 @@
+{% extends "base.html" %}
+{% block title %}Browse Jobs{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Jobs</div>
+        <h1><i class="fas fa-robot" style="color:#667eea;"></i> AI-Powered Job Search</h1>
+        <p>Real-time jobs from 17+ sources &mdash; scraped daily from LinkedIn, Indeed, Naukri, Remotive &amp; more.
+            AI-ranked for relevance.</p>
+        <div id="refreshStatus" style="font-size:.78rem;opacity:0.7;margin-top:4px;"></div>
+    </div>
+</div>
+
+<!-- Trending Skills Bar -->
+<div style="background:linear-gradient(135deg,#667eea 0%,#764ba2 100%);padding:12px 0;overflow:hidden;">
+    <div class="container">
+        <div style="display:flex;align-items:center;gap:12px;overflow-x:auto;scrollbar-width:none;">
+            <span style="color:#fff;font-weight:600;font-size:.8rem;white-space:nowrap;"><i class="fas fa-fire"></i>
+                Trending:</span>
+            <div id="trendingSkills" style="display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;">
+                <span
+                    style="background:rgba(255,255,255,0.2);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem;white-space:nowrap;">Loading...</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- All India Jobs Quick Access -->
+<div style="background:linear-gradient(135deg,#ff9933 0%,#ff6600 50%,#138808 100%);padding:12px 0;">
+    <div class="container">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="color:#fff;font-weight:700;font-size:.88rem;">🇮🇳 All India Jobs</span>
+                <span style="color:rgba(255,255,255,.8);font-size:.78rem;">700+ AI-organized jobs from 8+ portals across
+                    36 states & UTs</span>
+            </div>
+            <a href="/jobs/india"
+                style="display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.2);backdrop-filter:blur(4px);color:#fff;padding:8px 20px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s;border:1px solid rgba(255,255,255,.3);">
+                <i class="fas fa-arrow-right"></i> Explore India Jobs
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Tamil Nadu & Pondicherry Quick Access -->
+<div style="background:linear-gradient(135deg,#0f3460 0%,#1a1a2e 100%);padding:12px 0;">
+    <div class="container">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+            <div style="display:flex;align-items:center;gap:10px;">
+                <span style="color:#fff;font-weight:700;font-size:.88rem;"><i class="fas fa-map-marked-alt"
+                        style="color:#667eea;"></i> Tamil Nadu & Pondicherry</span>
+                <span style="color:rgba(255,255,255,.6);font-size:.78rem;">Browse jobs across 55+ cities in TN</span>
+            </div>
+            <a href="/jobs/tamilnadu"
+                style="display:inline-flex;align-items:center;gap:6px;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:8px 20px;border-radius:8px;font-size:.82rem;font-weight:600;text-decoration:none;transition:all .2s;">
+                <i class="fas fa-arrow-right"></i> Explore TN Jobs
+            </a>
+        </div>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <!-- AI Search Mode Toggle -->
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px;">
+            <label
+                style="display:flex;align-items:center;gap:6px;cursor:pointer;font-size:.82rem;color:var(--text-secondary);">
+                <input type="checkbox" id="aiSearchMode" checked style="accent-color:#667eea;">
+                <i class="fas fa-robot" style="color:#667eea;"></i> AI Smart Search
+            </label>
+            <span style="font-size:.72rem;color:var(--text-secondary);">(understands location aliases, skill synonyms
+                &amp; role expansions)</span>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="hero-search mb-4" style="max-width:100%;">
+            <div class="search-field">
+                <i class="fas fa-search"></i>
+                <input type="text" id="searchKeyword"
+                    placeholder="Job title, skill, or company (e.g. SDE, Data Analyst, TCS)" />
+            </div>
+            <div class="search-field">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="searchLocation" placeholder="Bangalore, Mumbai, Hyderabad, Remote..."
+                    data-autocomplete="location" autocomplete="off" />
+            </div>
+            <button class="btn btn-primary" onclick="searchJobs()">
+                <i class="fas fa-search"></i> Search
+            </button>
+        </div>
+
+        <!-- AI Insights Panel (collapsible) -->
+        <div id="aiInsightsPanel"
+            style="display:none;background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:16px;">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+                <h4 style="margin:0;font-size:.9rem;"><i class="fas fa-brain" style="color:#667eea;"></i> AI Insights
+                </h4>
+                <button onclick="document.getElementById('aiInsightsPanel').style.display='none'"
+                    style="background:none;border:none;cursor:pointer;color:var(--text-secondary);"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div id="aiInsightsContent"
+                style="display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;font-size:.82rem;">
+            </div>
+        </div>
+
+        <!-- Active Filters Bar -->
+        <div id="activeFilters" class="active-filters mb-3" style="display:none;">
+            <span class="text-muted" style="font-size:.85rem;"><i class="fas fa-filter"></i> Active filters:</span>
+            <div id="filterTags"></div>
+            <button class="btn btn-ghost btn-sm" onclick="clearFilters()"
+                style="font-size:.8rem;padding:4px 10px;">Clear All</button>
+        </div>
+
+        <div class="jobs-layout">
+            <!-- Filter Toggle Button (mobile) -->
+            <button id="filterToggleBtn" onclick="toggleFilters()" class="btn btn-outline"
+                style="display:none;width:100%;margin-bottom:12px;">
+                <i class="fas fa-sliders-h"></i> Show Filters
+                <span id="filterCountBadge"
+                    style="background:#667eea;color:#fff;padding:1px 8px;border-radius:10px;font-size:.75rem;margin-left:6px;display:none;">0</span>
+            </button>
+
+            <!-- Filters Sidebar -->
+            <aside class="filter-sidebar" id="filterSidebar">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h3 style="margin-bottom:0;"><i class="fas fa-sliders-h"></i> Filters</h3>
+                    <button id="filterCloseBtn" onclick="toggleFilters()"
+                        style="display:none;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-secondary);"><i
+                            class="fas fa-times"></i></button>
+                </div>
+
+                <!-- Country -->
+                <div class="filter-group" style="margin-top:16px;">
+                    <h4><i class="fas fa-globe"></i> Country</h4>
+                    <select class="form-control" id="filterCountry" onchange="onCountryChange(); searchJobs();">
+                        <option value="">All Countries</option>
+                    </select>
+                </div>
+
+                <!-- City -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-city"></i> City</h4>
+                    <select class="form-control" id="filterCity" onchange="searchJobs();">
+                        <option value="">All Cities</option>
+                    </select>
+                </div>
+
+                <!-- Source -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-rss"></i> Source</h4>
+                    <label class="filter-option"><input type="checkbox" name="source" value="LinkedIn"
+                            onchange="applyFiltersAndRender()"> LinkedIn <span class="fc"
+                            data-fc="source:LinkedIn"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Indeed"
+                            onchange="applyFiltersAndRender()"> Indeed <span class="fc"
+                            data-fc="source:Indeed"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Naukri.com"
+                            onchange="applyFiltersAndRender()"> Naukri.com <span class="fc"
+                            data-fc="source:Naukri.com"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Internshala"
+                            onchange="applyFiltersAndRender()"> Internshala <span class="fc"
+                            data-fc="source:Internshala"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="TimesJobs"
+                            onchange="applyFiltersAndRender()"> TimesJobs <span class="fc"
+                            data-fc="source:TimesJobs"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Foundit"
+                            onchange="applyFiltersAndRender()"> Foundit <span class="fc"
+                            data-fc="source:Foundit"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Remotive"
+                            onchange="applyFiltersAndRender()"> Remotive <span class="fc"
+                            data-fc="source:Remotive"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="RemoteOK"
+                            onchange="applyFiltersAndRender()"> RemoteOK <span class="fc"
+                            data-fc="source:RemoteOK"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Arbeitnow"
+                            onchange="applyFiltersAndRender()"> Arbeitnow <span class="fc"
+                            data-fc="source:Arbeitnow"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="The Muse"
+                            onchange="applyFiltersAndRender()"> The Muse <span class="fc"
+                            data-fc="source:The Muse"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Himalayas"
+                            onchange="applyFiltersAndRender()"> Himalayas <span class="fc"
+                            data-fc="source:Himalayas"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="We Work Remotely"
+                            onchange="applyFiltersAndRender()"> We Work Remotely <span class="fc"
+                            data-fc="source:We Work Remotely"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Freshersworld"
+                            onchange="applyFiltersAndRender()"> Freshersworld <span class="fc"
+                            data-fc="source:Freshersworld"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="FindWork"
+                            onchange="applyFiltersAndRender()"> FindWork <span class="fc"
+                            data-fc="source:FindWork"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="source" value="Jobicy"
+                            onchange="applyFiltersAndRender()"> Jobicy <span class="fc"
+                            data-fc="source:Jobicy"></span></label>
+                </div>
+
+                <!-- Job Type -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-briefcase"></i> Job Type</h4>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Full-time"
+                            onchange="applyFiltersAndRender()"> Full-time <span class="fc"
+                            data-fc="type:Full-time"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Remote"
+                            onchange="applyFiltersAndRender()"> Remote <span class="fc"
+                            data-fc="type:Remote"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Part-time"
+                            onchange="applyFiltersAndRender()"> Part-time <span class="fc"
+                            data-fc="type:Part-time"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Internship"
+                            onchange="applyFiltersAndRender()"> Internship <span class="fc"
+                            data-fc="type:Internship"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Contract"
+                            onchange="applyFiltersAndRender()"> Contract <span class="fc"
+                            data-fc="type:Contract"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Hybrid"
+                            onchange="applyFiltersAndRender()"> Hybrid <span class="fc"
+                            data-fc="type:Hybrid"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="type" value="Fresher"
+                            onchange="applyFiltersAndRender()"> Fresher <span class="fc"
+                            data-fc="type:Fresher"></span></label>
+                </div>
+
+                <!-- Experience -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-layer-group"></i> Experience Level</h4>
+                    <label class="filter-option"><input type="checkbox" name="exp" value="Entry Level"
+                            onchange="applyFiltersAndRender()"> Entry Level <span class="fc"
+                            data-fc="exp:Entry Level"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="exp" value="Junior"
+                            onchange="applyFiltersAndRender()"> Junior <span class="fc"
+                            data-fc="exp:Junior"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="exp" value="Mid Level"
+                            onchange="applyFiltersAndRender()"> Mid Level <span class="fc"
+                            data-fc="exp:Mid Level"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="exp" value="Senior"
+                            onchange="applyFiltersAndRender()"> Senior <span class="fc"
+                            data-fc="exp:Senior"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="exp" value="Lead"
+                            onchange="applyFiltersAndRender()"> Lead <span class="fc" data-fc="exp:Lead"></span></label>
+                </div>
+
+                <!-- Category -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-th-large"></i> Category</h4>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Technology"
+                            onchange="applyFiltersAndRender()"> Technology <span class="fc"
+                            data-fc="cat:Technology"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Data Science"
+                            onchange="applyFiltersAndRender()"> Data Science <span class="fc"
+                            data-fc="cat:Data Science"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Design"
+                            onchange="applyFiltersAndRender()"> Design <span class="fc"
+                            data-fc="cat:Design"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Marketing"
+                            onchange="applyFiltersAndRender()"> Marketing <span class="fc"
+                            data-fc="cat:Marketing"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Sales"
+                            onchange="applyFiltersAndRender()"> Sales <span class="fc"
+                            data-fc="cat:Sales"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Customer Service"
+                            onchange="applyFiltersAndRender()"> Customer Service <span class="fc"
+                            data-fc="cat:Customer Service"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Management"
+                            onchange="applyFiltersAndRender()"> Management <span class="fc"
+                            data-fc="cat:Management"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Human Resources"
+                            onchange="applyFiltersAndRender()"> Human Resources <span class="fc"
+                            data-fc="cat:Human Resources"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Finance"
+                            onchange="applyFiltersAndRender()"> Finance <span class="fc"
+                            data-fc="cat:Finance"></span></label>
+                    <label class="filter-option"><input type="checkbox" name="cat" value="Internship"
+                            onchange="applyFiltersAndRender()"> Internship <span class="fc"
+                            data-fc="cat:Internship"></span></label>
+                </div>
+
+                <!-- Salary -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-money-bill-wave"></i> Salary</h4>
+                    <label class="filter-option"><input type="radio" name="salary" value=""
+                            onchange="applyFiltersAndRender()" checked> Any salary</label>
+                    <label class="filter-option"><input type="radio" name="salary" value="paid"
+                            onchange="applyFiltersAndRender()"> Has salary info</label>
+                    <label class="filter-option"><input type="radio" name="salary" value="50000"
+                            onchange="applyFiltersAndRender()"> $50k+ / &#8377;5L+</label>
+                    <label class="filter-option"><input type="radio" name="salary" value="100000"
+                            onchange="applyFiltersAndRender()"> $100k+ / &#8377;10L+</label>
+                </div>
+
+                <!-- Posted -->
+                <div class="filter-group">
+                    <h4><i class="fas fa-calendar-alt"></i> Posted</h4>
+                    <label class="filter-option"><input type="radio" name="posted" value=""
+                            onchange="applyFiltersAndRender()" checked> Any time</label>
+                    <label class="filter-option"><input type="radio" name="posted" value="1"
+                            onchange="applyFiltersAndRender()"> Last 24 hours</label>
+                    <label class="filter-option"><input type="radio" name="posted" value="3"
+                            onchange="applyFiltersAndRender()"> Last 3 days</label>
+                    <label class="filter-option"><input type="radio" name="posted" value="7"
+                            onchange="applyFiltersAndRender()"> Last week</label>
+                    <label class="filter-option"><input type="radio" name="posted" value="30"
+                            onchange="applyFiltersAndRender()"> Last month</label>
+                </div>
+
+                <button class="btn btn-ghost" onclick="clearFilters()" style="width:100%;"><i class="fas fa-times"></i>
+                    Clear All Filters</button>
+            </aside>
+
+            <!-- Job Results -->
+            <div>
+                <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3" style="gap:12px;">
+                    <div>
+                        <p id="resultsCount" class="text-muted" style="margin-bottom:2px;">Loading jobs...</p>
+                        <p id="sourceInfo" class="text-muted" style="font-size:.78rem;opacity:0.7;margin:0;"></p>
+                    </div>
+                    <select class="form-control" id="sortBy" onchange="applyFiltersAndRender()"
+                        style="width:auto;min-width:180px;">
+                        <option value="newest">Sort: Newest First</option>
+                        <option value="oldest">Sort: Oldest First</option>
+                        <option value="quality">Sort: AI Quality &#11088;</option>
+                        <option value="title">Sort: Title A-Z</option>
+                        <option value="company">Sort: Company A-Z</option>
+                    </select>
+                </div>
+                <div class="jobs-grid {% if theme_settings and theme_settings.get('layout_style') == 'list' %}list-layout{% endif %}" id="jobsGrid">
+                    <div class="loading-spinner">
+                        <div class="spinner"></div>
+                    </div>
+                </div>
+                <div id="loadMoreWrap" class="text-center mt-4" style="display:none;">
+                    <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()"><i class="fas fa-plus"></i>
+                        Load More Jobs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+    .fc {
+        color: var(--text-tertiary);
+        font-size: .75rem;
+        margin-left: auto
+    }
+
+    #jobsGrid.is-loading {
+        opacity: .5;
+        pointer-events: none;
+        position: relative;
+        min-height: 200px
+    }
+
+    #jobsGrid.is-loading::after {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 36px;
+        height: 36px;
+        margin: -18px 0 0 -18px;
+        border: 3px solid var(--border, #ddd);
+        border-top-color: #667eea;
+        border-radius: 50%;
+        animation: spin .6s linear infinite
+    }
+
+    @keyframes spin {
+        to {
+            transform: rotate(360deg)
+        }
+    }
+
+    @media(max-width:768px) {
+        #filterToggleBtn {
+            display: flex !important;
+            align-items: center;
+            justify-content: center
+        }
+
+        #filterCloseBtn {
+            display: inline-block !important
+        }
+
+        .filter-sidebar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 999;
+            overflow-y: auto;
+            border-radius: 0;
+            padding: 20px;
+            background: var(--bg-card, #fff)
+        }
+
+        .filter-sidebar.open {
+            display: block
+        }
+    }
+
+    .filter-option input:checked~.fc {
+        font-weight: 600;
+        color: var(--accent, #667eea)
+    }
+</style>
+
+<script>
+    /* ================================================================
+       STATE
+       ================================================================ */
+    var masterJobs = [];       // full set from last server fetch — NEVER mutated
+    var filteredJobs = [];     // after client-side filtering (safe copy)
+    var displayedCount = 0;
+    var PAGE_SIZE = 15;
+    var locationData = {};
+    var debounceTimer = null;
+    var lastFetchParams = '';
+
+    /* ================================================================
+       URL PARAMS
+       ================================================================ */
+    (function initParams() {
+        var params = new URLSearchParams(window.location.search);
+        if (params.get('keyword')) document.getElementById('searchKeyword').value = params.get('keyword');
+        if (params.get('location')) document.getElementById('searchLocation').value = params.get('location');
+        if (params.get('type')) {
+            document.querySelectorAll('input[name="type"]').forEach(function (cb) {
+                if (cb.value.toLowerCase() === params.get('type').toLowerCase()) cb.checked = true;
+            });
+        }
+        if (params.get('country')) window._presetCountry = params.get('country');
+    })();
+
+    /* ================================================================
+       MOBILE FILTER TOGGLE
+       ================================================================ */
+    function toggleFilters() {
+        var sidebar = document.getElementById('filterSidebar');
+        sidebar.classList.toggle('open');
+        document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    }
+
+    /* ================================================================
+       TRENDING SKILLS BAR
+       ================================================================ */
+    async function loadTrending() {
+        try {
+            var resp = await fetch('/api/trending');
+            var data = await resp.json();
+            var container = document.getElementById('trendingSkills');
+            var skills = (data.skills && data.skills.top_25 ? data.skills.top_25.slice(0, 12) : null) || (data.top_skills ? data.top_skills.slice(0, 12) : []);
+            if (skills.length) {
+                container.innerHTML = skills.map(function (s) {
+                    return '<span onclick="document.getElementById(\'searchKeyword\').value=\'' + s.skill + '\'; lastFetchParams=\'\'; searchJobs();" '
+                        + 'style="background:rgba(255,255,255,.2);color:#fff;padding:4px 12px;border-radius:20px;font-size:.75rem;white-space:nowrap;cursor:pointer;transition:background .2s;" '
+                        + 'onmouseover="this.style.background=\'rgba(255,255,255,.35)\'" '
+                        + 'onmouseout="this.style.background=\'rgba(255,255,255,.2)\'">'
+                        + s.skill + ' <small>(' + s.count + ')</small></span>';
+                }).join('');
+            }
+        } catch (e) { console.warn('Trending load failed:', e); }
+    }
+
+    /* ================================================================
+       REFRESH STATUS
+       ================================================================ */
+    async function loadRefreshStatus() {
+        try {
+            var resp = await fetch('/api/refresh-status');
+            var data = await resp.json();
+            var el = document.getElementById('refreshStatus');
+            var icon = data.is_fresh ? '\ud83d\udfe2' : '\ud83d\udfe1';
+            var text = icon + ' Last updated: ' + (data.last_updated || 'Never') + ' | '
+                + data.total_jobs + ' jobs from ' + Object.keys(data.sources || {}).length
+                + ' sources across ' + (data.countries_covered || 0) + ' countries';
+
+            // Show scheduler info
+            if (data.scheduler && data.scheduler.active) {
+                var hrs = data.hours_since_update != null ? data.hours_since_update + 'h ago' : '';
+                text += ' | \u23f0 Auto-refresh: every ' + data.scheduler.refresh_interval_hours + 'h';
+                if (data.scheduler.next_run) {
+                    text += ' (next: ' + data.scheduler.next_run + ')';
+                }
+            }
+            el.innerHTML = text;
+        } catch (e) { }
+    }
+
+    /* ================================================================
+       LOCATION DROPDOWNS
+       ================================================================ */
+    async function loadLocations() {
+        try {
+            var resp = await fetch('/api/locations');
+            locationData = await resp.json();
+            var sel = document.getElementById('filterCountry');
+            Object.keys(locationData).sort().forEach(function (country) {
+                var opt = document.createElement('option');
+                opt.value = country;
+                opt.textContent = country + ' (' + locationData[country].length + ' cities)';
+                sel.appendChild(opt);
+            });
+            if (window._presetCountry) { sel.value = window._presetCountry; onCountryChange(); }
+        } catch (e) { console.warn('Could not load locations:', e); }
+    }
+
+    function onCountryChange() {
+        var country = document.getElementById('filterCountry').value;
+        var citySel = document.getElementById('filterCity');
+        citySel.innerHTML = '<option value="">All Cities</option>';
+        if (country && locationData[country]) {
+            locationData[country].forEach(function (city) {
+                var opt = document.createElement('option');
+                opt.value = city; opt.textContent = city;
+                citySel.appendChild(opt);
+            });
+        }
+    }
+
+    /* ================================================================
+       BOOTSTRAP
+       ================================================================ */
+    document.addEventListener('DOMContentLoaded', function () {
+        loadTrending();
+        loadRefreshStatus();
+        loadLocations().then(function () { searchJobs(); });
+    });
+
+    /* ================================================================
+       CORE SEARCH — fetches data from server
+       Only re-fetches when keyword / location / country / city change.
+       Checkbox filters are applied purely client-side.
+       ================================================================ */
+    async function searchJobs() {
+        var keyword = document.getElementById('searchKeyword').value.trim();
+        var location = document.getElementById('searchLocation').value.trim();
+        var country = document.getElementById('filterCountry').value;
+        var city = document.getElementById('filterCity').value;
+        var aiMode = document.getElementById('aiSearchMode') ? document.getElementById('aiSearchMode').checked : false;
+
+        // Duplicate-fetch guard
+        var fetchKey = keyword + '|' + location + '|' + country + '|' + city + '|' + aiMode;
+        if (fetchKey === lastFetchParams && masterJobs.length > 0) {
+            applyFiltersAndRender();
+            return;
+        }
+        lastFetchParams = fetchKey;
+
+        // Loading state
+        var grid = document.getElementById('jobsGrid');
+        grid.classList.add('is-loading');
+        document.getElementById('resultsCount').textContent = 'Searching...';
+
+        try {
+            if (aiMode && keyword) {
+                // AI Smart Search
+                var aiQuery = keyword + (location ? ' ' + location : '') + (city ? ' ' + city : '') + (country ? ' ' + country : '');
+                var res = await fetch('/api/smart-search?q=' + encodeURIComponent(aiQuery) + '&top_k=500');
+                var data = await res.json();
+                masterJobs = data.results || [];
+                if (data.ai_powered) showAIInsights(data, masterJobs);
+            } else {
+                // Standard API — fetch up to 500 jobs for client-side filtering
+                var url = '/api/search?per_page=500';
+                if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+                if (location) url += '&location=' + encodeURIComponent(location);
+                if (country) url += '&country=' + encodeURIComponent(country);
+                if (city) url += '&city=' + encodeURIComponent(city);
+
+                var res = await fetch(url);
+                var data = await res.json();
+                masterJobs = data.jobs || [];
+                if (data.filter_counts) updateServerFilterCounts(data.filter_counts);
+            }
+        } catch (e) {
+            console.error('Search error:', e);
+            grid.innerHTML = '<div class="no-results" style="grid-column:1/-1"><i class="fas fa-exclamation-circle"></i><h3>Failed to load jobs</h3><p>Please try again later.</p></div>';
+            grid.classList.remove('is-loading');
+            return;
+        }
+
+        grid.classList.remove('is-loading');
+        applyFiltersAndRender();
+    }
+
+    /* ================================================================
+       CLIENT-SIDE FILTERING
+       Works on a COPY of masterJobs → filteredJobs.
+       Idempotent: toggling checkboxes re-runs from masterJobs each time.
+       ================================================================ */
+    function applyFiltersAndRender() {
+        var jobs = masterJobs.slice(); // shallow copy — masterJobs stays intact
+
+        // Checkbox filters
+        var typeFilters = getChecked('type');
+        var expFilters = getChecked('exp');
+        var catFilters = getChecked('cat');
+        var srcFilters = getChecked('source');
+
+        if (typeFilters.length) jobs = jobs.filter(function (j) { return matchAny(j.type, typeFilters); });
+        if (expFilters.length) jobs = jobs.filter(function (j) { return matchAny(j.experience, expFilters); });
+        if (catFilters.length) jobs = jobs.filter(function (j) { return matchAny(j.category, catFilters); });
+        if (srcFilters.length) jobs = jobs.filter(function (j) { return matchAny(j.source, srcFilters); });
+
+        // Salary filter
+        var salaryVal = getRadioVal('salary');
+        if (salaryVal === 'paid') {
+            jobs = jobs.filter(function (j) {
+                var s = (j.salary_min || '') + (j.salary_max || '');
+                return s && s !== 'Competitive' && s !== 'Not specified';
+            });
+        } else if (salaryVal) {
+            var minSal = parseInt(salaryVal);
+            jobs = jobs.filter(function (j) {
+                var nums = ((j.salary_min || '') + ' ' + (j.salary_max || '')).replace(/[^0-9\s]/g, '').match(/\d+/g);
+                if (!nums) return false;
+                return nums.some(function (n) { return parseInt(n) >= minSal; });
+            });
+        }
+
+        // Posted date filter
+        var postedDays = getRadioVal('posted');
+        if (postedDays) {
+            var cutoff = new Date();
+            cutoff.setDate(cutoff.getDate() - parseInt(postedDays));
+            var cutoffStr = cutoff.toISOString().split('T')[0];
+            jobs = jobs.filter(function (j) { return (j.posted_date || '') >= cutoffStr; });
+        }
+
+        // Sorting
+        var sort = document.getElementById('sortBy').value;
+        if (sort === 'newest') jobs.sort(function (a, b) { return (b.posted_date || '').localeCompare(a.posted_date || ''); });
+        else if (sort === 'oldest') jobs.sort(function (a, b) { return (a.posted_date || '').localeCompare(b.posted_date || ''); });
+        else if (sort === 'title') jobs.sort(function (a, b) { return (a.title || '').localeCompare(b.title || ''); });
+        else if (sort === 'company') jobs.sort(function (a, b) { return (a.company || '').localeCompare(b.company || ''); });
+        else if (sort === 'quality') jobs.sort(function (a, b) { return (b.quality_score || 0) - (a.quality_score || 0); });
+
+        filteredJobs = jobs;
+
+        computeFilterCounts();
+        updateActiveFilters();
+        renderResults();
+
+        // Mobile active-filter badge
+        var activeCount = typeFilters.length + expFilters.length + catFilters.length + srcFilters.length + (salaryVal ? 1 : 0) + (postedDays ? 1 : 0);
+        var badge = document.getElementById('filterCountBadge');
+        badge.textContent = activeCount;
+        badge.style.display = activeCount > 0 ? 'inline' : 'none';
+    }
+
+    /* helpers */
+    function getChecked(name) {
+        var vals = [];
+        document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function (cb) { vals.push(cb.value.toLowerCase()); });
+        return vals;
+    }
+    function getRadioVal(name) {
+        var el = document.querySelector('input[name="' + name + '"]:checked');
+        return el ? el.value : '';
+    }
+    function matchAny(field, filters) {
+        var low = (field || '').toLowerCase();
+        return filters.some(function (f) { return low.indexOf(f) !== -1; });
+    }
+
+    /* ================================================================
+       FILTER COUNTS — computed from masterJobs
+       ================================================================ */
+    function computeFilterCounts() {
+        var counts = { type: {}, exp: {}, cat: {}, source: {} };
+        masterJobs.forEach(function (j) {
+            inc(counts.type, j.type || 'Other');
+            inc(counts.exp, j.experience || 'Unknown');
+            inc(counts.cat, j.category || 'Other');
+            inc(counts.source, j.source || 'Unknown');
+        });
+        document.querySelectorAll('.fc[data-fc]').forEach(function (el) {
+            var parts = el.dataset.fc.split(':');
+            var group = parts[0], val = parts.slice(1).join(':');
+            var count = 0;
+            if (counts[group]) {
+                count = counts[group][val] || 0;
+                if (!count) {
+                    Object.keys(counts[group]).forEach(function (k) {
+                        if (k.toLowerCase().indexOf(val.toLowerCase()) !== -1) count += counts[group][k];
+                    });
+                }
+            }
+            el.textContent = count > 0 ? '(' + count + ')' : '';
+        });
+    }
+    function inc(obj, key) { obj[key] = (obj[key] || 0) + 1; }
+
+    function updateServerFilterCounts(fc) {
+        var map = { types: 'type', experience: 'exp', categories: 'cat', sources: 'source' };
+        Object.keys(map).forEach(function (sk) {
+            if (!fc[sk]) return;
+            document.querySelectorAll('.fc[data-fc^="' + map[sk] + ':"]').forEach(function (el) {
+                var val = el.dataset.fc.split(':').slice(1).join(':');
+                var c = fc[sk][val] || 0;
+                el.textContent = c > 0 ? '(' + c + ')' : '';
+            });
+        });
+    }
+
+    /* ================================================================
+       RENDER
+       ================================================================ */
+    function renderResults() {
+        displayedCount = 0;
+        var grid = document.getElementById('jobsGrid');
+        grid.innerHTML = '';
+        document.getElementById('resultsCount').textContent = filteredJobs.length + ' jobs found';
+
+        // Source breakdown
+        var srcCount = {};
+        filteredJobs.forEach(function (j) { srcCount[j.source] = (srcCount[j.source] || 0) + 1; });
+        var parts = Object.entries(srcCount).sort(function (a, b) { return b[1] - a[1]; }).map(function (e) { return e[0] + ': ' + e[1]; });
+        document.getElementById('sourceInfo').textContent = parts.length ? 'Sources: ' + parts.join(' \u00b7 ') : '';
+
+        loadMore();
+    }
+
+    function loadMore() {
+        var grid = document.getElementById('jobsGrid');
+        var batch = filteredJobs.slice(displayedCount, displayedCount + PAGE_SIZE);
+        var frag = document.createDocumentFragment();
+        batch.forEach(function (job) {
+            var wrap = document.createElement('div');
+            wrap.innerHTML = renderJobCard(job);
+            if (wrap.firstElementChild) frag.appendChild(wrap.firstElementChild);
+        });
+        grid.appendChild(frag);
+        displayedCount += batch.length;
+        document.getElementById('loadMoreWrap').style.display = displayedCount < filteredJobs.length ? 'block' : 'none';
+        if (filteredJobs.length === 0 && displayedCount === 0) {
+            grid.innerHTML = '<div class="no-results" style="grid-column:1/-1"><i class="fas fa-search"></i><h3>No jobs found</h3><p>Try adjusting your search or filters.</p></div>';
+        }
+    }
+
+    /* ================================================================
+       JOB CARD RENDERER
+       ================================================================ */
+    function renderJobCard(job) {
+        var logo = job.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company || '?') + '&background=667eea&color=fff&size=50');
+        var fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company || '?') + '&background=667eea&color=fff&size=50';
+        var colors = {
+            'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Remotive': '#00D4AA', 'RemoteOK': '#00D4AA', 'Arbeitnow': '#FF6B35',
+            'The Muse': '#7B68EE', 'FindWork': '#20C997', 'Jobicy': '#FF4081', 'Naukri.com': '#2196F3', 'Foundit': '#FF5722',
+            'Shine.com': '#4CAF50', 'Freshersworld': '#FF9800', 'TimesJobs': '#9C27B0', 'Internshala': '#00BCD4',
+            'We Work Remotely': '#6366f1', 'FlexJobs': '#10b981', 'Himalayas': '#8b5cf6', 'Careerguidance': '#667eea'
+        };
+        var clr = colors[job.source] || '#667eea';
+        var qBadge = (job.quality_score >= 80) ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:4px" title="High quality">\u2605 Top</span>' : '';
+        var tBadge = job.is_trending ? '<span style="background:#f59e0b;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;margin-left:4px" title="Trending skills">\ud83d\udd25 Hot</span>' : '';
+        var aiSum = job.ai_summary ? ('<p style="font-size:.75rem;color:var(--text-secondary);margin:6px 0 4px;line-height:1.4"><i class="fas fa-robot" style="color:#667eea;font-size:.65rem"></i> ' + esc(job.ai_summary.substring(0, 120)) + (job.ai_summary.length > 120 ? '...' : '') + '</p>') : '';
+        var salary = job.salary_min ? (esc(job.salary_min) + (job.salary_max ? ' \u2013 ' + esc(job.salary_max) : '')) : '<span style="opacity:.5">Not specified</span>';
+        var posted = job.posted_date ? '<span style="font-size:.7rem;color:var(--text-tertiary);margin-left:8px"><i class="far fa-clock"></i> ' + job.posted_date + '</span>' : '';
+        var skills = (job.skills || []).slice(0, 4).map(function (s) { return '<span class="skill-tag">' + esc(s) + '</span>'; }).join('');
+        var hotTag = (job.trending_skills || []).length ? '<span class="skill-tag" style="background:#f59e0b22;color:#f59e0b;border-color:#f59e0b">\ud83d\udd25 Trending</span>' : '';
+
+        return '<div class="job-card fade-in" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
+            + '<div class="job-card-header">'
+            + '<img src="' + logo + '" alt="' + esc(job.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
+            + '<div class="job-card-info"><h3>' + esc(job.title || 'Untitled') + qBadge + tBadge + '</h3><span class="job-card-company">' + esc(job.company || 'Unknown') + '</span></div>'
+            + '</div>'
+            + aiSum
+            + '<div class="job-card-meta">'
+            + '<span><i class="fas fa-map-marker-alt"></i> ' + esc(job.location || 'Remote') + '</span>'
+            + '<span><i class="fas fa-briefcase"></i> ' + esc(job.type || 'Full-time') + '</span>'
+            + '<span><i class="fas fa-layer-group"></i> ' + esc(job.experience || 'Mid Level') + '</span>'
+            + '</div>'
+            + '<div class="job-card-skills">' + skills + hotTag + '</div>'
+            + '<div class="job-card-footer">'
+            + '<div><span class="job-salary">' + salary + '</span>' + posted + '</div>'
+            + '<div class="job-card-actions">'
+            + '<span class="source-badge" style="background:' + clr + ';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:6px">' + esc(job.source) + '</span>'
+            + '<button class="btn-save btn btn-outline btn-sm" onclick="event.stopPropagation();saveJob(this, \'' + job.id + '\')" title="Save Job"><i class="far fa-heart"></i></button>'
+            + '<a href="' + job.apply_url + '" class="btn-apply" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Sign in to track your job applications.\',event);return false;}trackApply(\'' + job.id + '\')">Apply</a>'
+            + '</div>'
+            + '</div></div>';
+    }
+
+    function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+    async function saveJob(btn, jobId) {
+        if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs and track your applications.');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        btn.disabled = true;
+        try {
+            const res = await fetch('/api/save-job', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ job_id: jobId })
+            });
+            if (res.ok) {
+                btn.innerHTML = '<i class="fas fa-check text-accent"></i>';
+                btn.title = "Saved";
+            } else {
+                btn.innerHTML = '<i class="far fa-heart"></i>';
+                btn.disabled = false;
+            }
+        } catch (e) {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+            btn.disabled = false;
+        }
+    }
+
+    function trackApply(jobId) {
+        if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications and get personalized recommendations.'); return; }
+        fetch('/api/apply-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: jobId})
+        }).catch(function(){});
+    }
+
+    /* ================================================================
+       AI INSIGHTS PANEL
+       ================================================================ */
+    function showAIInsights(data, jobs) {
+        var panel = document.getElementById('aiInsightsPanel');
+        var content = document.getElementById('aiInsightsContent');
+        var sc = {}, lc = {}, kc = {};
+        jobs.forEach(function (j) {
+            sc[j.source] = (sc[j.source] || 0) + 1;
+            if (j.location_city) lc[j.location_city] = (lc[j.location_city] || 0) + 1;
+            (j.skills || []).forEach(function (s) { kc[s] = (kc[s] || 0) + 1; });
+        });
+        var topS = Object.entries(kc).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 5).map(function (e) { return e[0] + ' (' + e[1] + ')'; }).join(', ');
+        var topL = Object.entries(lc).sort(function (a, b) { return b[1] - a[1]; }).slice(0, 3).map(function (e) { return e[0] + ' (' + e[1] + ')'; }).join(', ');
+        var rc = jobs.filter(function (j) { return (j.type || '').toLowerCase().indexOf('remote') !== -1; }).length;
+        var aq = jobs.length ? Math.round(jobs.reduce(function (s, j) { return s + (j.quality_score || 50); }, 0) / jobs.length) : 0;
+
+        content.innerHTML =
+            '<div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px"><strong style="font-size:.75rem;color:#667eea">\ud83c\udfaf Top Skills</strong><br><span style="font-size:.78rem">' + (topS || 'N/A') + '</span></div>'
+            + '<div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px"><strong style="font-size:.75rem;color:#667eea">\ud83d\udccd Top Locations</strong><br><span style="font-size:.78rem">' + (topL || 'N/A') + '</span></div>'
+            + '<div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px"><strong style="font-size:.75rem;color:#667eea">\ud83c\udfe0 Remote Jobs</strong><br><span style="font-size:.78rem">' + rc + ' (' + (jobs.length ? Math.round(rc / jobs.length * 100) : 0) + '%)</span></div>'
+            + '<div style="padding:8px;background:var(--bg-accent,#f8f9ff);border-radius:8px"><strong style="font-size:.75rem;color:#667eea">\u2b50 Avg Quality</strong><br><span style="font-size:.78rem">' + aq + '/100</span></div>';
+        panel.style.display = 'block';
+    }
+
+    /* ================================================================
+       ACTIVE FILTER TAGS
+       ================================================================ */
+    function updateActiveFilters() {
+        var container = document.getElementById('filterTags');
+        var wrap = document.getElementById('activeFilters');
+        container.innerHTML = '';
+        var has = false;
+
+        var kw = document.getElementById('searchKeyword').value.trim();
+        var loc = document.getElementById('searchLocation').value.trim();
+        var country = document.getElementById('filterCountry').value;
+        var city = document.getElementById('filterCity').value;
+
+        if (kw) { addTag(container, 'Keyword', kw); has = true; }
+        if (loc) { addTag(container, 'Location', loc); has = true; }
+        if (country) { addTag(container, 'Country', country); has = true; }
+        if (city) { addTag(container, 'City', city); has = true; }
+
+        document.querySelectorAll('.filter-sidebar input[type="checkbox"]:checked').forEach(function (cb) {
+            addTag(container, cb.name, cb.value); has = true;
+        });
+
+        var sv = getRadioVal('salary');
+        if (sv) { addTag(container, 'salary', sv === 'paid' ? 'Has salary' : '$' + (parseInt(sv) / 1000) + 'k+'); has = true; }
+        var pv = getRadioVal('posted');
+        if (pv) { addTag(container, 'posted', 'Last ' + pv + ' day' + (parseInt(pv) > 1 ? 's' : '')); has = true; }
+
+        wrap.style.display = has ? 'flex' : 'none';
+    }
+
+    function addTag(container, label, value) {
+        var tag = document.createElement('span');
+        tag.style.cssText = 'display:inline-flex;align-items:center;gap:4px;background:#667eea;color:#fff;padding:3px 10px;border-radius:20px;font-size:.78rem;cursor:pointer';
+        tag.innerHTML = esc(value) + ' <i class="fas fa-times" style="cursor:pointer;opacity:.8"></i>';
+        tag.querySelector('i').addEventListener('click', function () { removeFilter(label, value); });
+        container.appendChild(tag);
+    }
+
+    function removeFilter(label, value) {
+        if (label === 'Keyword') { document.getElementById('searchKeyword').value = ''; lastFetchParams = ''; searchJobs(); return; }
+        if (label === 'Location') { document.getElementById('searchLocation').value = ''; lastFetchParams = ''; searchJobs(); return; }
+        if (label === 'Country') { document.getElementById('filterCountry').value = ''; onCountryChange(); lastFetchParams = ''; searchJobs(); return; }
+        if (label === 'City') { document.getElementById('filterCity').value = ''; lastFetchParams = ''; searchJobs(); return; }
+        if (label === 'salary') { document.querySelector('input[name="salary"][value=""]').checked = true; applyFiltersAndRender(); return; }
+        if (label === 'posted') { document.querySelector('input[name="posted"][value=""]').checked = true; applyFiltersAndRender(); return; }
+        document.querySelectorAll('input[name="' + label + '"]').forEach(function (cb) { if (cb.value === value) cb.checked = false; });
+        applyFiltersAndRender();
+    }
+
+    function clearFilters() {
+        document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(function (c) { c.checked = false; });
+        document.querySelectorAll('.filter-sidebar input[type="radio"][value=""]').forEach(function (r) { r.checked = true; });
+        document.getElementById('searchKeyword').value = '';
+        document.getElementById('searchLocation').value = '';
+        document.getElementById('filterCountry').value = '';
+        document.getElementById('filterCity').value = '';
+        document.getElementById('sortBy').value = 'newest';
+        document.getElementById('aiInsightsPanel').style.display = 'none';
+        onCountryChange();
+        lastFetchParams = '';
+        searchJobs();
+    }
+
+    /* ================================================================
+       DEBOUNCED SEARCH (typing in keyword / location)
+       ================================================================ */
+    function debouncedSearch() {
+        clearTimeout(debounceTimer);
+        debounceTimer = setTimeout(function () { lastFetchParams = ''; searchJobs(); }, 400);
+    }
+    document.getElementById('searchKeyword').addEventListener('input', debouncedSearch);
+    document.getElementById('searchLocation').addEventListener('input', debouncedSearch);
+    document.getElementById('searchKeyword').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') { clearTimeout(debounceTimer); lastFetchParams = ''; searchJobs(); }
+    });
+    document.getElementById('searchLocation').addEventListener('keypress', function (e) {
+        if (e.key === 'Enter') { clearTimeout(debounceTimer); lastFetchParams = ''; searchJobs(); }
+    });
+</script>
+
+{% endblock %}

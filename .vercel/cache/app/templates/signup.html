@@ -1,0 +1,411 @@
+{% extends "base.html" %}
+{% block title %}Sign Up – CareerGuidance{% endblock %}
+
+{% block extra_head %}
+<style>
+    body { background: #0f172a; }
+
+    .auth-wrapper {
+        min-height: 100vh;
+        display: flex;
+        align-items: stretch;
+    }
+
+    /* ── Left panel: branding ── */
+    .auth-left {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+        background: linear-gradient(135deg, #064e3b 0%, #065f46 40%, #0f172a 100%);
+        position: relative;
+        overflow: hidden;
+    }
+
+    .auth-left::before {
+        content: '';
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(16,185,129,0.2) 0%, transparent 70%);
+        top: -100px;
+        right: -150px;
+    }
+
+    .auth-left::after {
+        content: '';
+        position: absolute;
+        width: 300px;
+        height: 300px;
+        border-radius: 50%;
+        background: radial-gradient(circle, rgba(5,150,105,0.2) 0%, transparent 70%);
+        bottom: -50px;
+        left: -80px;
+    }
+
+    .auth-brand {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 60px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-brand-icon {
+        width: 44px;
+        height: 44px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        color: white;
+        box-shadow: 0 4px 20px rgba(16,185,129,0.4);
+    }
+
+    .auth-brand-name {
+        font-size: 1.3rem;
+        font-weight: 800;
+        color: white;
+        letter-spacing: -0.3px;
+    }
+
+    .auth-hero-text {
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-hero-text h2 {
+        font-size: clamp(1.8rem, 3vw, 2.8rem);
+        font-weight: 800;
+        color: white;
+        line-height: 1.2;
+        margin-bottom: 16px;
+    }
+
+    .auth-hero-text h2 span {
+        background: linear-gradient(90deg, #6ee7b7, #34d399);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .auth-hero-text p {
+        color: rgba(255,255,255,0.6);
+        font-size: 1.05rem;
+        line-height: 1.7;
+        max-width: 340px;
+        margin-bottom: 40px;
+    }
+
+    .auth-benefits {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+        position: relative;
+        z-index: 2;
+    }
+
+    .auth-benefit {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: rgba(255,255,255,0.75);
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+
+    .benefit-dot {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: rgba(16,185,129,0.2);
+        border: 1px solid rgba(16,185,129,0.3);
+        display: flex;
+        align-items: center;
+        justify-content:center;
+        font-size: 11px;
+        color: #34d399;
+        flex-shrink: 0;
+    }
+
+    /* ── Right panel: form ── */
+    .auth-right {
+        width: min(500px, 100%);
+        background: #0f172a;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        padding: 60px 50px;
+        border-left: 1px solid rgba(255,255,255,0.06);
+    }
+
+    .auth-form-header { margin-bottom: 32px; }
+
+    .auth-form-header h1 {
+        font-size: 1.9rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 8px;
+    }
+
+    .auth-form-header p {
+        color: rgba(255,255,255,0.45);
+        font-size: 0.9rem;
+    }
+
+    .auth-field { margin-bottom: 20px; }
+
+    .auth-field label {
+        display: block;
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: rgba(255,255,255,0.6);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 8px;
+    }
+
+    .auth-input-wrap {
+        position: relative;
+    }
+
+    .auth-input-wrap i {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        color: rgba(255,255,255,0.25);
+        font-size: 14px;
+        pointer-events: none;
+    }
+
+    .auth-input {
+        width: 100%;
+        padding: 14px 16px 14px 44px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.08);
+        border-radius: 12px;
+        color: white;
+        font-size: 0.95rem;
+        transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        box-sizing: border-box;
+        outline: none;
+    }
+
+    .auth-input::placeholder { color: rgba(255,255,255,0.2); }
+
+    .auth-input:focus {
+        border-color: rgba(16,185,129,0.6);
+        background: rgba(16,185,129,0.07);
+        box-shadow: 0 0 0 3px rgba(16,185,129,0.12);
+    }
+
+    .auth-error {
+        background: rgba(239,68,68,0.1);
+        border: 1px solid rgba(239,68,68,0.3);
+        color: #fca5a5;
+        padding: 12px 16px;
+        border-radius: 10px;
+        margin-bottom: 24px;
+        font-size: 0.87rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+
+    .auth-btn {
+        width: 100%;
+        padding: 15px;
+        background: linear-gradient(135deg, #10b981, #059669);
+        border: none;
+        border-radius: 12px;
+        color: white;
+        font-size: 1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+        box-shadow: 0 4px 24px rgba(16,185,129,0.4);
+        letter-spacing: 0.3px;
+        margin-top: 8px;
+    }
+
+    .auth-btn:hover {
+        opacity: 0.92;
+        transform: translateY(-1px);
+        box-shadow: 0 8px 32px rgba(16,185,129,0.5);
+    }
+
+    .auth-btn:active { transform: translateY(0); }
+
+    .auth-btn-google {
+        background: white;
+        color: #1e293b;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        text-decoration: none;
+        margin-top: 16px;
+    }
+
+    .auth-btn-google:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        background: #f8fafc;
+    }
+
+    .auth-btn-google img {
+        width: 18px;
+        height: 18px;
+    }
+
+    .auth-terms {
+        font-size: 0.78rem;
+        color: rgba(255,255,255,0.3);
+        text-align: center;
+        margin-top: 14px;
+        line-height: 1.5;
+    }
+
+    .auth-terms a { color: rgba(255,255,255,0.5); text-decoration: underline; }
+
+    .auth-divider {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 24px 0;
+        color: rgba(255,255,255,0.2);
+        font-size: 0.78rem;
+    }
+
+    .auth-divider::before, .auth-divider::after {
+        content: '';
+        flex: 1;
+        height: 1px;
+        background: rgba(255,255,255,0.08);
+    }
+
+    .auth-footer-text {
+        text-align: center;
+        color: rgba(255,255,255,0.4);
+        font-size: 0.88rem;
+    }
+
+    .auth-footer-text a {
+        color: #34d399;
+        font-weight: 700;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+
+    .auth-footer-text a:hover { color: #6ee7b7; }
+
+    @media (max-width: 860px) {
+        .auth-left { display: none; }
+        .auth-right { width: 100%; padding: 40px 24px; }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+    <!-- Left Branding Panel -->
+    <div class="auth-left">
+        <div class="auth-brand">
+            <div class="auth-brand-icon"><i class="fas fa-briefcase"></i></div>
+            <span class="auth-brand-name">CareerGuidance</span>
+        </div>
+
+        <div class="auth-hero-text">
+            <h2>Start your <span>career journey</span> here</h2>
+            <p>Join thousands of students and professionals finding their dream job across India with AI-powered guidance.</p>
+        </div>
+
+        <div class="auth-benefits">
+            <div class="auth-benefit">
+                <div class="benefit-dot"><i class="fas fa-check"></i></div>
+                Browse 10,000+ live job listings across India
+            </div>
+            <div class="auth-benefit">
+                <div class="benefit-dot"><i class="fas fa-check"></i></div>
+                Personalized AI career tips and resume scoring
+            </div>
+            <div class="auth-benefit">
+                <div class="benefit-dot"><i class="fas fa-check"></i></div>
+                Tamil Nadu & government job alerts
+            </div>
+            <div class="auth-benefit">
+                <div class="benefit-dot"><i class="fas fa-check"></i></div>
+                100% free — no credit card required
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-right">
+        <div class="auth-form-header">
+            <h1>Create your account ✨</h1>
+            <p>It only takes 30 seconds — completely free</p>
+        </div>
+
+        {% if error %}
+        <div class="auth-error">
+            <i class="fas fa-exclamation-circle"></i> {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/signup">
+            <div class="auth-field">
+                <label>Full Name</label>
+                <div class="auth-input-wrap">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="name" class="auth-input" required placeholder="John Doe">
+                </div>
+            </div>
+
+            <div class="auth-field">
+                <label>Email Address</label>
+                <div class="auth-input-wrap">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" class="auth-input" required placeholder="you@example.com">
+                </div>
+            </div>
+
+            <div class="auth-field">
+                <label>Password</label>
+                <div class="auth-input-wrap">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" class="auth-input" required minlength="6" placeholder="Min 6 characters">
+                </div>
+            </div>
+
+            <button type="submit" class="auth-btn">
+                <i class="fas fa-user-plus"></i> Create Free Account
+            </button>
+        </form>
+
+        <div class="auth-divider">OR</div>
+
+        <a href="/login/google?source=signup" class="auth-btn auth-btn-google">
+            <img src="https://cdn.jsdelivr.net/gh/devicons/devicon/icons/google/google-original.svg" alt="Google">
+            Sign up with Google
+        </a>
+
+        <p class="auth-terms">
+            By creating an account, you agree to our <a href="/terms">Terms</a> and <a href="/privacy">Privacy Policy</a>.
+        </p>
+
+        <div class="auth-divider">Already a member?</div>
+
+        <p class="auth-footer-text">
+            <a href="/login">← Back to login</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,866 @@
+{% extends "base.html" %}
+{% block title %}Tamil Nadu & Pondicherry Jobs{% endblock %}
+{% block meta_desc %}Browse latest job openings across all cities in Tamil Nadu & Pondicherry. Find jobs in Chennai, Coimbatore, Madurai, Trichy, Salem, Puducherry & 50+ cities.{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ═══════════ TN HERO ═══════════ */
+.tn-hero{background:linear-gradient(135deg,#1a1a2e 0%,#16213e 40%,#0f3460 100%);padding:48px 0 32px;position:relative;overflow:hidden}
+.tn-hero::before{content:'';position:absolute;top:-50%;right:-10%;width:500px;height:500px;background:radial-gradient(circle,rgba(102,126,234,.15) 0%,transparent 70%);border-radius:50%}
+.tn-hero .breadcrumb{margin-bottom:12px;font-size:.82rem}
+.tn-hero .breadcrumb a{color:rgba(255,255,255,.6);text-decoration:none}
+.tn-hero .breadcrumb a:hover{color:#fff}
+.tn-hero .breadcrumb i{color:rgba(255,255,255,.3);font-size:.65rem;margin:0 6px}
+.tn-hero h1{color:#fff;font-size:2rem;font-weight:800;margin-bottom:8px}
+.tn-hero h1 span{background:linear-gradient(135deg,#667eea,#764ba2);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.tn-hero p{color:rgba(255,255,255,.7);font-size:.92rem;max-width:700px}
+.tn-stats-row{display:flex;gap:16px;margin-top:20px;flex-wrap:wrap}
+.tn-stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:14px 20px;min-width:0;flex:1 1 auto;text-align:center}
+.tn-stat-card .stat-num{font-size:1.5rem;font-weight:800;color:#fff}
+.tn-stat-card .stat-label{font-size:.72rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* ═══════════ CITY QUICK FILTERS ═══════════ */
+.city-bar{background:var(--bg-card);border-bottom:1px solid var(--border);padding:14px 0;overflow:hidden}
+.city-pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.city-pills::-webkit-scrollbar{display:none}
+.city-pill{white-space:nowrap;padding:6px 16px;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all .2s}
+.city-pill:hover,.city-pill.active{background:#667eea;color:#fff;border-color:#667eea;transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.3)}
+.city-pill i{margin-right:4px;font-size:.7rem}
+
+/* ═══════════ LAYOUT ═══════════ */
+.tn-layout{display:grid;grid-template-columns:260px 1fr;gap:24px;margin-top:24px}
+@media(max-width:900px){.tn-layout{grid-template-columns:1fr}}
+.tn-sidebar{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow-y:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.tn-sidebar h3{font-size:1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.tn-filter-group{margin-bottom:18px}
+.tn-filter-group h4{font-size:.82rem;font-weight:600;margin-bottom:8px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.tn-filter-group h4 i{font-size:.75rem;color:#667eea}
+.tn-filter-option{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.82rem;cursor:pointer;color:var(--text-primary)}
+.tn-filter-option input{accent-color:#667eea}
+.tn-filter-option .fc{margin-left:auto;color:var(--text-tertiary);font-size:.72rem}
+.tn-filter-option input:checked~.fc{color:#667eea;font-weight:600}
+
+/* ═══════════ JOB CARDS ═══════════ */
+.tn-jobs-grid{display:grid;gap:16px}
+.tn-job-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .25s}
+.tn-job-card:hover{border-color:#667eea;box-shadow:0 8px 30px rgba(102,126,234,.12);transform:translateY(-2px)}
+.tn-job-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
+.tn-job-logo{width:48px;height:48px;border-radius:10px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+.tn-job-info{flex:1;min-width:0}
+.tn-job-info h3{font-size:.95rem;font-weight:700;margin:0 0 4px;line-height:1.3}
+.tn-job-info .company{font-size:.82rem;color:var(--text-secondary)}
+.tn-job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:.78rem;color:var(--text-secondary)}
+.tn-job-meta span{display:flex;align-items:center;gap:4px}
+.tn-job-meta i{font-size:.7rem;color:#667eea}
+.tn-job-skills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.tn-skill-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;background:var(--bg-accent,#f0f2ff);color:#667eea;border:1px solid rgba(102,126,234,.15)}
+.tn-job-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.tn-salary{font-weight:600;font-size:.85rem;color:var(--text-primary)}
+.tn-job-actions{display:flex;align-items:center;gap:8px}
+.tn-source-badge{font-size:.65rem;padding:3px 10px;border-radius:20px;color:#fff;font-weight:500}
+.tn-apply-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#667eea,#764ba2);text-decoration:none;transition:all .2s}
+.tn-apply-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(102,126,234,.4)}
+.tn-save-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text-secondary);transition:all .2s}
+.tn-save-btn:hover{color:#e74c3c;border-color:#e74c3c}
+
+/* ═══════════ RESULTS BAR ═══════════ */
+.tn-results-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.tn-results-bar p{margin:0;font-size:.88rem;color:var(--text-secondary)}
+.tn-results-bar select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;background:var(--bg-card);color:var(--text-primary)}
+
+/* ═══════════ ACTIVE FILTERS ═══════════ */
+.tn-active-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px 16px;background:var(--bg-accent,#f8f9ff);border-radius:10px}
+.tn-filter-tag{display:inline-flex;align-items:center;gap:4px;background:#667eea;color:#fff;padding:4px 12px;border-radius:20px;font-size:.78rem;cursor:pointer}
+.tn-filter-tag i{opacity:.7;cursor:pointer}
+
+/* ═══════════ LOAD MORE ═══════════ */
+.tn-load-more{text-align:center;margin-top:24px}
+.tn-load-more .btn{padding:10px 32px;border-radius:10px;font-weight:600}
+
+/* ═══════════ NO RESULTS ═══════════ */
+.tn-no-results{text-align:center;padding:60px 20px;grid-column:1/-1}
+.tn-no-results i{font-size:3rem;color:var(--text-tertiary);margin-bottom:16px}
+.tn-no-results h3{margin-bottom:8px}
+.tn-no-results p{color:var(--text-secondary);font-size:.88rem}
+
+/* ═══════════ MOBILE ═══════════ */
+@media(max-width:900px){
+    .tn-hero h1{font-size:1.5rem}
+    .tn-stats-row{gap:8px}
+    .tn-stat-card{padding:10px 12px}
+    .tn-stat-card .stat-num{font-size:1.1rem}
+    .tn-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;max-height:100vh;border-radius:0}
+    .tn-sidebar.open{display:block}
+    .tn-mobile-filter-btn{display:flex!important}
+}
+@media(max-width:480px){
+    .tn-hero{padding:80px 0 30px}
+    .tn-hero h1{font-size:1.3rem}
+    .tn-hero p{font-size:.82rem}
+    .tn-stats-row{gap:6px}
+    .tn-stat-card{padding:8px 10px}
+    .tn-stat-card .stat-num{font-size:.95rem}
+    .tn-stat-card .stat-label{font-size:.6rem}
+}
+
+.tn-mobile-filter-btn{display:none!important;width:100%;margin-bottom:12px;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text-primary)}
+.tn-mobile-filter-btn:hover{border-color:#667eea;color:#667eea}
+
+/* Loading state */
+.tn-jobs-grid.is-loading{opacity:.4;pointer-events:none;position:relative;min-height:300px}
+.tn-jobs-grid.is-loading::after{content:'';position:absolute;top:50%;left:50%;width:40px;height:40px;margin:-20px 0 0 -20px;border:3px solid var(--border);border-top-color:#667eea;border-radius:50%;animation:tn-spin .6s linear infinite}
+@keyframes tn-spin{to{transform:rotate(360deg)}}
+
+/* Refresh button */
+.tn-refresh-btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:.78rem;border:1px solid rgba(255,255,255,.2);color:rgba(255,255,255,.8);background:transparent;cursor:pointer;transition:all .2s;margin-top:12px}
+.tn-refresh-btn:hover{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.4);color:#fff}
+.tn-refresh-btn.spinning i{animation:tn-spin 1s linear infinite}
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Jobs",
+    "item": "https://careerguidance.me/jobs"
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "Tamil Nadu & Pondicherry Jobs",
+    "item": "{{ g.canonical_url }}"
+  }]
+}
+</script>
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ═══════════ TN HERO ═══════════ -->
+<div class="tn-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">Home</a> <i class="fas fa-chevron-right"></i>
+            <a href="/jobs">Jobs</a> <i class="fas fa-chevron-right"></i>
+            Tamil Nadu & Pondicherry
+        </div>
+        <h1><i class="fas fa-map-marked-alt" style="color:#667eea;"></i> Jobs in <span>Tamil Nadu & Pondicherry</span></h1>
+        <p>Discover career opportunities across 55+ cities — Chennai, Coimbatore, Madurai, Trichy, Salem, Puducherry & more. Auto-fetched from LinkedIn, Naukri, Indeed, Internshala and other top portals.</p>
+
+        <div class="tn-stats-row" id="tnStatsRow">
+            <div class="tn-stat-card">
+                <div class="stat-num" id="statTotalJobs">—</div>
+                <div class="stat-label">Total Jobs</div>
+            </div>
+            <div class="tn-stat-card">
+                <div class="stat-num" id="statCities">—</div>
+                <div class="stat-label">Cities</div>
+            </div>
+            <div class="tn-stat-card">
+                <div class="stat-num" id="statCompanies">—</div>
+                <div class="stat-label">Companies</div>
+            </div>
+            <div class="tn-stat-card">
+                <div class="stat-num" id="statFresher">—</div>
+                <div class="stat-label">Fresher Jobs</div>
+            </div>
+            <div class="tn-stat-card">
+                <div class="stat-num" id="statRemote">—</div>
+                <div class="stat-label">Remote / WFH</div>
+            </div>
+        </div>
+
+        <button class="tn-refresh-btn" id="refreshBtn" onclick="refreshTNJobs()">
+            <i class="fas fa-sync-alt"></i> Refresh Jobs Now
+        </button>
+        <span id="tnRefreshStatus" style="font-size:.72rem;color:rgba(255,255,255,.5);margin-left:12px;"></span>
+    </div>
+</div>
+
+<!-- ═══════════ CROSS-NAVIGATION ═══════════ -->
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border);padding:8px 0;">
+    <div class="container" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.8rem;">
+        <span style="color:var(--text-tertiary);font-weight:600;">Also browse:</span>
+        <a href="/jobs" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(102,126,234,.1);color:#667eea;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#667eea';this.style.color='#fff'" onmouseout="this.style.background='rgba(102,126,234,.1)';this.style.color='#667eea'"><i class="fas fa-globe"></i> Global Jobs</a>
+        <a href="/jobs/india" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(255,153,0,.1);color:#ff9933;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#ff9933';this.style.color='#fff'" onmouseout="this.style.background='rgba(255,153,0,.1)';this.style.color='#ff9933'"><i class="fas fa-flag"></i> 🇮🇳 All India Jobs</a>
+        <a href="/jobs?type=remote" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(16,185,129,.1);color:#10b981;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,.1)';this.style.color='#10b981'"><i class="fas fa-laptop-house"></i> Remote Jobs</a>
+        <a href="/jobs?type=fresher" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(245,158,11,.1);color:#f59e0b;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#f59e0b';this.style.color='#fff'" onmouseout="this.style.background='rgba(245,158,11,.1)';this.style.color='#f59e0b'"><i class="fas fa-seedling"></i> Fresher Jobs</a>
+    </div>
+</div>
+
+<!-- ═══════════ CITY QUICK FILTERS ═══════════ -->
+<div class="city-bar">
+    <div class="container">
+        <div class="city-pills" id="cityPills">
+            <span class="city-pill active" data-city="" onclick="selectCity(this)"><i class="fas fa-globe-asia"></i> All Cities</span>
+            <span class="city-pill" data-city="Chennai" onclick="selectCity(this)"><i class="fas fa-city"></i> Chennai</span>
+            <span class="city-pill" data-city="Coimbatore" onclick="selectCity(this)"><i class="fas fa-industry"></i> Coimbatore</span>
+            <span class="city-pill" data-city="Madurai" onclick="selectCity(this)"><i class="fas fa-landmark"></i> Madurai</span>
+            <span class="city-pill" data-city="Tiruchirappalli" onclick="selectCity(this)"><i class="fas fa-building"></i> Trichy</span>
+            <span class="city-pill" data-city="Salem" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Salem</span>
+            <span class="city-pill" data-city="Tirunelveli" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Tirunelveli</span>
+            <span class="city-pill" data-city="Puducherry" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Puducherry</span>
+            <span class="city-pill" data-city="Vellore" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Vellore</span>
+            <span class="city-pill" data-city="Erode" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Erode</span>
+            <span class="city-pill" data-city="Thanjavur" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Thanjavur</span>
+            <span class="city-pill" data-city="Tiruppur" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Tiruppur</span>
+            <span class="city-pill" data-city="Thoothukudi" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Thoothukudi</span>
+            <span class="city-pill" data-city="Hosur" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Hosur</span>
+            <span class="city-pill" data-city="Dindigul" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Dindigul</span>
+            <span class="city-pill" data-city="Nagercoil" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Nagercoil</span>
+            <span class="city-pill" data-city="Karaikal" onclick="selectCity(this)"><i class="fas fa-map-pin"></i> Karaikal</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════ MAIN CONTENT ═══════════ -->
+<section style="padding:28px 0 60px;">
+    <div class="container">
+        <!-- Search Bar -->
+        <div class="hero-search mb-4" style="max-width:100%;">
+            <div class="search-field">
+                <i class="fas fa-search"></i>
+                <input type="text" id="tnSearchKeyword" placeholder="Job title, skill, or company (e.g. Java Developer, Zoho, TCS)" />
+            </div>
+            <div class="search-field">
+                <i class="fas fa-map-marker-alt"></i>
+                <input type="text" id="tnSearchCity" placeholder="City (e.g. Chennai, Coimbatore, Madurai...)" />
+            </div>
+            <button class="btn btn-primary" onclick="searchTNJobs()">
+                <i class="fas fa-search"></i> Search TN Jobs
+            </button>
+        </div>
+
+        <!-- Active Filters -->
+        <div id="tnActiveFilters" class="tn-active-filters" style="display:none;">
+            <span style="font-size:.82rem;color:var(--text-secondary);"><i class="fas fa-filter"></i> Filters:</span>
+            <div id="tnFilterTags"></div>
+            <button class="btn btn-ghost btn-sm" onclick="clearTNFilters()" style="font-size:.78rem;padding:4px 10px;">Clear All</button>
+        </div>
+
+        <!-- Mobile Filter Toggle -->
+        <button class="tn-mobile-filter-btn" id="tnMobileFilterBtn" onclick="toggleTNFilters()">
+            <i class="fas fa-sliders-h"></i> Show Filters
+            <span id="tnFilterBadge" style="background:#667eea;color:#fff;padding:1px 8px;border-radius:10px;font-size:.72rem;display:none;">0</span>
+        </button>
+
+        <div class="tn-layout">
+            <!-- ═══════════ SIDEBAR ═══════════ -->
+            <aside class="tn-sidebar" id="tnSidebar">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h3><i class="fas fa-sliders-h" style="color:#667eea;"></i> Filters</h3>
+                    <button id="tnSidebarClose" onclick="toggleTNFilters()" style="display:none;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-secondary);"><i class="fas fa-times"></i></button>
+                </div>
+
+                <!-- City -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-city"></i> City</h4>
+                    <select class="form-control" id="tnFilterCity" onchange="searchTNJobs()" style="width:100%;padding:8px;border-radius:8px;">
+                        <option value="">All Cities</option>
+                    </select>
+                </div>
+
+                <!-- Source -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-rss"></i> Source</h4>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="LinkedIn" onchange="applyTNFilters()"> LinkedIn <span class="fc" data-tfc="source:LinkedIn"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Naukri.com" onchange="applyTNFilters()"> Naukri.com <span class="fc" data-tfc="source:Naukri.com"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Indeed" onchange="applyTNFilters()"> Indeed <span class="fc" data-tfc="source:Indeed"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Foundit" onchange="applyTNFilters()"> Foundit <span class="fc" data-tfc="source:Foundit"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Internshala" onchange="applyTNFilters()"> Internshala <span class="fc" data-tfc="source:Internshala"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="TimesJobs" onchange="applyTNFilters()"> TimesJobs <span class="fc" data-tfc="source:TimesJobs"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Freshersworld" onchange="applyTNFilters()"> Freshersworld <span class="fc" data-tfc="source:Freshersworld"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_source" value="Careerguidance" onchange="applyTNFilters()"> Careerguidance <span class="fc" data-tfc="source:Careerguidance"></span></label>
+                </div>
+
+                <!-- Job Type -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-briefcase"></i> Job Type</h4>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Full-time" onchange="applyTNFilters()"> Full-time <span class="fc" data-tfc="type:Full-time"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Remote" onchange="applyTNFilters()"> Remote / WFH <span class="fc" data-tfc="type:Remote"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Part-time" onchange="applyTNFilters()"> Part-time <span class="fc" data-tfc="type:Part-time"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Internship" onchange="applyTNFilters()"> Internship <span class="fc" data-tfc="type:Internship"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Contract" onchange="applyTNFilters()"> Contract <span class="fc" data-tfc="type:Contract"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Hybrid" onchange="applyTNFilters()"> Hybrid <span class="fc" data-tfc="type:Hybrid"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_type" value="Fresher" onchange="applyTNFilters()"> Fresher <span class="fc" data-tfc="type:Fresher"></span></label>
+                </div>
+
+                <!-- Experience -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-layer-group"></i> Experience</h4>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_exp" value="Entry Level" onchange="applyTNFilters()"> Entry Level <span class="fc" data-tfc="exp:Entry Level"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_exp" value="Junior" onchange="applyTNFilters()"> Junior <span class="fc" data-tfc="exp:Junior"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_exp" value="Mid Level" onchange="applyTNFilters()"> Mid Level <span class="fc" data-tfc="exp:Mid Level"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_exp" value="Senior" onchange="applyTNFilters()"> Senior <span class="fc" data-tfc="exp:Senior"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_exp" value="Lead" onchange="applyTNFilters()"> Lead <span class="fc" data-tfc="exp:Lead"></span></label>
+                </div>
+
+                <!-- Category -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-th-large"></i> Category</h4>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Technology" onchange="applyTNFilters()"> Technology <span class="fc" data-tfc="cat:Technology"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Data Science" onchange="applyTNFilters()"> Data Science <span class="fc" data-tfc="cat:Data Science"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Design" onchange="applyTNFilters()"> Design <span class="fc" data-tfc="cat:Design"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Marketing" onchange="applyTNFilters()"> Marketing <span class="fc" data-tfc="cat:Marketing"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Manufacturing" onchange="applyTNFilters()"> Manufacturing <span class="fc" data-tfc="cat:Manufacturing"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="BPO" onchange="applyTNFilters()"> BPO / Customer Service <span class="fc" data-tfc="cat:BPO"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Finance" onchange="applyTNFilters()"> Finance <span class="fc" data-tfc="cat:Finance"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Management" onchange="applyTNFilters()"> Management <span class="fc" data-tfc="cat:Management"></span></label>
+                    <label class="tn-filter-option"><input type="checkbox" name="tn_cat" value="Internship" onchange="applyTNFilters()"> Internship <span class="fc" data-tfc="cat:Internship"></span></label>
+                </div>
+
+                <!-- Salary -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-rupee-sign"></i> Salary</h4>
+                    <label class="tn-filter-option"><input type="radio" name="tn_salary" value="" onchange="applyTNFilters()" checked> Any salary</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_salary" value="paid" onchange="applyTNFilters()"> Has salary info</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_salary" value="300000" onchange="applyTNFilters()"> &#8377;3 LPA+</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_salary" value="600000" onchange="applyTNFilters()"> &#8377;6 LPA+</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_salary" value="1000000" onchange="applyTNFilters()"> &#8377;10 LPA+</label>
+                </div>
+
+                <!-- Posted -->
+                <div class="tn-filter-group">
+                    <h4><i class="fas fa-calendar-alt"></i> Posted</h4>
+                    <label class="tn-filter-option"><input type="radio" name="tn_posted" value="" onchange="applyTNFilters()" checked> Any time</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_posted" value="1" onchange="applyTNFilters()"> Last 24 hours</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_posted" value="3" onchange="applyTNFilters()"> Last 3 days</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_posted" value="7" onchange="applyTNFilters()"> Last week</label>
+                    <label class="tn-filter-option"><input type="radio" name="tn_posted" value="30" onchange="applyTNFilters()"> Last month</label>
+                </div>
+
+                <button class="btn btn-ghost" onclick="clearTNFilters()" style="width:100%;"><i class="fas fa-times"></i> Clear All Filters</button>
+            </aside>
+
+            <!-- ═══════════ RESULTS ═══════════ -->
+            <div>
+                <div class="tn-results-bar">
+                    <div>
+                        <p id="tnResultsCount" style="font-weight:600;">Loading jobs across Tamil Nadu...</p>
+                        <p id="tnSourceInfo" style="font-size:.72rem;opacity:.6;margin:2px 0 0;">Fetching from multiple sources...</p>
+                    </div>
+                    <select id="tnSortBy" onchange="applyTNFilters()">
+                        <option value="newest">Sort: Newest First</option>
+                        <option value="oldest">Sort: Oldest First</option>
+                        <option value="title">Sort: Title A-Z</option>
+                        <option value="company">Sort: Company A-Z</option>
+                        <option value="city">Sort: City A-Z</option>
+                    </select>
+                </div>
+
+                <div class="tn-jobs-grid" id="tnJobsGrid">
+                    <div style="text-align:center;padding:60px 20px;">
+                        <div class="spinner" style="width:40px;height:40px;border:3px solid var(--border);border-top-color:#667eea;border-radius:50%;animation:tn-spin .6s linear infinite;margin:0 auto 16px;"></div>
+                        <p style="color:var(--text-secondary);">Loading Tamil Nadu & Pondicherry jobs...</p>
+                    </div>
+                </div>
+
+                <div id="tnLoadMoreWrap" class="tn-load-more" style="display:none;">
+                    <button class="btn btn-outline" onclick="tnLoadMore()"><i class="fas fa-plus"></i> Load More Jobs</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TOP CITIES SECTION ═══════════ -->
+<section style="padding:40px 0;background:var(--bg-accent,#f8f9ff);">
+    <div class="container">
+        <h2 style="text-align:center;margin-bottom:8px;"><i class="fas fa-map-marked-alt" style="color:#667eea;"></i> Top Hiring Cities in Tamil Nadu</h2>
+        <p style="text-align:center;color:var(--text-secondary);margin-bottom:28px;font-size:.88rem;">Explore job opportunities across major cities and emerging tech hubs</p>
+        <div id="topCitiesGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* ================================================================
+   STATE
+   ================================================================ */
+var tnMasterJobs = [];
+var tnFilteredJobs = [];
+var tnDisplayedCount = 0;
+var TN_PAGE_SIZE = 20;
+var tnDebounce = null;
+var tnLastFetch = '';
+var tnCitiesList = [];
+
+/* ================================================================
+   INIT
+   ================================================================ */
+document.addEventListener('DOMContentLoaded', function() {
+    // Read URL params into search fields
+    var params = new URLSearchParams(window.location.search);
+    if (params.get('keyword')) {
+        var el = document.getElementById('tnSearchKeyword');
+        if (el) el.value = params.get('keyword');
+    }
+    if (params.get('city')) {
+        var cityEl = document.getElementById('tnSearchCity');
+        var filterEl = document.getElementById('tnFilterCity');
+        if (cityEl) cityEl.value = params.get('city');
+        if (filterEl) filterEl.value = params.get('city');
+        // Highlight matching city pill
+        document.querySelectorAll('.city-pill').forEach(function(p) {
+            if (p.dataset.city && p.dataset.city.toLowerCase() === params.get('city').toLowerCase()) {
+                p.classList.add('active');
+            }
+        });
+    }
+    if (params.get('type')) {
+        document.querySelectorAll('input[name="tn_type"]').forEach(function(cb) {
+            if (cb.value.toLowerCase() === params.get('type').toLowerCase()) cb.checked = true;
+        });
+    }
+
+    loadTNCities();
+    loadTNStats();
+    searchTNJobs();
+});
+
+/* ================================================================
+   CITY QUICK FILTER
+   ================================================================ */
+function selectCity(el) {
+    document.querySelectorAll('.city-pill').forEach(function(p) { p.classList.remove('active'); });
+    el.classList.add('active');
+    var city = el.dataset.city;
+    document.getElementById('tnFilterCity').value = city;
+    document.getElementById('tnSearchCity').value = city;
+    tnLastFetch = '';
+    searchTNJobs();
+}
+
+/* ================================================================
+   LOAD CITIES DROPDOWN
+   ================================================================ */
+async function loadTNCities() {
+    try {
+        var resp = await fetch('/api/jobs/tamilnadu/cities');
+        var data = await resp.json();
+        tnCitiesList = data.cities || [];
+        var sel = document.getElementById('tnFilterCity');
+        tnCitiesList.forEach(function(c) {
+            var opt = document.createElement('option');
+            opt.value = c.city;
+            opt.textContent = c.city + (c.count > 0 ? ' (' + c.count + ')' : '');
+            sel.appendChild(opt);
+        });
+    } catch(e) { console.warn('Failed to load TN cities:', e); }
+}
+
+/* ================================================================
+   LOAD STATS
+   ================================================================ */
+async function loadTNStats() {
+    try {
+        var resp = await fetch('/api/jobs/tamilnadu/stats');
+        var data = await resp.json();
+        document.getElementById('statTotalJobs').textContent = (data.total_jobs || 0).toLocaleString();
+        document.getElementById('statCities').textContent = data.unique_cities || 0;
+        document.getElementById('statCompanies').textContent = data.unique_companies || 0;
+        document.getElementById('statFresher').textContent = data.fresher_jobs || 0;
+        document.getElementById('statRemote').textContent = data.remote_jobs || 0;
+
+        /* Top Cities Grid */
+        var grid = document.getElementById('topCitiesGrid');
+        var topCities = data.top_cities || [];
+        if (topCities.length) {
+            grid.innerHTML = topCities.slice(0, 12).map(function(c) {
+                return '<div onclick="quickCitySearch(\'' + esc(c.city) + '\')" style="background:var(--bg-card);border:1px solid var(--border);border-radius:12px;padding:16px;text-align:center;cursor:pointer;transition:all .2s" onmouseover="this.style.borderColor=\'#667eea\';this.style.transform=\'translateY(-2px)\'" onmouseout="this.style.borderColor=\'\';this.style.transform=\'\'">'
+                    + '<div style="font-size:1.3rem;font-weight:700;color:#667eea;">' + c.count + '</div>'
+                    + '<div style="font-size:.85rem;font-weight:600;margin-top:4px;">' + esc(c.city) + '</div>'
+                    + '<div style="font-size:.7rem;color:var(--text-tertiary);">jobs available</div>'
+                    + '</div>';
+            }).join('');
+        }
+    } catch(e) { console.warn('Failed to load TN stats:', e); }
+}
+
+function quickCitySearch(city) {
+    document.getElementById('tnSearchCity').value = city;
+    document.getElementById('tnFilterCity').value = city;
+    document.querySelectorAll('.city-pill').forEach(function(p) {
+        p.classList.toggle('active', p.dataset.city === city);
+    });
+    tnLastFetch = '';
+    searchTNJobs();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ================================================================
+   SEARCH — main server fetch
+   ================================================================ */
+async function searchTNJobs() {
+    var keyword = document.getElementById('tnSearchKeyword').value.trim();
+    var city    = document.getElementById('tnSearchCity').value.trim() || document.getElementById('tnFilterCity').value;
+
+    var fetchKey = keyword + '|' + city;
+    if (fetchKey === tnLastFetch && tnMasterJobs.length > 0) {
+        applyTNFilters();
+        return;
+    }
+    tnLastFetch = fetchKey;
+
+    var grid = document.getElementById('tnJobsGrid');
+    grid.classList.add('is-loading');
+    document.getElementById('tnResultsCount').textContent = 'Searching Tamil Nadu jobs...';
+
+    try {
+        var url = '/api/jobs/tamilnadu?per_page=1000';
+        if (keyword) url += '&keyword=' + encodeURIComponent(keyword);
+        if (city)    url += '&city=' + encodeURIComponent(city);
+
+        var resp = await fetch(url);
+        var data = await resp.json();
+        tnMasterJobs = data.jobs || [];
+    } catch(e) {
+        console.error('TN search error:', e);
+        grid.innerHTML = '<div class="tn-no-results"><i class="fas fa-exclamation-circle"></i><h3>Failed to load jobs</h3><p>Please try again later.</p></div>';
+        grid.classList.remove('is-loading');
+        return;
+    }
+
+    grid.classList.remove('is-loading');
+    applyTNFilters();
+}
+
+/* ================================================================
+   CLIENT-SIDE FILTERS
+   ================================================================ */
+function applyTNFilters() {
+    var jobs = tnMasterJobs.slice();
+
+    var typeF = getTNChecked('tn_type');
+    var expF  = getTNChecked('tn_exp');
+    var catF  = getTNChecked('tn_cat');
+    var srcF  = getTNChecked('tn_source');
+
+    if (typeF.length) jobs = jobs.filter(function(j) { return tnMatchAny(j.type, typeF); });
+    if (expF.length)  jobs = jobs.filter(function(j) { return tnMatchAny(j.experience, expF); });
+    if (catF.length)  jobs = jobs.filter(function(j) { return tnMatchAny(j.category, catF); });
+    if (srcF.length)  jobs = jobs.filter(function(j) { return tnMatchAny(j.source, srcF); });
+
+    /* Salary */
+    var salVal = getTNRadio('tn_salary');
+    if (salVal === 'paid') {
+        jobs = jobs.filter(function(j) {
+            var s = (j.salary_min || '') + (j.salary_max || '');
+            return s && s !== 'Competitive' && s !== 'Not specified';
+        });
+    } else if (salVal) {
+        var minSal = parseInt(salVal);
+        jobs = jobs.filter(function(j) {
+            var nums = ((j.salary_min||'') + ' ' + (j.salary_max||'')).replace(/[^0-9\s]/g, '').match(/\d+/g);
+            if (!nums) return false;
+            return nums.some(function(n) { return parseInt(n) >= minSal; });
+        });
+    }
+
+    /* Posted */
+    var postedD = getTNRadio('tn_posted');
+    if (postedD) {
+        var cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - parseInt(postedD));
+        var cutStr = cutoff.toISOString().split('T')[0];
+        jobs = jobs.filter(function(j) { return (j.posted_date || '') >= cutStr; });
+    }
+
+    /* Sort */
+    var sort = document.getElementById('tnSortBy').value;
+    if (sort === 'newest')       jobs.sort(function(a,b) { return (b.posted_date||'').localeCompare(a.posted_date||''); });
+    else if (sort === 'oldest')  jobs.sort(function(a,b) { return (a.posted_date||'').localeCompare(b.posted_date||''); });
+    else if (sort === 'title')   jobs.sort(function(a,b) { return (a.title||'').localeCompare(b.title||''); });
+    else if (sort === 'company') jobs.sort(function(a,b) { return (a.company||'').localeCompare(b.company||''); });
+    else if (sort === 'city')    jobs.sort(function(a,b) { return (a.location_city||'').localeCompare(b.location_city||''); });
+
+    tnFilteredJobs = jobs;
+    computeTNFilterCounts();
+    updateTNActiveFilters();
+    renderTNResults();
+
+    /* Mobile badge */
+    var cnt = typeF.length + expF.length + catF.length + srcF.length + (salVal ? 1 : 0) + (postedD ? 1 : 0);
+    var badge = document.getElementById('tnFilterBadge');
+    badge.textContent = cnt;
+    badge.style.display = cnt > 0 ? 'inline' : 'none';
+}
+
+/* Helpers */
+function getTNChecked(name) {
+    var vals = [];
+    document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function(cb) { vals.push(cb.value.toLowerCase()); });
+    return vals;
+}
+function getTNRadio(name) {
+    var el = document.querySelector('input[name="' + name + '"]:checked');
+    return el ? el.value : '';
+}
+function tnMatchAny(field, filters) {
+    var low = (field || '').toLowerCase();
+    return filters.some(function(f) { return low.indexOf(f) !== -1; });
+}
+
+/* ================================================================
+   FILTER COUNTS
+   ================================================================ */
+function computeTNFilterCounts() {
+    var counts = { type:{}, exp:{}, cat:{}, source:{} };
+    tnMasterJobs.forEach(function(j) {
+        tnInc(counts.type, j.type || 'Other');
+        tnInc(counts.exp, j.experience || 'Unknown');
+        tnInc(counts.cat, j.category || 'Other');
+        tnInc(counts.source, j.source || 'Unknown');
+    });
+    document.querySelectorAll('.fc[data-tfc]').forEach(function(el) {
+        var parts = el.dataset.tfc.split(':');
+        var group = parts[0], val = parts.slice(1).join(':');
+        var count = 0;
+        if (counts[group]) {
+            count = counts[group][val] || 0;
+            if (!count) {
+                Object.keys(counts[group]).forEach(function(k) {
+                    if (k.toLowerCase().indexOf(val.toLowerCase()) !== -1) count += counts[group][k];
+                });
+            }
+        }
+        el.textContent = count > 0 ? '(' + count + ')' : '';
+    });
+}
+function tnInc(obj, key) { obj[key] = (obj[key] || 0) + 1; }
+
+/* ================================================================
+   ACTIVE FILTER TAGS
+   ================================================================ */
+function updateTNActiveFilters() {
+    var container = document.getElementById('tnFilterTags');
+    var wrap = document.getElementById('tnActiveFilters');
+    container.innerHTML = '';
+    var has = false;
+
+    var kw = document.getElementById('tnSearchKeyword').value.trim();
+    var city = document.getElementById('tnSearchCity').value.trim();
+    var fCity = document.getElementById('tnFilterCity').value;
+
+    if (kw)    { addTNTag(container, 'Keyword', kw); has = true; }
+    if (city)  { addTNTag(container, 'City', city); has = true; }
+    else if (fCity) { addTNTag(container, 'City', fCity); has = true; }
+
+    document.querySelectorAll('.tn-sidebar input[type="checkbox"]:checked').forEach(function(cb) {
+        addTNTag(container, cb.name, cb.value); has = true;
+    });
+
+    var sv = getTNRadio('tn_salary');
+    if (sv) { addTNTag(container, 'tn_salary', sv === 'paid' ? 'Has salary' : '₹' + (parseInt(sv)/100000) + 'L+'); has = true; }
+    var pv = getTNRadio('tn_posted');
+    if (pv) { addTNTag(container, 'tn_posted', 'Last ' + pv + ' day' + (parseInt(pv)>1?'s':'')); has = true; }
+
+    wrap.style.display = has ? 'flex' : 'none';
+}
+
+function addTNTag(container, label, value) {
+    var tag = document.createElement('span');
+    tag.className = 'tn-filter-tag';
+    tag.innerHTML = esc(value) + ' <i class="fas fa-times" onclick="removeTNFilter(\'' + label + '\',\'' + esc(value) + '\')"></i>';
+    container.appendChild(tag);
+}
+
+function removeTNFilter(label, value) {
+    if (label === 'Keyword') { document.getElementById('tnSearchKeyword').value = ''; tnLastFetch = ''; searchTNJobs(); return; }
+    if (label === 'City') {
+        document.getElementById('tnSearchCity').value = '';
+        document.getElementById('tnFilterCity').value = '';
+        document.querySelectorAll('.city-pill').forEach(function(p) { p.classList.toggle('active', !p.dataset.city); });
+        tnLastFetch = '';
+        searchTNJobs();
+        return;
+    }
+    if (label === 'tn_salary') { document.querySelector('input[name="tn_salary"][value=""]').checked = true; applyTNFilters(); return; }
+    if (label === 'tn_posted') { document.querySelector('input[name="tn_posted"][value=""]').checked = true; applyTNFilters(); return; }
+    document.querySelectorAll('input[name="' + label + '"]').forEach(function(cb) { if (cb.value === value) cb.checked = false; });
+    applyTNFilters();
+}
+
+/* ================================================================
+   CLEAR FILTERS
+   ================================================================ */
+function clearTNFilters() {
+    document.querySelectorAll('.tn-sidebar input[type="checkbox"]').forEach(function(c) { c.checked = false; });
+    document.querySelectorAll('.tn-sidebar input[type="radio"][value=""]').forEach(function(r) { r.checked = true; });
+    document.getElementById('tnSearchKeyword').value = '';
+    document.getElementById('tnSearchCity').value = '';
+    document.getElementById('tnFilterCity').value = '';
+    document.getElementById('tnSortBy').value = 'newest';
+    document.querySelectorAll('.city-pill').forEach(function(p) { p.classList.toggle('active', !p.dataset.city); });
+    tnLastFetch = '';
+    searchTNJobs();
+}
+
+/* ================================================================
+   RENDER RESULTS
+   ================================================================ */
+function renderTNResults() {
+    tnDisplayedCount = 0;
+    var grid = document.getElementById('tnJobsGrid');
+    grid.innerHTML = '';
+    document.getElementById('tnResultsCount').textContent = tnFilteredJobs.length + ' jobs found in Tamil Nadu & Pondicherry';
+
+    /* Source breakdown */
+    var sc = {};
+    tnFilteredJobs.forEach(function(j) { sc[j.source] = (sc[j.source]||0) + 1; });
+    var parts = Object.entries(sc).sort(function(a,b){return b[1]-a[1];}).map(function(e){return e[0]+': '+e[1];});
+    document.getElementById('tnSourceInfo').textContent = parts.length ? 'Sources: ' + parts.join(' · ') : '';
+
+    tnLoadMore();
+}
+
+function tnLoadMore() {
+    var grid = document.getElementById('tnJobsGrid');
+    var batch = tnFilteredJobs.slice(tnDisplayedCount, tnDisplayedCount + TN_PAGE_SIZE);
+    var frag = document.createDocumentFragment();
+    batch.forEach(function(job) {
+        var wrap = document.createElement('div');
+        wrap.innerHTML = renderTNJobCard(job);
+        if (wrap.firstElementChild) frag.appendChild(wrap.firstElementChild);
+    });
+    grid.appendChild(frag);
+    tnDisplayedCount += batch.length;
+    document.getElementById('tnLoadMoreWrap').style.display = tnDisplayedCount < tnFilteredJobs.length ? 'block' : 'none';
+    if (tnFilteredJobs.length === 0 && tnDisplayedCount === 0) {
+        grid.innerHTML = '<div class="tn-no-results"><i class="fas fa-search"></i><h3>No jobs found</h3><p>Try adjusting your search or filters. Jobs are auto-refreshed from multiple portals every 12 hours.</p></div>';
+    }
+}
+
+/* ================================================================
+   JOB CARD
+   ================================================================ */
+function renderTNJobCard(job) {
+    var logo = job.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company||'?') + '&background=667eea&color=fff&size=50');
+    var fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company||'?') + '&background=667eea&color=fff&size=50';
+    var colors = {
+        'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Foundit':'#FF5722',
+        'Internshala':'#00BCD4','TimesJobs':'#9C27B0','Freshersworld':'#FF9800',
+        'Careerguidance':'#667eea','Shine.com':'#4CAF50'
+    };
+    var clr = colors[job.source] || '#667eea';
+    var salary = job.salary_min ? (esc(job.salary_min) + (job.salary_max ? ' – ' + esc(job.salary_max) : '')) : '<span style="opacity:.5">Not specified</span>';
+    var posted = job.posted_date ? '<span style="font-size:.7rem;color:var(--text-tertiary)"><i class="far fa-clock"></i> ' + job.posted_date + '</span>' : '';
+    var skills = (job.skills||[]).slice(0, 5).map(function(s) { return '<span class="tn-skill-tag">' + esc(s) + '</span>'; }).join('');
+    var cityBadge = job.location_city ? '<span style="background:#e8f5e9;color:#2e7d32;font-size:.65rem;padding:2px 8px;border-radius:8px;margin-left:6px"><i class="fas fa-map-marker-alt"></i> ' + esc(job.location_city) + '</span>' : '';
+
+    return '<div class="tn-job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
+        + '<div class="tn-job-header">'
+        +   '<img src="' + logo + '" alt="' + esc(job.company||'') + '" class="tn-job-logo" loading="lazy" onerror="this.src=\'' + fallback + '\'">'
+        +   '<div class="tn-job-info"><h3>' + esc(job.title||'Untitled') + cityBadge + '</h3>'
+        +   '<span class="company">' + esc(job.company||'Unknown') + '</span></div>'
+        + '</div>'
+        + '<div class="tn-job-meta">'
+        +   '<span><i class="fas fa-map-marker-alt"></i> ' + esc(job.location||'Tamil Nadu') + '</span>'
+        +   '<span><i class="fas fa-briefcase"></i> ' + esc(job.type||'Full-time') + '</span>'
+        +   '<span><i class="fas fa-layer-group"></i> ' + esc(job.experience||'—') + '</span>'
+        + '</div>'
+        + (skills ? '<div class="tn-job-skills">' + skills + '</div>' : '')
+        + '<div class="tn-job-footer">'
+        +   '<div><span class="tn-salary">' + salary + '</span> ' + posted + '</div>'
+        +   '<div class="tn-job-actions">'
+        +     '<span class="tn-source-badge" style="background:'+clr+'">'+esc(job.source||'Portal')+'</span>'
+        +     '<button class="tn-save-btn" onclick="event.stopPropagation();tnSaveJob(this,\''+job.id+'\')" title="Save"><i class="far fa-heart"></i></button>'
+        +     '<a href="'+esc(job.apply_url||'#')+'" class="tn-apply-btn" target="_blank" onclick="event.stopPropagation();if(!__isLoggedIn){event.preventDefault();requireLogin(\'Login to Apply\',\'Sign in to track your job applications.\',event);return false;}tnTrackApply(\''+job.id+'\')"><i class="fas fa-external-link-alt"></i> Apply</a>'
+        +   '</div>'
+        + '</div></div>';
+}
+
+function tnTrackApply(jobId) {
+    if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications.'); return; }
+    fetch('/api/apply-job', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: String(jobId)})
+    }).catch(function(){});
+}
+
+async function tnSaveJob(btn, jobId) {
+    if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        var res = await fetch('/api/save-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: String(jobId)})
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i>';
+            btn.title = 'Saved';
+        } else {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+    }
+}
+
+/* ================================================================
+   REFRESH
+   ================================================================ */
+async function refreshTNJobs() {
+    var btn = document.getElementById('refreshBtn');
+    var status = document.getElementById('tnRefreshStatus');
+    btn.classList.add('spinning');
+    btn.disabled = true;
+    status.textContent = 'Refreshing... This may take a minute.';
+
+    try {
+        var resp = await fetch('/api/jobs/tamilnadu/refresh', { method: 'POST' });
+        var data = await resp.json();
+        status.textContent = '✅ Refreshed! ' + (data.jobs_count || 0) + ' jobs fetched.';
+        setTimeout(function() {
+            tnLastFetch = '';
+            searchTNJobs();
+            loadTNStats();
+            loadTNCities();
+        }, 500);
+    } catch(e) {
+        status.textContent = '❌ Refresh failed. Try again later.';
+    }
+    btn.classList.remove('spinning');
+    btn.disabled = false;
+}
+
+/* ================================================================
+   MOBILE TOGGLE
+   ================================================================ */
+function toggleTNFilters() {
+    var sb = document.getElementById('tnSidebar');
+    sb.classList.toggle('open');
+    document.body.style.overflow = sb.classList.contains('open') ? 'hidden' : '';
+}
+
+/* ================================================================
+   DEBOUNCE
+   ================================================================ */
+function tnDebouncedSearch() {
+    clearTimeout(tnDebounce);
+    tnDebounce = setTimeout(function() { tnLastFetch = ''; searchTNJobs(); }, 400);
+}
+document.getElementById('tnSearchKeyword').addEventListener('input', tnDebouncedSearch);
+document.getElementById('tnSearchCity').addEventListener('input', tnDebouncedSearch);
+document.getElementById('tnSearchKeyword').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { clearTimeout(tnDebounce); tnLastFetch = ''; searchTNJobs(); }
+});
+document.getElementById('tnSearchCity').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') { clearTimeout(tnDebounce); tnLastFetch = ''; searchTNJobs(); }
+});
+
+/* Utility */
+function esc(s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>
+{% endblock %}

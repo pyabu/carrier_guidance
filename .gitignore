@@ -1,12 +1,44 @@
+# Python
 __pycache__/
-*.pyc
-.env
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
 venv/
-# Keep data/jobs.json as seed for Vercel (don't ignore it)
-# data/*.json
-*.log
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Project specific
+.env
+carrier_guidance/data/scraped_jobs.json
+carrier_guidance/data/trends.json
+instance/
+*.db
+*.sqlite3
+
+# OS
 .DS_Store
-nohup.out
-.vercel
-.env*.local
-*.dmg.download/
+Thumbs.db

@@ -1,0 +1,97 @@
+[
+  {
+    "date": "2026-03-09",
+    "total_jobs": 398,
+    "top_5_skills": [
+      "TypeScript",
+      "Communication",
+      "Problem Solving",
+      "Go",
+      "Agile"
+    ],
+    "top_5_companies": [
+      "Startup",
+      "Walmart",
+      "Meta",
+      "CVS Health",
+      "Tinder"
+    ],
+    "remote_percentage": 43.2
+  },
+  {
+    "date": "2026-03-10",
+    "total_jobs": 676,
+    "top_5_skills": [
+      "Communication",
+      "Problem Solving",
+      "TypeScript",
+      "Go",
+      "Terraform"
+    ],
+    "top_5_companies": [
+      "Startup",
+      "Walmart",
+      "Meta",
+      "CVS Health",
+      "Tinder"
+    ],
+    "remote_percentage": 28.8
+  },
+  {
+    "date": "2026-03-12",
+    "total_jobs": 671,
+    "top_5_skills": [
+      "Communication",
+      "Problem Solving",
+      "TypeScript",
+      "Go",
+      "Agile"
+    ],
+    "top_5_companies": [
+      "Startup",
+      "Walmart",
+      "The Coca-Cola Company",
+      "CVS Health",
+      "Pavago"
+    ],
+    "remote_percentage": 27.6
+  },
+  {
+    "date": "2026-03-13",
+    "total_jobs": 918,
+    "top_5_skills": [
+      "TypeScript",
+      "Communication",
+      "Problem Solving",
+      "Go",
+      "Terraform"
+    ],
+    "top_5_companies": [
+      "",
+      "Startup",
+      "Walmart",
+      "BairesDev",
+      "Synchrony"
+    ],
+    "remote_percentage": 19.5
+  },
+  {
+    "date": "2026-03-14",
+    "total_jobs": 686,
+    "top_5_skills": [
+      "Communication",
+      "Problem Solving",
+      "TypeScript",
+      "Go",
+      "Agile"
+    ],
+    "top_5_companies": [
+      "Startup",
+      "Walmart",
+      "CVS Health",
+      "Southern Railway",
+      "Eleventh Hour Games"
+    ],
+    "remote_percentage": 27.6
+  }
+]

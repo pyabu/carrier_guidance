@@ -1,0 +1,379 @@
+{% extends "base.html" %}
+{% block meta_desc %}{{ g.seo.meta_description }}{% endblock %}
+
+{% block extra_head %}
+<!-- JobPosting Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "title": "{{ job.title }}",
+  "description": "{{ job.description|striptags|replace('\n', ' ')|truncate(5000) }}",
+  "datePosted": "{{ job.posted_date }}",
+  "validThrough": "2026-12-31T23:59:59Z",
+  "employmentType": "{{ job.type|upper }}",
+  "hiringOrganization": {
+    "@type": "Organization",
+    "name": "{{ job.company }}",
+    "sameAs": "{{ job.apply_url }}",
+    "logo": "{{ job.company_logo }}"
+  },
+  "jobLocation": {
+    "@type": "Place",
+    "address": {
+      "@type": "PostalAddress",
+      "addressLocality": "{{ job.location.split(',')[0] if ',' in job.location else job.location }}",
+      "addressRegion": "{{ job.location.split(',')[1].strip() if ',' in job.location else '' }}",
+      "addressCountry": "IN"
+    }
+  },
+  "baseSalary": {
+    "@type": "MonetaryAmount",
+    "currency": "INR",
+    "value": {
+      "@type": "QuantitativeValue",
+      "minValue": {{ job.salary_min if job.salary_min is number else 0 }},
+      "maxValue": {{ job.salary_max if job.salary_max is number else 0 }},
+      "unitText": "MONTH"
+    }
+  }
+}
+</script>
+
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Jobs",
+    "item": "https://careerguidance.me/jobs"
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "{{ job.title }}",
+    "item": "{{ g.canonical_url }}"
+  }]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<!-- Job Detail Header -->
+<div class="job-detail-header">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/">Home</a> <i class="fas fa-chevron-right"></i>
+            <a href="/jobs">Jobs</a> <i class="fas fa-chevron-right"></i>
+            <span>{{ job.title }}</span>
+        </div>
+        <div class="d-flex align-center gap-2" style="gap:16px;">
+            <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:60px;height:60px;border-radius:12px;background:white;padding:8px;object-fit:contain;" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=60'">
+            <div>
+                <h1 style="font-size:clamp(1.5rem,3vw,2.2rem)">{{ job.title }}</h1>
+                <p style="font-size:1.1rem;opacity:0.9;">{{ job.company }} &bull; {{ job.location }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Detail Content -->
+<div class="job-detail-content">
+    <div class="container">
+        <div class="job-detail-grid">
+            <!-- Main Content -->
+            <div class="job-detail-main">
+                <h3><i class="fas fa-info-circle"></i> Job Description</h3>
+                <div style="white-space:pre-line;line-height:1.8;color:var(--text-secondary);">{{ job.description }}</div>
+
+                <h3><i class="fas fa-tags"></i> Required Skills</h3>
+                <div class="job-card-skills" style="margin-bottom:0;">
+                    {% for skill in job.skills %}
+                    <span class="skill-tag" style="font-size:0.88rem;padding:6px 14px;">{{ skill }}</span>
+                    {% endfor %}
+                </div>
+
+                <h3><i class="fas fa-briefcase"></i> Similar Jobs</h3>
+                <div class="jobs-grid" id="similarJobs" style="grid-template-columns:1fr;">
+                    <!-- Loaded via JS -->
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="job-detail-sidebar">
+                <div class="sidebar-card">
+                    <h4>Job Overview</h4>
+                    <div class="detail-meta">
+                        <div class="detail-meta-item">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <div>
+                                <div class="label">Salary Range</div>
+                                <div class="value">{{ job.salary_min }} – {{ job.salary_max }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <div>
+                                <div class="label">Location</div>
+                                <div class="value">{{ job.location }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-briefcase"></i>
+                            <div>
+                                <div class="label">Job Type</div>
+                                <div class="value">{{ job.type }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-layer-group"></i>
+                            <div>
+                                <div class="label">Experience</div>
+                                <div class="value">{{ job.experience }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-folder"></i>
+                            <div>
+                                <div class="label">Category</div>
+                                <div class="value">{{ job.category }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-calendar-alt"></i>
+                            <div>
+                                <div class="label">Posted</div>
+                                <div class="value">{{ job.posted_date }}</div>
+                            </div>
+                        </div>
+                        <div class="detail-meta-item">
+                            <i class="fas fa-globe"></i>
+                            <div>
+                                <div class="label">Source</div>
+                                <div class="value">{{ job.source }}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="sidebar-card text-center">
+                    <a href="{{ job.apply_url }}" class="btn btn-primary btn-lg detail-apply-btn" target="_blank" rel="noopener" style="width:100%;justify-content:center;font-size:1rem;padding:14px 20px;" data-job-id="{{ job.id }}">
+                        <i class="fas fa-paper-plane"></i> Apply Now
+                    </a>
+                    {% if job.get('apply_links') %}
+                    <div style="margin-top:12px;display:flex;flex-direction:column;gap:8px;">
+                        {% if job.apply_links.get('naukri') %}
+                        <a href="{{ job.apply_links.naukri }}" target="_blank" rel="noopener" class="btn btn-ghost detail-apply-btn" style="width:100%;justify-content:center;font-size:.85rem;border-color:#0059ff;color:#0059ff;" data-job-id="{{ job.id }}">
+                            <i class="fas fa-briefcase"></i> Apply on Naukri
+                        </a>
+                        {% endif %}
+                        {% if job.apply_links.get('linkedin') %}
+                        <a href="{{ job.apply_links.linkedin }}" target="_blank" rel="noopener" class="btn btn-ghost detail-apply-btn" style="width:100%;justify-content:center;font-size:.85rem;border-color:#0077b5;color:#0077b5;" data-job-id="{{ job.id }}">
+                            <i class="fab fa-linkedin"></i> Apply on LinkedIn
+                        </a>
+                        {% endif %}
+                        {% if job.apply_links.get('indeed') %}
+                        <a href="{{ job.apply_links.indeed }}" target="_blank" rel="noopener" class="btn btn-ghost detail-apply-btn" style="width:100%;justify-content:center;font-size:.85rem;border-color:#2164f3;color:#2164f3;" data-job-id="{{ job.id }}">
+                            <i class="fas fa-search"></i> Apply on Indeed
+                        </a>
+                        {% endif %}
+                    </div>
+                    {% endif %}
+                    <button class="btn btn-ghost mt-2" id="saveJobBtn" style="width:100%;justify-content:center;" data-job-id="{{ job.id }}">
+                        <i class="far fa-heart"></i> Save Job
+                    </button>
+                </div>
+
+                <div class="sidebar-card">
+                    <h4>Company Info</h4>
+                    <div class="d-flex align-center gap-2" style="gap:12px;margin-bottom:12px;">
+                        <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:var(--bg-tertiary);padding:4px;" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff'">
+                        <div>
+                            <h4 style="font-size:0.95rem;">{{ job.company }}</h4>
+                            <span class="text-muted" style="font-size:0.82rem;">{{ job.get('industry', 'Technology') }}</span>
+                        </div>
+                    </div>
+                    <a href="{{ job.apply_url }}" class="text-accent" style="font-size:0.9rem;" target="_blank" rel="noopener">
+                        <i class="fas fa-external-link-alt"></i> Visit Company Careers
+                    </a>
+                    <button class="btn btn-ghost mt-2" id="bookmarkCompanyBtn" style="width:100%;justify-content:center;margin-top:12px;" data-company="{{ job.company }}">
+                        <i class="far fa-bookmark"></i> Bookmark Company
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Comments Section -->
+<div class="container" style="max-width:900px;margin:0 auto 60px;padding:0 20px;">
+    <div style="background:var(--surface);border-radius:16px;padding:28px;box-shadow:var(--shadow-sm);">
+        <h3 style="margin:0 0 20px;font-size:1.1rem;"><i class="fas fa-comments" style="color:var(--accent);"></i> Discussion</h3>
+        {% if session.get('user_id') %}
+        <div style="display:flex;gap:12px;margin-bottom:20px;">
+            <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;">{{ session.get('user_name','?')[0]|upper }}</div>
+            <div style="flex:1;">
+                <textarea id="commentText" placeholder="Share your thoughts about this role..." style="width:100%;padding:10px 14px;border:1px solid var(--border);border-radius:10px;font-size:0.9rem;resize:vertical;min-height:60px;background:var(--bg);color:var(--text-primary);box-sizing:border-box;"></textarea>
+                <button onclick="postComment()" class="btn btn-primary btn-sm" style="margin-top:8px;"><i class="fas fa-paper-plane"></i> Post</button>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align:center;padding:16px;background:var(--bg);border-radius:10px;margin-bottom:16px;">
+            <p style="margin:0 0 8px;color:var(--text-secondary);"><i class="fas fa-lock" style="margin-right:6px;"></i>Login to join the discussion</p>
+            <a href="/login" class="btn btn-primary btn-sm"><i class="fas fa-sign-in-alt"></i> Login</a>
+        </div>
+        {% endif %}
+        <div id="commentsList" style="display:flex;flex-direction:column;gap:12px;"></div>
+        <div id="noComments" style="text-align:center;padding:20px;color:var(--text-secondary);font-size:0.9rem;display:none;">No comments yet. Be the first to share your thoughts!</div>
+    </div>
+</div>
+
+<script>
+// Track application on Apply click
+document.querySelectorAll('.detail-apply-btn').forEach(btn => {
+    btn.addEventListener('click', function(e) {
+        if (!__isLoggedIn) { e.preventDefault(); e.stopPropagation(); requireLogin('Login to Apply', 'Sign in to track your applications.'); return; }
+        const jobId = this.dataset.jobId;
+        fetch('/api/apply-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: jobId})
+        }).catch(() => {});
+    });
+});
+
+// Save / Unsave Job
+(async function() {
+    const btn = document.getElementById('saveJobBtn');
+    if (!btn) return;
+    const jobId = btn.dataset.jobId;
+    let saved = false;
+
+    // Check if already saved
+    try {
+        const res = await fetch('/api/saved-jobs');
+        if (res.ok) {
+            const data = await res.json();
+            saved = (data.jobs || []).some(j => String(j.id) === String(jobId));
+            if (saved) {
+                btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i> Saved';
+            }
+        }
+    } catch(e) {}
+
+    btn.addEventListener('click', async () => {
+        if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+        const url = saved ? '/api/unsave-job' : '/api/save-job';
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({job_id: String(jobId)})
+            });
+            if (res.ok) {
+                saved = !saved;
+                btn.innerHTML = saved
+                    ? '<i class="fas fa-heart" style="color:#e74c3c"></i> Saved'
+                    : '<i class="far fa-heart"></i> Save Job';
+            }
+        } catch(e) {}
+    });
+})();
+
+// Load similar jobs
+document.addEventListener('DOMContentLoaded', async () => {
+    try {
+        const res = await fetch('/api/jobs?keyword={{ job.category }}');
+        const data = await res.json();
+        const similar = (data.jobs || []).filter(j => j.id !== {{ job.id }}).slice(0, 3);
+        const grid = document.getElementById('similarJobs');
+        if (similar.length === 0) {
+            grid.innerHTML = '<p class="text-muted">No similar jobs found.</p>';
+            return;
+        }
+        grid.innerHTML = similar.map(j => `
+            <div class="job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/${j.id}'" style="margin-bottom:12px;">
+                <div class="job-card-header">
+                    <img src="${j.company_logo || ''}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'" alt="${j.company}">
+                    <div class="job-card-info">
+                        <h3>${j.title}</h3>
+                        <span class="job-card-company">${j.company}</span>
+                    </div>
+                </div>
+                <div class="job-card-meta">
+                    <span><i class="fas fa-map-marker-alt"></i> ${j.location}</span>
+                    <span><i class="fas fa-briefcase"></i> ${j.type}</span>
+                </div>
+                <div class="job-card-footer">
+                    <span class="job-salary">${j.salary_min} – ${j.salary_max}</span>
+                    <a href="/job/${j.id}" class="btn-apply" onclick="if(!__isLoggedIn){event.preventDefault();event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return false;}">View</a>
+                </div>
+            </div>`).join('');
+    } catch(e) {}
+});
+
+// Comments
+const JOB_ID = '{{ job.id }}';
+function loadComments() {
+    fetch('/api/job-comments/' + JOB_ID).then(r => r.json()).then(d => {
+        const list = document.getElementById('commentsList');
+        const none = document.getElementById('noComments');
+        if (!d.comments || !d.comments.length) { none.style.display = 'block'; list.innerHTML = ''; return; }
+        none.style.display = 'none';
+        list.innerHTML = d.comments.map(c => {
+            const date = new Date(c.created_at).toLocaleDateString('en-IN', {day:'numeric',month:'short',year:'numeric'});
+            return '<div style="display:flex;gap:12px;padding:12px;background:var(--bg);border-radius:10px;">' +
+                '<div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;flex-shrink:0;font-size:0.85rem;">' + (c.user_name||'?')[0].toUpperCase() + '</div>' +
+                '<div><div style="font-weight:600;font-size:0.9rem;">' + (c.user_name||'User') + ' <span style="color:var(--text-secondary);font-weight:400;font-size:0.8rem;margin-left:8px;">' + date + '</span></div>' +
+                '<p style="margin:4px 0 0;font-size:0.88rem;color:var(--text-secondary);">' + c.text.replace(/</g,'&lt;').replace(/>/g,'&gt;') + '</p></div></div>';
+        }).join('');
+    });
+}
+function postComment() {
+    const ta = document.getElementById('commentText');
+    const text = ta.value.trim();
+    if (!text) return;
+    fetch('/api/job-comment', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: JOB_ID, text: text})
+    }).then(r => r.json()).then(d => {
+        if (d.status === 'posted') { ta.value = ''; loadComments(); }
+    });
+}
+loadComments();
+
+// Bookmark Company
+(function() {
+    const btn = document.getElementById('bookmarkCompanyBtn');
+    if (!btn) return;
+    const company = btn.dataset.company;
+    // Check if bookmarked
+    if (__isLoggedIn) {
+        fetch('/api/bookmarked-companies').then(r => r.json()).then(d => {
+            const found = (d.bookmarks||[]).some(b => b.company === company);
+            if (found) btn.innerHTML = '<i class="fas fa-bookmark" style="color:var(--accent)"></i> Bookmarked';
+        }).catch(() => {});
+    }
+    btn.addEventListener('click', () => {
+        if (!__isLoggedIn) return requireLogin('Login to Bookmark', 'Create an account to bookmark companies.');
+        fetch('/api/bookmark-company', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({company: company})
+        }).then(r => r.json()).then(d => {
+            btn.innerHTML = d.status === 'added'
+                ? '<i class="fas fa-bookmark" style="color:var(--accent)"></i> Bookmarked'
+                : '<i class="far fa-bookmark"></i> Bookmark Company';
+        });
+    });
+})();
+</script>
+{% endblock %}

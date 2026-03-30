@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#0f4c75">
+    <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
+    <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
+    <link rel="canonical" href="{{ g.canonical_url }}">
+    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="description"
+        content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance. Discover the best fresher jobs, IT roles, and remote work in Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR, and across India.') }}{% endblock %}">
+    <meta name="keywords"
+        content="{% block meta_keywords %}{{ g.get('seo', {}).get('keywords', []) | join(', ') }}{% endblock %}, Career Guidance, Job Portal India, Fresher Jobs 2026, IT Jobs India, Remote Work, Tamil Nadu Jobs, Resume Builder, Career Roadmaps, AI Job Search, Abu Saleem, Sindhu Bharathi">
+
+    <!-- Open Graph / Facebook -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ g.canonical_url }}">
+    <meta property="og:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
+    <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
+    <meta property="og:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+
+    <!-- Twitter -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="{{ g.canonical_url }}">
+    <meta property="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
+    <meta property="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
+    <meta property="twitter:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+
+    <!-- JSON-LD WebSite Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0] }}",
+      "url": "https://careerguidance.me/",
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://careerguidance.me/jobs?q={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
+    }
+    </script>
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+
+    <!-- Sitemap -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml">
+
+    <!-- Performance: DNS Prefetch & Preconnect -->
+    <link rel="dns-prefetch" href="https://fonts.googleapis.com">
+    <link rel="dns-prefetch" href="https://fonts.gstatic.com">
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+
+    <!-- Google Fonts -->
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome Icons (Deferred) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"></noscript>
+
+    <!-- AOS Animations (Deferred) -->
+    <link rel="preload" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"></noscript>
+
+    <!-- Main Stylesheet (Unminified with Cache Buster) -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css', v='1.1') }}">
+    <style>
+        /* Prevent FOUC */
+        .main-content {
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+
+        .main-content.loaded {
+            opacity: 1;
+        }
+    </style>
+
+    <!-- Theme Settings Injection -->
+    {% if theme_settings %}
+        {% if theme_settings.get('font_family') and theme_settings.font_family != 'Inter' %}
+        <link href="https://fonts.googleapis.com/css2?family={{ theme_settings.font_family.replace(' ', '+') }}:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+        {% endif %}
+    <style>
+        :root, [data-theme="light"], [data-theme="dark"] {
+            {% if theme_settings.get('primary_color') %}
+            --accent: {{ theme_settings.primary_color }} !important;
+            --accent-hover: {{ theme_settings.primary_color }} !important;
+            --bg-accent: {{ theme_settings.primary_color }} !important;
+            --accent2: {{ theme_settings.primary_color }} !important;
+            {% endif %}
+            {% if theme_settings.get('sec_color') %}
+            --bg-primary: {{ theme_settings.sec_color }} !important;
+            {% endif %}
+        }
+        {% if theme_settings.get('font_family') %}
+        body, h1, h2, h3, h4, h5, h6, .nav-logo, .job-title, .brand-text {
+            font-family: '{{ theme_settings.font_family }}', sans-serif !important;
+        }
+        {% endif %}
+    </style>
+    {% endif %}
+
+    {% block extra_head %}{% endblock %}
+</head>
+
+<body>
+    <!-- ═══════════ NAVBAR ═══════════ -->
+    <nav class="navbar" id="navbar">
+        <div class="container nav-container">
+            <a href="/" class="nav-logo">
+                <i class="fas fa-rocket"></i>
+                <span style="white-space: nowrap;">{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0].replace(' ', '') }}</span>
+            </a>
+
+            <ul class="nav-menu" id="navMenu">
+                <li><a href="/" class="nav-link {% if request.path == '/' %}active{% endif %}">
+                        <i class="fas fa-home"></i> Home
+                    </a></li>
+                <li class="nav-dropdown">
+                    <a href="/jobs" class="nav-link {% if 'jobs' in request.path %}active{% endif %}">
+                        <i class="fas fa-briefcase"></i> Jobs <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="/jobs"><i class="fas fa-search"></i> All Jobs</a>
+                        <a href="/jobs/india"><i class="fas fa-flag"></i> 🇮🇳 All India Jobs</a>
+                        <a href="/jobs/tamilnadu"><i class="fas fa-map-marked-alt"></i> Tamil Nadu & Pondicherry
+                            Jobs</a>
+                        <a href="/jobs?type=remote"><i class="fas fa-laptop-house"></i> Remote Jobs</a>
+                        <a href="/jobs?type=internship"><i class="fas fa-graduation-cap"></i> Internships</a>
+                        <a href="/jobs?type=fresher"><i class="fas fa-seedling"></i> Fresher Jobs</a>
+                    </div>
+                </li>
+                <li class="nav-dropdown">
+                    <a href="/career-guidance" class="nav-link {% if 'career' in request.path %}active{% endif %}">
+                        <i class="fas fa-compass"></i> Career Guidance <i class="fas fa-chevron-down dropdown-icon"></i>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="/career-guidance"><i class="fas fa-map-signs"></i> Career Roadmaps</a>
+                        <a href="/career-guidance#interview"><i class="fas fa-comments"></i> Interview Tips</a>
+                        <a href="/career-guidance#skills"><i class="fas fa-cogs"></i> Skill Resources</a>
+                        <a href="/resume-builder"><i class="fas fa-file-alt"></i> Resume Builder</a>
+                        <a href="/job-trends"><i class="fas fa-chart-line"></i> Job Trends</a>
+                    </div>
+                </li>
+                <li><a href="/blog" class="nav-link {% if 'blog' in request.path %}active{% endif %}">
+                        <i class="fas fa-newspaper"></i> Blog
+                    </a></li>
+                <li><a href="/contact" class="nav-link {% if 'contact' in request.path %}active{% endif %}">
+                        <i class="fas fa-envelope"></i> Contact
+                    </a></li>
+                <!-- Mobile-only auth links -->
+                <li class="nav-mobile-auth">
+                    {% if session.get('user_id') %}
+                    <a href="/student-dashboard" class="nav-link"><i class="fas fa-th-large"></i> Dashboard</a>
+                    <a href="/logout" class="nav-link"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                    {% else %}
+                    <a href="/login" class="nav-link"><i class="fas fa-sign-in-alt"></i> Login</a>
+                    <a href="/signup" class="nav-link"><i class="fas fa-user-plus"></i> Sign Up</a>
+                    {% endif %}
+                </li>
+            </ul>
+
+            <div class="nav-actions">
+                <button class="theme-toggle" id="themeToggle" title="Toggle Dark/Light Mode">
+                    <i class="fas fa-moon"></i>
+                </button>
+                {% if session.get('user_id') %}
+                <div class="nav-auth-desktop">
+                    {% if session.get('is_admin') %}
+                    <a href="/admin" class="btn btn-outline btn-sm" style="border: none;">
+                        <i class="fas fa-shield-alt"></i> Admin
+                    </a>
+                    {% endif %}
+                    <a href="/student-dashboard" class="btn btn-primary btn-sm">
+                        <i class="fas fa-th-large"></i> Dashboard
+                    </a>
+                    <a href="/logout" class="btn btn-outline btn-sm" style="border: none;">
+                        Logout
+                    </a>
+                </div>
+                {% else %}
+                <div class="nav-auth-desktop">
+                    <a href="/login" class="btn btn-primary btn-sm">
+                        <i class="fas fa-sign-in-alt"></i> Login
+                    </a>
+                    <a href="/signup" class="btn btn-outline btn-sm">
+                        Sign Up
+                    </a>
+                </div>
+                {% endif %}
+                <button class="nav-toggle" id="navToggle">
+                    <span></span><span></span><span></span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- ═══════════ MAIN CONTENT ═══════════ -->
+    <main class="main-content">
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- ═══════════ FOOTER ═══════════ -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-brand">
+                    <a href="/" class="footer-logo">
+                        <i class="fas fa-rocket"></i>
+                        <span style="white-space: nowrap;">{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0].replace(' ', '') }}</span>
+                    </a>
+                    <p>India's leading career guidance, job search, and hiring platform. Empowering Indian students,
+                        freshers, and professionals across Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai &
+                        more.</p>
+                    <div class="footer-social">
+                        <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-github"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
+                    </div>
+                </div>
+                <div class="footer-links">
+                    <h4>For Job Seekers</h4>
+                    <a href="/jobs">Browse Jobs</a>
+                    <a href="/jobs/india">🇮🇳 All India Jobs</a>
+                    <a href="/jobs/tamilnadu">Tamil Nadu & Pondicherry Jobs</a>
+                    <a href="/jobs?country=India">Jobs in India</a>
+                    <a href="/jobs?type=remote">Remote Jobs</a>
+                    <a href="/jobs?type=internship">Internships</a>
+                    <a href="/jobs?type=fresher">Fresher Jobs</a>
+                    <a href="/resume-builder">Resume Builder</a>
+                    <a href="/career-guidance">Career Guidance</a>
+                </div>
+
+                <div class="footer-links">
+                    <h4>Resources</h4>
+                    <a href="/blog">Blog & Articles</a>
+                    <a href="/career-guidance">Career Roadmaps</a>
+                    <a href="/faq">FAQ</a>
+                    <a href="/about">About Us</a>
+                    <a href="/developer">Developer Profile</a>
+                    <a href="/contact">Contact</a>
+                </div>
+                <div class="footer-links">
+                    <h4>Legal</h4>
+                    <a href="/privacy">Privacy Policy</a>
+                    <a href="/terms">Terms of Service</a>
+                    <a href="/contact">Support</a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2026 {{ g.get('seo', {}).get('meta_title', 'careerguidance').split(' – ')[0].split(' | ')[0] }}. All rights reserved. Built with ❤️ in India for career success.</p>
+                <p class="footer-update" id="lastUpdate">Jobs last updated: {{ jobs_last_updated }}</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ═══════════ LOGIN PROMPT MODAL ═══════════ -->
+    {% if not session.get('user_id') %}
+    <div id="loginModal"
+        style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.7);backdrop-filter:blur(6px);align-items:center;justify-content:center;">
+        <div
+            style="background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:40px;max-width:420px;width:90%;text-align:center;box-shadow:0 20px 60px rgba(0,0,0,0.5);position:relative;">
+            <button onclick="closeLoginModal()"
+                style="position:absolute;top:12px;right:16px;background:none;border:none;font-size:1.5rem;cursor:pointer;color:var(--text-secondary);">&times;</button>
+            <div
+                style="width:64px;height:64px;border-radius:50%;background:var(--bg-accent);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;">
+                <i class="fas fa-lock" style="color:white;font-size:1.5rem;"></i>
+            </div>
+            <h3 id="loginModalTitle" style="margin:0 0 8px;color:var(--text-primary);">Login Required</h3>
+            <p id="loginModalMsg" style="color:var(--text-secondary);margin-bottom:24px;">Sign in to unlock this feature
+                and get the full Careerguidance experience.</p>
+            <a href="/login" class="btn btn-primary"
+                style="display:flex;width:100%;justify-content:center;margin-bottom:12px;gap:8px;padding:12px 20px;background:var(--accent);color:#fff;border-radius:10px;text-decoration:none;font-weight:600;font-size:0.95rem;">
+                <i class="fas fa-sign-in-alt"></i> Login to Continue
+            </a>
+            <p style="font-size:0.85rem;color:var(--text-secondary);">Don't have an account? <a href="/signup"
+                    style="color:var(--accent);font-weight:600;">Sign up free</a></p>
+        </div>
+    </div>
+    <script>
+        function showLoginModal(title, msg) {
+            var m = document.getElementById('loginModal');
+            if (title) document.getElementById('loginModalTitle').textContent = title;
+            if (msg) document.getElementById('loginModalMsg').textContent = msg;
+            m.style.display = 'flex';
+        }
+        function closeLoginModal() { document.getElementById('loginModal').style.display = 'none'; }
+        document.getElementById('loginModal').addEventListener('click', function (e) { if (e.target === this) closeLoginModal(); });
+        var __isLoggedIn = false;
+        function requireLogin(title, msg, evt) { if (evt) { evt.preventDefault(); evt.stopPropagation(); } showLoginModal(title, msg); return false; }
+    </script>
+    {% else %}
+    <script>var __isLoggedIn = true;</script>
+    {% endif %}
+
+    <!-- Scripts (Deferred to prevent parsing blocks) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js" defer></script>
+    <script src="{{ url_for('static', filename='js/main.js') }}" defer></script>
+    <script>
+        // Wait for deferred scripts to execute before marking as loaded if needed
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelector('.main-content')?.classList.add('loaded');
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+
+</html>
