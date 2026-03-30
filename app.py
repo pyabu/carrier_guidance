@@ -6,7 +6,9 @@ Works both locally and on Vercel (serverless).
 
 import os
 import json
+import re
 from dotenv import load_dotenv
+from xml.sax.saxutils import escape as xml_escape
 
 load_dotenv(os.path.join(os.path.dirname(__file__), ".env"))
 
@@ -41,6 +43,31 @@ if IS_VERCEL:
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
+
+BASE_URL = os.environ.get("SITE_URL", "https://careerguidance.me").rstrip("/")
+CAREER_COPILOT_HISTORY_LIMIT = 6
+CAREER_COPILOT_HISTORY_CHAR_LIMITS = {
+    "user": 300,
+    "assistant": 500,
+}
+DEFAULT_THEME_SETTINGS = {
+    "primary_color": "#667eea",
+    "sec_color": "#ffffff",
+    "font_family": "Inter",
+    "layout_style": "grid"
+}
+PUBLIC_FILTER_PATHS = {"/jobs", "/jobs/india", "/jobs/tamilnadu"}
+PRIVATE_NOINDEX_PREFIXES = (
+    "/login",
+    "/signup",
+    "/logout",
+    "/profile",
+    "/onboarding",
+    "/student-dashboard",
+    "/admin",
+    "/login/google",
+    "/auth/google",
+)
 
 # On Vercel the filesystem is read-only except /tmp
 if IS_VERCEL:
@@ -180,6 +207,76 @@ def _check_cron_secret():
         return True # Default to allow if not set (for local dev)
     return auth_header == f"Bearer {cron_secret}"
 
+
+def _normalize_path(path):
+    path = path or "/"
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+    return path
+
+
+def _is_private_noindex_path(path):
+    path = _normalize_path(path)
+    return any(path == prefix or path.startswith(prefix + "/") for prefix in PRIVATE_NOINDEX_PREFIXES)
+
+
+def _read_json_file(path):
+    try:
+        with open(path, "r") as f:
+            data = json.load(f)
+        if isinstance(data, dict):
+            return data
+        logger.warning(f"Unexpected non-dict JSON content in {path}")
+    except Exception as e:
+        logger.warning(f"Failed to read JSON from {path}: {e}")
+    return None
+
+
+def _compact_chat_message(text, limit):
+    """Trim and normalize chat content so cookie-based sessions stay small."""
+    cleaned = re.sub(r"\s+", " ", str(text or "")).strip()
+    if len(cleaned) <= limit:
+        return cleaned
+    return cleaned[: limit - 1].rstrip() + "…"
+
+
+def _compact_chat_history(history):
+    """Keep only recent, bounded chat history for Flask's signed cookie session."""
+    compact = []
+    for item in history[-CAREER_COPILOT_HISTORY_LIMIT:]:
+        role = "assistant" if item.get("role") == "assistant" else "user"
+        content = _compact_chat_message(
+            item.get("content", ""),
+            CAREER_COPILOT_HISTORY_CHAR_LIMITS[role],
+        )
+        if content:
+            compact.append({"role": role, "content": content})
+    return compact[-CAREER_COPILOT_HISTORY_LIMIT:]
+
+
+def _normalize_job_source(source):
+    source = (source or "").strip().lower()
+    aliases = {
+        "main": "main",
+        "global": "main",
+        "india": "india",
+        "all-india": "india",
+        "tamilnadu": "tamilnadu",
+        "tn": "tamilnadu",
+        "tamil-nadu": "tamilnadu",
+        "pondicherry": "tamilnadu",
+    }
+    return aliases.get(source)
+
+
+def _job_detail_path(job_id, source="main"):
+    normalized_source = _normalize_job_source(source) or "main"
+    return f"/job/{normalized_source}/{job_id}"
+
+
+def _job_detail_url(job_id, source="main"):
+    return f"{BASE_URL}{_job_detail_path(job_id, source)}"
+
 # ── Helpers ────────────────────────────────────────────────────────────
 
 import concurrent.futures
@@ -241,9 +338,8 @@ def load_jobs():
         return _jobs_memory_cache["jobs"]
 
     if os.path.exists(JOBS_FILE):
-        with open(JOBS_FILE, "r") as f:
-            data = json.load(f)
-            # Ensure last_updated is present if not already in JSON
+        data = _read_json_file(JOBS_FILE)
+        if data is not None:
             if "last_updated" not in data:
                 mtime = os.path.getmtime(JOBS_FILE)
                 data["last_updated"] = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
@@ -261,6 +357,15 @@ def load_jobs():
             logger.info("☁️  Loaded jobs from Supabase → /tmp")
             return sb_data
 
+        if os.path.exists(SEED_FILE):
+            os.makedirs(DATA_DIR, exist_ok=True)
+            shutil.copy2(SEED_FILE, JOBS_FILE)
+            logger.info("📦 Copied main jobs seed to /tmp")
+            data = _read_json_file(JOBS_FILE)
+            if data is not None:
+                _jobs_memory_cache["jobs"] = data
+                return data
+
     # Final fallback
     return {"jobs": [], "total": 0, "sources": {}, "last_updated": "Never"}
 
@@ -271,8 +376,8 @@ def load_tn_jobs():
         return _jobs_memory_cache["tn_jobs"]
 
     if os.path.exists(TN_JOBS_FILE):
-        with open(TN_JOBS_FILE, "r") as f:
-            data = json.load(f)
+        data = _read_json_file(TN_JOBS_FILE)
+        if data is not None:
             _jobs_memory_cache["tn_jobs"] = data
             return data
     if IS_VERCEL:
@@ -288,8 +393,8 @@ def load_tn_jobs():
             os.makedirs(DATA_DIR, exist_ok=True)
             shutil.copy2(TN_SEED_FILE, TN_JOBS_FILE)
             logger.info("📦 Copied TN seed to /tmp")
-            with open(TN_JOBS_FILE, "r") as f:
-                data = json.load(f)
+            data = _read_json_file(TN_JOBS_FILE)
+            if data is not None:
                 _jobs_memory_cache["tn_jobs"] = data
                 return data
     return {"jobs": [], "last_updated": None, "region": "Tamil Nadu & Pondicherry"}
@@ -314,8 +419,8 @@ def load_india_jobs():
         return _jobs_memory_cache["india_jobs"]
 
     if os.path.exists(INDIA_JOBS_FILE):
-        with open(INDIA_JOBS_FILE, "r") as f:
-            data = json.load(f)
+        data = _read_json_file(INDIA_JOBS_FILE)
+        if data is not None:
             _jobs_memory_cache["india_jobs"] = data
             return data
     if IS_VERCEL:
@@ -331,8 +436,8 @@ def load_india_jobs():
             os.makedirs(DATA_DIR, exist_ok=True)
             shutil.copy2(INDIA_SEED_FILE, INDIA_JOBS_FILE)
             logger.info("📦 Copied India seed to /tmp")
-            with open(INDIA_JOBS_FILE, "r") as f:
-                data = json.load(f)
+            data = _read_json_file(INDIA_JOBS_FILE)
+            if data is not None:
                 _jobs_memory_cache["india_jobs"] = data
                 return data
     return {"jobs": [], "last_updated": None, "region": "India"}
@@ -607,46 +712,80 @@ def jobs_page():
     return render_template("jobs.html")
 
 
-@app.route("/job/<job_id>")
-def job_detail(job_id):
-    """Job detail page — searches main, India, and TN jobs by ID.
-    Accepts optional ?source= param to narrow the search."""
+def _resolve_job_detail(job_id, source_hint=None):
+    """Resolve a job by id across datasets and attach canonical source metadata."""
     # Normalise: try int conversion for files that use numeric IDs
     try:
         job_id_int = int(job_id)
     except (ValueError, TypeError):
         job_id_int = None
 
-    source_hint = request.args.get("source", "").lower()
+    normalized_source = _normalize_job_source(source_hint)
 
     # Search order based on source hint
     search_order = []
-    if source_hint == "india":
+    if normalized_source == "india":
         search_order = [(load_india_jobs, "india"), (load_jobs, "main"), (load_tn_jobs, "tamilnadu")]
-    elif source_hint == "tamilnadu":
+    elif normalized_source == "tamilnadu":
         search_order = [(load_tn_jobs, "tamilnadu"), (load_jobs, "main"), (load_india_jobs, "india")]
     else:
         search_order = [(load_jobs, "main"), (load_india_jobs, "india"), (load_tn_jobs, "tamilnadu")]
 
-    job = None
     for loader, src_name in search_order:
         data = loader()
         jobs = data.get("jobs", [])
-        job = next((j for j in jobs if str(j.get("id")) == str(job_id) or j.get("id") == job_id_int), None)
-        if job:
+        found = next((j for j in jobs if str(j.get("id")) == str(job_id) or j.get("id") == job_id_int), None)
+        if found:
+            job = dict(found)
             job["_source_db"] = src_name
-            break
+            job["detail_path"] = _job_detail_path(job.get("id"), src_name)
+            job["canonical_url"] = _job_detail_url(job.get("id"), src_name)
+            return job
 
+    return None
+
+
+def _render_job_detail(job):
+    """Render a resolved job detail page with source-specific canonical metadata."""
     if not job:
         abort(404)
-    
+
+    g.canonical_url = job["canonical_url"]
+    if request.args:
+        g.robots_meta = "noindex, follow, max-image-preview:large"
+
     # Inject dynamic SEO for the specific job
     if 'seo' not in g:
         g.seo = {}
     g.seo['meta_title'] = f"{job.get('title')} at {job.get('company')} | Career Guidance"
     g.seo['meta_description'] = f"Apply for {job.get('title')} position at {job.get('company')} in {job.get('location')}. {job.get('description', '')[:150]}..."
-    
+
     return render_template("job_detail.html", job=job)
+
+
+@app.route("/job/<source>/<job_id>")
+def job_detail_canonical(source, job_id):
+    """Canonical job detail page with a unique source-specific path."""
+    normalized_source = _normalize_job_source(source)
+    if not normalized_source:
+        abort(404)
+
+    job = _resolve_job_detail(job_id, source_hint=normalized_source)
+    if not job:
+        abort(404)
+    if job["_source_db"] != normalized_source:
+        return redirect(job["detail_path"], code=301)
+
+    return _render_job_detail(job)
+
+
+@app.route("/job/<job_id>")
+def job_detail(job_id):
+    """Legacy job URL. Redirect to the unique canonical job path."""
+    job = _resolve_job_detail(job_id, source_hint=request.args.get("source", ""))
+    if not job:
+        abort(404)
+    return redirect(job["detail_path"], code=301)
 
 
 @app.route("/career-guidance")
@@ -934,18 +1073,18 @@ def career_copilot():
     Maintains chat history in session for context-aware responses.
     """
     api_key = os.environ.get("GEMINI_API_KEY")
-    data = request.get_json()
-    user_msg = data.get("message", "").strip()
+    data = request.get_json(silent=True) or {}
+    if not isinstance(data, dict):
+        return jsonify({"error": "Invalid request payload"}), 400
+
+    user_msg = _compact_chat_message(data.get("message", ""), CAREER_COPILOT_HISTORY_CHAR_LIMITS["user"])
     
     if not user_msg:
         return jsonify({"error": "No message provided"}), 400
 
     # ── Chat History Management ──────────────────────────────────────
-    if 'chat_history' not in session:
-        session['chat_history'] = []
-    
-    # Keep history manageable (last 10 messages)
-    history = session['chat_history'][-10:]
+    history = _compact_chat_history(session.get("chat_history", []))
+    session['chat_history'] = history
     
     # ── Built-in career advice fallback (keyword-based) ──────────────
     def _fallback_response(query):
@@ -983,7 +1122,7 @@ def career_copilot():
                     "1. Master one language (Python or JavaScript).\n"
                     "2. Build 3-4 real-world projects on GitHub.\n"
                     "3. Practice DSA and apply on LinkedIn/Naukri.")
-        elif any(w in q for w in ["data science", "data analyst", "analytics", "machine learning", "ml", "ai ", "artificial intelligence"]):
+        elif any(w in q for w in ["data science", "data scientist", "data analyst", "analytics", "machine learning", "ml", "ai ", "artificial intelligence"]):
             return ("**Data Science & AI** is the fastest-growing field in India!\n\n"
                     "📈 **Career Options**:\n"
                     "• **Data Scientist** – ₹10-30 LPA, top companies hiring actively\n"
@@ -1147,7 +1286,7 @@ def career_copilot():
             # Update history
             history.append({"role": "user", "content": user_msg})
             history.append({"role": "assistant", "content": ai_response})
-            session['chat_history'] = history[-10:] # Keep last 10
+            session['chat_history'] = _compact_chat_history(history)
             session.modified = True
             
             return jsonify({
@@ -1164,7 +1303,7 @@ def career_copilot():
     # Update history for fallback as well
     history.append({"role": "user", "content": user_msg})
     history.append({"role": "assistant", "content": ai_response})
-    session['chat_history'] = history[-10:]
+    session['chat_history'] = _compact_chat_history(history)
     session.modified = True
     
     return jsonify({
@@ -1539,16 +1678,14 @@ def _save_scraper_config(data):
 def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
-    
-    # Calculate canonical URL
-    base_url = "https://careerguidance.me"
-    path = request.path
-    
-    # Standardize: strip trailing slash except for root, and remove query params
-    if path != "/" and path.endswith("/"):
-        path = path.rstrip("/")
-        
-    g.canonical_url = f"{base_url}{path}"
+    path = _normalize_path(request.path)
+    g.canonical_url = f"{BASE_URL}{path}"
+    g.robots_meta = "index, follow, max-image-preview:large"
+
+    if path in PUBLIC_FILTER_PATHS and request.args:
+        g.robots_meta = "noindex, follow, max-image-preview:large"
+    elif _is_private_noindex_path(path):
+        g.robots_meta = "noindex, nofollow"
 
 import time
 _jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}
@@ -1563,22 +1700,13 @@ def _get_theme_settings():
             if resp.data:
                 _theme_settings_cache["data"] = resp.data[0]["data"]
             else:
-                _theme_settings_cache["data"] = {
-                    "primary_color": "#667eea",
-                    "sec_color": "#ffffff",
-                    "font_family": "Inter",
-                    "layout_style": "grid"
-                }
+                _theme_settings_cache["data"] = dict(DEFAULT_THEME_SETTINGS)
             _theme_settings_cache["last_fetched"] = now
         except Exception as e:
             logger.error(f"Failed to load theme settings: {e}")
             if not _theme_settings_cache["data"]:
-                _theme_settings_cache["data"] = {
-                    "primary_color": "#667eea",
-                    "sec_color": "#ffffff",
-                    "font_family": "Inter",
-                    "layout_style": "grid"
-                }
+                _theme_settings_cache["data"] = dict(DEFAULT_THEME_SETTINGS)
+            _theme_settings_cache["last_fetched"] = now
     return _theme_settings_cache["data"]
 
 @app.context_processor
@@ -1595,8 +1723,25 @@ def inject_globals():
         
     return dict(
         jobs_last_updated=_jobs_last_updated_cache["time"],
-        theme_settings=_get_theme_settings()
+        theme_settings=_get_theme_settings(),
+        job_detail_path=_job_detail_path,
+        job_detail_url=_job_detail_url,
     )
+
+
+@app.after_request
+def apply_indexing_headers(response):
+    """Add robots headers so private/API URLs can be crawled but not indexed."""
+    header_value = None
+    if request.path.startswith("/api/"):
+        header_value = "noindex, nofollow, noarchive"
+    elif getattr(g, "robots_meta", None) and "noindex" in g.robots_meta:
+        header_value = g.robots_meta
+
+    if header_value:
+        response.headers["X-Robots-Tag"] = header_value
+
+    return response
 
 
 # ── Real-time scraper log buffer (SSE) ──────────────────────────────────
@@ -1677,55 +1822,13 @@ def seo_settings():
 def generate_sitemap():
     """Dynamically rebuild sitemap.xml from job data + static pages."""
     try:
-        base_url = request.host_url.rstrip("/")
-        static_pages = [
-            ("", "1.0", "daily"),
-            ("/jobs", "0.9", "daily"),
-            ("/jobs/india", "0.9", "daily"),
-            ("/jobs/tamilnadu", "0.9", "daily"),
-            ("/career-guidance", "0.8", "weekly"),
-            ("/resume-builder", "0.8", "weekly"),
-            ("/login", "0.5", "monthly"),
-            ("/register", "0.5", "monthly"),
-        ]
-
-        urls_xml = []
-        today = datetime.now().strftime("%Y-%m-%d")
-
-        for path, priority, freq in static_pages:
-            urls_xml.append(f"""  <url>
-    <loc>{base_url}{path}</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>{freq}</changefreq>
-    <priority>{priority}</priority>
-  </url>""")
-
-        # Add individual job pages from all datasets
-        for load_fn in (load_jobs, load_india_jobs, load_tn_jobs):
-            try:
-                data = load_fn()
-                for job in data.get("jobs", [])[:500]:   # cap at 500 job URLs per source
-                    slug = job.get("id", "")
-                    if slug:
-                        urls_xml.append(f"""  <url>
-    <loc>{base_url}/job/{slug}</loc>
-    <lastmod>{today}</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.6</priority>
-  </url>""")
-            except Exception:
-                pass
-
-        sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
-        sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
-        sitemap_content += "\n".join(urls_xml)
-        sitemap_content += "\n</urlset>"
+        sitemap_content = _render_sitemap_xml(_build_sitemap_entries())
 
         sitemap_path = os.path.join(app.root_path, "sitemap.xml")
         with open(sitemap_path, "w") as f:
             f.write(sitemap_content)
 
-        url_count = len(urls_xml)
+        url_count = sitemap_content.count("<url>")
         logger.info(f"Sitemap regenerated with {url_count} URLs.")
         return jsonify({"success": True, "url_count": url_count, "preview": sitemap_content[:800]})
     except Exception as e:
@@ -4094,13 +4197,20 @@ def google_verification():
 def robots():
     return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
 
-@app.route("/sitemap.xml")
-def sitemap():
-    """Generate a dynamic sitemap including static pages and all job sources."""
-    base_url = "https://careerguidance.me"
+
+def _job_lastmod(job, fallback_date):
+    candidate = str(job.get("posted_date") or job.get("updated_at") or "").strip()
+    if re.match(r"^\d{4}-\d{2}-\d{2}", candidate):
+        return candidate[:10]
+    return fallback_date
+
+
+def _build_sitemap_entries():
+    """Return canonical sitemap entries for public pages and unique job detail pages."""
     pages = []
-    
-    # 1. Static core pages
+    seen_urls = set()
+    today = datetime.now().strftime("%Y-%m-%d")
+
     static_urls = [
         {"loc": "/", "priority": "1.0", "changefreq": "daily"},
         {"loc": "/jobs", "priority": "0.95", "changefreq": "daily"},
@@ -4108,6 +4218,7 @@ def sitemap():
         {"loc": "/jobs/tamilnadu", "priority": "0.95", "changefreq": "daily"},
         {"loc": "/career-guidance", "priority": "0.85", "changefreq": "weekly"},
         {"loc": "/resume-builder", "priority": "0.85", "changefreq": "weekly"},
+        {"loc": "/job-trends", "priority": "0.80", "changefreq": "weekly"},
         {"loc": "/blog", "priority": "0.80", "changefreq": "weekly"},
         {"loc": "/faq", "priority": "0.70", "changefreq": "monthly"},
         {"loc": "/about", "priority": "0.60", "changefreq": "monthly"},
@@ -4116,64 +4227,73 @@ def sitemap():
         {"loc": "/privacy", "priority": "0.30", "changefreq": "yearly"},
         {"loc": "/terms", "priority": "0.30", "changefreq": "yearly"},
     ]
-    
-    today = datetime.now().strftime("%Y-%m-%d")
+
     for url in static_urls:
+        loc = f"{BASE_URL}{url['loc']}"
         pages.append({
-            "loc": f"{base_url}{url['loc']}",
+            "loc": loc,
             "lastmod": today,
             "changefreq": url["changefreq"],
             "priority": url["priority"]
         })
-        
-    # 2. Dynamic Job pages from all sources
-    try:
-        all_jobs = []
-        # Main jobs
-        main_data = load_jobs()
-        if isinstance(main_data, dict):
-            all_jobs.extend([(j, "main") for j in (main_data.get("jobs") or []) if isinstance(j, dict)])
-        
-        # India jobs
-        india_data = load_india_jobs()
-        if isinstance(india_data, dict):
-            all_jobs.extend([(j, "india") for j in (india_data.get("jobs") or []) if isinstance(j, dict)])
-        
-        # TN jobs
-        tn_data = load_tn_jobs()
-        if isinstance(tn_data, dict):
-            all_jobs.extend([(j, "tamilnadu") for j in (tn_data.get("jobs") or []) if isinstance(j, dict)])
-        
-        # Take latest 1000 for sitemap safety
-        recent_jobs = all_jobs[:1000]
-        
-        for job, src in recent_jobs:
-            job_id = job.get("id")
-            if not job_id: continue
-            
-            # Use source hint to ensure detail page loads correctly
-            loc = f"{base_url}/job/{job_id}?source={src}"
-            
-            pages.append({
-                "loc": loc,
-                "lastmod": today,
-                "changefreq": "weekly",
-                "priority": "0.6"
-            })
-    except Exception as e:
-        logger.error(f"Error adding jobs to sitemap: {e}")
+        seen_urls.add(loc)
 
-    sitemap_xml = '<?xml version="1.0" encoding="UTF-8"?>\n'
-    sitemap_xml += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n'
+    datasets = [
+        ("main", load_jobs),
+        ("india", load_india_jobs),
+        ("tamilnadu", load_tn_jobs),
+    ]
+
+    for source_name, loader in datasets:
+        try:
+            data = loader()
+            fallback_date = str(data.get("last_updated") or today).split(" ")[0]
+            if not re.match(r"^\d{4}-\d{2}-\d{2}$", fallback_date):
+                fallback_date = today
+            for job in data.get("jobs", [])[:1000]:
+                job_id = job.get("id")
+                if job_id in (None, ""):
+                    continue
+                loc = _job_detail_url(job_id, source_name)
+                if loc in seen_urls:
+                    continue
+                seen_urls.add(loc)
+                pages.append({
+                    "loc": loc,
+                    "lastmod": _job_lastmod(job, fallback_date),
+                    "changefreq": "daily",
+                    "priority": "0.70",
+                })
+        except Exception as e:
+            logger.error(f"Error adding {source_name} jobs to sitemap: {e}")
+
+    return pages
+
+
+def _render_sitemap_xml(pages):
+    lines = ['<?xml version="1.0" encoding="UTF-8"?>', '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">']
     for page in pages:
-        sitemap_xml += '    <url>\n'
-        sitemap_xml += f'        <loc>{page["loc"]}</loc>\n'
-        sitemap_xml += f'        <lastmod>{page["lastmod"]}</lastmod>\n'
-        sitemap_xml += f'        <changefreq>{page["changefreq"]}</changefreq>\n'
-        sitemap_xml += f'        <priority>{page["priority"]}</priority>\n'
-        sitemap_xml += '    </url>\n'
-    sitemap_xml += '</urlset>'
-    
+        lines.extend([
+            "    <url>",
+            f"        <loc>{xml_escape(page['loc'])}</loc>",
+            f"        <lastmod>{xml_escape(page['lastmod'])}</lastmod>",
+            f"        <changefreq>{xml_escape(page['changefreq'])}</changefreq>",
+            f"        <priority>{xml_escape(page['priority'])}</priority>",
+            "    </url>",
+        ])
+    lines.append("</urlset>")
+    return "\n".join(lines)
+
+
+@app.route("/sitemap.xml")
+def sitemap():
+    """Generate a dynamic sitemap including static pages and all job sources."""
+    try:
+        sitemap_xml = _render_sitemap_xml(_build_sitemap_entries())
+    except Exception as e:
+        logger.error(f"Failed to build sitemap XML: {e}")
+        sitemap_xml = _render_sitemap_xml(_build_sitemap_entries()[:14])
+
     response = make_response(sitemap_xml)
     response.headers["Content-Type"] = "application/xml"
     response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"

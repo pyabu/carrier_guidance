@@ -290,7 +290,13 @@ document.querySelectorAll('.detail-apply-btn').forEach(btn => {
 // Load similar jobs
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        const res = await fetch('/api/jobs?keyword={{ job.category }}');
+        const sourceKey = '{{ job["_source_db"] }}';
+        const similarApi = sourceKey === 'india'
+            ? '/api/jobs/india?category={{ job.category|urlencode }}&per_page=10'
+            : (sourceKey === 'tamilnadu'
+                ? '/api/jobs/tamilnadu?category={{ job.category|urlencode }}&per_page=10'
+                : '/api/search?keyword={{ job.category|urlencode }}&per_page=10');
+        const res = await fetch(similarApi);
         const data = await res.json();
         const similar = (data.jobs || []).filter(j => j.id !== {{ job.id }}).slice(0, 3);
         const grid = document.getElementById('similarJobs');
@@ -299,7 +305,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         grid.innerHTML = similar.map(j => `
-            <div class="job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/${j.id}'" style="margin-bottom:12px;">
+            <div class="job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job['_source_db'] }}/${j.id}'" style="margin-bottom:12px;">
                 <div class="job-card-header">
                     <img src="${j.company_logo || ''}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'" alt="${j.company}">
                     <div class="job-card-info">
@@ -313,7 +319,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </div>
                 <div class="job-card-footer">
                     <span class="job-salary">${j.salary_min} – ${j.salary_max}</span>
-                    <a href="/job/${j.id}" class="btn-apply" onclick="if(!__isLoggedIn){event.preventDefault();event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return false;}">View</a>
+                    <a href="/job/{{ job['_source_db'] }}/${j.id}" class="btn-apply" onclick="if(!__isLoggedIn){event.preventDefault();event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return false;}">View</a>
                 </div>
             </div>`).join('');
     } catch(e) {}

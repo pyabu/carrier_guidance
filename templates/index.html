@@ -94,7 +94,7 @@
         <div class="jobs-grid" id="featuredJobsGrid">
             {% if featured_jobs %}
                 {% for job in featured_jobs %}
-                <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='/job/{{ job.id }}'">
+                <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='{{ job_detail_path(job.id, 'main') }}'">
                     <div class="job-card-header">
                         <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
                         <div class="job-card-info">
@@ -626,10 +626,9 @@ function searchJobCard(j) {
     const skills = (j.skills||[]).slice(0,4).map(function(s){return '<span class="skill-tag">'+escH(s)+'</span>';}).join('');
     const salary = j.salary_min ? (escH(j.salary_min) + (j.salary_max ? ' – ' + escH(j.salary_max) : '')) : '';
     const loc = j.location_city ? escH(j.location_city) + (j.location_state ? ', ' + escH(j.location_state) : '') : escH(j.location||'India');
-    const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : '/job/' + j.id + '?source=' + (j.source_db||'main');
-    // Build detail page URL with source hint so /job/<id> route knows which DB to search
     const srcDb = j.source_db || 'main';
-    const detailUrl = '/job/' + (j.id||0) + '?source=' + srcDb;
+    const detailUrl = '/job/' + srcDb + '/' + (j.id||0);
+    const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : detailUrl;
     const srcColors = {'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Internshala':'#00BCD4','TimesJobs':'#9C27B0','Foundit':'#FF5722','Freshersworld':'#FF9800','Himalayas':'#8b5cf6','Remotive':'#00D4AA','CareerPath Pro':'#667eea'};
     const srcClr = srcColors[j.source] || '#667eea';
     const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';

@@ -8,7 +8,7 @@
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
     <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
     <link rel="canonical" href="{{ g.canonical_url }}">
-    <meta name="robots" content="index, follow, max-image-preview:large">
+    <meta name="robots" content="{{ g.get('robots_meta', 'index, follow, max-image-preview:large') }}">
     <meta name="description"
         content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance. Discover the best fresher jobs, IT roles, and remote work in Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR, and across India.') }}{% endblock %}">
     <meta name="keywords"
@@ -339,7 +339,7 @@
             </div>
         </div>
         <div class="chatbot-messages" id="chatbotMessages">
-            <div class="message ai">
+            <div class="message ai" data-chatbot-welcome="true">
                 <p>Hi there! 👋 I'm your AI Career Copilot. I can help you with career paths, skill roadmaps, and interview tips tailored for India.</p>
                 <div class="chat-suggestions" style="margin-top: 15px; display: flex; flex-wrap: wrap; gap: 8px;">
                     <button class="suggestion-btn" onclick="document.getElementById('chatbotInput').value='What are the best career options for BCom?'; document.getElementById('chatbotSend').click();" style="background: rgba(59, 130, 246, 0.1); border: 1px solid rgba(59, 130, 246, 0.2); color: #60a5fa; border-radius: 20px; padding: 6px 12px; font-size: 0.8rem; cursor: pointer; transition: all 0.2s;">🎓 BCom Careers</button>
@@ -361,7 +361,7 @@
         </div>
     </div>
 
-    <script src="{{ url_for('static', filename='js/chatbot.js') }}?v=2"></script>
+    <script src="{{ url_for('static', filename='js/chatbot.js') }}?v=3"></script>
     {% endif %}
 
     <!-- Scripts (Deferred to prevent parsing blocks) -->

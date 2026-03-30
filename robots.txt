@@ -1,18 +1,14 @@
-# ─── robots.txt for careerguidance.me ───────────────────────────────────────
-# Comprehensive SEO optimization. Last updated: 2026-03-18
+# robots.txt for careerguidance.me
+# Updated: 2026-03-30
 
 User-agent: *
 Allow: /
 
-# Block sensitive / internal paths for crawl efficiency
-Disallow: /admin
-Disallow: /api/
-Disallow: /login
-Disallow: /signup
-Disallow: /logout
-Disallow: /profile
-Disallow: /onboarding
-Disallow: /student-dashboard
+# Keep uploaded/private files out of crawl results.
+Disallow: /static/uploads/
+Disallow: /api/serve-upload/
 
-# Sitemap discovery
+# Login, dashboard, admin, and API URLs are controlled with noindex headers/meta
+# so Google can crawl them long enough to drop them from the index cleanly.
+
 Sitemap: https://careerguidance.me/sitemap.xml

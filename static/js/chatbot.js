@@ -15,6 +15,49 @@
 
     if (!chatbotToggle || !chatbotWindow) return;
 
+    const escapeHtml = (value) => String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+
+    const formatInlineMarkdown = (value) => value
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+        .replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
+        .replace(/📈/g, '<span style="font-size: 1.2rem;">📈</span>')
+        .replace(/🔥/g, '<span style="font-size: 1.2rem;">🔥</span>')
+        .replace(/🛠️/g, '<span style="font-size: 1.2rem;">🛠️</span>')
+        .replace(/🗺️/g, '<span style="font-size: 1.2rem;">🗺️</span>');
+
+    const formatMessage = (text) => {
+        const placeholders = [];
+        let safeText = escapeHtml(text).replace(/```([\s\S]*?)```/g, (_, code) => {
+            const placeholder = `__CHATBOT_CODE_BLOCK_${placeholders.length}__`;
+            placeholders.push(
+                `<pre style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-family: monospace; font-size: 0.8rem;"><code>${code.trim()}</code></pre>`
+            );
+            return placeholder;
+        });
+
+        const formattedLines = safeText.split('\n').map((line) => {
+            const bulletMatch = line.match(/^\s*[\*\-•]\s+(.*)$/);
+            if (bulletMatch) {
+                return `<div style="display:flex; gap:8px; margin-bottom:4px; padding-left: 10px;"><span style="color: #60a5fa;">•</span><span>${formatInlineMarkdown(bulletMatch[1])}</span></div>`;
+            }
+            if (!line.trim()) {
+                return '<br>';
+            }
+            return formatInlineMarkdown(line);
+        });
+
+        let formattedText = formattedLines.join('<br>');
+        placeholders.forEach((block, index) => {
+            formattedText = formattedText.replace(`__CHATBOT_CODE_BLOCK_${index}__`, block);
+        });
+        return formattedText;
+    };
+
     // Clear Chat Functionality
     if (chatbotClear) {
         chatbotClear.addEventListener('click', async (e) => {
@@ -23,8 +66,8 @@
                 try {
                     await fetch('/api/career_copilot/clear', { method: 'POST' });
                     if (chatbotMessages) {
-                        // Keep only the first welcome message
-                        const firstMsg = chatbotMessages.querySelector('.message.ai');
+                        // Restore the original welcome state after clearing the session.
+                        const firstMsg = chatbotMessages.querySelector('[data-chatbot-welcome="true"]');
                         chatbotMessages.innerHTML = '';
                         if (firstMsg) chatbotMessages.appendChild(firstMsg);
                         if (typingIndicator) chatbotMessages.appendChild(typingIndicator);
@@ -159,31 +202,7 @@
             messageDiv.classList.add('error-msg');
         }
         
-        // Better Markdown-ish parsing for AI responses
-        let formattedText = text
-            // Handle code blocks (simple version)
-            .replace(/```([\s\S]*?)```/g, '<pre style="background: rgba(0,0,0,0.3); padding: 10px; border-radius: 8px; overflow-x: auto; margin: 10px 0; font-family: monospace; font-size: 0.8rem;">$1</pre>')
-            
-            // Handle bold (must be before italics)
-            .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-            
-            // Handle italics (must be before bullets to avoid collision)
-            // This regex now avoids matching across lines and only matches if it's not a bullet point
-            .replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
-            
-            // Handle bullet points (* or - or • at start of line)
-            .replace(/^\s*[\*\-•]\s+(.*)/gm, '<div style="display:flex; gap:8px; margin-bottom:4px; padding-left: 10px;"><span style="color: #60a5fa;">•</span><span>$1</span></div>')
-            
-            // Handle newlines (only those not preceded by a closing div)
-            .replace(/([^\>])\n/g, '$1<br>')
-            .replace(/\n([^\<])/g, '<br>$1')
-            
-            // Handle icons
-            .replace(/📈/g, '<span style="font-size: 1.2rem;">📈</span>')
-            .replace(/🔥/g, '<span style="font-size: 1.2rem;">🔥</span>')
-            .replace(/🛠️/g, '<span style="font-size: 1.2rem;">🛠️</span>')
-            .replace(/🗺️/g, '<span style="font-size: 1.2rem;">🗺️</span>');
-
+        const formattedText = formatMessage(text);
         messageDiv.innerHTML = formattedText;
 
         // Insert before typing indicator (so it appears above it)

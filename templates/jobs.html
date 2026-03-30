@@ -765,7 +765,7 @@
         var skills = (job.skills || []).slice(0, 4).map(function (s) { return '<span class="skill-tag">' + esc(s) + '</span>'; }).join('');
         var hotTag = (job.trending_skills || []).length ? '<span class="skill-tag" style="background:#f59e0b22;color:#f59e0b;border-color:#f59e0b">\ud83d\udd25 Trending</span>' : '';
 
-        return '<div class="job-card fade-in" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/' + job.id + '\'">'
+        return '<div class="job-card fade-in" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin(\'Login Required\',\'Please login to continue and view job details.\');return;}window.location=\'/job/main/' + job.id + '\'">'
             + '<div class="job-card-header">'
             + '<img src="' + logo + '" alt="' + esc(job.company || '') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
             + '<div class="job-card-info"><h3>' + esc(job.title || 'Untitled') + qBadge + tBadge + '</h3><span class="job-card-company">' + esc(job.company || 'Unknown') + '</span></div>'
