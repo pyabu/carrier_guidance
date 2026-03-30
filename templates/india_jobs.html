@@ -1,0 +1,733 @@
+{% extends "base.html" %}
+{% block title %}All India Jobs – AI-Powered Job Portal{% endblock %}
+{% block meta_desc %}Browse 500+ AI-organized job listings across all 28 states and 8 union territories of India. Powered by real-time scraping from Naukri, LinkedIn, Indeed, and more.{% endblock %}
+
+{% block extra_head %}
+<style>
+/* ═══════════ INDIA HERO ═══════════ */
+.india-hero{background:linear-gradient(135deg,#0c0c1d 0%,#1a1a40 40%,#270082 80%,#7a00cc 100%);padding:48px 0 32px;position:relative;overflow:hidden}
+.india-hero::before{content:'';position:absolute;top:-40%;right:-8%;width:600px;height:600px;background:radial-gradient(circle,rgba(255,153,0,.1) 0%,transparent 70%);border-radius:50%;animation:pulseGlow 6s ease-in-out infinite}
+.india-hero::after{content:'';position:absolute;bottom:-30%;left:-5%;width:400px;height:400px;background:radial-gradient(circle,rgba(0,128,0,.08) 0%,transparent 70%);border-radius:50%}
+@keyframes pulseGlow{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.1);opacity:1}}
+.india-hero .breadcrumb{margin-bottom:12px;font-size:.82rem;position:relative;z-index:1}
+.india-hero .breadcrumb a{color:rgba(255,255,255,.6);text-decoration:none}
+.india-hero .breadcrumb a:hover{color:#fff}
+.india-hero .breadcrumb i{color:rgba(255,255,255,.3);font-size:.65rem;margin:0 6px}
+.india-hero h1{color:#fff;font-size:2.2rem;font-weight:800;margin-bottom:8px;position:relative;z-index:1}
+.india-hero h1 .tri{background:linear-gradient(135deg,#ff9933,#fff,#138808);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.india-hero p{color:rgba(255,255,255,.7);font-size:.92rem;max-width:700px;position:relative;z-index:1}
+.india-hero .ai-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.12);backdrop-filter:blur(8px);border:1px solid rgba(255,255,255,.15);border-radius:20px;padding:4px 14px;font-size:.75rem;color:#ff9933;margin-bottom:10px;position:relative;z-index:1}
+.india-hero .ai-badge i{animation:sparkle 2s ease-in-out infinite}
+@keyframes sparkle{0%,100%{opacity:1}50%{opacity:.4}}
+.india-stats-row{display:flex;gap:14px;margin-top:20px;flex-wrap:wrap;position:relative;z-index:1}
+.india-stat-card{background:rgba(255,255,255,.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:14px 20px;min-width:0;flex:1 1 auto;text-align:center;transition:transform .2s}
+.india-stat-card:hover{transform:translateY(-2px);background:rgba(255,255,255,.12)}
+.india-stat-card .stat-num{font-size:1.5rem;font-weight:800;color:#fff}
+.india-stat-card .stat-label{font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;margin-top:2px}
+
+/* ═══════════ SEARCH BAR ═══════════ */
+.india-search{max-width:700px;margin-top:20px;position:relative;z-index:1}
+.india-search form{display:flex;gap:8px}
+.india-search input{flex:1;padding:12px 16px;border:2px solid rgba(255,255,255,.15);border-radius:12px;background:rgba(255,255,255,.08);color:#fff;font-size:.9rem;outline:none;transition:border-color .3s}
+.india-search input::placeholder{color:rgba(255,255,255,.4)}
+.india-search input:focus{border-color:#ff9933}
+.india-search button{padding:12px 24px;border-radius:12px;border:none;background:linear-gradient(135deg,#ff9933,#ff6600);color:#fff;font-weight:700;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:6px}
+.india-search button:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(255,153,0,.3)}
+
+/* ═══════════ CITY QUICK FILTERS ═══════════ */
+.city-bar{background:var(--bg-card);border-bottom:1px solid var(--border);padding:14px 0;overflow:hidden}
+.city-pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none;padding-bottom:4px}
+.city-pills::-webkit-scrollbar{display:none}
+.city-pill{white-space:nowrap;padding:6px 16px;border-radius:20px;font-size:.8rem;font-weight:500;border:1px solid var(--border);background:var(--bg-card);color:var(--text-secondary);cursor:pointer;transition:all .2s}
+.city-pill:hover,.city-pill.active{background:linear-gradient(135deg,#ff9933,#ff6600);color:#fff;border-color:#ff9933;transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,153,0,.3)}
+.city-pill i{margin-right:4px;font-size:.7rem}
+
+/* ═══════════ LAYOUT ═══════════ */
+.india-layout{display:grid;grid-template-columns:260px 1fr;gap:24px;margin-top:24px}
+@media(max-width:900px){.india-layout{grid-template-columns:1fr}}
+.india-sidebar{position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow-y:auto;background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px}
+.india-sidebar h3{font-size:1rem;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.india-filter-group{margin-bottom:18px}
+.india-filter-group h4{font-size:.82rem;font-weight:600;margin-bottom:8px;color:var(--text-secondary);display:flex;align-items:center;gap:6px}
+.india-filter-group h4 i{font-size:.75rem;color:#ff9933}
+.india-filter-option{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:.82rem;cursor:pointer;color:var(--text-primary)}
+.india-filter-option input{accent-color:#ff9933}
+.india-filter-option .fc{margin-left:auto;color:var(--text-tertiary);font-size:.72rem}
+.india-filter-option input:checked~.fc{color:#ff9933;font-weight:600}
+
+/* ═══════════ JOB CARDS ═══════════ */
+.india-jobs-grid{display:grid;gap:16px}
+.india-job-card{background:var(--bg-card);border:1px solid var(--border);border-radius:14px;padding:20px;cursor:pointer;transition:all .25s;position:relative}
+.india-job-card:hover{border-color:#ff9933;box-shadow:0 8px 30px rgba(255,153,0,.1);transform:translateY(-2px)}
+.india-job-card.trending::before{content:'TRENDING';position:absolute;top:12px;right:12px;background:linear-gradient(135deg,#ff6b35,#ff3c00);color:#fff;font-size:.6rem;padding:3px 10px;border-radius:10px;font-weight:700;letter-spacing:.5px}
+.india-job-header{display:flex;align-items:flex-start;gap:14px;margin-bottom:12px}
+.india-job-logo{width:48px;height:48px;border-radius:10px;object-fit:cover;border:1px solid var(--border);flex-shrink:0}
+.india-job-info{flex:1;min-width:0}
+.india-job-info h3{font-size:.95rem;font-weight:700;margin:0 0 4px;line-height:1.3}
+.india-job-info .company{font-size:.82rem;color:var(--text-secondary)}
+.india-job-meta{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:10px;font-size:.78rem;color:var(--text-secondary)}
+.india-job-meta span{display:flex;align-items:center;gap:4px}
+.india-job-meta i{font-size:.7rem;color:#ff9933}
+.india-job-skills{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.india-skill-tag{padding:3px 10px;border-radius:6px;font-size:.72rem;background:rgba(255,153,0,.08);color:#ff9933;border:1px solid rgba(255,153,0,.15)}
+.india-job-footer{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px}
+.india-salary{font-weight:600;font-size:.85rem;color:var(--text-primary)}
+.india-job-actions{display:flex;align-items:center;gap:8px}
+.india-source-badge{font-size:.65rem;padding:3px 10px;border-radius:20px;color:#fff;font-weight:500}
+.india-apply-btn{display:inline-flex;align-items:center;gap:4px;padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:600;color:#fff;background:linear-gradient(135deg,#ff9933,#ff6600);text-decoration:none;transition:all .2s}
+.india-apply-btn:hover{transform:translateY(-1px);box-shadow:0 4px 12px rgba(255,153,0,.4)}
+.india-save-btn{background:none;border:1px solid var(--border);border-radius:8px;padding:6px 10px;cursor:pointer;color:var(--text-secondary);transition:all .2s}
+.india-save-btn:hover{color:#e74c3c;border-color:#e74c3c}
+
+/* Freshness/score badges */
+.freshness-badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;padding:2px 8px;border-radius:8px;font-weight:600}
+.freshness-hot{background:rgba(255,60,0,.1);color:#ff3c00}
+.freshness-new{background:rgba(0,180,80,.1);color:#00b450}
+.freshness-week{background:rgba(255,153,0,.1);color:#ff9933}
+.score-badge{display:inline-flex;align-items:center;gap:3px;font-size:.65rem;padding:2px 8px;border-radius:8px;font-weight:600;background:rgba(102,126,234,.1);color:#667eea}
+
+/* ═══════════ RESULTS BAR ═══════════ */
+.india-results-bar{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px}
+.india-results-bar p{margin:0;font-size:.88rem;color:var(--text-secondary)}
+.india-results-bar select{padding:8px 12px;border:1px solid var(--border);border-radius:8px;font-size:.82rem;background:var(--bg-card);color:var(--text-primary)}
+
+/* Active filters strip */
+.india-active-filters{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;padding:10px 16px;background:rgba(255,153,0,.04);border:1px solid rgba(255,153,0,.1);border-radius:10px}
+.india-filter-tag{display:inline-flex;align-items:center;gap:4px;background:#ff9933;color:#fff;padding:4px 12px;border-radius:20px;font-size:.78rem;cursor:pointer}
+.india-filter-tag i{opacity:.7;cursor:pointer}
+
+/* ═══════════ FEATURES SECTION ═══════════ */
+.features-section{background:var(--bg-card);border:1px solid var(--border);border-radius:16px;padding:32px;margin-top:32px}
+.features-section h2{font-size:1.3rem;font-weight:800;margin-bottom:24px;text-align:center}
+.features-section h2 span{background:linear-gradient(135deg,#ff9933,#ff6600);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.features-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.feature-card{padding:20px;border-radius:12px;border:1px solid var(--border);background:var(--bg-body);transition:all .25s}
+.feature-card:hover{transform:translateY(-3px);box-shadow:0 8px 25px rgba(0,0,0,.08);border-color:#ff9933}
+.feature-card .icon{font-size:1.5rem;margin-bottom:10px;width:48px;height:48px;display:flex;align-items:center;justify-content:center;border-radius:12px;background:rgba(255,153,0,.1)}
+.feature-card h4{font-size:.9rem;font-weight:700;margin-bottom:6px}
+.feature-card p{font-size:.78rem;color:var(--text-secondary);line-height:1.5;margin:0}
+
+/* ═══════════ TRENDING BAR ═══════════ */
+.trending-bar{background:var(--bg-card);border-bottom:1px solid var(--border);padding:10px 0;overflow:hidden}
+.trending-bar .container{display:flex;align-items:center;gap:12px}
+.trending-label{white-space:nowrap;font-size:.78rem;font-weight:700;color:#ff3c00;display:flex;align-items:center;gap:4px}
+.trending-pills{display:flex;gap:8px;overflow-x:auto;scrollbar-width:none}
+.trending-pills::-webkit-scrollbar{display:none}
+.trending-pill{white-space:nowrap;padding:4px 14px;border-radius:20px;font-size:.73rem;font-weight:500;border:1px solid rgba(255,60,0,.15);background:rgba(255,60,0,.05);color:#ff3c00;cursor:pointer;transition:all .2s}
+.trending-pill:hover{background:#ff3c00;color:#fff}
+
+/* ═══════════ LOAD MORE ═══════════ */
+.india-load-more{text-align:center;margin-top:24px}
+.india-load-more .btn{padding:10px 32px;border-radius:10px;font-weight:600}
+
+/* ═══════════ NO RESULTS ═══════════ */
+.india-no-results{text-align:center;padding:60px 20px;grid-column:1/-1}
+.india-no-results i{font-size:3rem;color:var(--text-tertiary);margin-bottom:16px}
+.india-no-results h3{margin-bottom:8px}
+.india-no-results p{color:var(--text-secondary);font-size:.88rem}
+
+/* ═══════════ STATE MAP ═══════════ */
+.state-map-section{margin-top:32px}
+.state-map-section h2{font-size:1.2rem;font-weight:800;margin-bottom:16px;display:flex;align-items:center;gap:8px}
+.state-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.state-card{background:var(--bg-card);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;text-align:center}
+.state-card:hover{border-color:#ff9933;box-shadow:0 4px 12px rgba(255,153,0,.1)}
+.state-card .state-name{font-size:.82rem;font-weight:600;margin-bottom:2px}
+.state-card .state-count{font-size:.72rem;color:var(--text-secondary)}
+
+/* ═══════════ MOBILE ═══════════ */
+@media(max-width:900px){
+    .india-hero h1{font-size:1.5rem}
+    .india-stats-row{gap:8px}
+    .india-stat-card{padding:10px 12px}
+    .india-stat-card .stat-num{font-size:1.1rem}
+    .india-sidebar{display:none;position:fixed;top:0;left:0;right:0;bottom:0;z-index:999;max-height:100vh;border-radius:0}
+    .india-sidebar.open{display:block}
+    .india-mobile-filter-btn{display:flex!important}
+    .features-grid{grid-template-columns:1fr}
+}
+@media(max-width:480px){
+    .india-hero{padding:80px 0 30px}
+    .india-hero h1{font-size:1.3rem}
+    .india-hero p{font-size:.82rem}
+    .india-stats-row{gap:6px}
+    .india-stat-card{padding:8px 10px}
+    .india-stat-card .stat-num{font-size:.95rem}
+    .india-stat-card .stat-label{font-size:.6rem}
+    .india-search form{flex-direction:column}
+    .india-search button{width:100%}
+    .state-grid{grid-template-columns:repeat(2,1fr)}
+}
+.india-mobile-filter-btn{display:none!important;width:100%;margin-bottom:12px;align-items:center;justify-content:center;gap:8px;padding:10px;border-radius:10px;border:1px solid var(--border);background:var(--bg-card);font-size:.85rem;font-weight:500;cursor:pointer;color:var(--text-primary)}
+.india-mobile-filter-btn:hover{border-color:#ff9933;color:#ff9933}
+
+/* Loading skeleton */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,rgba(255,255,255,.1) 50%,var(--border) 75%);background-size:200% 100%;animation:shimmer 1.5s infinite;border-radius:8px}
+@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+<!-- Breadcrumb Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Jobs",
+    "item": "https://careerguidance.me/jobs"
+  },{
+    "@type": "ListItem",
+    "position": 3,
+    "name": "All India Jobs",
+    "item": "{{ g.canonical_url }}"
+  }]
+}
+</script>
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- ═══════════ HERO ═══════════ -->
+<section class="india-hero">
+    <div class="container">
+        <div class="breadcrumb">
+            <a href="/"><i class="fas fa-home"></i> Home</a>
+            <i class="fas fa-chevron-right"></i>
+            <a href="/jobs">Jobs</a>
+            <i class="fas fa-chevron-right"></i>
+            <span style="color:rgba(255,255,255,.9)">All India</span>
+        </div>
+        <div class="ai-badge"><i class="fas fa-robot"></i> AI-Powered • Auto-Updated Every 12h • Real-time Scraping</div>
+        <h1><span class="tri">🇮🇳 All India</span> Job Portal</h1>
+        <p>AI-organized jobs from 8+ portals across all 28 states & 8 union territories. Auto-scraped from Naukri, LinkedIn, Indeed, Foundit, Internshala & more.</p>
+        <div class="india-stats-row" id="statsRow">
+            <div class="india-stat-card"><div class="stat-num" id="statJobs">—</div><div class="stat-label">Total Jobs</div></div>
+            <div class="india-stat-card"><div class="stat-num" id="statStates">—</div><div class="stat-label">States</div></div>
+            <div class="india-stat-card"><div class="stat-num" id="statCities">—</div><div class="stat-label">Cities</div></div>
+            <div class="india-stat-card"><div class="stat-num" id="statCompanies">—</div><div class="stat-label">Companies</div></div>
+            <div class="india-stat-card"><div class="stat-num" id="statFresher">—</div><div class="stat-label">Fresher Jobs</div></div>
+            <div class="india-stat-card"><div class="stat-num" id="statRemote">—</div><div class="stat-label">Remote</div></div>
+        </div>
+        <div class="india-search">
+            <form onsubmit="event.preventDefault();searchJobs()">
+                <input type="text" id="searchInput" placeholder="Search jobs, skills, companies across India…">
+                <button type="submit"><i class="fas fa-search"></i> Search</button>
+            </form>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CROSS-NAVIGATION ═══════════ -->
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border);padding:8px 0;">
+    <div class="container" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:.8rem;">
+        <span style="color:var(--text-tertiary);font-weight:600;">Also browse:</span>
+        <a href="/jobs" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(102,126,234,.1);color:#667eea;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#667eea';this.style.color='#fff'" onmouseout="this.style.background='rgba(102,126,234,.1)';this.style.color='#667eea'"><i class="fas fa-globe"></i> Global Jobs</a>
+        <a href="/jobs/tamilnadu" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(118,75,162,.1);color:#764ba2;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#764ba2';this.style.color='#fff'" onmouseout="this.style.background='rgba(118,75,162,.1)';this.style.color='#764ba2'"><i class="fas fa-map-marked-alt"></i> Tamil Nadu & Pondicherry</a>
+        <a href="/jobs?type=remote" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(16,185,129,.1);color:#10b981;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#10b981';this.style.color='#fff'" onmouseout="this.style.background='rgba(16,185,129,.1)';this.style.color='#10b981'"><i class="fas fa-laptop-house"></i> Remote Jobs</a>
+        <a href="/jobs?type=internship" style="display:inline-flex;align-items:center;gap:4px;padding:4px 14px;border-radius:20px;background:rgba(245,158,11,.1);color:#f59e0b;text-decoration:none;font-weight:500;transition:all .2s;" onmouseover="this.style.background='#f59e0b';this.style.color='#fff'" onmouseout="this.style.background='rgba(245,158,11,.1)';this.style.color='#f59e0b'"><i class="fas fa-graduation-cap"></i> Internships</a>
+    </div>
+</div>
+
+<!-- ═══════════ TRENDING SKILLS BAR ═══════════ -->
+<section class="trending-bar">
+    <div class="container">
+        <div class="trending-label"><i class="fas fa-fire"></i> Trending</div>
+        <div class="trending-pills" id="trendingPills">
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TOP CITIES PILLS ═══════════ -->
+<section class="city-bar">
+    <div class="container">
+        <div class="city-pills" id="cityPills">
+            <div class="city-pill active" onclick="filterCity('')"><i class="fas fa-globe-asia"></i> All India</div>
+            <!-- Populated by JS -->
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ MAIN LAYOUT ═══════════ -->
+<div class="container">
+    <div class="india-layout">
+        <!-- Sidebar Filters -->
+        <aside class="india-sidebar" id="sidebarFilters">
+            <h3><i class="fas fa-sliders-h"></i> Filters</h3>
+            
+            <div class="india-filter-group">
+                <h4><i class="fas fa-map-marker-alt"></i> State</h4>
+                <div id="stateFilters"><!-- JS populated --></div>
+            </div>
+
+            <div class="india-filter-group">
+                <h4><i class="fas fa-briefcase"></i> Job Type</h4>
+                <div id="typeFilters"><!-- JS populated --></div>
+            </div>
+
+            <div class="india-filter-group">
+                <h4><i class="fas fa-star"></i> Experience</h4>
+                <div id="expFilters"><!-- JS populated --></div>
+            </div>
+
+            <div class="india-filter-group">
+                <h4><i class="fas fa-layer-group"></i> Category</h4>
+                <div id="catFilters"><!-- JS populated --></div>
+            </div>
+
+            <div class="india-filter-group">
+                <h4><i class="fas fa-database"></i> Source</h4>
+                <div id="srcFilters"><!-- JS populated --></div>
+            </div>
+
+            <button onclick="clearAllFilters()" style="width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg-body);color:var(--text-primary);cursor:pointer;font-size:.82rem;margin-top:8px"><i class="fas fa-times"></i> Clear All Filters</button>
+        </aside>
+
+        <!-- Jobs List -->
+        <main>
+            <button class="india-mobile-filter-btn" onclick="toggleSidebar()"><i class="fas fa-sliders-h"></i> Filters</button>
+
+            <!-- Active Filters -->
+            <div class="india-active-filters" id="activeFilters" style="display:none"></div>
+
+            <!-- Results Bar -->
+            <div class="india-results-bar">
+                <p id="resultsCount">Loading jobs…</p>
+                <select id="sortSelect" onchange="applySort(this.value)">
+                    <option value="score">AI Ranked (Best Match)</option>
+                    <option value="newest">Newest First</option>
+                    <option value="trending">Trending First</option>
+                    <option value="oldest">Oldest First</option>
+                    <option value="title">Title A-Z</option>
+                    <option value="company">Company A-Z</option>
+                </select>
+            </div>
+
+            <!-- Jobs Grid -->
+            <div class="india-jobs-grid" id="jobsGrid">
+                <!-- Loading skeletons -->
+                <div style="padding:40px;text-align:center;color:var(--text-secondary)">
+                    <i class="fas fa-spinner fa-spin" style="font-size:2rem;margin-bottom:12px;display:block;color:#ff9933"></i>
+                    <p>Fetching AI-organized jobs across India…</p>
+                </div>
+            </div>
+
+            <!-- Load More -->
+            <div class="india-load-more" id="loadMore" style="display:none">
+                <button class="btn btn-primary" onclick="loadMoreJobs()"><i class="fas fa-plus"></i> Load More Jobs</button>
+                <p style="font-size:.78rem;color:var(--text-secondary);margin-top:8px" id="loadMoreLabel"></p>
+            </div>
+        </main>
+    </div>
+
+    <!-- ═══════════ STATE MAP / TOP STATES ═══════════ -->
+    <section class="state-map-section" id="stateMapSection">
+        <h2><i class="fas fa-map-marked-alt" style="color:#ff9933"></i> Jobs by State</h2>
+        <div class="state-grid" id="stateGrid"><!-- JS populated --></div>
+    </section>
+
+    <!-- ═══════════ FEATURES SECTION ═══════════ -->
+    <section class="features-section">
+        <h2>🤖 Powered by <span>AI & Automation</span></h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="icon">🔄</div>
+                <h4>Auto-Refresh Every 12h</h4>
+                <p>Jobs are automatically scraped from 8+ portals every 12 hours + daily 6 AM refresh. Always fresh data.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🧠</div>
+                <h4>AI Organization</h4>
+                <p>Smart deduplication, quality scoring, freshness ranking, and auto-categorization powered by AI algorithms.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🇮🇳</div>
+                <h4>All 36 States & UTs</h4>
+                <p>Complete coverage: 28 states + 8 union territories. 200+ cities from Tier 1 metros to emerging tech hubs.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔎</div>
+                <h4>8+ Job Portals</h4>
+                <p>Real-time scraping from Naukri, Indeed, LinkedIn, Foundit, Internshala, TimesJobs, Freshersworld & Himalayas.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📊</div>
+                <h4>Trending Detection</h4>
+                <p>AI detects trending skills, roles, and companies. Stay ahead with real-time market intelligence.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">⚡</div>
+                <h4>Quality Scoring</h4>
+                <p>Each job gets a composite score (freshness + completeness + quality). Top jobs surface first automatically.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🏷️</div>
+                <h4>Smart Auto-Tagging</h4>
+                <p>Jobs auto-tagged as "Just Posted", "Trending", "Fresher Friendly". Category & skills detected from title.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">💰</div>
+                <h4>Salary in INR</h4>
+                <p>All salaries normalized to Indian Rupees (LPA format). Compare across companies easily.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🔗</div>
+                <h4>Direct Apply Links</h4>
+                <p>One-click apply buttons linking directly to the job posting on the original portal.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">📱</div>
+                <h4>150+ Companies</h4>
+                <p>TCS, Infosys, Google, Flipkart, Swiggy, Razorpay, HDFC Bank, and 140+ more companies hiring across India.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🎓</div>
+                <h4>Fresher & Intern Focus</h4>
+                <p>Dedicated fresher jobs, internships from Internshala & Freshersworld. Entry-level opportunities highlighted.</p>
+            </div>
+            <div class="feature-card">
+                <div class="icon">🛡️</div>
+                <h4>Dedup & Clean Data</h4>
+                <p>Smart hash-based deduplication removes duplicate listings from multiple portals. Clean, unique results only.</p>
+            </div>
+        </div>
+    </section>
+</div>
+
+<script>
+// ═══════════ STATE ═══════════
+let allJobs = [];
+let filteredJobs = [];
+let currentPage = 1;
+const perPage = 50;
+let activeFilters = {keyword:'',city:'',state:'',type:'',experience:'',category:'',source:'',sort:'score'};
+let filterCounts = {};
+let statsData = {};
+
+// ═══════════ INIT ═══════════
+document.addEventListener('DOMContentLoaded', () => {
+    // Read URL params into filters
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('keyword')) {
+        activeFilters.keyword = params.get('keyword');
+        document.getElementById('searchInput').value = params.get('keyword');
+    }
+    if (params.get('city')) activeFilters.city = params.get('city');
+    if (params.get('state')) activeFilters.state = params.get('state');
+    if (params.get('type')) activeFilters.type = params.get('type');
+    if (params.get('experience')) activeFilters.experience = params.get('experience');
+    if (params.get('category')) activeFilters.category = params.get('category');
+    if (params.get('source')) activeFilters.source = params.get('source');
+    if (params.get('sort')) activeFilters.sort = params.get('sort');
+
+    loadStats();
+    loadTrending();
+    fetchJobs();
+});
+
+// ═══════════ LOAD STATS ═══════════
+async function loadStats() {
+    try {
+        const resp = await fetch('/api/jobs/india/stats');
+        const data = await resp.json();
+        statsData = data;
+        document.getElementById('statJobs').textContent = (data.total_jobs||0).toLocaleString();
+        document.getElementById('statStates').textContent = data.unique_states||'28+';
+        document.getElementById('statCities').textContent = data.unique_cities||'200+';
+        document.getElementById('statCompanies').textContent = data.unique_companies||'150+';
+        document.getElementById('statFresher').textContent = (data.fresher_jobs||0).toLocaleString();
+        document.getElementById('statRemote').textContent = (data.remote_jobs||0).toLocaleString();
+
+        // Populate state grid
+        const stateGrid = document.getElementById('stateGrid');
+        const topStates = data.top_states || [];
+        stateGrid.innerHTML = topStates.map(s =>
+            `<div class="state-card" onclick="filterState('${s.state}')">
+                <div class="state-name">${s.state}</div>
+                <div class="state-count">${s.count} jobs</div>
+            </div>`
+        ).join('');
+    } catch(e) { console.error('Stats error:', e); }
+}
+
+// ═══════════ LOAD TRENDING ═══════════
+async function loadTrending() {
+    try {
+        const resp = await fetch('/api/jobs/india/trending');
+        const data = await resp.json();
+        const pills = document.getElementById('trendingPills');
+        const skills = data.trending_skills || [];
+        pills.innerHTML = skills.slice(0, 15).map(s =>
+            `<div class="trending-pill" onclick="searchSkill('${s.skill}')">${s.skill} (${s.count})</div>`
+        ).join('');
+    } catch(e) { console.error('Trending error:', e); }
+}
+
+// ═══════════ FETCH JOBS ═══════════
+async function fetchJobs() {
+    const params = new URLSearchParams();
+    if (activeFilters.keyword) params.set('keyword', activeFilters.keyword);
+    if (activeFilters.city) params.set('city', activeFilters.city);
+    if (activeFilters.state) params.set('state', activeFilters.state);
+    if (activeFilters.type) params.set('type', activeFilters.type);
+    if (activeFilters.experience) params.set('experience', activeFilters.experience);
+    if (activeFilters.category) params.set('category', activeFilters.category);
+    if (activeFilters.source) params.set('source', activeFilters.source);
+    params.set('sort', activeFilters.sort);
+    params.set('page', currentPage);
+    params.set('per_page', perPage);
+
+    try {
+        const resp = await fetch('/api/jobs/india?' + params.toString());
+        const data = await resp.json();
+
+        if (currentPage === 1) {
+            allJobs = data.jobs || [];
+        } else {
+            allJobs = allJobs.concat(data.jobs || []);
+        }
+        filteredJobs = allJobs;
+        filterCounts = data.filter_counts || {};
+
+        // Render
+        renderJobs();
+        renderFilters();
+        renderActiveFilters();
+        renderCityPills(filterCounts.cities || {});
+
+        // Update results count
+        document.getElementById('resultsCount').innerHTML =
+            `<strong>${data.total.toLocaleString()}</strong> jobs found across India` +
+            (data.last_updated ? ` <span style="font-size:.72rem;color:var(--text-tertiary)">• Updated ${data.last_updated}</span>` : '');
+
+        // Show/hide load more
+        const loadMore = document.getElementById('loadMore');
+        if (data.page < data.total_pages) {
+            loadMore.style.display = 'block';
+            document.getElementById('loadMoreLabel').textContent = `Showing ${allJobs.length} of ${data.total} jobs`;
+        } else {
+            loadMore.style.display = 'none';
+        }
+    } catch(e) {
+        console.error('Fetch error:', e);
+        document.getElementById('jobsGrid').innerHTML =
+            '<div class="india-no-results"><i class="fas fa-exclamation-triangle"></i><h3>Error Loading Jobs</h3><p>Please try again later. The AI scraper may be refreshing.</p></div>';
+    }
+}
+
+// ═══════════ RENDER JOBS ═══════════
+function renderJobs() {
+    const grid = document.getElementById('jobsGrid');
+    if (allJobs.length === 0) {
+        grid.innerHTML = '<div class="india-no-results"><i class="fas fa-search"></i><h3>No Jobs Found</h3><p>Try adjusting your filters or search query.</p></div>';
+        return;
+    }
+    grid.innerHTML = allJobs.map(j => jobCardHTML(j)).join('');
+}
+
+function jobCardHTML(j) {
+    const skills = (j.skills||[]).slice(0,5).map(s => `<span class="india-skill-tag">${s}</span>`).join('');
+    const salary = j.salary_min && j.salary_max ? `${j.salary_min} - ${j.salary_max}` :
+                   j.salary_min ? `${j.salary_min}+` : '';
+    const sourceColors = {
+        'Naukri.com':'#0059b3','LinkedIn':'#0a66c2','Indeed':'#2164f3',
+        'Foundit':'#6d28d9','Internshala':'#00a5ec','TimesJobs':'#e60000',
+        'Freshersworld':'#10b981','Himalayas':'#059669','Careerguidance':'#ff9933'
+    };
+    const srcColor = sourceColors[j.source] || '#667eea';
+
+    // Freshness badge
+    let freshBadge = '';
+    const posted = j.posted_date||'';
+    if (posted) {
+        const daysOld = Math.floor((Date.now() - new Date(posted).getTime())/(1000*60*60*24));
+        if (daysOld <= 1) freshBadge = '<span class="freshness-badge freshness-hot"><i class="fas fa-fire"></i> Just Posted</span>';
+        else if (daysOld <= 3) freshBadge = '<span class="freshness-badge freshness-new"><i class="fas fa-clock"></i> New</span>';
+        else if (daysOld <= 7) freshBadge = '<span class="freshness-badge freshness-week"><i class="fas fa-calendar"></i> This Week</span>';
+    }
+
+    // Score badge
+    let scoreBadge = '';
+    if (j.composite_score && j.composite_score > 70) scoreBadge = `<span class="score-badge"><i class="fas fa-star"></i> Score ${Math.round(j.composite_score)}</span>`;
+
+    const trendClass = j.trending ? ' trending' : '';
+
+    return `
+    <div class="india-job-card${trendClass}" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/${j.id}'">
+        <div class="india-job-header">
+            <img class="india-job-logo" src="${j.company_logo||'https://ui-avatars.com/api/?name='+encodeURIComponent(j.company)+'&background=ff9933&color=fff&size=50'}" alt="${j.company}" loading="lazy" onerror="this.src='https://ui-avatars.com/api/?name='+encodeURIComponent('${j.company}')+'&background=ff9933&color=fff&size=50'">
+            <div class="india-job-info">
+                <h3>${j.title||'Untitled'}</h3>
+                <div class="company">${j.company||'Company'}</div>
+            </div>
+        </div>
+        <div class="india-job-meta">
+            <span><i class="fas fa-map-marker-alt"></i> ${j.location_city||j.location||'India'}${j.location_state ? ', '+j.location_state : ''}</span>
+            <span><i class="fas fa-briefcase"></i> ${j.type||'Full-time'}</span>
+            <span><i class="fas fa-layer-group"></i> ${j.experience||'Mid Level'}</span>
+            <span><i class="fas fa-tag"></i> ${j.category||'Technology'}</span>
+            ${freshBadge} ${scoreBadge}
+        </div>
+        <div class="india-job-skills">${skills}</div>
+        <div class="india-job-footer">
+            <span class="india-salary">${salary || 'Competitive Salary'}</span>
+            <div class="india-job-actions">
+                <span class="india-source-badge" style="background:${srcColor}">${j.source||'Various'}</span>
+                <button class="india-save-btn" onclick="event.stopPropagation();indiaSaveJob(this,'${j.id}')" title="Save"><i class="far fa-heart"></i></button>
+                <a href="${j.apply_url||'#'}" target="_blank" rel="noopener" class="india-apply-btn" onclick="if(!__isLoggedIn){event.preventDefault();requireLogin('Login to Apply','Sign in to track your job applications.',event);return false;}trackApply('${j.id}')"><i class="fas fa-external-link-alt"></i> Apply</a>
+            </div>
+        </div>
+    </div>`;
+}
+
+// ═══════════ RENDER FILTERS ═══════════
+function renderFilters() {
+    renderFilterGroup('stateFilters', filterCounts.states||{}, 'state', 12);
+    renderFilterGroup('typeFilters', filterCounts.types||{}, 'type', 10);
+    renderFilterGroup('expFilters', filterCounts.experience||{}, 'experience', 10);
+    renderFilterGroup('catFilters', filterCounts.categories||{}, 'category', 10);
+    renderFilterGroup('srcFilters', filterCounts.sources||{}, 'source', 10);
+}
+
+function renderFilterGroup(containerId, counts, filterKey, limit) {
+    const el = document.getElementById(containerId);
+    const entries = Object.entries(counts).sort((a,b) => b[1]-a[1]).slice(0, limit);
+    el.innerHTML = entries.map(([label, count]) => {
+        const checked = activeFilters[filterKey] && activeFilters[filterKey].toLowerCase() === label.toLowerCase() ? 'checked' : '';
+        return `<label class="india-filter-option">
+            <input type="radio" name="${filterKey}" value="${label}" ${checked} onchange="setFilter('${filterKey}','${label.replace(/'/g,"\\'")}')">
+            ${label} <span class="fc">${count}</span>
+        </label>`;
+    }).join('');
+}
+
+// ═══════════ FILTER FUNCTIONS ═══════════
+function setFilter(key, value) {
+    activeFilters[key] = activeFilters[key] === value ? '' : value;
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+}
+
+function filterCity(city) {
+    activeFilters.city = city;
+    currentPage = 1;
+    allJobs = [];
+    document.querySelectorAll('.city-pill').forEach(p => p.classList.remove('active'));
+    event.target.classList.add('active');
+    fetchJobs();
+}
+
+function filterState(state) {
+    activeFilters.state = state;
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function searchJobs() {
+    activeFilters.keyword = document.getElementById('searchInput').value.trim();
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+}
+
+function searchSkill(skill) {
+    document.getElementById('searchInput').value = skill;
+    activeFilters.keyword = skill;
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+    window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function trackApply(jobId) {
+    if (!__isLoggedIn) { requireLogin('Login to Apply', 'Sign in to track your job applications.'); return; }
+    fetch('/api/apply-job', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({job_id: String(jobId)})
+    }).catch(function(){});
+}
+
+async function indiaSaveJob(btn, jobId) {
+    if (!__isLoggedIn) return requireLogin('Login to Save Jobs', 'Create a free account to save jobs.');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+    try {
+        var res = await fetch('/api/save-job', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({job_id: String(jobId)})
+        });
+        if (res.ok) {
+            btn.innerHTML = '<i class="fas fa-heart" style="color:#e74c3c"></i>';
+            btn.title = 'Saved';
+        } else {
+            btn.innerHTML = '<i class="far fa-heart"></i>';
+        }
+    } catch(e) {
+        btn.innerHTML = '<i class="far fa-heart"></i>';
+    }
+}
+
+function applySort(value) {
+    activeFilters.sort = value;
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+}
+
+function loadMoreJobs() {
+    currentPage++;
+    fetchJobs();
+}
+
+function clearAllFilters() {
+    activeFilters = {keyword:'',city:'',state:'',type:'',experience:'',category:'',source:'',sort:'score'};
+    document.getElementById('searchInput').value = '';
+    currentPage = 1;
+    allJobs = [];
+    fetchJobs();
+}
+
+function toggleSidebar() {
+    document.getElementById('sidebarFilters').classList.toggle('open');
+}
+
+// ═══════════ RENDER ACTIVE FILTERS ═══════════
+function renderActiveFilters() {
+    const container = document.getElementById('activeFilters');
+    const tags = [];
+    if (activeFilters.keyword) tags.push({key:'keyword',label:`"${activeFilters.keyword}"`});
+    if (activeFilters.city) tags.push({key:'city',label:activeFilters.city});
+    if (activeFilters.state) tags.push({key:'state',label:activeFilters.state});
+    if (activeFilters.type) tags.push({key:'type',label:activeFilters.type});
+    if (activeFilters.experience) tags.push({key:'experience',label:activeFilters.experience});
+    if (activeFilters.category) tags.push({key:'category',label:activeFilters.category});
+    if (activeFilters.source) tags.push({key:'source',label:activeFilters.source});
+    if (tags.length === 0) {
+        container.style.display = 'none';
+        return;
+    }
+    container.style.display = 'flex';
+    container.innerHTML = '<span style="font-size:.78rem;color:var(--text-secondary);margin-right:8px">Active:</span>' +
+        tags.map(t => `<span class="india-filter-tag" onclick="setFilter('${t.key}','')">${t.label} <i class="fas fa-times"></i></span>`).join('') +
+        '<span class="india-filter-tag" onclick="clearAllFilters()" style="background:var(--text-secondary)">Clear All <i class="fas fa-times"></i></span>';
+}
+
+// ═══════════ RENDER CITY PILLS ═══════════
+function renderCityPills(cityData) {
+    const pills = document.getElementById('cityPills');
+    const topCities = Object.entries(cityData).sort((a,b)=>b[1]-a[1]).slice(0,12);
+    pills.innerHTML = '<div class="city-pill' + (!activeFilters.city?' active':'') + '" onclick="filterCity(\'\')"><i class="fas fa-globe-asia"></i> All India</div>' +
+        topCities.map(([city,cnt]) =>
+            `<div class="city-pill${activeFilters.city.toLowerCase()===city.toLowerCase()?' active':''}" onclick="filterCity('${city}')">${city} (${cnt})</div>`
+        ).join('');
+}
+</script>
+{% endblock %}

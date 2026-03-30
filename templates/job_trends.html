@@ -1,0 +1,977 @@
+{% extends "base.html" %}
+{% block title %}Job Trends & Market Insights 2026 | Career Guidance{% endblock %}
+{% block meta_desc %}Explore live job market trends, in-demand skills, top hiring companies, and the best courses to upskill for 2026. Data-driven career insights for India.{% endblock %}
+
+{% block extra_head %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<style>
+    /* ── Page-level design tokens ─────────────────────────── */
+    :root {
+        --accent-a: #667eea;
+        --accent-b: #764ba2;
+        --accent-c: #f093fb;
+        --green:    #10b981;
+        --orange:   #f59e0b;
+        --red:      #ef4444;
+    }
+
+    /* ── Hero ──────────────────────────────────────────────── */
+    .trends-hero {
+        background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%);
+        padding: 60px 0 50px;
+        position: relative;
+        overflow: hidden;
+    }
+    .trends-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+    }
+    .trends-hero-content {
+        position: relative;
+        z-index: 1;
+        text-align: center;
+    }
+    .trends-hero h1 {
+        font-size: clamp(1.8rem, 4vw, 3rem);
+        font-weight: 800;
+        color: #fff;
+        margin: 0 0 12px;
+        letter-spacing: -0.5px;
+    }
+    .trends-hero p {
+        font-size: 1.05rem;
+        color: rgba(255,255,255,.72);
+        max-width: 600px;
+        margin: 0 auto 28px;
+    }
+    .hero-badges {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .hero-badge {
+        background: rgba(255,255,255,.12);
+        backdrop-filter: blur(8px);
+        border: 1px solid rgba(255,255,255,.2);
+        color: #fff;
+        padding: 8px 18px;
+        border-radius: 30px;
+        font-size: .82rem;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+    .hero-badge i { color: var(--orange); }
+
+    /* ── KPI stats strip ─────────────────────────────────── */
+    .kpi-strip {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+        margin: -28px 0 36px;
+        position: relative;
+        z-index: 10;
+    }
+    .kpi-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 20px;
+        text-align: center;
+        box-shadow: 0 4px 24px rgba(0,0,0,.07);
+        transition: transform .2s, box-shadow .2s;
+    }
+    .kpi-card:hover { transform: translateY(-4px); box-shadow: 0 12px 40px rgba(102,126,234,.15); }
+    .kpi-card .kpi-icon {
+        width: 44px; height: 44px;
+        border-radius: 12px;
+        display: flex; align-items: center; justify-content: center;
+        margin: 0 auto 10px;
+        font-size: 1.2rem;
+    }
+    .kpi-card .kpi-value {
+        font-size: 1.7rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        line-height: 1;
+    }
+    .kpi-card .kpi-label {
+        font-size: .75rem;
+        color: var(--text-secondary);
+        margin-top: 4px;
+    }
+
+    /* ── Section headings ───────────────────────────────── */
+    .section-heading {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    .section-heading h2 {
+        font-size: 1.35rem;
+        font-weight: 700;
+        margin: 0;
+    }
+    .section-heading .pill {
+        background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+        color: #fff;
+        font-size: .68rem;
+        font-weight: 700;
+        padding: 3px 10px;
+        border-radius: 20px;
+        text-transform: uppercase;
+        letter-spacing: .5px;
+    }
+
+    /* ── Chart containers ───────────────────────────────── */
+    .chart-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 20px;
+        padding: 24px;
+        box-shadow: 0 2px 16px rgba(0,0,0,.05);
+        height: 100%;
+    }
+    .chart-card h3 {
+        font-size: .95rem;
+        font-weight: 700;
+        color: var(--text-primary);
+        margin: 0 0 16px;
+        display: flex; align-items: center; gap: 8px;
+    }
+    .chart-wrap { position: relative; }
+
+    /* ── Skill tags ─────────────────────────────────────── */
+    .skill-trend-list {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .skill-trend-tag {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 14px;
+        border-radius: 20px;
+        font-size: .78rem;
+        font-weight: 600;
+        border: 1.5px solid transparent;
+        cursor: default;
+        transition: transform .15s;
+    }
+    .skill-trend-tag:hover { transform: scale(1.05); }
+    .skill-trend-tag .count-badge {
+        background: rgba(0,0,0,.1);
+        border-radius: 10px;
+        padding: 1px 7px;
+        font-size: .68rem;
+    }
+
+    /* ── Course cards ───────────────────────────────────── */
+    .courses-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 20px;
+    }
+    .course-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        overflow: hidden;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .course-card:hover { transform: translateY(-5px); box-shadow: 0 16px 40px rgba(102,126,234,.18); }
+    .course-card-header {
+        padding: 20px 20px 0;
+        display: flex;
+        align-items: flex-start;
+        gap: 14px;
+    }
+    .course-icon {
+        width: 52px; height: 52px; border-radius: 14px;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 1.4rem;
+        flex-shrink: 0;
+    }
+    .course-card-body { padding: 14px 20px 20px; }
+    .course-card h3 { font-size: .95rem; font-weight: 700; margin: 0 0 4px; }
+    .course-card p { font-size: .8rem; color: var(--text-secondary); margin: 0 0 12px; line-height: 1.5; }
+    .course-skills { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 14px; }
+    .course-skill-tag {
+        background: rgba(102,126,234,.1);
+        color: var(--accent-a);
+        border-radius: 8px;
+        padding: 2px 9px;
+        font-size: .7rem;
+        font-weight: 600;
+    }
+    .course-links { display: flex; flex-wrap: wrap; gap: 8px; }
+    .course-link {
+        display: inline-flex; align-items: center; gap: 5px;
+        background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+        color: #fff;
+        padding: 6px 14px;
+        border-radius: 8px;
+        font-size: .75rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity .2s;
+    }
+    .course-link:hover { opacity: .85; }
+    .course-link.secondary {
+        background: var(--bg-hover, rgba(102,126,234,.1));
+        color: var(--accent-a);
+    }
+
+    /* ── Career path card ───────────────────────────────── */
+    .path-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 18px;
+    }
+    .path-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 18px;
+        padding: 20px;
+        transition: transform .2s, box-shadow .2s;
+    }
+    .path-card:hover { transform: translateY(-4px); box-shadow: 0 12px 36px rgba(0,0,0,.1); }
+    .path-card h3 { font-size: .95rem; font-weight: 700; margin: 0 0 12px; }
+    .path-stage {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 8px 0;
+        border-bottom: 1px dashed var(--border);
+        font-size: .78rem;
+    }
+    .path-stage:last-child { border-bottom: none; }
+    .stage-dot {
+        width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+    }
+    .path-salary { font-size: .7rem; color: var(--text-secondary); margin-top: 12px; text-align: right; }
+
+    /* ── Companies ──────────────────────────────────────── */
+    .company-list { display: flex; flex-direction: column; gap: 10px; }
+    .company-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        background: var(--bg-hover, rgba(102,126,234,.04));
+        border-radius: 12px;
+        cursor: default;
+    }
+    .company-logo {
+        width: 38px; height: 38px; border-radius: 10px;
+        object-fit: cover;
+        background: #667eea;
+        display: flex; align-items: center; justify-content: center;
+        color: #fff; font-weight: 700; font-size: .85rem;
+        flex-shrink: 0;
+    }
+    .company-name { font-size: .85rem; font-weight: 600; flex: 1; }
+    .company-jobs {
+        background: linear-gradient(135deg, var(--accent-a), var(--accent-b));
+        color: #fff;
+        padding: 2px 10px;
+        border-radius: 20px;
+        font-size: .73rem;
+        font-weight: 700;
+    }
+
+    /* ── Freshness/freshdata card ────────────────────────── */
+    .freshness-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 10px;
+    }
+    .fresh-card {
+        border-radius: 12px;
+        padding: 14px;
+        text-align: center;
+    }
+    .fresh-card .fval { font-size: 1.5rem; font-weight: 800; }
+    .fresh-card .flabel { font-size: .72rem; margin-top: 2px; opacity: .75; }
+
+    /* ── Responsive ─────────────────────────────────────── */
+    .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; }
+    .full-width { grid-column: 1 / -1; }
+    @media (max-width: 700px) {
+        .kpi-strip { grid-template-columns: repeat(2, 1fr); }
+        .courses-grid { grid-template-columns: 1fr; }
+        .path-cards { grid-template-columns: 1fr; }
+        .charts-grid { grid-template-columns: 1fr; }
+        .freshness-grid { grid-template-columns: repeat(2, 1fr); }
+    }
+
+    /* ── Loading skeleton ───────────────────────────────── */
+    .skeleton {
+        background: linear-gradient(90deg, var(--border) 25%, rgba(255,255,255,.05) 50%, var(--border) 75%);
+        background-size: 200% 100%;
+        animation: shimmer 1.5s infinite;
+        border-radius: 8px;
+    }
+    @keyframes shimmer { to { background-position: -200% 0; } }
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- Hero -->
+<div class="trends-hero">
+    <div class="container trends-hero-content">
+        <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);padding:6px 16px;border-radius:30px;font-size:.8rem;color:rgba(255,255,255,.85);margin-bottom:20px;">
+            <i class="fas fa-satellite-dish" style="color:#f59e0b;"></i> Live Market Intelligence
+        </div>
+        <h1><i class="fas fa-chart-line" style="color:#667eea;"></i> Job Trends &amp; Market Insights</h1>
+        <p>Real-time analysis based on live job data scraped from 17+ portals across India and globally.</p>
+        <div class="hero-badges">
+            <span class="hero-badge"><i class="fas fa-fire"></i> Top Skills in Demand</span>
+            <span class="hero-badge"><i class="fas fa-building"></i> Hiring Companies</span>
+            <span class="hero-badge"><i class="fas fa-graduation-cap"></i> Course Suggestions</span>
+            <span class="hero-badge"><i class="fas fa-road"></i> Career Paths</span>
+        </div>
+    </div>
+</div>
+
+<section>
+<div class="container" style="padding-top:20px;padding-bottom:60px;">
+
+    <!-- KPI Strip -->
+    <div class="kpi-strip">
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(102,126,234,.15);"><i class="fas fa-briefcase" style="color:#667eea;"></i></div>
+            <div class="kpi-value" id="kpiTotal">—</div>
+            <div class="kpi-label">Live Job Listings</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(16,185,129,.15);"><i class="fas fa-tools" style="color:#10b981;"></i></div>
+            <div class="kpi-value" id="kpiSkills">—</div>
+            <div class="kpi-label">Unique Skills Tracked</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(245,158,11,.15);"><i class="fas fa-laptop-house" style="color:#f59e0b;"></i></div>
+            <div class="kpi-value" id="kpiRemote">—%</div>
+            <div class="kpi-label">Remote-Friendly Roles</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(239,68,68,.15);"><i class="fas fa-building" style="color:#ef4444;"></i></div>
+            <div class="kpi-value" id="kpiCompanies">—</div>
+            <div class="kpi-label">Unique Companies</div>
+        </div>
+        <div class="kpi-card">
+            <div class="kpi-icon" style="background:rgba(118,75,162,.15);"><i class="fas fa-calendar-check" style="color:#764ba2;"></i></div>
+            <div class="kpi-value" id="kpiFresh">—</div>
+            <div class="kpi-label">Posted Today</div>
+        </div>
+    </div>
+
+    <!-- Charts Row 1 -->
+    <div class="charts-grid" style="margin-bottom:28px;">
+        <!-- Top Skills Bar Chart -->
+        <div class="chart-card" style="grid-column:span 2 / auto;">
+            <div class="section-heading">
+                <h2><i class="fas fa-fire" style="color:#f59e0b;"></i> Most In-Demand Skills</h2>
+                <span class="pill">Market Trend</span>
+            </div>
+            <div class="chart-wrap" style="height:280px;">
+                <canvas id="skillsBarChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Categories Doughnut -->
+        <div class="chart-card">
+            <div class="section-heading">
+                <h2><i class="fas fa-th-large" style="color:#667eea;"></i> Job Categories</h2>
+                <span class="pill">Distribution</span>
+            </div>
+            <div class="chart-wrap" style="height:260px;">
+                <canvas id="categoriesChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Row 2 -->
+    <div class="charts-grid" style="margin-bottom:28px;">
+        <!-- Top Roles -->
+        <div class="chart-card">
+            <div class="section-heading">
+                <h2><i class="fas fa-user-tie" style="color:#10b981;"></i> Hottest Job Roles</h2>
+                <span class="pill">Live</span>
+            </div>
+            <div class="chart-wrap" style="height:280px;">
+                <canvas id="rolesChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Job Type Pie -->
+        <div class="chart-card">
+            <div class="section-heading">
+                <h2><i class="fas fa-briefcase" style="color:#764ba2;"></i> Work Arrangement</h2>
+                <span class="pill">Split</span>
+            </div>
+            <div class="chart-wrap" style="height:280px;">
+                <canvas id="jobTypeChart"></canvas>
+            </div>
+        </div>
+
+        <!-- Data freshness -->
+        <div class="chart-card">
+            <div class="section-heading">
+                <h2><i class="fas fa-clock" style="color:#f59e0b;"></i> Data Freshness</h2>
+                <span class="pill">Age</span>
+            </div>
+            <div class="freshness-grid" id="freshnessGrid">
+                <div class="fresh-card skeleton" style="min-height:80px;"></div>
+                <div class="fresh-card skeleton" style="min-height:80px;"></div>
+                <div class="fresh-card skeleton" style="min-height:80px;"></div>
+                <div class="fresh-card skeleton" style="min-height:80px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Trending Skills Tag Cloud -->
+    <div style="margin-bottom:28px;">
+        <div class="section-heading">
+            <h2><i class="fas fa-tags" style="color:#667eea;"></i> Skill Tags Heatmap</h2>
+            <span class="pill">Top 25</span>
+        </div>
+        <div class="chart-card">
+            <div id="skillTagCloud" class="skill-trend-list">
+                <span class="skeleton" style="width:80px;height:32px;border-radius:20px;"></span>
+                <span class="skeleton" style="width:110px;height:32px;border-radius:20px;"></span>
+                <span class="skeleton" style="width:90px;height:32px;border-radius:20px;"></span>
+                <span class="skeleton" style="width:120px;height:32px;border-radius:20px;"></span>
+                <span class="skeleton" style="width:75px;height:32px;border-radius:20px;"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Top Companies -->
+    <div style="margin-bottom:28px;">
+        <div class="section-heading">
+            <h2><i class="fas fa-building" style="color:#ef4444;"></i> Top Hiring Companies</h2>
+            <span class="pill">Now Hiring</span>
+        </div>
+        <div class="charts-grid">
+            <div class="chart-card">
+                <div id="companiesList" class="company-list">
+                    <div class="skeleton" style="height:52px;border-radius:12px;"></div>
+                    <div class="skeleton" style="height:52px;border-radius:12px;"></div>
+                    <div class="skeleton" style="height:52px;border-radius:12px;"></div>
+                    <div class="skeleton" style="height:52px;border-radius:12px;"></div>
+                    <div class="skeleton" style="height:52px;border-radius:12px;"></div>
+                </div>
+            </div>
+            <div class="chart-card">
+                <div class="chart-wrap" style="height:300px;">
+                    <canvas id="companiesChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hot Skill Combinations -->
+    <div style="margin-bottom:28px;" id="hotCombosSection" style="display:none;">
+        <div class="section-heading">
+            <h2><i class="fas fa-link" style="color:#10b981;"></i> Hot Skill Combinations</h2>
+            <span class="pill">Pairs</span>
+        </div>
+        <div class="chart-card">
+            <div class="chart-wrap" style="height:280px;">
+                <canvas id="combosChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════════════════  -->
+    <!-- BEST COURSES SECTION (based on market trends) -->
+    <!-- ════════════════════════════════════════════  -->
+    <div style="margin-bottom:36px;">
+        <div class="section-heading" style="margin-bottom:6px;">
+            <h2><i class="fas fa-graduation-cap" style="color:#667eea;"></i> Best Courses Based on Market Trends</h2>
+            <span class="pill">AI-Curated</span>
+        </div>
+        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:20px;">Handpicked free &amp; paid resources matched to the top in-demand skills right now.</p>
+
+        <div class="courses-grid" id="coursesGrid">
+            <!-- Rendered by JS -->
+            <div class="course-card skeleton" style="min-height:200px;"></div>
+            <div class="course-card skeleton" style="min-height:200px;"></div>
+            <div class="course-card skeleton" style="min-height:200px;"></div>
+        </div>
+    </div>
+
+    <!-- Career Paths -->
+    <div style="margin-bottom:36px;">
+        <div class="section-heading" style="margin-bottom:6px;">
+            <h2><i class="fas fa-road" style="color:#764ba2;"></i> Career Growth Paths</h2>
+            <span class="pill">Roadmap</span>
+        </div>
+        <p style="color:var(--text-secondary);font-size:.85rem;margin-bottom:20px;">Step-by-step progression paths with salary insights &amp; live job counts.</p>
+        <div class="path-cards" id="pathCards">
+            <div class="path-card skeleton" style="min-height:200px;"></div>
+            <div class="path-card skeleton" style="min-height:200px;"></div>
+            <div class="path-card skeleton" style="min-height:200px;"></div>
+        </div>
+    </div>
+
+</div><!-- /container -->
+</section>
+
+<!-- ── COURSE DATA (curated, skills-matched) ──────────────────────────── -->
+<script>
+const CURATED_COURSES = [
+  {
+    icon:"🐍", bg:"rgba(59,130,246,.12)", color:"#3b82f6",
+    title:"Python for Everybody",
+    desc:"Master Python from zero to data science. Covers syntax, pandas, APIs, and automation.",
+    skills:["Python","Pandas","Automation","APIs"],
+    links:[
+      {label:"Coursera (Free Audit)",url:"https://www.coursera.org/specializations/python"},
+      {label:"CS50P",url:"https://cs50.harvard.edu/python/"}
+    ]
+  },
+  {
+    icon:"🤖", bg:"rgba(16,185,129,.12)", color:"#10b981",
+    title:"Machine Learning Specialization",
+    desc:"Andrew Ng's comprehensive ML course. Linear regression to neural networks.",
+    skills:["Machine Learning","scikit-learn","TensorFlow","Math"],
+    links:[
+      {label:"Coursera",url:"https://www.coursera.org/specializations/machine-learning-introduction"},
+      {label:"fast.ai (Free)",url:"https://www.fast.ai/"}
+    ]
+  },
+  {
+    icon:"⚛️", bg:"rgba(102,126,234,.12)", color:"#667eea",
+    title:"Full Stack Web Development",
+    desc:"React, Node.js, MongoDB &amp; REST APIs. From UI to backend deployment.",
+    skills:["React","Node.js","JavaScript","MongoDB"],
+    links:[
+      {label:"freeCodeCamp (Free)",url:"https://www.freecodecamp.org/"},
+      {label:"The Odin Project",url:"https://www.theodinproject.com/"}
+    ]
+  },
+  {
+    icon:"☁️", bg:"rgba(245,158,11,.12)", color:"#f59e0b",
+    title:"AWS Cloud Practitioner",
+    desc:"Learn core AWS services, architecture best practices, security, and pricing.",
+    skills:["AWS","Cloud","S3","EC2","IAM"],
+    links:[
+      {label:"AWS Free Tier",url:"https://aws.amazon.com/free/"},
+      {label:"KodeKloud",url:"https://kodekloud.com/"}
+    ]
+  },
+  {
+    icon:"🐳", bg:"rgba(15,172,254,.12)", color:"#0fACFE",
+    title:"Docker & Kubernetes",
+    desc:"Containerization for modern DevOps. From docker run to k8s deployments.",
+    skills:["Docker","Kubernetes","DevOps","CI/CD"],
+    links:[
+      {label:"Play with Docker (Free)",url:"https://labs.play-with-docker.com/"},
+      {label:"KodeKloud",url:"https://kodekloud.com/courses/docker/"}
+    ]
+  },
+  {
+    icon:"📊", bg:"rgba(139,92,246,.12)", color:"#8b5cf6",
+    title:"Data Science & Analytics",
+    desc:"SQL, Excel, Python visualization, and storytelling with Tableau/Power BI.",
+    skills:["SQL","Pandas","Tableau","Excel","Statistics"],
+    links:[
+      {label:"Kaggle Learn (Free)",url:"https://www.kaggle.com/learn"},
+      {label:"DataCamp",url:"https://www.datacamp.com/"}
+    ]
+  },
+  {
+    icon:"🧠", bg:"rgba(239,68,68,.12)", color:"#ef4444",
+    title:"Generative AI & LLMs",
+    desc:"Prompt engineering, RAG pipelines, LangChain, fine-tuning, and deployment.",
+    skills:["LLMs","LangChain","RAG","Prompt Engineering"],
+    links:[
+      {label:"DeepLearning.AI (Free)",url:"https://www.deeplearning.ai/short-courses/"},
+      {label:"Hugging Face",url:"https://huggingface.co/learn"}
+    ]
+  },
+  {
+    icon:"🔒", bg:"rgba(15,23,42,.1)", color:"#334155",
+    title:"Cybersecurity Fundamentals",
+    desc:"Ethical hacking, network security, OWASP top 10, and hands-on CTF prep.",
+    skills:["Cybersecurity","Linux","Network","OWASP"],
+    links:[
+      {label:"TryHackMe (Free tier)",url:"https://tryhackme.com/"},
+      {label:"Cybrary",url:"https://www.cybrary.it/"}
+    ]
+  },
+  {
+    icon:"📱", bg:"rgba(244,63,94,.12)", color:"#f43f5e",
+    title:"Flutter Mobile Development",
+    desc:"Cross-platform iOS &amp; Android apps with a single Dart codebase.",
+    skills:["Flutter","Dart","Mobile","REST APIs"],
+    links:[
+      {label:"Flutter.dev (Free)",url:"https://flutter.dev/learn"},
+      {label:"Udemy",url:"https://www.udemy.com/topic/flutter/"}
+    ]
+  }
+];
+</script>
+
+<script>
+/* ================================================================
+   CHART DEFAULTS
+   ================================================================ */
+const isDark = () => document.documentElement.getAttribute('data-theme') === 'dark' ||
+    window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+Chart.defaults.font.family = "'Inter', 'Plus Jakarta Sans', sans-serif";
+Chart.defaults.color = '#6b7280';
+Chart.defaults.plugins.legend.display = false;
+
+const PALETTE = [
+    '#667eea','#764ba2','#f093fb','#f5576c','#4facfe',
+    '#00f2fe','#43e97b','#38f9d7','#fa709a','#fee140',
+    '#a18cd1','#fbc2eb','#a1c4fd','#c2e9fb','#fddb92'
+];
+
+function buildGradient(ctx, colorA, colorB) {
+    const g = ctx.createLinearGradient(0, 0, 0, 300);
+    g.addColorStop(0, colorA);
+    g.addColorStop(1, colorB || colorA + '55');
+    return g;
+}
+
+/* ================================================================
+   RENDER HELPERS
+   ================================================================ */
+function renderSkillsBar(skills) {
+    const ctx = document.getElementById('skillsBarChart').getContext('2d');
+    const top = skills.slice(0, 15);
+    const labels = top.map(s => s.skill);
+    const data   = top.map(s => s.count);
+    const colors = top.map((_, i) => PALETTE[i % PALETTE.length]);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [{
+                label: 'Job Postings',
+                data,
+                backgroundColor: colors,
+                borderRadius: 8,
+                borderSkipped: false,
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: t => ` ${t.parsed.y} jobs` } } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 35, font: { size: 11 } } },
+                y: { grid: { color: 'rgba(107,114,128,.1)' }, ticks: { precision: 0 } }
+            }
+        }
+    });
+}
+
+function renderCategoriesChart(categories) {
+    const ctx = document.getElementById('categoriesChart').getContext('2d');
+    const top = categories.slice(0, 10);
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: top.map(c => c.category),
+            datasets: [{
+                data: top.map(c => c.count),
+                backgroundColor: PALETTE.slice(0, top.length),
+                borderWidth: 2,
+                borderColor: 'transparent'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            cutout: '62%',
+            plugins: {
+                legend: { display: true, position: 'right', labels: { boxWidth: 12, font: { size: 11 } } },
+                tooltip: { callbacks: { label: t => ` ${t.label}: ${t.parsed} jobs` } }
+            }
+        }
+    });
+}
+
+function renderRolesChart(roles) {
+    const ctx = document.getElementById('rolesChart').getContext('2d');
+    const top = roles.slice(0, 10);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top.map(r => r.role.length > 24 ? r.role.substring(0, 22) + '…' : r.role),
+            datasets: [{
+                label: 'Job Count',
+                data: top.map(r => r.count),
+                backgroundColor: ctx => `${PALETTE[ctx.dataIndex % PALETTE.length]}cc`,
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            responsive: true, maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: t => ` ${t.parsed.x} listings` } } },
+            scales: {
+                x: { grid: { color: 'rgba(107,114,128,.08)' }, ticks: { precision: 0 } },
+                y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+}
+
+function renderJobTypeChart(types) {
+    const ctx = document.getElementById('jobTypeChart').getContext('2d');
+    const entries = Object.entries(types).sort((a,b) => b[1]-a[1]).slice(0, 8);
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: entries.map(e => e[0]),
+            datasets: [{
+                data: entries.map(e => e[1]),
+                backgroundColor: PALETTE.slice(0, entries.length),
+                borderWidth: 2,
+                borderColor: 'transparent'
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } },
+                tooltip: { callbacks: { label: t => ` ${t.label}: ${t.parsed} jobs` } }
+            }
+        }
+    });
+}
+
+function renderCompaniesChart(companies) {
+    const ctx = document.getElementById('companiesChart').getContext('2d');
+    const top = companies.slice(0, 12);
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: top.map(c => c.company.length > 20 ? c.company.substring(0,18)+'…' : c.company),
+            datasets: [{
+                label: 'Open Positions',
+                data: top.map(c => c.open_positions),
+                backgroundColor: PALETTE.slice(0, top.length).map(c => c + 'cc'),
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: t => ` ${t.parsed.x} openings` } } },
+            scales: {
+                x: { grid: { color: 'rgba(107,114,128,.08)' }, ticks: { precision: 0 } },
+                y: { grid: { display: false }, ticks: { font: { size: 11 } } }
+            }
+        }
+    });
+}
+
+function renderCombosChart(combos) {
+    const ctx = document.getElementById('combosChart');
+    if (!ctx) return;
+    document.getElementById('hotCombosSection').style.display = '';
+    new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: {
+            labels: combos.slice(0,12).map(c => c.combination),
+            datasets: [{
+                label: 'Co-occurrence',
+                data: combos.slice(0,12).map(c => c.demand),
+                backgroundColor: PALETTE.slice(0,12).map(c => c+'cc'),
+                borderRadius: 6,
+                borderSkipped: false
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { tooltip: { callbacks: { label: t => ` ${t.parsed.y} co-occurrences` } } },
+            scales: {
+                x: { grid: { display: false }, ticks: { maxRotation: 40, font: { size: 10 } } },
+                y: { grid: { color: 'rgba(107,114,128,.1)' }, ticks: { precision: 0 } }
+            }
+        }
+    });
+}
+
+/* skill tag cloud */
+function renderSkillTagCloud(skills) {
+    const container = document.getElementById('skillTagCloud');
+    const maxCount = skills[0]?.count || 1;
+    const hues = [248, 220, 280, 160, 350, 38, 200, 120];
+    container.innerHTML = skills.map((s, i) => {
+        const pct = s.count / maxCount;
+        const size = 0.72 + pct * 0.38;
+        const h = hues[i % hues.length];
+        const alpha = 0.1 + pct * 0.25;
+        return `<span class="skill-trend-tag" style="font-size:${size}rem;background:hsla(${h},80%,55%,${alpha});color:hsl(${h},60%,45%);border-color:hsla(${h},70%,55%,.25);" title="${s.count} job postings (${s.percentage}%)">`
+            + `${s.skill}<span class="count-badge">${s.count}</span></span>`;
+    }).join('');
+}
+
+/* companies list */
+function renderCompanyList(companies) {
+    const list = document.getElementById('companiesList');
+    list.innerHTML = companies.slice(0, 10).map((c, i) => {
+        const initials = c.company.split(' ').map(w => w[0]).join('').toUpperCase().substring(0,2);
+        const bg = PALETTE[i % PALETTE.length];
+        return `<div class="company-row">
+            <div class="company-logo" style="background:${bg};">${initials}</div>
+            <span class="company-name">${c.company}</span>
+            <span class="company-jobs">${c.open_positions} open</span>
+        </div>`;
+    }).join('');
+}
+
+/* freshness */
+function renderFreshness(f) {
+    const config = [
+        { label:'Today',     key:'today',       bg:'rgba(16,185,129,.12)', color:'#10b981' },
+        { label:'This Week', key:'this_week',    bg:'rgba(102,126,234,.12)', color:'#667eea' },
+        { label:'This Month',key:'this_month',  bg:'rgba(245,158,11,.12)', color:'#f59e0b' },
+        { label:'Older',     key:'older',        bg:'rgba(107,114,128,.1)', color:'#6b7280' },
+    ];
+    document.getElementById('freshnessGrid').innerHTML = config.map(c =>
+        `<div class="fresh-card" style="background:${c.bg};color:${c.color};">
+            <div class="fval">${(f[c.key]||0).toLocaleString()}</div>
+            <div class="flabel">${c.label}</div>
+        </div>`
+    ).join('');
+}
+
+/* courses */
+function renderCourses(topSkills) {
+    const topSkillNames = new Set(topSkills.slice(0,12).map(s => s.skill.toLowerCase()));
+    // score each course by how many trending skills it covers
+    const scored = CURATED_COURSES.map(c => ({
+        ...c,
+        score: c.skills.filter(sk => topSkillNames.has(sk.toLowerCase())).length
+    })).sort((a,b) => b.score - a.score);
+
+    document.getElementById('coursesGrid').innerHTML = scored.map(c => `
+        <div class="course-card">
+            <div class="course-card-header">
+                <div class="course-icon" style="background:${c.bg};font-size:1.6rem;">${c.icon}</div>
+                <div>
+                    <h3 style="color:var(--text-primary);">${c.title}</h3>
+                    ${c.score > 0 ? `<span style="font-size:.7rem;background:rgba(16,185,129,.12);color:#10b981;padding:2px 8px;border-radius:8px;font-weight:600;">▲ Trending skill match (${c.score})</span>` : ''}
+                </div>
+            </div>
+            <div class="course-card-body">
+                <p>${c.desc}</p>
+                <div class="course-skills">${c.skills.map(sk =>
+                    `<span class="course-skill-tag" style="${topSkillNames.has(sk.toLowerCase()) ? `background:rgba(16,185,129,.12);color:#10b981;` : ''}">${sk}</span>`
+                ).join('')}</div>
+                <div class="course-links">${c.links.map((l,i) =>
+                    `<a href="${l.url}" target="_blank" rel="noopener" class="course-link ${i>0?'secondary':''}">${l.label}</a>`
+                ).join('')}</div>
+            </div>
+        </div>
+    `).join('');
+}
+
+/* career paths */
+function renderPaths(paths) {
+    const stageColors = ['#667eea','#764ba2','#f59e0b','#10b981','#ef4444'];
+    document.getElementById('pathCards').innerHTML = paths.map((p,pi) => `
+        <div class="path-card">
+            <h3>
+                <span style="background:linear-gradient(135deg,${stageColors[pi%stageColors.length]},${stageColors[(pi+1)%stageColors.length]});-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;">${p.name}</span>
+            </h3>
+            ${p.stages.map((s,si) => `
+                <div class="path-stage">
+                    <div class="stage-dot" style="background:${stageColors[si%stageColors.length]};"></div>
+                    <div style="flex:1;">
+                        <div style="font-weight:600;">${s.role}</div>
+                        <div style="color:var(--text-secondary);font-size:.7rem;">${s.skills.slice(0,3).join(' · ')}</div>
+                    </div>
+                    ${s.available_jobs ? `<span style="font-size:.68rem;color:var(--text-secondary);">${s.available_jobs} jobs</span>` : ''}
+                </div>
+            `).join('')}
+            ${p.avg_salary_progression ? `<div class="path-salary">💰 ${p.avg_salary_progression.join(' → ')}</div>` : ''}
+        </div>
+    `).join('');
+}
+
+/* ================================================================
+   MAIN DATA LOADER
+   ================================================================ */
+async function loadTrends() {
+    try {
+        const [trendRes, statsRes] = await Promise.all([
+            fetch('/api/trending'),
+            fetch('/api/stats')
+        ]);
+        const trends = await trendRes.json();
+        const stats  = await statsRes.json();
+
+        /* KPIs */
+        document.getElementById('kpiTotal').textContent    = (trends.total_jobs || stats.total_jobs || 0).toLocaleString();
+        document.getElementById('kpiSkills').textContent   = (trends.skills?.total_unique || '—');
+        document.getElementById('kpiRemote').textContent   = (trends.locations?.remote_percentage || 0) + '%';
+        document.getElementById('kpiCompanies').textContent = (trends.companies?.total_unique || '—');
+        document.getElementById('kpiFresh').textContent    = (trends.freshness?.today || 0);
+
+        /* Skills */
+        const skills = trends.skills?.top_25 || trends.top_skills?.map(s=>({skill:s.skill,count:s.count,percentage:0})) || [];
+        if (skills.length) {
+            renderSkillsBar(skills);
+            renderSkillTagCloud(skills);
+            renderCourses(skills);
+        }
+
+        /* Categories */
+        const cats = trends.categories?.distribution || Object.entries(stats.categories||{}).map(([category,count])=>({category,count}));
+        if (cats.length) renderCategoriesChart(cats);
+
+        /* Roles */
+        const roles = trends.roles?.top_20 || [];
+        if (roles.length) renderRolesChart(roles);
+
+        /* Job types from stats */
+        if (stats.types) renderJobTypeChart(stats.types);
+
+        /* Companies */
+        const companies = trends.companies?.top_30 || [];
+        if (companies.length) {
+            renderCompanyList(companies);
+            renderCompaniesChart(companies);
+        }
+
+        /* Freshness */
+        if (trends.freshness) renderFreshness(trends.freshness);
+
+        /* Hot skill combos */
+        const combos = trends.hot_combinations || [];
+        if (combos.length) renderCombosChart(combos);
+
+        /* Career paths */
+        const paths = trends.career_paths || [];
+        if (paths.length) renderPaths(paths);
+
+    } catch(err) {
+        console.error('Failed to load trends:', err);
+        document.getElementById('kpiTotal').textContent = 'Error';
+    }
+}
+
+document.addEventListener('DOMContentLoaded', loadTrends);
+</script>
+
+{% endblock %}

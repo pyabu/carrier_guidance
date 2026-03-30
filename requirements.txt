@@ -1,0 +1,24 @@
+flask==3.0.0
+requests==2.31.0
+beautifulsoup4==4.12.2
+flask-cors==4.0.0
+apscheduler==3.10.4
+lxml==5.1.0
+openai>=1.0.0
+supabase>=2.3.4
+
+# Anti-blocking / stealth scraping
+cloudscraper>=1.2.71
+fake-useragent>=2.0.0
+
+# Scrapy scraping engine
+Scrapy>=2.11.0
+scrapy-user-agents>=0.1.1
+
+# AI enrichment (Google Gemini – free tier)
+google-generativeai>=0.8.0
+pytz>=2023.3
+
+# Google OAuth
+authlib>=1.3.0
+python-dotenv>=1.0.0

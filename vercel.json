@@ -1,0 +1,37 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxDuration": 60,
+        "maxLambdaSize": "512mb",
+        "includeFiles": ["templates/**", "static/**", "data/**"]
+      }
+    }
+  ],
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "app.py"
+    }
+  ],
+  "crons": [
+    {
+      "path": "/api/cron/scraper",
+      "schedule": "0 0 * * *"
+    },
+    {
+      "path": "/api/cron/tn",
+      "schedule": "30 0 * * *"
+    },
+    {
+      "path": "/api/cron/india",
+      "schedule": "0 1 * * *"
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+{% block title %}FAQ | Frequently Asked Questions | CareerGuidance{% endblock %}
+{% block meta_desc %}Find answers to common questions about Indian job listings, career roadmaps, resume building, and how to use CareerGuidance effectively.{% endblock %}
+{% block meta_keywords %}CareerGuidance FAQ, Job Search Help, Career Roadmap Questions, Resume Builder Help{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> FAQ</div>
+        <h1>❓ Frequently Asked Questions</h1>
+        <p>Find answers to the most common questions about Careerguidance</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="faq-list">
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What is Careerguidance?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>CareerGuidance is India's all-in-one career guidance and job portal that helps Indian students, freshers, and professionals. We provide job listings from top Indian & global companies (scraped daily), career roadmaps for B.Tech/MCA/BCA graduates, resume building tools tailored for the Indian market, campus placement preparation guides, and AI-powered career recommendations — all completely free.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is Careerguidance free to use?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes! All core features including job browsing, career guidance, resume builder, and career roadmaps are completely free for Indian students and professionals. We believe every Indian engineering student deserves quality career guidance regardless of their college tier. We plan to offer premium features like AI resume analysis and advanced analytics in the future.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How often are job listings updated?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Our AI-powered job scraper runs every 24 hours, pulling fresh job listings from multiple sources including Indian company career pages (TCS, Infosys, Flipkart, Razorpay, etc.), global job boards, LinkedIn, and API feeds. Jobs are available across 14+ Indian cities including Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai, and more. This ensures you always see the latest opportunities in the Indian job market.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How do I apply for a job?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>When you find a job you're interested in, click the "Apply Now" button on the job card or detail page. This will redirect you to the company's official application page where you can submit your application directly. We recommend using our Resume Builder to create an ATS-friendly resume first!</p>
+                </div>
+            </div>
+
+
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    What career roadmaps are available?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>We offer detailed career roadmaps for: AI/Machine Learning, Full Stack Web Development, Data Science & Analytics, Cloud & DevOps, Mobile App Development, and Cybersecurity. Each roadmap includes step-by-step learning paths with Indian platforms like NPTEL, GeeksforGeeks, CodeChef & Internshala, recommended resources, tips for campus placements, and related job opportunities in India.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How does the AI Career Suggestion feature work?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Our AI analyzes your skills, interests, and current market trends to provide personalized career recommendations. It matches your profile against thousands of job roles to show you career paths with the highest compatibility scores.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    Is my data safe and private?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>Yes, we take data privacy seriously. Your personal information is encrypted and never shared with third parties without your consent. You can read our full <a href="/privacy">Privacy Policy</a> for detailed information about how we handle your data.</p>
+                </div>
+            </div>
+
+            <div class="faq-item" data-aos="fade-up">
+                <button class="faq-question" onclick="toggleFaq(this)">
+                    How can I contact support?
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="faq-answer">
+                    <p>You can reach us through our <a href="/contact">Contact page</a>, email us at support@careerguidance.com, or call us at +91 98765 43210. We respond to all inquiries within 24 hours during business hours (Mon-Fri, 9AM-6PM IST).</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Still have questions?</h2>
+        <p>Our support team is always here to help you.</p>
+        <a href="/contact" class="btn btn-white btn-lg"><i class="fas fa-envelope"></i> Contact Support</a>
+    </div>
+</section>
+
+<script>
+function toggleFaq(btn) {
+    const item = btn.parentElement;
+    const wasActive = item.classList.contains('active');
+    // Close all
+    document.querySelectorAll('.faq-item').forEach(i => i.classList.remove('active'));
+    // Toggle clicked
+    if (!wasActive) item.classList.add('active');
+}
+</script>
+{% endblock %}

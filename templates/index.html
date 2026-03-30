@@ -1,0 +1,697 @@
+{% extends "base.html" %}
+{% block title %}Home{% endblock %}
+
+{% block content %}
+
+<!-- ═══════════ HERO ═══════════ -->
+<section class="hero">
+    <div class="container">
+        <div class="hero-content">
+            <span class="section-badge">🚀 #1 Career Platform for Indian Students & Professionals</span>
+            <h1>Find Your Dream <span id="typedTitle">Career in India</span><span class="typed-cursor">|</span></h1>
+            <p>Discover thousands of job opportunities across Bangalore, Mumbai, Delhi NCR, Hyderabad & more. Get AI-powered career guidance, build your resume, and connect with top Indian & MNC employers — all in one place.</p>
+            
+            <div class="hero-search">
+                <div class="search-field">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="heroKeyword" placeholder="Job title, skill, or company" />
+                </div>
+                <div class="search-field">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <input type="text" id="heroLocation" placeholder="Bangalore, Mumbai, Remote..." data-autocomplete="location" autocomplete="off" />
+                </div>
+                <button class="btn btn-primary" id="heroSearchBtn" onclick="heroSearch()">
+                    <i class="fas fa-search"></i> Search Jobs
+                </button>
+            </div>
+
+            <!-- Quick search suggestions -->
+            <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;justify-content:center;">
+                <span style="font-size:.78rem;color:rgba(255,255,255,.5);">Popular:</span>
+                <a onclick="quickSearch('Python Developer')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Python Developer</a>
+                <a onclick="quickSearch('Data Analyst')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Data Analyst</a>
+                <a onclick="quickSearch('React Developer')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">React Developer</a>
+                <a onclick="quickSearch('DevOps')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">DevOps</a>
+                <a onclick="quickSearch('Internship')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Internship</a>
+                <a onclick="quickSearch('Fresher')" style="cursor:pointer;font-size:.75rem;padding:3px 12px;border-radius:20px;background:rgba(255,255,255,.1);color:rgba(255,255,255,.7);text-decoration:none;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.2)'" onmouseout="this.style.background='rgba(255,255,255,.1)'">Fresher</a>
+            </div>
+
+            <div class="hero-stats">
+                <div class="stat">
+                    <div class="stat-number" id="totalJobs">{{ total_jobs or '10,000' }}+</div>
+                    <div class="stat-label">Active Jobs in India</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{{ total_companies or '500' }}+</div>
+                    <div class="stat-label">Indian & MNC Companies</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">{{ total_cities or '50' }}+</div>
+                    <div class="stat-label">Cities Covered</div>
+                </div>
+                <div class="stat">
+                    <div class="stat-number">95%</div>
+                    <div class="stat-label">Placement Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ SEARCH RESULTS (Hidden by default, shown on search) ═══════════ -->
+<section id="heroSearchResults" style="display:none;background:var(--bg-secondary);padding:40px 0;">
+    <div class="container">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+            <div>
+                <h2 style="margin:0;font-size:1.3rem;" id="searchResultsTitle">Search Results</h2>
+                <p id="searchResultsSubtitle" style="margin:4px 0 0;font-size:.82rem;color:var(--text-secondary);">Searching across all job sources...</p>
+            </div>
+            <button onclick="closeSearchResults()" class="btn btn-ghost btn-sm" style="font-size:.82rem;">
+                <i class="fas fa-times"></i> Close Results
+            </button>
+        </div>
+
+        <!-- Source tabs -->
+        <div id="searchSourceTabs" style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;"></div>
+
+        <!-- Job cards grid -->
+        <div id="searchJobsGrid" class="jobs-grid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;"></div>
+
+        <!-- View more links -->
+        <div id="searchMoreLinks" style="display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap;"></div>
+    </div>
+</section>
+
+<!-- ═══════════ FEATURED JOBS ═══════════ -->
+<section class="section-alt" id="featuredJobs">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🔥 Hot Openings</span>
+            <h2>Featured Job Listings</h2>
+            <p class="section-subtitle">Handpicked opportunities from top companies, updated daily via our AI scraper</p>
+        </div>
+
+        <div class="jobs-grid" id="featuredJobsGrid">
+            {% if featured_jobs %}
+                {% for job in featured_jobs %}
+                <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='/job/{{ job.id }}'">
+                    <div class="job-card-header">
+                        <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
+                        <div class="job-card-info">
+                            <h3>{{ job.title }}</h3>
+                            <span class="job-card-company">{{ job.company }}</span>
+                        </div>
+                    </div>
+                    <div class="job-card-meta">
+                        <span><i class="fas fa-map-marker-alt"></i> {{ job.location }}</span>
+                        <span><i class="fas fa-briefcase"></i> {{ job.type }}</span>
+                        <span><i class="fas fa-layer-group"></i> {{ job.experience }}</span>
+                    </div>
+                    <div class="job-card-skills">
+                        {% for skill in job.skills[:4] %}
+                        <span class="skill-tag">{{ skill }}</span>
+                        {% endfor %}
+                    </div>
+                    <div class="job-card-footer">
+                        <span class="job-salary">{{ job.salary_min }} – {{ job.salary_max }}</span>
+                        <div class="job-card-actions">
+                            <button class="btn-save" onclick="event.stopPropagation(); toggleSave(this)" title="Save Job">
+                                <i class="far fa-heart"></i>
+                            </button>
+                            <a href="{{ job.apply_url }}" class="btn-apply" target="_blank" onclick="event.stopPropagation()">Apply Now</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Skeleton loaders while loading -->
+                {% for i in range(6) %}
+                <div class="skeleton skeleton-card"></div>
+                {% endfor %}
+            {% endif %}
+        </div>
+
+        <div class="text-center mt-4" data-aos="fade-up">
+            <a href="/jobs" class="btn btn-primary btn-lg">
+                <i class="fas fa-th-list"></i> Browse All Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ ALL INDIA JOBS ═══════════ -->
+<section style="background:linear-gradient(135deg,#0c0c1d 0%,#1a1a40 40%,#270082 80%,#7a00cc 100%);padding:60px 0;">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up" style="margin-bottom:32px;">
+            <span class="section-badge" style="background:rgba(255,153,0,.2);color:#ff9933;">🇮🇳 AI-Powered</span>
+            <h2 style="color:#fff;">All India Job Portal</h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,.6);">500+ AI-organized jobs from 8+ portals across all 28 states & 8 union territories. Auto-updated every 12 hours.</p>
+        </div>
+
+        <!-- India Stats -->
+        <div data-aos="fade-up" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:14px;margin-bottom:28px;">
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaTotal" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Total Jobs</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaStates" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">States & UTs</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaCities" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Cities</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaCompanies" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Companies</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaFresher" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Fresher / Entry</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeIndiaRemote" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Remote / Hybrid</div>
+            </div>
+        </div>
+
+        <!-- Top India Cities Quick Links -->
+        <div data-aos="fade-up" data-aos-delay="100" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;">
+            <a href="/jobs/india" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,153,0,.3);color:#fff;text-decoration:none;border:1px solid rgba(255,153,0,.4);transition:all .2s;" onmouseover="this.style.background='#ff9933'" onmouseout="this.style.background='rgba(255,153,0,.3)'"><i class="fas fa-globe-asia"></i> All India</a>
+            <a href="/jobs/india?city=Bangalore" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Bangalore</a>
+            <a href="/jobs/india?city=Mumbai" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Mumbai</a>
+            <a href="/jobs/india?city=Delhi+NCR" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Delhi NCR</a>
+            <a href="/jobs/india?city=Hyderabad" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Hyderabad</a>
+            <a href="/jobs/india?city=Chennai" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Chennai</a>
+            <a href="/jobs/india?city=Pune" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Pune</a>
+            <a href="/jobs/india?city=Kolkata" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Kolkata</a>
+        </div>
+
+        <!-- AI Features row -->
+        <div data-aos="fade-up" data-aos-delay="150" style="display:flex;gap:16px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;">
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:8px;font-size:.78rem;color:rgba(255,255,255,.7)"><i class="fas fa-robot" style="color:#ff9933"></i> AI-Organized</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:8px;font-size:.78rem;color:rgba(255,255,255,.7)"><i class="fas fa-sync-alt" style="color:#ff9933"></i> Auto-Updated 12h</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:8px;font-size:.78rem;color:rgba(255,255,255,.7)"><i class="fas fa-fire" style="color:#ff9933"></i> Trending Detection</div>
+            <div style="background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px 18px;display:flex;align-items:center;gap:8px;font-size:.78rem;color:rgba(255,255,255,.7)"><i class="fas fa-star" style="color:#ff9933"></i> Quality Scored</div>
+        </div>
+
+        <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+            <a href="/jobs/india" class="btn btn-primary btn-lg" style="background:linear-gradient(135deg,#ff9933,#ff6600);border:none;font-size:1rem;padding:14px 32px;">
+                <i class="fas fa-flag"></i> Explore All India Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TAMIL NADU & PONDICHERRY JOBS ═══════════ -->
+<section style="background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);padding:60px 0;">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up" style="margin-bottom:32px;">
+            <span class="section-badge" style="background:rgba(102,126,234,.2);color:#667eea;">🗺️ Regional Focus</span>
+            <h2 style="color:#fff;">Tamil Nadu & Pondicherry Jobs</h2>
+            <p class="section-subtitle" style="color:rgba(255,255,255,.6);">Auto-fetched jobs from LinkedIn, Naukri, Indeed & more — across 55+ cities in TN & Pondicherry</p>
+        </div>
+
+        <!-- TN Stats -->
+        <div data-aos="fade-up" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:28px;">
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeTnTotal" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Total Jobs</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeTnCities" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Cities</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeTnCompanies" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Companies</div>
+            </div>
+            <div style="background:rgba(255,255,255,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:18px;text-align:center;">
+                <div id="homeTnFresher" style="font-size:1.8rem;font-weight:800;color:#fff;">—</div>
+                <div style="font-size:.7rem;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:1px;">Fresher / Entry</div>
+            </div>
+        </div>
+
+        <!-- Top TN Cities Quick Links -->
+        <div data-aos="fade-up" data-aos-delay="100" style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-bottom:28px;">
+            <a href="/jobs/tamilnadu" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(102,126,234,.2);color:#fff;text-decoration:none;border:1px solid rgba(102,126,234,.3);transition:all .2s;" onmouseover="this.style.background='#667eea'" onmouseout="this.style.background='rgba(102,126,234,.2)'"><i class="fas fa-globe-asia"></i> All Cities</a>
+            <a href="/jobs/tamilnadu?city=Chennai" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Chennai</a>
+            <a href="/jobs/tamilnadu?city=Coimbatore" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Coimbatore</a>
+            <a href="/jobs/tamilnadu?city=Madurai" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Madurai</a>
+            <a href="/jobs/tamilnadu?city=Tiruchirappalli" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Trichy</a>
+            <a href="/jobs/tamilnadu?city=Salem" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Salem</a>
+            <a href="/jobs/tamilnadu?city=Puducherry" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Puducherry</a>
+            <a href="/jobs/tamilnadu?city=Tirunelveli" style="padding:8px 18px;border-radius:20px;font-size:.82rem;font-weight:500;background:rgba(255,255,255,.06);color:rgba(255,255,255,.8);text-decoration:none;border:1px solid rgba(255,255,255,.1);transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,.15)'" onmouseout="this.style.background='rgba(255,255,255,.06)'">Tirunelveli</a>
+        </div>
+
+        <div class="text-center" data-aos="fade-up" data-aos-delay="200">
+            <a href="/jobs/tamilnadu" class="btn btn-primary btn-lg" style="background:linear-gradient(135deg,#667eea,#764ba2);border:none;">
+                <i class="fas fa-map-marked-alt"></i> Explore All TN & Pondicherry Jobs
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ JOB CATEGORIES ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">📂 Explore By Category</span>
+            <h2>Popular Job Categories</h2>
+            <p class="section-subtitle">Find your perfect role across diverse industries and career paths</p>
+        </div>
+        <div class="categories-grid">
+            <a href="/jobs?keyword=software" class="category-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="category-icon"><i class="fas fa-code"></i></div>
+                <h3>Software Development</h3>
+                <p>2,500+ openings</p>
+            </a>
+            <a href="/jobs?keyword=data" class="category-card" data-aos="fade-up" data-aos-delay="150">
+                <div class="category-icon"><i class="fas fa-database"></i></div>
+                <h3>Data Science & AI</h3>
+                <p>1,800+ openings</p>
+            </a>
+            <a href="/jobs?keyword=design" class="category-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="category-icon"><i class="fas fa-paint-brush"></i></div>
+                <h3>UI/UX Design</h3>
+                <p>900+ openings</p>
+            </a>
+            <a href="/jobs?keyword=marketing" class="category-card" data-aos="fade-up" data-aos-delay="250">
+                <div class="category-icon"><i class="fas fa-bullhorn"></i></div>
+                <h3>Digital Marketing</h3>
+                <p>1,200+ openings</p>
+            </a>
+            <a href="/jobs?keyword=cloud" class="category-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="category-icon"><i class="fas fa-cloud"></i></div>
+                <h3>Cloud & DevOps</h3>
+                <p>1,400+ openings</p>
+            </a>
+            <a href="/jobs?keyword=product" class="category-card" data-aos="fade-up" data-aos-delay="350">
+                <div class="category-icon"><i class="fas fa-tasks"></i></div>
+                <h3>Product Management</h3>
+                <p>700+ openings</p>
+            </a>
+            <a href="/jobs?keyword=cyber" class="category-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="category-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Cybersecurity</h3>
+                <p>800+ openings</p>
+            </a>
+            <a href="/jobs?keyword=mobile" class="category-card" data-aos="fade-up" data-aos-delay="450">
+                <div class="category-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Mobile Development</h3>
+                <p>600+ openings</p>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CAREER GUIDANCE ═══════════ -->
+<section class="section-alt">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🧭 Career Guidance</span>
+            <h2>Navigate Your Career Path</h2>
+            <p class="section-subtitle">Expert-curated roadmaps, tips, and resources to accelerate your career growth</p>
+        </div>
+        <div class="guidance-grid">
+            <a href="/career-guidance" class="guidance-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #667eea, #764ba2)">
+                    <div class="overlay"><span>📍 Roadmaps</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Career Roadmaps</h3>
+                    <p>Step-by-step learning paths for AI, Web Dev, Data Science, Cloud, and more.</p>
+                    <span class="read-more">Explore Roadmaps <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            <a href="/resume-builder" class="guidance-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #f093fb, #f5576c)">
+                    <div class="overlay"><span>📝 Resume</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Resume Builder & Tips</h3>
+                    <p>Build ATS-friendly resumes with our builder and get expert advice on standing out.</p>
+                    <span class="read-more">Build Resume <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+            <a href="/career-guidance#interview" class="guidance-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="guidance-card-img" style="background: linear-gradient(135deg, #34c759, #00b4d8)">
+                    <div class="overlay"><span>🎤 Interview</span></div>
+                </div>
+                <div class="guidance-card-body">
+                    <h3>Interview Preparation</h3>
+                    <p>Crack technical and behavioral interviews with curated questions and strategies.</p>
+                    <span class="read-more">Prepare Now <i class="fas fa-arrow-right"></i></span>
+                </div>
+            </a>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ AI FEATURES ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">⚡ AI-Powered</span>
+            <h2>Smart Career Tools</h2>
+            <p class="section-subtitle">Leverage artificial intelligence to supercharge your job search and career</p>
+        </div>
+        <div class="ai-features-grid">
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="100">
+                <div class="ai-feature-icon"><i class="fas fa-brain"></i></div>
+                <h3>AI Career Suggestion</h3>
+                <p>Get personalized career recommendations based on your skills, interests, and market trends.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="200">
+                <div class="ai-feature-icon"><i class="fas fa-file-alt"></i></div>
+                <h3>Resume Analyzer</h3>
+                <p>Upload your resume and get instant AI feedback on improvements, ATS scoring, and formatting.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="300">
+                <div class="ai-feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Skill Gap Analysis</h3>
+                <p>Identify missing skills for your dream job and get curated learning resource recommendations.</p>
+            </div>
+            <div class="ai-feature-card" data-aos="fade-up" data-aos-delay="400">
+                <div class="ai-feature-icon"><i class="fas fa-magic"></i></div>
+                <h3>Job Recommendations</h3>
+                <p>Smart matching algorithm pairs you with the most relevant opportunities automatically.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TOP COMPANIES ═══════════ -->
+<section class="section-alt">
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">🏢 Top Employers</span>
+            <h2>Companies That Hire in India</h2>
+            <p class="section-subtitle">Leading Indian & global companies trust CareerPath Pro to find top talent</p>
+        </div>
+        <div class="companies-grid" data-aos="fade-up" data-aos-delay="200">
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/tcs.com" alt="TCS" onerror="this.src='https://ui-avatars.com/api/?name=TCS&background=2B6CB0&color=fff'">
+                <h4>TCS</h4>
+                <p>250+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys" onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
+                <h4>Infosys</h4>
+                <p>200+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro" onerror="this.src='https://ui-avatars.com/api/?name=W&background=3F1D8E&color=fff'">
+                <h4>Wipro</h4>
+                <p>150+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart" onerror="this.src='https://ui-avatars.com/api/?name=F&background=F7C948&color=000'">
+                <h4>Flipkart</h4>
+                <p>80+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay" onerror="this.src='https://ui-avatars.com/api/?name=R&background=0A62C9&color=fff'">
+                <h4>Razorpay</h4>
+                <p>60+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/google.com" alt="Google India" onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
+                <h4>Google India</h4>
+                <p>120+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India" onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
+                <h4>Microsoft India</h4>
+                <p>95+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India" onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
+                <h4>Amazon India</h4>
+                <p>180+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy" onerror="this.src='https://ui-avatars.com/api/?name=S&background=FC8019&color=fff'">
+                <h4>Swiggy</h4>
+                <p>50+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato" onerror="this.src='https://ui-avatars.com/api/?name=Z&background=E23744&color=fff'">
+                <h4>Zomato</h4>
+                <p>45+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks" onerror="this.src='https://ui-avatars.com/api/?name=FW&background=16C172&color=fff'">
+                <h4>Freshworks</h4>
+                <p>70+ openings</p>
+            </div>
+            <div class="company-card">
+                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe" onerror="this.src='https://ui-avatars.com/api/?name=P&background=5F259F&color=fff'">
+                <h4>PhonePe</h4>
+                <p>40+ openings</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ TESTIMONIALS ═══════════ -->
+<section>
+    <div class="container">
+        <div class="section-header" data-aos="fade-up">
+            <span class="section-badge">💬 Success Stories</span>
+            <h2>What Our Users Say</h2>
+            <p class="section-subtitle">Real stories from students and professionals who transformed their careers</p>
+        </div>
+        <div class="testimonials-grid">
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <p>CareerPath Pro helped me land my dream job at Google Bangalore. The career roadmap and resume tips were absolute game-changers for my campus placement preparation!</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">AK</div>
+                    <div>
+                        <h4>Arjun Kumar</h4>
+                        <span>SDE at Google, Bangalore</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <p>As a B.Tech fresher from a Tier-2 college, I was lost. The career guidance section gave me a clear path — from learning Python to cracking my first Data Science role at Amazon Hyderabad.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">SP</div>
+                    <div>
+                        <h4>Sneha Patel</h4>
+                        <span>Data Analyst at Amazon, Hyderabad</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                <p>We posted 5 positions and got 200+ quality applicants from IITs, NITs, and top engineering colleges within a week. The platform's reach across India is impressive.</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">RM</div>
+                    <div>
+                        <h4>Rajesh Mehta</h4>
+                        <span>HR Director at TCS, Mumbai</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="100">
+                <p>After graduating from NIT Warangal, I used this platform for 3 months — the GATE preparation resources and off-campus job listings helped me bag an offer at Infosys with ₹12 LPA!</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">PD</div>
+                    <div>
+                        <h4>Priya Deshmukh</h4>
+                        <span>Systems Engineer at Infosys, Pune</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="200">
+                <p>The resume builder is perfectly tailored for Indian job market. It helped me create an ATS-friendly CV that got shortlisted at Flipkart, Swiggy, and Razorpay!</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">VR</div>
+                    <div>
+                        <h4>Vikram Rao</h4>
+                        <span>Backend Developer at Flipkart, Bangalore</span>
+                    </div>
+                </div>
+            </div>
+            <div class="testimonial-card" data-aos="fade-up" data-aos-delay="300">
+                <p>As a mother returning to work after a 4-year career break, the career guidance and fresher-friendly listings helped me restart my journey at Zoho, Chennai. Truly inclusive platform!</p>
+                <div class="testimonial-author">
+                    <div class="testimonial-avatar">AN</div>
+                    <div>
+                        <h4>Anita Nair</h4>
+                        <span>QA Engineer at Zoho, Chennai</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ═══════════ CTA ═══════════ -->
+<section class="cta-section">
+    <div class="container" data-aos="fade-up">
+        <h2>Ready to Launch Your Career in India?</h2>
+        <p>Join 50,000+ Indian professionals already using CareerPath Pro to advance their careers across Bangalore, Mumbai, Delhi, Hyderabad & beyond.</p>
+        <div class="cta-buttons">
+            <a href="/jobs" class="btn btn-white btn-lg"><i class="fas fa-search"></i> Find Jobs</a>
+            <a href="/career-guidance" class="btn btn-outline btn-lg" style="border-color:white; color:white"><i class="fas fa-compass"></i> Career Guidance</a>
+        </div>
+    </div>
+</section>
+
+<script>
+/* ═══════════ HERO SEARCH — searches ALL sources, shows results inline ═══════════ */
+function heroSearch() {
+    const keyword = document.getElementById('heroKeyword').value.trim();
+    const location = document.getElementById('heroLocation').value.trim();
+    if (!keyword && !location) return;
+
+    const btn = document.getElementById('heroSearchBtn');
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Searching...';
+    btn.disabled = true;
+
+    const params = new URLSearchParams();
+    if (keyword) params.set('keyword', keyword);
+    if (location) params.set('location', location);
+    params.set('per_page', '30');
+
+    fetch('/api/jobs/search-all?' + params.toString())
+        .then(r => r.json())
+        .then(data => {
+            btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
+            btn.disabled = false;
+            showSearchResults(data, keyword, location);
+        })
+        .catch(e => {
+            btn.innerHTML = '<i class="fas fa-search"></i> Search Jobs';
+            btn.disabled = false;
+            // Fallback: redirect to /jobs page
+            let url = '/jobs?';
+            if (keyword) url += 'keyword=' + encodeURIComponent(keyword) + '&';
+            if (location) url += 'location=' + encodeURIComponent(location);
+            window.location.href = url;
+        });
+}
+
+function quickSearch(term) {
+    document.getElementById('heroKeyword').value = term;
+    document.getElementById('heroLocation').value = '';
+    heroSearch();
+}
+
+function showSearchResults(data, keyword, location) {
+    const section = document.getElementById('heroSearchResults');
+    const grid = document.getElementById('searchJobsGrid');
+    const tabs = document.getElementById('searchSourceTabs');
+    const links = document.getElementById('searchMoreLinks');
+    const jobs = data.jobs || [];
+    const total = data.total || 0;
+    const sources = data.sources || {};
+    const query = [keyword, location].filter(Boolean).join(' in ');
+
+    document.getElementById('searchResultsTitle').innerHTML =
+        '<i class="fas fa-search" style="color:#667eea"></i> ' + total + ' Jobs Found' + (query ? ' for "<strong>' + escH(query) + '</strong>"' : '');
+    document.getElementById('searchResultsSubtitle').innerHTML =
+        'From ' + (sources.main||0) + ' global + ' + (sources.india||0) + ' India + ' + (sources.tamilnadu||0) + ' TN jobs';
+
+    // Source tabs
+    tabs.innerHTML = '';
+    if (sources.main > 0) tabs.innerHTML += '<a href="/jobs?keyword=' + encodeURIComponent(keyword||'') + (location?'&location='+encodeURIComponent(location):'') + '" style="padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;background:#667eea;color:#fff;text-decoration:none;"><i class="fas fa-globe"></i> Global (' + sources.main + ')</a>';
+    if (sources.india > 0) tabs.innerHTML += '<a href="/jobs/india?keyword=' + encodeURIComponent(keyword||'') + (location?'&city='+encodeURIComponent(location):'') + '" style="padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;background:#ff9933;color:#fff;text-decoration:none;"><i class="fas fa-flag"></i> 🇮🇳 India (' + sources.india + ')</a>';
+    if (sources.tamilnadu > 0) tabs.innerHTML += '<a href="/jobs/tamilnadu?keyword=' + encodeURIComponent(keyword||'') + (location?'&city='+encodeURIComponent(location):'') + '" style="padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;background:#764ba2;color:#fff;text-decoration:none;"><i class="fas fa-map"></i> TN (' + sources.tamilnadu + ')</a>';
+
+    // Render job cards
+    if (jobs.length === 0) {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:40px;"><i class="fas fa-search" style="font-size:2rem;color:var(--text-tertiary);"></i><h3 style="margin-top:12px;">No jobs found</h3><p style="color:var(--text-secondary);">Try different keywords or location.</p></div>';
+    } else {
+        grid.innerHTML = jobs.map(function(j) { return searchJobCard(j); }).join('');
+    }
+
+    // View more links
+    const kw = encodeURIComponent(keyword||'');
+    const loc = encodeURIComponent(location||'');
+    links.innerHTML =
+        '<a href="/jobs?keyword=' + kw + '&location=' + loc + '" class="btn btn-primary" style="font-size:.88rem;"><i class="fas fa-th-list"></i> View All ' + total + ' Results</a>' +
+        '<a href="/jobs/india?keyword=' + kw + (location?'&city='+loc:'') + '" class="btn btn-outline" style="font-size:.88rem;border-color:#ff9933;color:#ff9933;"><i class="fas fa-flag"></i> Search India Jobs</a>' +
+        '<a href="/jobs/tamilnadu?keyword=' + kw + (location?'&city='+loc:'') + '" class="btn btn-outline" style="font-size:.88rem;border-color:#764ba2;color:#764ba2;"><i class="fas fa-map"></i> Search TN Jobs</a>';
+
+    section.style.display = 'block';
+    section.scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function searchJobCard(j) {
+    const logo = j.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50');
+    const fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50';
+    const skills = (j.skills||[]).slice(0,4).map(function(s){return '<span class="skill-tag">'+escH(s)+'</span>';}).join('');
+    const salary = j.salary_min ? (escH(j.salary_min) + (j.salary_max ? ' – ' + escH(j.salary_max) : '')) : '';
+    const loc = j.location_city ? escH(j.location_city) + (j.location_state ? ', ' + escH(j.location_state) : '') : escH(j.location||'India');
+    const applyUrl = j.apply_url && j.apply_url !== '#' ? j.apply_url : '/job/' + j.id + '?source=' + (j.source_db||'main');
+    // Build detail page URL with source hint so /job/<id> route knows which DB to search
+    const srcDb = j.source_db || 'main';
+    const detailUrl = '/job/' + (j.id||0) + '?source=' + srcDb;
+    const srcColors = {'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Internshala':'#00BCD4','TimesJobs':'#9C27B0','Foundit':'#FF5722','Freshersworld':'#FF9800','Himalayas':'#8b5cf6','Remotive':'#00D4AA','CareerPath Pro':'#667eea'};
+    const srcClr = srcColors[j.source] || '#667eea';
+    const postedBadge = j.posted_date ? '<span style="font-size:.68rem;color:var(--text-tertiary);"><i class="far fa-clock"></i> ' + j.posted_date + '</span>' : '';
+    const scoreBadge = j.composite_score > 70 ? '<span style="background:#10b981;color:#fff;font-size:.6rem;padding:1px 6px;border-radius:8px;">★ ' + Math.round(j.composite_score) + '</span> ' : '';
+
+    return '<div class="job-card fade-in" style="cursor:pointer;" onclick="window.location=\'' + detailUrl + '\'">'
+        + '<div class="job-card-header">'
+        +   '<img src="' + logo + '" alt="' + escH(j.company||'') + '" class="job-card-logo" onerror="this.src=\'' + fallback + '\'">'
+        +   '<div class="job-card-info"><h3>' + escH(j.title||'Untitled') + ' ' + scoreBadge + '</h3><span class="job-card-company">' + escH(j.company||'') + '</span></div>'
+        + '</div>'
+        + '<div class="job-card-meta">'
+        +   '<span><i class="fas fa-map-marker-alt"></i> ' + loc + '</span>'
+        +   '<span><i class="fas fa-briefcase"></i> ' + escH(j.type||'Full-time') + '</span>'
+        +   '<span><i class="fas fa-layer-group"></i> ' + escH(j.experience||'') + '</span>'
+        + '</div>'
+        + '<div class="job-card-skills">' + skills + '</div>'
+        + '<div class="job-card-footer">'
+        +   '<div>' + (salary ? '<span class="job-salary">' + salary + '</span> ' : '') + postedBadge + '</div>'
+        +   '<div class="job-card-actions">'
+        +     '<span style="background:'+srcClr+';color:#fff;font-size:.65rem;padding:2px 8px;border-radius:20px;margin-right:4px">' + escH(j.source||'') + '</span>'
+        +     '<a href="' + applyUrl + '" class="btn-apply" target="_blank" onclick="event.stopPropagation()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:6px 16px;border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem"></i></a>'
+        +   '</div>'
+        + '</div></div>';
+}
+
+function closeSearchResults() {
+    document.getElementById('heroSearchResults').style.display = 'none';
+}
+
+function escH(s) { var d = document.createElement('div'); d.textContent = s||''; return d.innerHTML; }
+
+document.getElementById('heroKeyword')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
+document.getElementById('heroLocation')?.addEventListener('keypress', (e) => { if (e.key==='Enter') heroSearch(); });
+
+/* Load TN Stats for Homepage */
+(async function loadHomeTNStats() {
+    try {
+        var resp = await fetch('/api/jobs/tamilnadu/stats');
+        var data = await resp.json();
+        var el = function(id) { return document.getElementById(id); };
+        if (el('homeTnTotal')) el('homeTnTotal').textContent = (data.total_jobs || 0).toLocaleString();
+        if (el('homeTnCities')) el('homeTnCities').textContent = data.unique_cities || 0;
+        if (el('homeTnCompanies')) el('homeTnCompanies').textContent = data.unique_companies || 0;
+        if (el('homeTnFresher')) el('homeTnFresher').textContent = data.fresher_jobs || 0;
+    } catch(e) { console.warn('TN stats load failed:', e); }
+})();
+
+/* Load India Stats for Homepage */
+(async function loadHomeIndiaStats() {
+    try {
+        var resp = await fetch('/api/jobs/india/stats');
+        var data = await resp.json();
+        var el = function(id) { return document.getElementById(id); };
+        if (el('homeIndiaTotal')) el('homeIndiaTotal').textContent = (data.total_jobs || 0).toLocaleString();
+        if (el('homeIndiaStates')) el('homeIndiaStates').textContent = data.unique_states || '36';
+        if (el('homeIndiaCities')) el('homeIndiaCities').textContent = data.unique_cities || '200+';
+        if (el('homeIndiaCompanies')) el('homeIndiaCompanies').textContent = data.unique_companies || '150+';
+        if (el('homeIndiaFresher')) el('homeIndiaFresher').textContent = (data.fresher_jobs || 0).toLocaleString();
+        if (el('homeIndiaRemote')) el('homeIndiaRemote').textContent = (data.remote_jobs || 0).toLocaleString();
+    } catch(e) { console.warn('India stats load failed:', e); }
+})();
+</script>
+
+
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Contact Us | CareerGuidance - Get Support & Guidance{% endblock %}
+{% block meta_desc %}Have questions or need support? Contact the CareerGuidance team for inquiries about job listings, career roadmaps, or technical assistance.{% endblock %}
+{% block meta_keywords %}Contact CareerGuidance, Support, Help India Jobs, Career Inquiry{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <div class="container">
+        <div class="breadcrumb"><a href="/">Home</a> <i class="fas fa-chevron-right"></i> Contact</div>
+        <h1>📬 Contact Us</h1>
+        <p>Have questions? We'd love to hear from you. Send us a message and we'll respond within 24 hours.</p>
+    </div>
+</div>
+
+<section>
+    <div class="container">
+        <div class="contact-grid">
+            <!-- Contact Info -->
+            <div class="contact-info-cards" data-aos="fade-right">
+                <div class="contact-info-card">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <h4>Email</h4>
+                            <p>support@careerguidance.com</p>
+                    </div>
+                </div>
+                <div class="contact-info-card">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h4>Phone</h4>
+                        <p>+91 98765 43210</p>
+                    </div>
+                </div>
+                <div class="contact-info-card">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <h4>Address</h4>
+                        <p>Tech Hub, Bangalore, India 560001</p>
+                    </div>
+                </div>
+                <div class="contact-info-card">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <h4>Working Hours</h4>
+                        <p>Mon – Fri: 9:00 AM – 6:00 PM IST</p>
+                    </div>
+                </div>
+                <div class="contact-info-card">
+                    <i class="fab fa-linkedin-in"></i>
+                    <div>
+                        <h4>Follow Us</h4>
+                        <p>LinkedIn | Twitter | Instagram | GitHub</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Form -->
+            <div class="contact-form" data-aos="fade-left">
+                <h3 style="margin-bottom:20px;"><i class="fas fa-paper-plane text-accent"></i> Send a Message</h3>
+                <form onsubmit="event.preventDefault(); showToast('Message sent successfully! We\'ll get back to you soon.', 'success'); this.reset();">
+                    <div style="display:grid;grid-template-columns:repeat(auto-fit, minmax(200px, 1fr));gap:16px;">
+                        <div class="form-group">
+                            <label>Your Name</label>
+                            <input type="text" class="form-control" placeholder="John Doe" required>
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" class="form-control" placeholder="john@email.com" required>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Subject</label>
+                        <select class="form-control" required>
+                            <option value="">Select a topic</option>
+                            <option>General Inquiry</option>
+                            <option>Job Posting Issue</option>
+                            <option>Career Guidance Help</option>
+                            <option>Technical Support</option>
+                            <option>Partnership / Collaboration</option>
+                            <option>Feedback / Suggestion</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" rows="5" placeholder="Tell us how we can help..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-lg" style="width:100%;">
+                        <i class="fas fa-paper-plane"></i> Send Message
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,1106 @@
+{% extends "base.html" %}
+
+{% block title %}Developers | Meet the Creators of CareerGuidance{% endblock %}
+
+{% block meta_desc %}Meet Abu Saleem and Sindhu Bharathi, the visionaries behind CareerGuidance. Learn about their journey in building India's most student-friendly job portal.{% endblock %}
+{% block meta_keywords %}Abu Saleem, Sindhu Bharathi, CareerGuidance Developers, Tech Founders India, Student Support Visionaries{% endblock %}
+
+{% block extra_head %}
+<!-- SEO Metadata -->
+<meta property="og:title" content="Abu Saleem & Sindhu Bharathi - Developer Team">
+<meta property="og:description" content="View the portfolio and projects of Abu Saleem and Sindhu Bharathi P G, the development team behind CareerGuidance.">
+<meta property="og:type" content="profile">
+<meta property="profile:first_name" content="Abu">
+<meta property="profile:last_name" content="Saleem">
+
+<!-- JSON-LD Structured Data for Person -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Person",
+  "name": "Abu Saleem",
+  "alternateName": "py abu",
+  "jobTitle": "Lead Developer",
+  "url": "https://careerguidance.me/developer",
+  "sameAs": [
+    "https://github.com/pyabu",
+    "https://www.linkedin.com/in/abu-py/"
+  ],
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Pondicherry University"
+  },
+  "knowsAbout": ["Python", "Flask", "Machine Learning", "Android Development", "Web Development"]
+}
+</script>
+
+<!-- JSON-LD Structured Data for Sindhu Bharathi -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org/",
+  "@type": "Person",
+  "name": "Sindhu Bharathi P G",
+  "jobTitle": "Developer",
+  "url": "https://careerguidance.me/developer",
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Pondicherry University"
+  },
+  "knowsAbout": ["Python", "NLP", "Machine Learning", "Data Analysis"]
+}
+</script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+    /* ═══════════════════════════════════════════════════════
+   DEVELOPER PROFILE PAGE — PREMIUM REDESIGN
+═══════════════════════════════════════════════════════ */
+
+    *,
+    *::before,
+    *::after {
+        box-sizing: border-box;
+    }
+
+    .dp {
+        font-family: 'Inter', sans-serif;
+        color: var(--text-primary);
+    }
+
+    /* ─────────────────── HERO BANNER ─────────────────── */
+    .dp-hero {
+        background: #080b1a;
+        padding: 80px 0 70px;
+        position: relative;
+        overflow: hidden;
+        color: #fff; /* Force light text in dark section */
+    }
+
+    /* Glowing orbs */
+    .dp-hero-orb1,
+    .dp-hero-orb2 {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        pointer-events: none;
+        animation: orb-drift 10s ease-in-out infinite alternate;
+    }
+
+    .dp-hero-orb1 {
+        width: 500px;
+        height: 500px;
+        background: radial-gradient(#6d28d9 0%, transparent 70%);
+        opacity: .28;
+        top: -120px;
+        left: -80px;
+    }
+
+    .dp-hero-orb2 {
+        width: 400px;
+        height: 400px;
+        background: radial-gradient(#0e7490 0%, transparent 70%);
+        opacity: .22;
+        bottom: -80px;
+        right: -60px;
+        animation-delay: 4s;
+    }
+
+    @keyframes orb-drift {
+        0% {
+            transform: translate(0, 0);
+        }
+
+        100% {
+            transform: translate(40px, 40px);
+        }
+    }
+
+    /* Dot pattern */
+    .dp-hero::before {
+        content: '';
+        position: absolute;
+        inset: 0;
+        background-image: radial-gradient(rgba(255, 255, 255, 0.07) 1px, transparent 1px);
+        background-size: 32px 32px;
+    }
+
+    .dp-hero-inner {
+        position: relative;
+        z-index: 2;
+        max-width: 760px;
+        margin: 0 auto;
+        padding: 0 28px;
+        text-align: center;
+    }
+
+    .dp-eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(109, 40, 217, .18);
+        border: 1px solid rgba(109, 40, 217, .4);
+        color: #c4b5fd;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 1.8px;
+        text-transform: uppercase;
+        padding: 5px 18px;
+        border-radius: 100px;
+        margin-bottom: 22px;
+    }
+
+    .dp-eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #a78bfa;
+        animation: blink-dot 1.6s ease-in-out infinite;
+    }
+
+    @keyframes blink-dot {
+
+        0%,
+        100% {
+            opacity: 1
+        }
+
+        50% {
+            opacity: .2
+        }
+    }
+
+    .dp-hero-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 900;
+        line-height: 1.1;
+        background: linear-gradient(135deg, #fff 0%, #c4b5fd 45%, #67e8f9 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin: 0 0 16px;
+    }
+
+    .dp-hero-sub {
+        color: rgba(255, 255, 255, 0.7);
+        font-size: 1rem;
+        line-height: 1.7;
+        margin: 0 auto;
+        max-width: 560px;
+    }
+
+    /* ─────────────────── PAGE BODY ─────────────────── */
+    .dp-body {
+        max-width: 1020px;
+        margin: 0 auto;
+        padding: 64px 24px 80px;
+        display: flex;
+        flex-direction: column;
+        gap: 72px;
+    }
+
+    /* ─────────────────── SECTION HEADER ─────────────────── */
+    .dp-sec-head {
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 32px;
+    }
+
+    .dp-sec-icon {
+        width: 44px;
+        height: 44px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.15rem;
+        flex-shrink: 0;
+    }
+
+    .sico-purple {
+        background: rgba(109, 40, 217, .1);
+        color: #7c3aed;
+    }
+
+    .sico-indigo {
+        background: rgba(99, 102, 241, .1);
+        color: #6366f1;
+    }
+
+    .sico-teal {
+        background: rgba(20, 184, 166, .1);
+        color: #0d9488;
+    }
+
+    .dp-sec-head h2 {
+        font-size: 1.25rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0;
+    }
+
+    .dp-sec-rule {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(to right, var(--border), transparent);
+    }
+
+    /* ─────────────────── TEAM GRID ─────────────────── */
+    .team-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+    }
+
+    /* Profile card */
+    .profile-card {
+        background: var(--bg-card);
+        border-radius: 22px;
+        border: 1px solid var(--border);
+        box-shadow: var(--shadow-md);
+        overflow: hidden;
+        display: flex;
+        flex-direction: column;
+        transition: transform .28s ease, box-shadow .28s ease;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-6px);
+        box-shadow: 0 20px 48px rgba(0, 0, 0, .11);
+    }
+
+    /* Coloured top strip */
+    .card-accent {
+        height: 5px;
+    }
+
+    .acc-purple {
+        background: linear-gradient(to right, #7c3aed, #6366f1);
+    }
+
+    .acc-pink {
+        background: linear-gradient(to right, #db2777, #e11d48);
+    }
+
+    /* Photo block */
+    .card-photo-block {
+        padding: 28px 28px 0;
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+    }
+
+    .card-avatar {
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        object-fit: cover;
+        object-position: top;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+        flex-shrink: 0;
+        display: block;
+    }
+
+    .card-avatar-fallback {
+        display: none;
+        width: 88px;
+        height: 88px;
+        border-radius: 50%;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: 900;
+        color: #fff;
+        flex-shrink: 0;
+        border: 3px solid #fff;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .14);
+    }
+
+    .avf-purple {
+        background: linear-gradient(135deg, #7c3aed, #6366f1);
+    }
+
+    .avf-pink {
+        background: linear-gradient(135deg, #db2777, #e11d48);
+    }
+
+    .card-name-block {
+        padding-bottom: 4px;
+    }
+
+    .card-role-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: .8px;
+        text-transform: uppercase;
+        padding: 3px 10px;
+        border-radius: 100px;
+        margin-bottom: 6px;
+    }
+
+    .chip-purple {
+        background: #ede9fe;
+        color: #6d28d9;
+    }
+
+    .chip-pink {
+        background: #fce7f3;
+        color: #be185d;
+    }
+
+    .card-name {
+        font-size: 1.2rem;
+        font-weight: 900;
+        color: var(--text-primary);
+        margin: 0 0 2px;
+    }
+
+    .card-inst {
+        font-size: 0.8rem;
+        color: var(--text-secondary);
+        margin: 0;
+        line-height: 1.4;
+    }
+
+    /* Info body */
+    .card-body {
+        padding: 20px 28px 28px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    /* Links row */
+    .card-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .clink {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 12px;
+        font-weight: 700;
+        padding: 5px 13px;
+        border-radius: 8px;
+        border: 1px solid transparent;
+        text-decoration: none;
+        transition: all .2s;
+    }
+
+    .cl-purple {
+        background: rgba(109, 40, 217, .12);
+        color: #c4b5fd;
+        border: 1px solid rgba(109, 40, 217, .25);
+    }
+    
+    [data-theme="light"] .cl-purple {
+        background: #f5f3ff;
+        color: #6d28d9;
+        border-color: #ddd6fe;
+    }
+    
+    .cl-pink {
+        background: rgba(219, 39, 119, .12);
+        color: #fbcfe8;
+        border: 1px solid rgba(219, 39, 119, .25);
+    }
+
+    [data-theme="light"] .cl-pink {
+        background: #fdf2f8;
+        color: #be185d;
+        border-color: #fbcfe8;
+    }
+    
+    .cl-ghost {
+        background: var(--bg-secondary);
+        color: var(--text-secondary);
+        border: 1px solid var(--border);
+    }
+
+    .clink:hover {
+        background: var(--accent);
+        color: white;
+        text-decoration: none;
+        transform: translateY(-1px);
+    }
+
+    /* Divider */
+    .card-divider {
+        height: 1px;
+        background: var(--border);
+        margin: 0;
+    }
+
+    /* Projects list */
+    .proj-label {
+        font-size: 10.5px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        color: var(--text-tertiary);
+        margin: 0 0 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .proj-item {
+        display: flex;
+        align-items: flex-start;
+        gap: 11px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--border-light);
+    }
+
+    .proj-item:last-child {
+        border-bottom: none;
+    }
+
+    .proj-pip {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 5px;
+    }
+
+    .pip-purple {
+        background: #7c3aed;
+    }
+
+    .pip-blue {
+        background: #3b82f6;
+    }
+
+    .pip-orange {
+        background: #f97316;
+    }
+
+    .pip-rose {
+        background: #e11d48;
+    }
+
+    .pip-teal {
+        background: #0d9488;
+    }
+
+    .pip-green {
+        background: #16a34a;
+    }
+
+    .proj-text-wrap {
+        flex: 1;
+    }
+
+    .proj-title-row {
+        display: flex;
+        align-items: baseline;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-bottom: 3px;
+    }
+
+    .proj-name {
+        font-size: .88rem;
+        font-weight: 700;
+        color: var(--text-primary);
+    }
+
+    .proj-badge {
+        font-size: 10px;
+        font-weight: 600;
+        background: var(--bg-tertiary);
+        color: var(--text-secondary);
+        padding: 1px 8px;
+        border-radius: 5px;
+        white-space: nowrap;
+    }
+
+    .proj-desc {
+        font-size: .78rem;
+        color: var(--text-secondary);
+        line-height: 1.55;
+        margin: 0;
+    }
+
+    /* ─────────────────── FEATURES GRID ─────────────────── */
+    .features-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 16px;
+    }
+
+    .feat-card {
+        background: var(--bg-card);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 22px 20px;
+        box-shadow: var(--shadow-sm);
+        transition: transform .25s, box-shadow .25s;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .feat-card::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+    }
+
+    .feat-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 32px rgba(0, 0, 0, .09);
+    }
+
+    .fc-a::after {
+        background: linear-gradient(to right, #6366f1, #8b5cf6);
+    }
+
+    .fc-b::after {
+        background: linear-gradient(to right, #0d9488, #3b82f6);
+    }
+
+    .fc-c::after {
+        background: linear-gradient(to right, #f59e0b, #ef4444);
+    }
+
+    .fc-d::after {
+        background: linear-gradient(to right, #db2777, #e11d48);
+    }
+
+    .fc-e::after {
+        background: linear-gradient(to right, #16a34a, #0d9488);
+    }
+
+    .fc-f::after {
+        background: linear-gradient(to right, #3b82f6, #6366f1);
+    }
+
+    .fc-g::after {
+        background: linear-gradient(to right, #8b5cf6, #db2777);
+    }
+
+    .fc-h::after {
+        background: linear-gradient(to right, #f97316, #f59e0b);
+    }
+
+    .fc-i::after {
+        background: linear-gradient(to right, #0ea5e9, #16a34a);
+    }
+
+    .feat-ico {
+        width: 46px;
+        height: 46px;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.2rem;
+        margin-bottom: 12px;
+    }
+
+    .fi-a {
+        background: rgba(99, 102, 241, .1);
+        color: #6366f1;
+    }
+
+    .fi-b {
+        background: rgba(13, 148, 136, .1);
+        color: #0d9488;
+    }
+
+    .fi-c {
+        background: rgba(245, 158, 11, .1);
+        color: #d97706;
+    }
+
+    .fi-d {
+        background: rgba(219, 39, 119, .1);
+        color: #be185d;
+    }
+
+    .fi-e {
+        background: rgba(22, 163, 74, .1);
+        color: #15803d;
+    }
+
+    .fi-f {
+        background: rgba(59, 130, 246, .1);
+        color: #2563eb;
+    }
+
+    .fi-g {
+        background: rgba(139, 92, 246, .1);
+        color: #7c3aed;
+    }
+
+    .fi-h {
+        background: rgba(249, 115, 22, .1);
+        color: #ea580c;
+    }
+
+    .fi-i {
+        background: rgba(14, 165, 233, .1);
+        color: #0284c7;
+    }
+
+    .feat-card h5 {
+        font-size: .92rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        margin: 0 0 6px;
+    }
+
+    .feat-card p {
+        font-size: .78rem;
+        color: var(--text-secondary);
+        line-height: 1.6;
+        margin: 0;
+    }
+
+    /* ─────────────────── SKILLS CLOUD ─────────────────── */
+    .skills-wrap {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .sk-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        background: var(--bg-secondary);
+        border: 1px solid var(--border);
+        color: var(--text-secondary);
+        padding: 7px 18px;
+        border-radius: 100px;
+        font-size: 13px;
+        font-weight: 600;
+        transition: all .2s;
+    }
+
+    .sk-pill:hover {
+        background: #f5f3ff;
+        border-color: #ddd6fe;
+        color: #6d28d9;
+        transform: translateY(-1px);
+    }
+
+    .sk-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: currentColor;
+        opacity: .45;
+    }
+
+    /* ─────────────────── RESPONSIVE ─────────────────── */
+    @media (max-width: 900px) {
+        .dp-body {
+            padding: 48px 20px 60px;
+            gap: 56px;
+        }
+
+        .dp-hero-title {
+            font-size: clamp(1.8rem, 5vw, 2.4rem);
+        }
+
+        .dp-hero {
+            padding: 60px 0 50px;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .team-row {
+            grid-template-columns: 1fr;
+        }
+
+        .features-grid {
+            grid-template-columns: 1fr 1fr;
+        }
+
+        .card-photo-block {
+            padding: 24px 24px 0;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            gap: 14px;
+        }
+
+        .card-avatar,
+        .card-avatar-fallback {
+            width: 100px;
+            height: 100px;
+        }
+
+        .card-body {
+            padding: 20px 24px 28px;
+        }
+
+        .card-links {
+            justify-content: center;
+        }
+
+        .proj-name {
+            font-size: 0.95rem;
+        }
+    }
+
+    @media (max-width: 520px) {
+        .features-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dp-hero-title {
+            font-size: 1.6rem;
+        }
+
+        .dp-hero-sub {
+            font-size: 0.9rem;
+        }
+
+        .dp-eyebrow {
+            font-size: 9.5px;
+            padding: 4px 14px;
+        }
+
+        .proj-item {
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .proj-pip {
+            display: none;
+        }
+
+        .proj-title-row {
+            align-items: center;
+            margin-bottom: 5px;
+        }
+
+        .card-photo-block {
+            padding: 20px 20px 0;
+        }
+
+        .card-body {
+            padding: 16px 20px 24px;
+        }
+
+        .feat-card {
+            padding: 20px 18px;
+        }
+
+        .skills-wrap {
+            justify-content: center;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dp">
+
+    <!-- ════════ HERO ════════ -->
+    <section class="dp-hero">
+        <div class="dp-hero-orb1"></div>
+        <div class="dp-hero-orb2"></div>
+        <div class="dp-hero-inner">
+            <div class="dp-eyebrow"><span class="dp-eyebrow-dot"></span> Career Guidance &amp; Job Portal Platform</div>
+            <h1 class="dp-hero-title">CareerGuidance<br>Your Career, Your Future</h1>
+            <p class="dp-hero-sub">
+                A smart job portal built for Indian students &amp; freshers — connecting talent with opportunity through
+                curated listings, career resources, and a seamless hiring experience.
+            </p>
+            <div style="display:flex; justify-content:center; gap:40px; margin-top:36px; flex-wrap:wrap;">
+                <div style="text-align:center;">
+                    <div
+                        style="font-size:1.9rem; font-weight:900; background:linear-gradient(135deg,#c4b5fd,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1;">
+                        1500+</div>
+                    <div
+                        style="font-size:11px; color:rgba(255, 255, 255, 0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px; font-weight:600;">
+                        Jobs Listed</div>
+                </div>
+                <div style="text-align:center;">
+                    <div
+                        style="font-size:1.9rem; font-weight:900; background:linear-gradient(135deg,#c4b5fd,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1;">
+                        9+</div>
+                    <div
+                        style="font-size:11px; color:rgba(255, 255, 255, 0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px; font-weight:600;">
+                        Platform Features</div>
+                </div>
+                <div style="text-align:center;">
+                    <div
+                        style="font-size:1.9rem; font-weight:900; background:linear-gradient(135deg,#c4b5fd,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1;">
+                        2</div>
+                    <div
+                        style="font-size:11px; color:rgba(255, 255, 255, 0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px; font-weight:600;">
+                        Regions Covered</div>
+                </div>
+                <div style="text-align:center;">
+                    <div
+                        style="font-size:1.9rem; font-weight:900; background:linear-gradient(135deg,#c4b5fd,#67e8f9); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; line-height:1;">
+                        Free</div>
+                    <div
+                        style="font-size:11px; color:rgba(255, 255, 255, 0.5); text-transform:uppercase; letter-spacing:1px; margin-top:4px; font-weight:600;">
+                        For Students</div>
+                </div>
+            </div>
+            <div style="margin-top:28px; display:flex; justify-content:center; gap:12px; flex-wrap:wrap;">
+                <a href="{{ url_for('jobs_page') }}"
+                    style="display:inline-flex; align-items:center; gap:8px; background:linear-gradient(135deg,#7c3aed,#6366f1); color:#fff; font-size:13px; font-weight:700; padding:10px 24px; border-radius:10px; text-decoration:none; transition:all .2s;"
+                    onmouseover="this.style.opacity='.88'" onmouseout="this.style.opacity='1'">
+                    <i class="fas fa-briefcase"></i> Browse Jobs
+                </a>
+                <a href="{{ url_for('home') }}"
+                    style="display:inline-flex; align-items:center; gap:8px; background:rgba(255,255,255,.08); color:#e2e8f0; font-size:13px; font-weight:700; padding:10px 24px; border-radius:10px; text-decoration:none; border:1px solid rgba(255,255,255,.15); transition:all .2s;"
+                    onmouseover="this.style.background='rgba(255,255,255,.13)'"
+                    onmouseout="this.style.background='rgba(255,255,255,.08)'">
+                    <i class="fas fa-home"></i> Home
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- ════════ BODY ════════ -->
+    <div class="dp-body">
+
+        <!-- ── TEAM PROFILES ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-purple"><i class="fas fa-users"></i></div>
+                <h2>Core Developer Team</h2>
+                <div class="dp-sec-rule"></div>
+            </div>
+
+            <div class="team-row">
+
+                <!-- ── Abu Saleem ── -->
+                <div class="profile-card">
+                    <div class="card-accent acc-purple"></div>
+
+                    <div class="card-photo-block">
+                        <img src="{{ url_for('static', filename='images/profile.png') }}" alt="Abu Saleem"
+                            class="card-avatar"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="card-avatar-fallback avf-purple">A</div>
+
+                        <div class="card-name-block">
+                            <div class="card-role-chip chip-purple"><i class="fab fa-github fa-xs"></i> pyabu · Lead Dev
+                            </div>
+                            <h3 class="card-name">Abu Saleem</h3>
+                            <p class="card-inst">MSc Computer Science<br>Pondicherry University, India &middot; Batch
+                                2024–2026</p>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-links">
+                            <a href="mailto:abusaleem.dev@gmail.com" class="clink cl-purple"><i
+                                    class="fas fa-envelope"></i> Email</a>
+                            <a href="https://github.com/pyabu" target="_blank" class="clink cl-ghost"><i
+                                    class="fab fa-github"></i> GitHub</a>
+                            <a href="https://www.linkedin.com/in/abu-py/" target="_blank" class="clink cl-ghost"><i
+                                    class="fab fa-linkedin"></i> LinkedIn</a>
+                        </div>
+
+                        <div class="card-divider"></div>
+
+                        <div>
+                            <p class="proj-label"><i class="fas fa-code-branch"></i> Projects</p>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-purple"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">HearAlert</span>
+                                        <span class="proj-badge">Final Year · Android</span>
+                                    </div>
+                                    <p class="proj-desc">Real-time acoustic sound monitoring app using TensorFlow Lite
+                                        &amp; YAMNet for health alerts for the hearing impaired.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-blue"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Health Tracker</span>
+                                        <span class="proj-badge">Web App · Flask</span>
+                                    </div>
+                                    <p class="proj-desc">Full-stack personal health metrics dashboard with interactive
+                                        charts built on Flask and Supabase.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-orange"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">CareerGuidance</span>
+                                        <span class="proj-badge">Web · Lead Dev</span>
+                                    </div>
+                                    <p class="proj-desc">Full-featured job portal and career platform with employer
+                                        dashboard, candidate profiles, admin panel and SEO.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ── Sindhu Bharathi ── -->
+                <div class="profile-card">
+                    <div class="card-accent acc-pink"></div>
+
+                    <div class="card-photo-block">
+                        <img src="{{ url_for('static', filename='images/sindhu.png') }}" alt="Sindhu Bharathi P G"
+                            class="card-avatar"
+                            onerror="this.style.display='none';this.nextElementSibling.style.display='flex';">
+                        <div class="card-avatar-fallback avf-pink">S</div>
+
+                        <div class="card-name-block">
+                            <div class="card-role-chip chip-pink"><i class="fas fa-graduation-cap fa-xs"></i> Batchmate
+                                · 2024–2026</div>
+                            <h3 class="card-name">Sindhu Bharathi P G</h3>
+                            <p class="card-inst">MSc Computer Science<br>Pondicherry University, India</p>
+                        </div>
+                    </div>
+
+                    <div class="card-body">
+                        <div class="card-links">
+                            <span class="clink cl-ghost"><i class="fas fa-university"></i> Pondicherry University</span>
+                        </div>
+
+                        <div class="card-divider"></div>
+
+                        <div>
+                            <p class="proj-label"><i class="fas fa-code-branch"></i> Projects</p>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-rose"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Tamil Text Summarization</span>
+                                        <span class="proj-badge">Final Year · NLP</span>
+                                    </div>
+                                    <p class="proj-desc">Deep learning NLP system to automatically summarize
+                                        Tamil-language documents using transformer-based models.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-teal"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Dengue Connect 2024</span>
+                                        <span class="proj-badge">Collaborative</span>
+                                    </div>
+                                    <p class="proj-desc">Community health platform for dengue awareness and real-time
+                                        case tracking.</p>
+                                </div>
+                            </div>
+                            <div class="proj-item">
+                                <div class="proj-pip pip-green"></div>
+                                <div class="proj-text-wrap">
+                                    <div class="proj-title-row">
+                                        <span class="proj-name">Medical Tourism</span>
+                                        <span class="proj-badge">Research</span>
+                                    </div>
+                                    <p class="proj-desc">Research-driven platform exploring medical tourism services and
+                                        patient management.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div><!-- /team-row -->
+        </section>
+
+        <!-- ── PLATFORM FEATURES ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-indigo"><i class="fas fa-th-large"></i></div>
+                <h2>CareerGuidance — Platform Features</h2>
+                <div class="dp-sec-rule"></div>
+            </div>
+
+            <div class="features-grid">
+                <div class="feat-card fc-a">
+                    <div class="feat-ico fi-a"><i class="fas fa-briefcase"></i></div>
+                    <h5>Job Listings Portal</h5>
+                    <p>Curated job openings across India &amp; Tamil Nadu — entry-level, fresher, and experienced roles
+                        updated regularly.</p>
+                </div>
+                <div class="feat-card fc-b">
+                    <div class="feat-ico fi-b"><i class="fas fa-search"></i></div>
+                    <h5>Smart Job Search</h5>
+                    <p>Filter jobs by keyword, location, category, or experience level with a fast and intuitive search
+                        interface.</p>
+                </div>
+                <div class="feat-card fc-c">
+                    <div class="feat-ico fi-c"><i class="fas fa-map-marker-alt"></i></div>
+                    <h5>Region-Specific Jobs</h5>
+                    <p>Dedicated sections for India-wide and Tamil Nadu–specific openings, making local career discovery
+                        seamless.</p>
+                </div>
+                <div class="feat-card fc-d">
+                    <div class="feat-ico fi-d"><i class="fas fa-user-circle"></i></div>
+                    <h5>Candidate Profiles</h5>
+                    <p>Students register, build profiles, and submit resumes directly to employers through the platform.
+                    </p>
+                </div>
+                <div class="feat-card fc-e">
+                    <div class="feat-ico fi-e"><i class="fas fa-building"></i></div>
+                    <h5>Employer Dashboard</h5>
+                    <p>Recruiters post openings and manage applications through a clean, dedicated employer portal.</p>
+                </div>
+                <div class="feat-card fc-f">
+                    <div class="feat-ico fi-f"><i class="fas fa-newspaper"></i></div>
+                    <h5>Tech Articles &amp; Blogs</h5>
+                    <p>Career advice, interview tips, and industry news curated for students and fresh graduates.</p>
+                </div>
+                <div class="feat-card fc-g">
+                    <div class="feat-ico fi-g"><i class="fas fa-shield-alt"></i></div>
+                    <h5>Admin Control Panel</h5>
+                    <p>Dark-themed admin dashboard to manage users, posts, signups, platform health and site config.</p>
+                </div>
+                <div class="feat-card fc-h">
+                    <div class="feat-ico fi-h"><i class="fas fa-mobile-alt"></i></div>
+                    <h5>Mobile Responsive</h5>
+                    <p>Fully responsive design optimised for mobile, tablet, and desktop — accessible on any device.</p>
+                </div>
+                <div class="feat-card fc-i">
+                    <div class="feat-ico fi-i"><i class="fas fa-chart-line"></i></div>
+                    <h5>SEO Optimised</h5>
+                    <p>Comprehensive sitemap, structured meta tags and keyword strategy for strong Google visibility.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ── TECH STACK ── -->
+        <section>
+            <div class="dp-sec-head">
+                <div class="dp-sec-icon sico-teal"><i class="fas fa-layer-group"></i></div>
+                <h2>Tech Stack &amp; Skills</h2>
+                <div class="dp-sec-rule"></div>
+            </div>
+            <div class="skills-wrap">
+                {% for sk in ['Python','Flask','JavaScript','HTML & CSS','Android / Java','Mobile Dev','REST
+                APIs','Supabase','PostgreSQL','Git & GitHub','Machine Learning','TensorFlow Lite','NLP /
+                Transformers','Jinja2','Vercel'] %}
+                <span class="sk-pill"><span class="sk-dot"></span>{{ sk }}</span>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div><!-- /dp-body -->
+</div><!-- /dp -->
+{% endblock %}

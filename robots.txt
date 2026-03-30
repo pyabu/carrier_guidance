@@ -1,0 +1,18 @@
+# ─── robots.txt for careerguidance.me ───────────────────────────────────────
+# Comprehensive SEO optimization. Last updated: 2026-03-18
+
+User-agent: *
+Allow: /
+
+# Block sensitive / internal paths for crawl efficiency
+Disallow: /admin
+Disallow: /api/
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+Disallow: /profile
+Disallow: /onboarding
+Disallow: /student-dashboard
+
+# Sitemap discovery
+Sitemap: https://careerguidance.me/sitemap.xml
