@@ -4630,33 +4630,46 @@ def _render_sitemap_xml(pages):
 @app.route("/sitemap.xml")
 def sitemap():
     """
-    Generate a dynamic sitemap including static pages and all job sources.
-    Returns proper XML with caching headers to prevent indexing issues.
+    Serve static sitemap.xml file with proper headers.
+    The sitemap is pre-generated and updated via generate_sitemap.py script.
     """
+    sitemap_path = os.path.join(BASE_DIR, "sitemap.xml")
+    
+    # Check if static sitemap exists
+    if os.path.exists(sitemap_path):
+        try:
+            with open(sitemap_path, 'r', encoding='utf-8') as f:
+                sitemap_xml = f.read()
+            
+            response = make_response(sitemap_xml)
+            response.headers["Content-Type"] = "application/xml; charset=utf-8"
+            response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"
+            response.headers["X-Robots-Tag"] = "noindex, follow"
+            response.status_code = 200
+            return response
+        except Exception as e:
+            logger.error(f"Failed to read sitemap.xml: {e}")
+    
+    # Fallback: generate dynamic sitemap if static file doesn't exist
+    logger.warning("Static sitemap.xml not found, falling back to dynamic generation")
     try:
         sitemap_xml = _render_sitemap_xml(_build_sitemap_entries())
     except Exception as e:
         logger.error(f"Failed to build sitemap XML: {e}", exc_info=True)
-        # Fallback: return just static pages
-        try:
-            static_entries = _build_sitemap_entries()[:14]
-            sitemap_xml = _render_sitemap_xml(static_entries)
-        except Exception as e2:
-            logger.error(f"Sitemap fallback also failed: {e2}")
-            # Last resort: minimal sitemap
-            sitemap_xml = _render_sitemap_xml([
-                {
-                    "loc": BASE_URL,
-                    "lastmod": datetime.now().strftime("%Y-%m-%d"),
-                    "changefreq": "daily",
-                    "priority": "1.0"
-                }
-            ])
+        # Last resort: minimal sitemap
+        sitemap_xml = _render_sitemap_xml([
+            {
+                "loc": BASE_URL,
+                "lastmod": datetime.now().strftime("%Y-%m-%d"),
+                "changefreq": "daily",
+                "priority": "1.0"
+            }
+        ])
 
     response = make_response(sitemap_xml)
     response.headers["Content-Type"] = "application/xml; charset=utf-8"
-    response.headers["Cache-Control"] = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
-    response.headers["X-Robots-Tag"] = "noindex, follow"  # Sitemap itself should not be indexed
+    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"
+    response.headers["X-Robots-Tag"] = "noindex, follow"
     response.status_code = 200
     return response
 

@@ -6,7 +6,9 @@ This creates a one-time sitemap file that can be served to Google
 
 import json
 import os
+import xml.etree.ElementTree as ET
 from datetime import datetime
+from xml.dom import minidom
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BASE_URL = "https://careerguidance.me"
@@ -40,9 +42,13 @@ def load_tn_jobs():
 
 
 def generate_sitemap():
-    """Generate sitemap.xml with all URLs."""
+    """Generate sitemap.xml with all URLs using XML library."""
     
     today = datetime.now().strftime("%Y-%m-%d")
+    
+    # Create root element
+    root = ET.Element('urlset')
+    root.set('xmlns', 'http://www.sitemaps.org/schemas/sitemap/0.9')
     
     # Static pages with priorities
     static_urls = [
@@ -62,20 +68,24 @@ def generate_sitemap():
         {"loc": "/terms", "priority": "0.30", "changefreq": "yearly"},
     ]
     
-    urls = []
     seen_urls = set()
+    total_urls = 0
     
     # Add static pages
     for url in static_urls:
         loc = f"{BASE_URL}{url['loc']}"
         if loc not in seen_urls:
-            urls.append({
-                "loc": loc,
-                "lastmod": today,
-                "changefreq": url["changefreq"],
-                "priority": url["priority"]
-            })
+            url_elem = ET.SubElement(root, 'url')
+            loc_elem = ET.SubElement(url_elem, 'loc')
+            loc_elem.text = loc
+            lastmod_elem = ET.SubElement(url_elem, 'lastmod')
+            lastmod_elem.text = today
+            changefreq_elem = ET.SubElement(url_elem, 'changefreq')
+            changefreq_elem.text = url['changefreq']
+            priority_elem = ET.SubElement(url_elem, 'priority')
+            priority_elem.text = url['priority']
             seen_urls.add(loc)
+            total_urls += 1
     
     # Add dynamic job detail pages (limit to avoid sitemap overflow)
     datasets = [
@@ -111,40 +121,33 @@ def generate_sitemap():
                     continue
                 
                 seen_urls.add(loc)
-                urls.append({
-                    "loc": loc,
-                    "lastmod": fallback_date,
-                    "changefreq": "daily",
-                    "priority": priority,
-                })
+                url_elem = ET.SubElement(root, 'url')
+                loc_elem = ET.SubElement(url_elem, 'loc')
+                loc_elem.text = loc
+                lastmod_elem = ET.SubElement(url_elem, 'lastmod')
+                lastmod_elem.text = fallback_date
+                changefreq_elem = ET.SubElement(url_elem, 'changefreq')
+                changefreq_elem.text = 'daily'
+                priority_elem = ET.SubElement(url_elem, 'priority')
+                priority_elem.text = priority
                 jobs_added += 1
                 total_jobs_added += 1
+                total_urls += 1
         
         except Exception as e:
-            print(f"Error adding {source_name} jobs: {e}")
+            print(f"⚠️ Error adding {source_name} jobs: {e}")
     
-    print(f"✅ Generated sitemap with {len(urls)} total entries ({total_jobs_added} job details)")
+    print(f"✅ Generated sitemap with {total_urls} total entries ({total_jobs_added} job details)")
     
-    # Generate XML
-    xml_lines = [
-        '<?xml version="1.0" encoding="UTF-8"?>',
-        '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
-    ]
+    # Pretty print XML
+    xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
+    # Remove extra blank lines
+    xml_str = '\n'.join([line for line in xml_str.split('\n') if line.strip()])
     
-    for url in urls:
-        xml_lines.append("  <url>")
-        xml_lines.append(f"    <loc>{url['loc']}</loc>")
-        xml_lines.append(f"    <lastmod>{url['lastmod']}</lastmod>")
-        xml_lines.append(f"    <changefreq>{url['changefreq']}</changefreq>")
-        xml_lines.append(f"    <priority>{url['priority']}</priority>")
-        xml_lines.append("  </url>")
-    
-    xml_lines.append("</urlset>")
-    
-    # Write to file
+    # Write to file with UTF-8 encoding
     sitemap_path = os.path.join(BASE_DIR, "sitemap.xml")
     with open(sitemap_path, 'w', encoding='utf-8') as f:
-        f.write('\n'.join(xml_lines))
+        f.write(xml_str)
     
     print(f"📝 Sitemap saved to: {sitemap_path}")
     return sitemap_path
