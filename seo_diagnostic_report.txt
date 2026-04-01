@@ -1,0 +1,36 @@
+======================================================================
+CAREERGUIDANCE.ME - SEO DIAGNOSTIC DETAILED REPORT
+Generated: 2026-04-01 11:43:20
+======================================================================
+
+CRITICAL ISSUES:
+----------------------------------------------------------------------
+
+
+WARNINGS:
+----------------------------------------------------------------------
+
+
+PASSED CHECKS:
+----------------------------------------------------------------------
+✅ Sitemap URL present in robots.txt
+✅ sitemap.xml contains 794 URLs
+✅ No duplicate URLs in sitemap
+✅ HTTPS enforcement enabled
+✅ Trailing slash removal enabled
+✅ Query parameters removed from canonical: ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'fbclid', 'gclid', 'msclkid']
+✅ 404 errors properly configured with noindex
+✅ 500 errors properly configured with noindex and no-cache
+✅ 503 errors configured with Retry-After: 3600s
+✅ 14 pages allowed for indexing
+✅ 9 pages marked as noindex
+✅ 7 paths blocked from crawling
+
+
+RECOMMENDATIONS:
+----------------------------------------------------------------------
+1. Run diagnostics regularly (weekly recommended)
+2. Fix all critical issues before deploying to production
+3. Monitor Search Console for indexing issues
+4. Regenerate sitemap.xml after major content changes
+5. Test canonical URLs and redirects
