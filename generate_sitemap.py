@@ -139,8 +139,10 @@ def generate_sitemap():
     
     print(f"✅ Generated sitemap with {total_urls} total entries ({total_jobs_added} job details)")
     
-    # Pretty print XML
-    xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ")
+    # Pretty print XML with explicit encoding declaration
+    xml_str = minidom.parseString(ET.tostring(root)).toprettyxml(indent="  ", encoding='UTF-8')
+    if isinstance(xml_str, bytes):
+        xml_str = xml_str.decode('utf-8')
     # Remove extra blank lines
     xml_str = '\n'.join([line for line in xml_str.split('\n') if line.strip()])
     
