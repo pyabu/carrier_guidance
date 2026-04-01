@@ -25,10 +25,14 @@
     const formatInlineMarkdown = (value) => value
         .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
         .replace(/(^|[^\*])\*([^\*\n]+)\*([^\*]|$)/g, '$1<em>$2</em>$3')
-        .replace(/📈/g, '<span style="font-size: 1.2rem;">📈</span>')
-        .replace(/🔥/g, '<span style="font-size: 1.2rem;">🔥</span>')
-        .replace(/🛠️/g, '<span style="font-size: 1.2rem;">🛠️</span>')
-        .replace(/🗺️/g, '<span style="font-size: 1.2rem;">🗺️</span>');
+        .replace(/📈/g, '<span style="font-size: 1.2rem; display: inline-block;">📈</span>')
+        .replace(/🔥/g, '<span style="font-size: 1.2rem; display: inline-block;">🔥</span>')
+        .replace(/🛠️/g, '<span style="font-size: 1.2rem; display: inline-block;">🛠️</span>')
+        .replace(/🗺️/g, '<span style="font-size: 1.2rem; display: inline-block;">🗺️</span>')
+        .replace(/💼/g, '<span style="font-size: 1.2rem; display: inline-block;">💼</span>')
+        .replace(/🏢/g, '<span style="font-size: 1.2rem; display: inline-block;">🏢</span>')
+        .replace(/💰/g, '<span style="font-size: 1.2rem; display: inline-block;">💰</span>')
+        .replace(/📊/g, '<span style="font-size: 1.2rem; display: inline-block;">📊</span>');
 
     const formatMessage = (text) => {
         const placeholders = [];
@@ -40,10 +44,32 @@
             return placeholder;
         });
 
+        // Handle job listings/cards
+        const jobCardRegex = /\*\*([^*]+)\*\*\s*\n\s*💼\s*([^\n]+)\n\s*💰\s*([^\n]+)/g;
+        safeText = safeText.replace(jobCardRegex, (match, title, role, salary) => {
+            const jobPlaceholder = `__CHATBOT_JOB_CARD_${placeholders.length}__`;
+            placeholders.push(
+                `<div style="background: rgba(59, 130, 246, 0.1); border-left: 4px solid #60a5fa; padding: 12px 14px; border-radius: 8px; margin: 8px 0; font-weight: 500;">
+                    <div style="color: #60a5fa; font-weight: 700; margin-bottom: 4px;">${title}</div>
+                    <div style="font-size: 0.85rem; color: rgba(255, 255, 255, 0.8); margin-bottom: 4px;">💼 ${role}</div>
+                    <div style="font-size: 0.85rem; color: #10b981; font-weight: 600;">💰 ${salary}</div>
+                </div>`
+            );
+            return jobPlaceholder;
+        });
+
         const formattedLines = safeText.split('\n').map((line) => {
             const bulletMatch = line.match(/^\s*[\*\-•]\s+(.*)$/);
             if (bulletMatch) {
-                return `<div style="display:flex; gap:8px; margin-bottom:4px; padding-left: 10px;"><span style="color: #60a5fa;">•</span><span>${formatInlineMarkdown(bulletMatch[1])}</span></div>`;
+                const content = bulletMatch[1];
+                // Check if it's a salary line with LPA
+                if (content.includes('LPA') || content.includes('₹')) {
+                    return `<div style="display:flex; gap:8px; margin-bottom:4px; padding-left: 10px; color: #10b981;">
+                        <span style="color: #10b981; font-weight: 700;">•</span>
+                        <span>${formatInlineMarkdown(content)}</span>
+                    </div>`;
+                }
+                return `<div style="display:flex; gap:8px; margin-bottom:4px; padding-left: 10px;"><span style="color: #60a5fa;">•</span><span>${formatInlineMarkdown(content)}</span></div>`;
             }
             if (!line.trim()) {
                 return '<br>';
@@ -54,6 +80,7 @@
         let formattedText = formattedLines.join('<br>');
         placeholders.forEach((block, index) => {
             formattedText = formattedText.replace(`__CHATBOT_CODE_BLOCK_${index}__`, block);
+            formattedText = formattedText.replace(`__CHATBOT_JOB_CARD_${index}__`, block);
         });
         return formattedText;
     };
@@ -164,6 +191,8 @@
 
             if (data.status === 'success' && data.response) {
                 addMessage(data.response, 'ai');
+                // Add quick suggestions after AI response
+                addQuickSuggestions();
             } else {
                 addMessage(data.error || "I'm sorry, I encountered an error. Please try again.", 'ai', true);
             }
@@ -187,6 +216,46 @@
             }
             if (chatbotSend) chatbotSend.disabled = false;
         }
+    };
+
+    // Add Quick Suggestion Buttons
+    const addQuickSuggestions = () => {
+        if (!chatbotMessages) return;
+        
+        const suggestions = [
+            "Tell me more details",
+            "Job opportunities",
+            "Required skills",
+            "Learning roadmap"
+        ];
+
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.style.cssText = 'display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; padding: 0 20px; animation: message-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) forwards, opacity 0;';
+        suggestionsDiv.className = 'chatbot-suggestions';
+        
+        suggestions.forEach((suggestion) => {
+            const btn = document.createElement('button');
+            btn.textContent = suggestion;
+            btn.style.cssText = 'padding: 6px 12px; background: rgba(59, 130, 246, 0.2); border: 1px solid rgba(96, 165, 250, 0.4); border-radius: 16px; color: #60a5fa; font-size: 0.8rem; cursor: pointer; transition: all 0.2s; white-space: nowrap;';
+            btn.addEventListener('mouseover', () => {
+                btn.style.background = 'rgba(59, 130, 246, 0.3)';
+                btn.style.borderColor = '#60a5fa';
+            });
+            btn.addEventListener('mouseout', () => {
+                btn.style.background = 'rgba(59, 130, 246, 0.2)';
+                btn.style.borderColor = 'rgba(96, 165, 250, 0.4)';
+            });
+            btn.addEventListener('click', () => {
+                chatbotInput.value = suggestion;
+                chatbotInput.focus();
+                sendMessage();
+                [...suggestionsDiv.children].forEach(b => b.remove());
+            });
+            suggestionsDiv.appendChild(btn);
+        });
+        
+        chatbotMessages.appendChild(suggestionsDiv);
+        scrollToBottom();
     };
 
     // Add Message to UI

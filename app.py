@@ -1090,99 +1090,264 @@ def career_copilot():
     def _fallback_response(query):
         q = query.lower()
         if any(w in q.split() for w in ["thanks", "thank", "thx"]):
-            return ("You're very welcome! 😊 Happy to help you with your career journey. Do you have any other questions about jobs or skills in India?")
-        elif any(w in q.split() for w in ["bye", "goodbye", "exit"]):
-            return ("Goodbye! 👋 All the best with your career goals. Come back anytime you need more guidance!")
+            return ("You're very welcome! 😊 Glad I could help with your career journey.\n\n"
+                    "🎯 **Next Steps**:\n"
+                    "• Start working on the skills discussed\n"
+                    "• Build projects and showcase on GitHub\n"
+                    "• Network on LinkedIn with professionals\n"
+                    "• Come back anytime for more guidance!\n\n"
+                    "👋 All the best with your career goals!")
+        elif any(w in q.split() for w in ["bye", "goodbye", "exit", "see you"]):
+            return ("Goodbye! 👋 Best of luck with your career journey!\n\n"
+                    "💡 **Remember**:\n"
+                    "• Consistency beats perfection\n"
+                    "• Build > Read > Talk\n"
+                    "• Your portfolio matters more than your degree\n\n"
+                    "📞 **Come back anytime** for more career guidance!\n\n"
+                    "🚀 Go crush your goals! 💪")
         elif any(w in q.split() for w in ["salary", "pay", "package", "lpa"]):
-            return ("Salary packages in India vary by role and city:\n\n"
-                    "📈 **Typical Salary Ranges (Entry-Level)**:\n"
-                    "• **Software Dev**: ₹4-12 LPA\n"
-                    "• **Data Analyst**: ₹5-9 LPA\n"
-                    "• **Digital Marketing**: ₹3-6 LPA\n"
-                    "• **Product Management**: ₹8-15 LPA\n\n"
-                    "🔥 **Demand Level**: High-paying roles are concentrated in Bangalore, Hyderabad, and Pune.\n\n"
-                    "🛠️ **Tip**: Negotiate based on your portfolio and specialized skills like Cloud or AI.")
+            return ("**Salary packages in India vary by role and city** 💰\n\n"
+                    "📈 **Entry-Level Typical Ranges (2026)**:\n"
+                    "• **Software Dev**: ₹4-12 LPA – Growing 35% annually\n"
+                    "• **Data Analyst**: ₹5-9 LPA – High demand roles\n"
+                    "• **Digital Marketing**: ₹3-6 LPA – Fastest growing\n"
+                    "• **Product Management**: ₹8-15 LPA – Premium roles\n"
+                    "• **DevOps Engineer**: ₹10-20 LPA – Cloud era specialist\n\n"
+                    "🔥 **Experience Matters**:\n"
+                    "• Freshers (0-2 years): ₹4-8 LPA\n"
+                    "• Mid-level (2-5 years): ₹8-18 LPA\n"
+                    "• Senior (5+ years): ₹18-40+ LPA\n\n"
+                    "🏙️ **City Variation**:\n"
+                    "• Bangalore/Hyderabad: 20-30% higher than other cities\n"
+                    "• Mumbai/Pune: Competitive tier-1 salaries\n"
+                    "• Tier-2 Cities: 15-25% lower but growing rapidly\n\n"
+                    "🛠️ **Boost Your Package**:\n"
+                    "• Specialize in AI/ML (+30% premium)\n"
+                    "• Cloud certifications (AWS/Azure): +₹2-5 LPA\n"
+                    "• Build strong GitHub portfolio: +₹1-3 LPA\n"
+                    "• Target startup roles for equity upside")
         elif any(w in q.split() for w in ["location", "city", "bangalore", "mumbai", "pune", "chennai", "hyderabad", "delhi"]):
-            return ("India's top job hubs are booming! Here's the current landscape:\n\n"
-                    "📍 **Top Cities**:\n"
-                    "• **Bangalore**: The Silicon Valley of India, best for Tech & Startups.\n"
-                    "• **Hyderabad**: Huge growth in Pharma and IT.\n"
-                    "• **Pune/Mumbai**: Financial capital and strong IT/Manufacturing hubs.\n"
-                    "• **Chennai**: The 'Detroit of Asia', great for Auto & IT roles.\n\n"
-                    "🔥 **Trend**: Remote and Hybrid roles are increasing across all Tier-1 cities.")
+            return ("**India's job hubs are thriving! Here's the 2026 landscape** 🗺️\n\n"
+                    "📍 **Tier-1 Tech Hubs**:\n"
+                    "• **Bangalore** 🏢 – Silicon Valley of India | 5000+ startups | Best for: Tech, AI/ML, Startups\n"
+                    "• **Hyderabad** 🏛️ – Rising tech powerhouse | Pharma hub | Best for: IT services, Cloud roles\n"
+                    "• **Pune** 🚀 – DevOps & startup capital | ₹18-25 LPA avg | Best for: IT companies, startups\n"
+                    "• **Mumbai** 🏦 – Financial hub | Media & finance roles | Best for: Banking, Digital marketing\n"
+                    "• **Chennai** 🏭 – Detroit of Asia | Auto & manufacturing | Best for: Hardware, EDA jobs\n\n"
+                    "🌆 **Tier-2 Emerging Cities** (Best growth potential):\n"
+                    "• Jaipur, Indore, Nagpur – 40% faster growth rate\n"
+                    "• Lower cost of living + competitive salaries\n"
+                    "• Perfect for work-life balance seekers\n\n"
+                    "🔥 **Remote & Hybrid**:\n"
+                    "• Top companies now offer 100% remote options\n"
+                    "• Hybrid is becoming the new normal (3-4 days office)\n"
+                    "• Your location doesn't limit Bangalore-level salaries\n\n"
+                    "💡 **Pro Tip**: Choose based on career stage, not just salary!")
         elif any(w in q for w in ["software", "developer", "programming", "coding", "engineer", "sde"]):
-            return ("**Software Engineering** is one of the hottest career paths in India right now!\n\n"
-                    "📈 **Career Options**:\n"
-                    "• **Full Stack Developer** – ₹8-25 LPA, huge demand\n"
-                    "• **Backend Engineer** – Python, Java, Node.js roles growing 40%\n"
-                    "• **DevOps Engineer** – ₹10-30 LPA, cloud skills critical\n\n"
-                    "🔥 **Demand Level**: Very High – 50,000+ openings across India\n\n"
-                    "🛠️ **Required Skills**: Python, JavaScript, React, Node.js, SQL, Git, AWS/GCP\n\n"
-                    "🗺️ **Personalized Roadmap**:\n"
-                    "1. Master one language (Python or JavaScript).\n"
-                    "2. Build 3-4 real-world projects on GitHub.\n"
-                    "3. Practice DSA and apply on LinkedIn/Naukri.")
+            return ("**Software Engineering – The Hottest Career Path in India!** 🚀\n\n"
+                    "📈 **Career Specializations & Salary**:\n"
+                    "• **Full Stack Developer** – ₹8-25 LPA, 50K+ openings\n"
+                    "• **Backend Engineer** (Java/Python) – ₹10-30 LPA, 35K+ openings\n"
+                    "• **Frontend Developer** (React/Vue) – ₹8-22 LPA, 25K+ openings\n"
+                    "• **DevOps Engineer** – ₹12-35 LPA, highest growth!\n"
+                    "• **Cloud Architect** (AWS/Azure) – ₹20-50 LPA, premium role\n\n"
+                    "🔥 **Demand Level**: VERY HIGH – 50,000+ openings across India\n"
+                    "✨ Job growth: +40% annually | Freshers hired actively\n\n"
+                    "🛠️ **Skills You MUST Learn**:\n"
+                    "• **Core**: Python/JavaScript, SQL, Git, REST APIs\n"
+                    "• **Frontend**: React, HTML, CSS, Responsive Design\n"
+                    "• **Backend**: Node.js/Django, PostgreSQL, Redis\n"
+                    "• **Cloud**: AWS fundamentals, Docker, Kubernetes\n\n"
+                    "🗺️ **Your Roadmap (6-12 months)**:\n"
+                    "1. **Month 1-2**: Master Python + Git, 2-3 small projects\n"
+                    "2. **Month 3-4**: Learn one framework (Django/Node.js)\n"
+                    "3. **Month 5-6**: Build a Full Stack project (GitHub)\n"
+                    "4. **Month 7+**: DSA practice + LinkedIn networking + Apply\n\n"
+                    "💼 **Companies Hiring**: Google, Microsoft, Amazon, FAANG (India), Flipkart, Paytm, startups\n"
+                    "🎯 **Next Step**: Pick a language and start building projects!")
         elif any(w in q for w in ["data science", "data scientist", "data analyst", "analytics", "machine learning", "ml", "ai ", "artificial intelligence"]):
-            return ("**Data Science & AI** is the fastest-growing field in India!\n\n"
-                    "📈 **Career Options**:\n"
-                    "• **Data Scientist** – ₹10-30 LPA, top companies hiring actively\n"
-                    "• **ML Engineer** – ₹12-35 LPA, high demand in Bangalore & Hyderabad\n"
-                    "• **Data Analyst** – ₹5-12 LPA, great entry point\n\n"
-                    "🔥 **Demand Level**: Very High – Growing 45% annually\n\n"
-                    "🛠️ **Required Skills**: Python, SQL, Pandas, Scikit-learn, TensorFlow, Power BI\n\n"
-                    "🗺️ **Personalized Roadmap**:\n"
-                    "1. Master Python and Statistics basics.\n"
-                    "2. Learn SQL and Data Visualization (Power BI/Tableau).\n"
-                    "3. Build projects using Kaggle datasets.")
+            return ("**Data Science & AI – The Fastest-Growing Field in India!** 📊\n\n"
+                    "📈 **Career Specializations & Growth**:\n"
+                    "• **Data Scientist** – ₹12-35 LPA, +50% annual growth\n"
+                    "• **ML Engineer** – ₹15-45 LPA, highest salary ceiling\n"
+                    "• **Data Analyst** – ₹6-14 LPA, best entry point\n"
+                    "• **AI Engineer** – ₹20-50 LPA, emerging hottest role\n"
+                    "• **Analytics Engineer** – ₹10-25 LPA, fast growing\n\n"
+                    "🔥 **Demand Level**: VERY HIGH\n"
+                    "✨ Top companies hiring: Google, Amazon, Microsoft, Flipkart, PhonePe, Analytics startups\n\n"
+                    "🛠️ **Required Skills**:\n"
+                    "• **Core**: Python, SQL, Statistics, Linear Algebra\n"
+                    "• **Tools**: Pandas, NumPy, Scikit-learn, TensorFlow\n"
+                    "• **Visualization**: Tableau, Power BI, Matplotlib\n"
+                    "• **Cloud**: AWS SageMaker, Google Cloud AI, Azure ML\n"
+                    "• **Soft**: Communication, storytelling with data\n\n"
+                    "🗺️ **Roadmap (8-14 months)**:\n"
+                    "1. **Month 1-3**: Python, SQL mastery + Statistics basics\n"
+                    "2. **Month 4-6**: Pandas, Scikit-learn, 2-3 Kaggle projects\n"
+                    "3. **Month 7-9**: Deep Learning basics (TensorFlow)\n"
+                    "4. **Month 10+**: Real-world projects + Certifications + Apply\n\n"
+                    "💡 **Quick Win**: Start with Kaggle competitions (free + portfolio builder)\n"
+                    "🎯 **Pro Tip**: Data Analyst roles → Data Scientist (easier transition)")
         elif any(w in q for w in ["resume", "cv", "portfolio"]):
-            return ("A strong **resume** is your ticket to interviews!\n\n"
-                    "📈 **Best Practices**:\n"
-                    "• Keep it to **1 page** (for freshers).\n"
-                    "• Use **action verbs** like 'Built', 'Led', 'Optimized'.\n"
-                    "• Include **quantifiable results** (e.g., 'Improved speed by 30%').\n\n"
-                    "🛠️ **Tip**: Use our **Resume Builder** tool on the dashboard for an ATS-friendly template!")
+            return ("**Your Resume is Your First Interview – Make it Count!** 📄\n\n"
+                    "📋 **Resume Structure** (Winning Format):\n"
+                    "• **Header**: Name, contact, location, LinkedIn, GitHub\n"
+                    "• **Professional Summary**: 2-3 lines about you (for experienced)\n"
+                    "• **Experience**: Most important – detail your projects & impact\n"
+                    "• **Skills**: Organized by category (Languages, Tools, Frameworks)\n"
+                    "• **Education**: College, CGPA, certifications\n"
+                    "• **Projects**: 2-3 best projects with links & impact\n\n"
+                    "✨ **ATS (Applicant Tracking System) Tips**:\n"
+                    "• Use standard fonts (Calibri, Arial) – No fancy designs\n"
+                    "• Include keywords from job description\n"
+                    "• Single column layout works best\n"
+                    "• Save as PDF to avoid formatting issues\n\n"
+                    "💪 **Action Verbs** (Avoid 'Responsible for'):\n"
+                    "• **Stronger**: Built, Designed, Optimized, Led, Implemented\n"
+                    "• **Impact**: 'Reduced latency by 40%' > 'Fixed bugs'\n"
+                    "• **Metrics**: Always include numbers (20% faster, 5K users, etc)\n\n"
+                    "🎯 **For Freshers**:\n"
+                    "• **Length**: 1 page maximum\n"
+                    "• **Focus**: Projects + skills > GPA\n"
+                    "• **Example**: 'Built e-commerce platform with React + Node.js, deployed on AWS'\n\n"
+                    "🎯 **For Experienced (2-5 years)**:\n"
+                    "• **Length**: 1-2 pages\n"
+                    "• **Focus**: Impact & leadership\n"
+                    "• **Example**: 'Led team of 3, shipped feature used by 500K+ users, 30% revenue growth'\n\n"
+                    "🔗 **Portfolio is MORE Important Than Resume**:\n"
+                    "• GitHub with 5-10 real projects\n"
+                    "• Live links to deployed applications\n"
+                    "• README files explaining your work\n"
+                    "• Contributes to 50x more callbacks than resume alone\n\n"
+                    "🛠️ **Pro Resume Tools**:\n"
+                    "• Canva Pro (free templates)\n"
+                    "• Google Docs (ATS-friendly)\n"
+                    "• Overleaf (LaTeX for tech)\n\n"
+                    "⚠️ **Common Mistakes**:\n"
+                    "❌ Typos or grammatical errors\n"
+                    "❌ Vague descriptions ('Worked on project')\n"
+                    "❌ Unrelated skills listed\n"
+                    "❌ More than 2 pages for freshers\n"
+                    "✅ Always proofread before sending!")
         elif any(w in q for w in ["interview", "prepare", "crack", "tips"]):
-            return ("**Interview preparation** is crucial! Here's how to ace it:\n\n"
-                    "📈 **Key Areas**:\n"
-                    "• **Technical**: DSA, System Design, Core Subjects.\n"
-                    "• **Behavioral**: Use the **STAR method** (Situation, Task, Action, Result).\n"
-                    "• **HR**: 'Tell me about yourself' and 'Why this company?'.\n\n"
-                    "🗺️ **Tip**: Research the company's recent news and culture before the call.")
+            return ("**Master Your Interview – Crack Your Dream Job!** 🎬\n\n"
+                    "📍 **The Complete Interview Journey**:\n"
+                    "1. **CV Screening** → Written Test → Interview → Offer\n"
+                    "2. **Average pass rate**: 2-5% (highly competitive)\n"
+                    "3. **Time to prepare**: 2-4 months for serious prep\n\n"
+                    "📈 **Interview Rounds** (Most companies follow this):\n"
+                    "• **Round 1: Technical (DSA/Coding)** – 45-90 min\n"
+                    "• **Round 2: Technical (System Design)** – For experienced\n"
+                    "• **Round 3: Behavioral (HR Round)** – Cultural fit\n"
+                    "• **Round 4: Final (Manager Round)** – Optional, leadership assessment\n\n"
+                    "🛠️ **Technical Round Preparation**:\n"
+                    "• **Data Structures**: Arrays, Linked Lists, Trees, Graphs, Heaps\n"
+                    "• **Algorithms**: Sorting, BFS/DFS, DP, Binary Search\n"
+                    "• **Problem Solving**: Practice 150+ LeetCode questions\n"
+                    "• **Resources**: LeetCode Premium, GeeksforGeeks, Coding Ninjas\n\n"
+                    "💬 **Behavioral Interview** (The STAR Method):\n"
+                    "• **S**ituation: Describe the context\n"
+                    "• **T**ask: What was the problem?\n"
+                    "• **A**ction: What did you do?\n"
+                    "• **R**esult: What was the outcome?\n\n"
+                    "❓ **Common Behavioral Questions**:\n"
+                    "• \"Tell me about yourself\"\n"
+                    "• \"Why this company?\"\n"
+                    "• \"Your biggest failure and learnings\"\n"
+                    "• \"How do you handle pressure?\"\n"
+                    "• \"Describe a project you're proud of\"\n\n"
+                    "🎯 **Day-Before Tips**:\n"
+                    "• Revise company, role, and recent projects\n"
+                    "• Prepare 3-4 questions for the interviewer\n"
+                    "• Get 7-8 hours of sleep\n"
+                    "• Mock interview with friends the day before\n\n"
+                    "💡 **Pro Tips**:\n"
+                    "• Think out loud – show your problem-solving\n"
+                    "• Ask clarifying questions before coding\n"
+                    "• Optimize for clarity, not fancy tricks\n"
+                    "• Mention trade-offs and scalability\n\n"
+                    "📊 **Success Rate**: With 3-4 months prep, 50-60% can crack top companies")
         elif any(w in q.split() for w in ["hello", "hi", "hey", "howdy"]) or q.startswith("good morning") or q.startswith("good evening"):
-            return ("Hello! 👋 I'm your **AI Career Copilot**. I can help you with:\n\n"
-                    "• 📈 **Career path recommendations** based on your background\n"
-                    "• 🔥 **Job market trends** in India\n"
-                    "• 🛠️ **Skill recommendations** for your dream role\n"
-                    "• 🗺️ **Personalized learning roadmaps**\n\n"
-                    "Try asking me:\n"
-                    "• *\"I'm a BCom student, what should I do?\"*\n"
-                    "• *\"What skills do I need to become a data scientist?\"*\n"
-                    "• *\"How to prepare for software engineering interviews?\"*\n"
-                    "• *\"Best career options for freshers in 2026\"*")
+            return ("**Hello! 👋 I'm your AI Career Copilot** – Let's find your perfect career path!\n\n"
+                    "📈 **I can help you with**:\n"
+                    "• **Career path recommendations** – Based on your education & interests\n"
+                    "• **Job market insights** – Real-time trends in India\n"
+                    "• **Skill recommendations** – What you need to master\n"
+                    "• **Salary expectations** – By role, city, and experience\n"
+                    "• **Learning roadmaps** – Step-by-step paths to success\n"
+                    "• **Company & role deep-dives** – Everything about specific jobs\n\n"
+                    "🔥 **Popular Topics Right Now (2026)**:\n"
+                    "• AI/ML roles (₹15-45 LPA) – Growing 50% annually\n"
+                    "• DevOps/Cloud roles – Premium salaries, high demand\n"
+                    "• Data Science career – Fast-track to ₹30+ LPA\n\n"
+                    "💬 **Try asking me**:\n"
+                    "• \"What should I do with a BCom degree?\"\n"
+                    "• \"I want to become a data scientist – what's the roadmap?\"\n"
+                    "• \"Software engineer vs DevOps – which is better?\"\n"
+                    "• \"Best jobs paying ₹20+ LPA in 2026?\"\n"
+                    "• \"How to crack a tech interview?\"\n"
+                    "• \"Remote job opportunities for freshers?\"\n\n"
+                    "Let's start! What interests you?")
         elif any(w in q for w in ["bca", "bsc cs", "it ", "computer science", "tech"]):
-            return ("Fantastic choice! Careers in **BCA / BSc CS** are at the heart of the digital revolution.\n\n"
-                    "📈 **Career Options**:\n"
-                    "• **Software Developer** – ₹5-15 LPA starting\n"
-                    "• **Cloud Associate** – High growth in AWS/Azure\n"
-                    "• **Web Developer** – Best for remote & freelance roles\n\n"
-                    "🔥 **Demand Level**: Very High – India is the world's tech hub\n\n"
-                    "🛠️ **Required Skills**: Python, Java, SQL, React, basic Cloud knowledge\n\n"
-                    "🗺️ **Personalized Roadmap**:\n"
-                    "1. Master one backend language (Python/Java).\n"
-                    "2. Build a Full Stack project (React + Node.js).\n"
-                    "3. Get an AWS Cloud Practitioner certification.")
+            return ("**BCA/B.Sc CS – Your Gateway to Premium Tech Careers** 🎓\n\n"
+                    "📈 **Top Career Options**:\n"
+                    "• **Software Developer** – ₹6-18 LPA, most popular path\n"
+                    "• **Cloud Associate** (AWS/Azure) – ₹8-20 LPA, fastest growth\n"
+                    "• **Web Developer** – ₹6-15 LPA, best for remote & freelance\n"
+                    "• **DevOps Engineer** – ₹12-30 LPA, premium positioning\n"
+                    "• **AI/ML Specialist** – ₹15-40 LPA, highest ceiling\n\n"
+                    "🔥 **Reality Check**:\n"
+                    "✨ 95% of BCA graduates get placed (top companies)\n"
+                    "✨ Average package: ₹7-12 LPA in India\n"
+                    "✨ Top 20% get: ₹25-40+ LPA\n\n"
+                    "🛠️ **Must-Learn Skills**:\n"
+                    "• **Frontend**: React, HTML, CSS, JavaScript\n"
+                    "• **Backend**: Python/Java, SQL, APIs\n"
+                    "• **Cloud**: AWS or Google Cloud fundamentals\n"
+                    "• **Tools**: Git, Docker, Linux basics\n"
+                    "• **DSA**: Essential for FAANG interviews\n\n"
+                    "🗺️ **Your 4-Year Action Plan**:\n"
+                    "• **Year 1**: Focus on academics + 1 language mastery\n"
+                    "• **Year 2**: Build 2 projects, compete in hackathons\n"
+                    "• **Year 3**: Contribute to open source, AWS certification\n"
+                    "• **Year 4**: Internship→ placement, refined portfolio\n\n"
+                    "💡 **Pro Tips**:\n"
+                    "• Start competitive coding early (CodeForces, LeetCode)\n"
+                    "• Join coding clubs, hackathons\n"
+                    "• Build a GitHub portfolio with 5+ projects\n"
+                    "• Network on LinkedIn from Year 2 onwards")
         elif any(w in q for w in ["mba", "management", "business", "marketing"]):
-            return ("**Management & Marketing** roles are evolving with data and AI!\n\n"
-                    "📈 **Career Options**:\n"
-                    "• **Product Manager** – ₹12-25 LPA for top roles\n"
-                    "• **Digital Marketing Lead** – Crucial for D2C brands\n"
-                    "• **Business Analyst** – Bridge between tech and business\n\n"
-                    "🔥 **Demand Level**: High – Every startup needs growth and product experts\n\n"
-                    "🛠️ **Required Skills**: Data Analysis, CRM (Salesforce/Hubspot), SEO, Product Roadmap tools\n\n"
-                    "🗺️ **Personalized Roadmap**:\n"
-                    "1. Learn data-driven marketing and SEO.\n"
-                    "2. Understand Agile and Product Management basics.\n"
-                    "3. Build a personal brand on LinkedIn.")
+            return ("**Management & Business Roles – High Demand & Leadership Opportunities** 🎯\n\n"
+                    "📈 **Top Management Career Paths**:\n"
+                    "• **Product Manager** – ₹15-40 LPA | Most coveted role\n"
+                    "• **Digital Marketing Lead** – ₹8-18 LPA | Growing rapidly\n"
+                    "• **Business Analyst** – ₹10-25 LPA | Bridge tech & business\n"
+                    "• **Program Manager** – ₹12-30 LPA | Project leadership\n"
+                    "• **Strategy Consultant** – ₹18-35 LPA | Senior positions\n\n"
+                    "🔥 **Demand Level**: HIGH – Every company needs growth experts\n"
+                    "✨ Post-MBA avg salary: ₹18-30 LPA starting\n\n"
+                    "🛠️ **Essential Skills**:\n"
+                    "• **Analytics**: SQL, Power BI, Google Analytics\n"
+                    "• **Tech Understanding**: No coding, but understand APIs/systems\n"
+                    "• **Tools**: Jira, Figma, Confluence, Salesforce\n"
+                    "• **Business**: Financial modeling, market analysis\n"
+                    "• **Leadership**: Communication, stakeholder management\n\n"
+                    "🗺️ **Path to Success**:\n"
+                    "**Without MBA**:\n"
+                    "• Start as Associate → Business Analyst → Senior PM\n"
+                    "• Takes 8-10 years to reach ₹30+ LPA\n"
+                    "**With MBA (from top 20 college)**:\n"
+                    "• Direct PM roles at ₹18+ LPA\n"
+                    "• Fast-track to leadership in 5 years\n\n"
+                    "💼 **Best Companies**:\n"
+                    "• Tech: Google, Microsoft, Amazon, Apple (PM programs)\n"
+                    "• Startups: Unacademy, Razorpay, Byju's (high growth)\n"
+                    "• D2C: Nykaa, Boat, Mamaearth (marketing-heavy)\n\n"
+                    "🎓 **Top MBA Colleges (ROI wise)**:\n"
+                    "• IIM A/B/C – Guaranteed ₹25+ LPA\n"
+                    "• ISB Hyderabad – Global exposure\n"
+                    "• XLRI Jamshedpur – Finance specialty\n"
+                    "• FMS Delhi – Best value for money")
         elif any(w in q for w in ["government", "upsc", "ssc", "bank", "exam"]):
             return ("Preparing for **Government Jobs** requires high dedication and a solid plan.\n\n"
                     "📈 **Career Options**:\n"
@@ -1196,32 +1361,82 @@ def career_copilot():
                     "2. Follow a strict daily study routine (6-10 hours).\n"
                     "3. Take regular mock tests to track progress.")
         elif any(w in q for w in ["bcom", "b.com", "commerce", "accounting", "finance"]):
-            return ("Great question! As a **BCom graduate**, you have exciting career paths ahead:\n\n"
-                    "📈 **Career Options**:\n"
-                    "• **Financial Analyst** – Analyze financial data for companies\n"
-                    "• **Data Analyst** – High demand in India, avg ₹6-10 LPA\n"
-                    "• **Digital Marketing Specialist** – Growing 35% YoY\n\n"
-                    "🔥 **Demand Level**: High – Finance & analytics roles are booming in India\n\n"
-                    "🛠️ **Required Skills**: Excel, Tally, SQL, Python, Power BI, Financial Modeling\n\n"
-                    "🗺️ **Personalized Roadmap**:\n"
-                    "1. Master advanced Excel and Tally.\n"
-                    "2. Learn SQL and data visualization tools.\n"
-                    "3. Apply for roles on Naukri and LinkedIn.")
+            return ("**BCom Graduates – You Have Excellent Career Options!** 📊\n\n"
+                    "📈 **Top Career Paths** (Best for BCom background):\n"
+                    "• **Financial Analyst** – ₹6-16 LPA | Analyze financial data\n"
+                    "• **Data Analyst** – ₹6-14 LPA | High demand, easier transition\n"
+                    "• **Digital Marketing Specialist** – ₹4-12 LPA | Growing 35% YoY\n"
+                    "• **Business Analyst** – ₹7-18 LPA | Bridge tech and business\n"
+                    "• **Chartered Accountant** – ₹8-25+ LPA | Traditional path\n\n"
+                    "🔥 **Demand Level**: HIGH – Finance & analytics roles booming in India\n"
+                    "✨ Data-driven roles are the future for commerce graduates\n\n"
+                    "🛠️ **Skills to Learn** (Make you stand out):\n"
+                    "• **Priority 1**: Excel (advanced) – Most important for finance\n"
+                    "• **Priority 2**: SQL basics – Will 10x your opportunities\n"
+                    "• **Priority 3**: Python – For data analysis (Pandas, NumPy)\n"
+                    "• **Priority 4**: Power BI/Tableau – Data visualization\n"
+                    "• **Bonus**: Tally, SAP, Financial modeling\n\n"
+                    "🗺️ **Focused Roadmap for BCom Grads** (6-8 months):\n"
+                    "• **Month 1-2**: Excel mastery + Tally proficiency\n"
+                    "• **Month 3-4**: SQL fundamentals + basic Python\n"
+                    "• **Month 5-6**: Real finance datasets + Power BI projects\n"
+                    "• **Month 7-8**: Interview prep + bank/fintech applications\n\n"
+                    "💼 **Best Companies for BCom Grads**:\n"
+                    "• Banks: ICICI, HDFC, SBI, Axis\n"
+                    "• Fintech: Paytm, PhonePe, Nykaa, Razorpay\n"
+                    "• Consulting: Deloitte, EY, KPMG (consulting arm)\n"
+                    "• Data-focused: startups + MNC analytics teams\n\n"
+                    "🎯 **Competitive Advantage**:\n"
+                    "• Most commerce grads only do traditional accounting\n"
+                    "• By adding SQL + Python, you'll be in top 10%\n"
+                    "• This opens ₹10-20 LPA roles instead of ₹5-8 LPA")
         elif any(w in q for w in ["skills", "learn", "course", "trending"]):
-            return ("Staying ahead of the curve is key! Here are the **top skills for 2026** in India:\n\n"
-                    "📈 **Top Skills**:\n"
-                    "• **AI & Prompt Engineering** – Essential for almost every role now.\n"
-                    "• **Data Science & SQL** – For analytical roles across industries.\n"
-                    "• **Cloud Computing (AWS/Azure)** – Critical for modern infrastructure.\n"
-                    "• **Digital Marketing & SEO** – Crucial for business growth.\n\n"
-                    "🔥 **Demand**: Very High – Companies are prioritizing skill-based hiring.\n\n"
-                    "🛠️ **Resources**: Coursera, Udemy, and free Google certifications are great places to start!")
+            return ("**Top Skills to Learn in 2026 – Stay Ahead!** 🚀\n\n"
+                    "🔴 **Red Hot Trending Skills**:\n"
+                    "• **AI & LLM Prompt Engineering** – ₹25%+ salary premium\n"
+                    "• **Python for AI/ML** – Most in-demand language\n"
+                    "• **Cloud Computing (AWS/Azure)** – ₹2-5 LPA salary jump\n"
+                    "• **Full Stack with React** – 30K+ openings\n"
+                    "• **DevOps/Kubernetes** – Highest salary growth\n\n"
+                    "📈 **High-Demand Tech Stack**:\n"
+                    "• **Frontend**: React, TypeScript, Tailwind CSS\n"
+                    "• **Backend**: Node.js, Python, PostgreSQL\n"
+                    "• **Cloud**: Docker, Kubernetes, AWS Lambda\n"
+                    "• **Data**: SQL, Python (Pandas), Power BI\n\n"
+                    "💡 **Soft Skills** (Often Overlooked but Crucial):\n"
+                    "• Communication & presentation skills\n"
+                    "• Problem-solving & debugging mindset\n"
+                    "• Agile/Scrum methodology\n"
+                    "• Leadership & team collaboration\n\n"
+                    "🎯 **Learning Strategy**:\n"
+                    "• Free: YouTube, Udemy sales, Codecademy\n"
+                    "• Paid: Udemy courses (wait for 90% off sales)\n"
+                    "• Certifications: Google Cloud, AWS Practitioner\n"
+                    "• Projects: Build 2-3 real projects on GitHub\n\n"
+                    "⏰ **Time to Learn**: 3-6 months for job-ready skills\n"
+                    "💰 **Expected ROI**: ₹1-5 LPA salary increase")
         else:
-            return (f"Thanks for your question! Here's some general career guidance:\n\n"
-                    "📈 **Top Career Paths (2026)**: Software Engineering, AI/ML, Cloud/DevOps, and Digital Marketing dominate the Indian job market.\n\n"
-                    "🔥 **Demand**: Very High for tech roles; ₹6-30 LPA depending on experience.\n\n"
-                    "🛠️ **Must-Have Skills**: Python, JavaScript, SQL, and Git.\n\n"
-                    "🗺️ **Next Steps**: Focus on one core skill, build 2-3 projects, and network on LinkedIn.")
+            return (f"**Great question! Here's career guidance for you** 💼\n\n"
+                    "📈 **Top Career Paths (2026)**:\n"
+                    "1. **Software Engineering** – ₹6-30 LPA | 50K+ openings\n"
+                    "2. **Data Science/AI** – ₹12-45 LPA | 25K+ openings\n"
+                    "3. **DevOps/Cloud** – ₹12-35 LPA | 15K+ openings\n"
+                    "4. **Digital Marketing** – ₹4-15 LPA | Growing 35% annually\n\n"
+                    "🔥 **Hottest Skills Right Now**:\n"
+                    "• Python, JavaScript, Cloud (AWS/Azure)\n"
+                    "• React for frontend, Node.js/Django for backend\n"
+                    "• AI/ML fundamentals (TensorFlow, PyTorch)\n"
+                    "• SQL and data visualization\n\n"
+                    "🛠️ **Quick Action Step**:\n"
+                    "1. Pick ONE skill to master (e.g., Python)\n"
+                    "2. Build 2-3 real projects on GitHub\n"
+                    "3. Practice DSA on LeetCode/CodeForces\n"
+                    "4. Network on LinkedIn + Apply!\n\n"
+                    "💡 **Remember**: Companies hire for skills, not just degrees. Portfolio > Degree!\n\n"
+                    "Want more specific guidance? Tell me:\n"
+                    "• Your background (BCA/BCom/Any degree)\n"
+                    "• Your interest area\n"
+                    "• Experience level (fresher/experienced)")
 
     # ── Gemini AI Logic ──────────────────────────────────────────────
     if api_key:
@@ -1679,13 +1894,43 @@ def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
     path = _normalize_path(request.path)
-    g.canonical_url = f"{BASE_URL}{path}"
+    
+    # Build canonical URL with proper normalization
+    scheme = "https" if request.is_secure or IS_VERCEL else request.scheme
+    host = request.host.split(':')[0]  # Remove port for canonical
+    
+    # Enforce no trailing slashes except for root
+    clean_path = path.rstrip('/') if path != '/' else '/'
+    
+    # Remove SEO-negative query parameters from canonical URL
+    clean_query_params = {}
+    canonical_exclude_params = {'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 
+                                'utm_term', 'fbclid', 'gclid', 'msclkid', 'sort', 'page'}
+    
+    for key, value in request.args.items():
+        if key.lower() not in canonical_exclude_params:
+            clean_query_params[key] = value
+    
+    # Build canonical URL
+    canonical_base = f"{scheme}://{host}{clean_path}"
+    if clean_query_params:
+        clean_query_string = urllib.parse.urlencode(sorted(clean_query_params.items()))
+        g.canonical_url = f"{canonical_base}?{clean_query_string}"
+    else:
+        g.canonical_url = canonical_base
+    
+    # Set default robots meta tag
     g.robots_meta = "index, follow, max-image-preview:large"
 
+    # Apply noindex for filter parameters (query strings on public paths)
     if path in PUBLIC_FILTER_PATHS and request.args:
         g.robots_meta = "noindex, follow, max-image-preview:large"
+    # Apply noindex for private paths
     elif _is_private_noindex_path(path):
         g.robots_meta = "noindex, nofollow"
+    # Apply noindex for API endpoints
+    elif path.startswith("/api/"):
+        g.robots_meta = "noindex, nofollow, noarchive"
 
 import time
 _jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}
@@ -3937,8 +4182,12 @@ def not_found(e):
             '</div>'
             '<p style="margin-top:16px;"><a href="/" style="color:#3282b8;text-decoration:none;font-size:0.9rem;"><i class="fas fa-arrow-left"></i> Back to Home</a></p>'
         )
-    return f"""
-    <html><head><title>Careerguidance</title>
+    response = make_response(f"""
+    <html><head><title>Page Not Found - Career Guidance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="The page you're looking for doesn't exist. Return to Career Guidance for jobs, career paths, and more opportunities.">
     <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
     <link rel="stylesheet" href="/static/css/style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -3946,14 +4195,78 @@ def not_found(e):
     </head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:var(--bg-primary,#fff);font-family:'Inter',sans-serif;">
     <div style="max-width:480px;padding:40px;">
         <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#0f4c75,#3282b8);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
-            <i class="fas fa-lock" style="color:#fff;font-size:2rem;"></i>
+            <i class="fas fa-search" style="color:#fff;font-size:2rem;"></i>
         </div>
-        <h1 style="font-size:1.8rem;color:var(--text-primary,#1a2332);margin:0 0 8px;">Login to Access Full Features</h1>
-        <p style="color:var(--text-secondary,#546478);margin:0 0 24px;">This page requires an account. Sign in to unlock jobs, dashboards, career tools and more.</p>
-        {cta}
+        <h1 style="font-size:1.8rem;color:var(--text-primary,#1a2332);margin:0 0 8px;">404 - Page Not Found</h1>
+        <p style="color:var(--text-secondary,#546478);margin:0 0 24px;">The page you're looking for doesn't exist.</p>
+        <a href="/" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#0f4c75;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Go Home</a>
     </div>
     </body></html>
-    """, 404
+    """, 404)
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
+
+
+@app.errorhandler(500)
+def server_error(e):
+    """Handle 500 Server Errors with noindex header to prevent indexing."""
+    logger.error(f"500 Server Error: {e}", exc_info=True)
+    response = make_response(f"""
+    <html><head><title>Server Error - Career Guidance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta name="description" content="We're experiencing a temporary server issue. Please try again later.">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:var(--bg-primary,#fff);font-family:'Inter',sans-serif;">
+    <div style="max-width:480px;padding:40px;">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+            <i class="fas fa-exclamation-triangle" style="color:#fff;font-size:2rem;"></i>
+        </div>
+        <h1 style="font-size:1.8rem;color:var(--text-primary,#1a2332);margin:0 0 8px;">500 - Server Error</h1>
+        <p style="color:var(--text-secondary,#546478);margin:0 0 24px;">We're experiencing a temporary issue. Our team has been notified.</p>
+        <a href="/" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#0f4c75;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Go Home</a>
+    </div>
+    </body></html>
+    """, 500)
+    response.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, proxy-revalidate, max-age=0"
+    return response
+
+
+@app.errorhandler(503)
+def service_unavailable(e):
+    """Handle 503 Service Unavailable errors."""
+    logger.error(f"503 Service Unavailable: {e}")
+    response = make_response(f"""
+    <html><head><title>Service Unavailable - Career Guidance</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="robots" content="noindex, nofollow">
+    <meta http-equiv="Retry-After" content="3600">
+    <meta name="description" content="The service is temporarily unavailable. Please try again later.">
+    <link rel="icon" type="image/x-icon" href="/static/favicon.ico">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    </head><body style="display:flex;align-items:center;justify-content:center;min-height:100vh;text-align:center;background:var(--bg-primary,#fff);font-family:'Inter',sans-serif;">
+    <div style="max-width:480px;padding:40px;">
+        <div style="width:80px;height:80px;border-radius:50%;background:linear-gradient(135deg,#f59e0b,#d97706);display:flex;align-items:center;justify-content:center;margin:0 auto 24px;">
+            <i class="fas fa-pause-circle" style="color:#fff;font-size:2rem;"></i>
+        </div>
+        <h1 style="font-size:1.8rem;color:var(--text-primary,#1a2332);margin:0 0 8px;">503 - Service Unavailable</h1>
+        <p style="color:var(--text-secondary,#546478);margin:0 0 24px;">We're performing maintenance. Please try again later.</p>
+        <a href="/" style="display:inline-flex;align-items:center;gap:8px;padding:12px 28px;background:#0f4c75;color:#fff;border-radius:10px;text-decoration:none;font-weight:600;"><i class="fas fa-home"></i> Go Home</a>
+    </div>
+    </body></html>
+    """, 503)
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    response.headers["Retry-After"] = "3600"
+    response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate"
+    return response
 
 
 # ── WSGI alias (some Vercel runtime versions look for `application`) ───
@@ -4211,11 +4524,14 @@ def _build_sitemap_entries():
     seen_urls = set()
     today = datetime.now().strftime("%Y-%m-%d")
 
+    # ═══════════════════════════════════════════════════════════════════
+    # STATIC PAGES WITH PRIORITY & FREQUENCY
+    # ═══════════════════════════════════════════════════════════════════
     static_urls = [
         {"loc": "/", "priority": "1.0", "changefreq": "daily"},
         {"loc": "/jobs", "priority": "0.95", "changefreq": "daily"},
-        {"loc": "/jobs/india", "priority": "0.95", "changefreq": "daily"},
-        {"loc": "/jobs/tamilnadu", "priority": "0.95", "changefreq": "daily"},
+        {"loc": "/jobs/india", "priority": "0.92", "changefreq": "daily"},
+        {"loc": "/jobs/tamilnadu", "priority": "0.90", "changefreq": "daily"},
         {"loc": "/career-guidance", "priority": "0.85", "changefreq": "weekly"},
         {"loc": "/resume-builder", "priority": "0.85", "changefreq": "weekly"},
         {"loc": "/job-trends", "priority": "0.80", "changefreq": "weekly"},
@@ -4223,50 +4539,76 @@ def _build_sitemap_entries():
         {"loc": "/faq", "priority": "0.70", "changefreq": "monthly"},
         {"loc": "/about", "priority": "0.60", "changefreq": "monthly"},
         {"loc": "/contact", "priority": "0.55", "changefreq": "monthly"},
-        {"loc": "/developer", "priority": "0.50", "changefreq": "monthly"},
+        {"loc": "/developer", "priority": "0.50", "changefreq": "quarterly"},
         {"loc": "/privacy", "priority": "0.30", "changefreq": "yearly"},
         {"loc": "/terms", "priority": "0.30", "changefreq": "yearly"},
     ]
 
     for url in static_urls:
         loc = f"{BASE_URL}{url['loc']}"
-        pages.append({
-            "loc": loc,
-            "lastmod": today,
-            "changefreq": url["changefreq"],
-            "priority": url["priority"]
-        })
-        seen_urls.add(loc)
+        # Avoid duplicates
+        if loc not in seen_urls:
+            pages.append({
+                "loc": loc,
+                "lastmod": today,
+                "changefreq": url["changefreq"],
+                "priority": url["priority"]
+            })
+            seen_urls.add(loc)
 
+    # ═══════════════════════════════════════════════════════════════════
+    # DYNAMIC JOB DETAIL PAGES (limit to avoid sitemap overflow)
+    # ═══════════════════════════════════════════════════════════════════
     datasets = [
-        ("main", load_jobs),
-        ("india", load_india_jobs),
-        ("tamilnadu", load_tn_jobs),
+        ("main", load_jobs, "0.80"),
+        ("india", load_india_jobs, "0.75"),
+        ("tamilnadu", load_tn_jobs, "0.70"),
     ]
 
-    for source_name, loader in datasets:
+    total_jobs_added = 0
+    max_jobs_per_source = 3000  # Google's suggestion: keep sitemaps under 50k URLs
+    
+    for source_name, loader, priority in datasets:
         try:
             data = loader()
             fallback_date = str(data.get("last_updated") or today).split(" ")[0]
+            
+            # Validate date format
             if not re.match(r"^\d{4}-\d{2}-\d{2}$", fallback_date):
                 fallback_date = today
-            for job in data.get("jobs", [])[:1000]:
+            
+            jobs_added = 0
+            for job in data.get("jobs", []):
+                if jobs_added >= max_jobs_per_source:
+                    break
+                    
                 job_id = job.get("id")
-                if job_id in (None, ""):
+                if job_id in (None, "", ""):
                     continue
+                
+                # Create canonical job URL
                 loc = _job_detail_url(job_id, source_name)
+                
+                # Avoid duplicates
                 if loc in seen_urls:
+                    logger.warning(f"Duplicate job URL in sitemap: {loc}")
                     continue
+                
                 seen_urls.add(loc)
+                
                 pages.append({
                     "loc": loc,
                     "lastmod": _job_lastmod(job, fallback_date),
                     "changefreq": "daily",
-                    "priority": "0.70",
+                    "priority": priority,
                 })
+                jobs_added += 1
+                total_jobs_added += 1
+                
         except Exception as e:
             logger.error(f"Error adding {source_name} jobs to sitemap: {e}")
 
+    logger.info(f"Sitemap generated with {len(pages)} total entries ({total_jobs_added} job details)")
     return pages
 
 
@@ -4287,16 +4629,35 @@ def _render_sitemap_xml(pages):
 
 @app.route("/sitemap.xml")
 def sitemap():
-    """Generate a dynamic sitemap including static pages and all job sources."""
+    """
+    Generate a dynamic sitemap including static pages and all job sources.
+    Returns proper XML with caching headers to prevent indexing issues.
+    """
     try:
         sitemap_xml = _render_sitemap_xml(_build_sitemap_entries())
     except Exception as e:
-        logger.error(f"Failed to build sitemap XML: {e}")
-        sitemap_xml = _render_sitemap_xml(_build_sitemap_entries()[:14])
+        logger.error(f"Failed to build sitemap XML: {e}", exc_info=True)
+        # Fallback: return just static pages
+        try:
+            static_entries = _build_sitemap_entries()[:14]
+            sitemap_xml = _render_sitemap_xml(static_entries)
+        except Exception as e2:
+            logger.error(f"Sitemap fallback also failed: {e2}")
+            # Last resort: minimal sitemap
+            sitemap_xml = _render_sitemap_xml([
+                {
+                    "loc": BASE_URL,
+                    "lastmod": datetime.now().strftime("%Y-%m-%d"),
+                    "changefreq": "daily",
+                    "priority": "1.0"
+                }
+            ])
 
     response = make_response(sitemap_xml)
-    response.headers["Content-Type"] = "application/xml"
-    response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"
+    response.headers["Content-Type"] = "application/xml; charset=utf-8"
+    response.headers["Cache-Control"] = "public, max-age=86400, s-maxage=604800, stale-while-revalidate=86400"
+    response.headers["X-Robots-Tag"] = "noindex, follow"  # Sitemap itself should not be indexed
+    response.status_code = 200
     return response
 
 

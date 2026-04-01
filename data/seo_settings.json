@@ -1,14 +1,166 @@
 {
+  "meta_title": "Career Guidance India | Jobs, Career Paths, Resume Builder & Remote Work Opportunities",
+  "meta_description": "Find 5000+ verified jobs across India, explore AI-guided career paths, build ATS-friendly resumes, and discover fresher/internship/remote opportunities in Bangalore, Hyderabad, Chennai & nationwide.",
   "keywords": [
     "Career Guidance India",
-    "Jobs in India",
-    "All India Jobs",
-    "Tamil Nadu Jobs",
+    "Jobs in India 2026",
     "Fresher Jobs India",
     "Remote Jobs India",
-    "Internships India",
-    "AI Resume Builder"
+    "Tamil Nadu Jobs",
+    "All India Jobs",
+    "IT Jobs India",
+    "Software Engineer Jobs",
+    "Data Science Jobs",
+    "Internship Opportunities",
+    "Career Roadmap",
+    "Resume Builder AI",
+    "Job Search Portal",
+    "Bangalore Jobs",
+    "Hyderabad Jobs",
+    "Chennai Jobs",
+    "Mumbai Jobs",
+    "Pune Jobs"
   ],
-  "meta_title": "Career Guidance India | Jobs, Career Paths, Resume Builder & Tamil Nadu Jobs",
-  "meta_description": "Find verified jobs across India and Tamil Nadu, explore AI-guided career roadmaps, build ATS-friendly resumes, and discover fresher, internship, and remote opportunities in one place."
+  "indexing_rules": {
+    "allow_indexing": [
+      "/",
+      "/jobs",
+      "/jobs/india",
+      "/jobs/tamilnadu",
+      "/career-guidance",
+      "/resume-builder",
+      "/job-trends",
+      "/blog",
+      "/faq",
+      "/about",
+      "/contact",
+      "/developer",
+      "/privacy",
+      "/terms"
+    ],
+    "noindex_pages": [
+      "/login",
+      "/signup",
+      "/logout",
+      "/profile",
+      "/student-dashboard",
+      "/admin",
+      "/onboarding",
+      "/auth",
+      "/api/"
+    ],
+    "block_crawl": [
+      "/static/uploads/",
+      "/api/serve-upload/",
+      "/*.json$",
+      "/*?*sort=*",
+      "/*?*page=*",
+      "/__pycache__/",
+      "/.vercel/"
+    ]
+  },
+  "canonical_rules": {
+    "enforce_https": true,
+    "enforce_www": false,
+    "trailing_slash": false,
+    "lowercase_urls": true,
+    "remove_query_params": [
+      "utm_source",
+      "utm_medium",
+      "utm_campaign",
+      "utm_content",
+      "fbclid",
+      "gclid",
+      "msclkid"
+    ],
+    "job_detail_canonical": "/job/{source}/{job_id}"
+  },
+  "error_handling": {
+    "404_status_code": 404,
+    "404_noindex": true,
+    "500_status_code": 500,
+    "500_noindex": true,
+    "500_no_cache": true,
+    "503_status_code": 503,
+    "503_noindex": true,
+    "503_retry_after": 3600
+  },
+  "sitemap_rules": {
+    "max_urls_per_sitemap": 50000,
+    "enable_compression": true,
+    "include_static_pages": true,
+    "include_job_details": true,
+    "job_priorities": {
+      "main_jobs": "0.80",
+      "india_jobs": "0.75",
+      "tamilnadu_jobs": "0.70"
+    },
+    "page_priorities": {
+      "homepage": "1.0",
+      "jobs_main": "0.95",
+      "jobs_regional": "0.90",
+      "career_guidance": "0.85",
+      "resume_builder": "0.85",
+      "trends": "0.80",
+      "blog": "0.80",
+      "faq": "0.70",
+      "about": "0.60",
+      "legal": "0.30"
+    },
+    "changefreq": {
+      "homepage": "daily",
+      "jobs": "daily",
+      "career_guidance": "weekly",
+      "trends": "weekly",
+      "blog": "weekly",
+      "static": "monthly"
+    }
+  },
+  "schema_org": {
+    "enable_website_schema": true,
+    "enable_job_posting_schema": true,
+    "enable_organization_schema": true,
+    "enable_breadcrumb_schema": true,
+    "organization": {
+      "name": "Career Guidance",
+      "url": "https://careerguidance.me",
+      "logo": "https://careerguidance.me/static/logo.png",
+      "description": "India's leading career guidance platform with job search, career paths, and AI resume builder",
+      "contact_type": "Customer Service",
+      "telephone": "",
+      "email": "support@careerguidance.me",
+      "address": {
+        "country": "India"
+      }
+    }
+  },
+  "performance": {
+    "cache_control_public": "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200",
+    "cache_control_api": "no-store, no-cache, must-revalidate",
+    "cache_control_static": "public, max-age=31536000, immutable",
+    "gzip_compression": true,
+    "minify_html": true,
+    "minify_css": true,
+    "minify_js": true
+  },
+  "security_headers": {
+    "X-Content-Type-Options": "nosniff",
+    "X-Frame-Options": "SAMEORIGIN",
+    "X-XSS-Protection": "1; mode=block",
+    "Referrer-Policy": "strict-origin-when-cross-origin",
+    "Permissions-Policy": "geolocation=(), microphone=(), camera=()"
+  },
+  "mobile_optimization": {
+    "viewport": "width=device-width, initial-scale=1.0",
+    "responsive_design": true,
+    "mobile_friendly": true,
+    "touch_targets_min_size": 48,
+    "legible_font_sizes": true
+  },
+  "structured_data": {
+    "breadcrumb_enabled": true,
+    "job_posting_enabled": true,
+    "faq_schema_enabled": true,
+    "organization_schema_enabled": true
+  }
 }
