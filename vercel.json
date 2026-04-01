@@ -7,7 +7,18 @@
       "config": {
         "maxDuration": 60,
         "maxLambdaSize": "512mb",
-        "includeFiles": ["templates/**", "static/**", "data/**"]
+        "includeFiles": [
+          "templates/**",
+          "static/**",
+          "data/**",
+          "sitemap.xml",
+          "robots.txt",
+          "generate_sitemap.py",
+          "seo_diagnostic.py",
+          "verify_sitemap.py",
+          "SEO_IMPROVEMENTS.md",
+          ".env"
+        ]
       }
     }
   ],
