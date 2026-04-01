@@ -4643,8 +4643,9 @@ def sitemap():
             
             response = make_response(sitemap_xml)
             response.headers["Content-Type"] = "application/xml; charset=utf-8"
-            response.headers["Cache-Control"] = "public, max-age=3600, s-maxage=86400, stale-while-revalidate=43200"
+            response.headers["Cache-Control"] = "public, max-age=86400, s-maxage=0"
             response.headers["X-Robots-Tag"] = "noindex, follow"
+            response.headers["Pragma"] = "cache"
             response.status_code = 200
             return response
         except Exception as e:
