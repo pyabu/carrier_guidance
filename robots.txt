@@ -35,8 +35,10 @@ Disallow: /__pycache__/
 Disallow: /.vercel/
 
 # Search parameters that create duplicate content
-Disallow: /*?*sort=
-Disallow: /*?*page=  # Pagination handled better with canonical links
+# Don't block in robots.txt - use X-Robots-Tag headers instead for canonical control
+# Pagination and sorting are allowed to be crawled; noindex headers handle indexing control
+# Disallow: /*?*sort=*
+# Disallow: /*?*page=*
 
 # ============================================================
 # CRAWLER RATE LIMITING
