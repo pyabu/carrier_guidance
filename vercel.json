@@ -24,6 +24,16 @@
   ],
   "routes": [
     {
+      "src": "/sitemap\\.xml/",
+      "status": 308,
+      "dest": "/sitemap.xml"
+    },
+    {
+      "src": "/robots\\.txt/",
+      "status": 308,
+      "dest": "/robots.txt"
+    },
+    {
       "handle": "filesystem"
     },
     {

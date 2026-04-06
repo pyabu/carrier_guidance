@@ -4507,6 +4507,7 @@ def google_verification():
     return send_from_directory(app.root_path, 'googled8e4a208a1e8c152.html', mimetype='text/html')
 
 @app.route("/robots.txt")
+@app.route("/robots.txt/")
 def robots():
     return send_from_directory(app.root_path, 'robots.txt', mimetype='text/plain')
 
@@ -4628,6 +4629,7 @@ def _render_sitemap_xml(pages):
 
 
 @app.route("/sitemap.xml")
+@app.route("/sitemap.xml/")
 def sitemap():
     """
     Serve static sitemap.xml file with proper headers.
