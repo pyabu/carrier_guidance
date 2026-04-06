@@ -63,7 +63,7 @@ def generate_sitemap():
         {"loc": "/faq", "priority": "0.70", "changefreq": "monthly"},
         {"loc": "/about", "priority": "0.60", "changefreq": "monthly"},
         {"loc": "/contact", "priority": "0.55", "changefreq": "monthly"},
-        {"loc": "/developer", "priority": "0.50", "changefreq": "quarterly"},
+        {"loc": "/developer", "priority": "0.50", "changefreq": "monthly"},
         {"loc": "/privacy", "priority": "0.30", "changefreq": "yearly"},
         {"loc": "/terms", "priority": "0.30", "changefreq": "yearly"},
     ]
