@@ -1,71 +1,37 @@
 # robots.txt for careerguidance.me
-# Last Updated: 2026-04-01
-# Purpose: Control crawler access while allowing indexing of public pages
+# Last Updated: 2026-04-06
 
-# ═══════════════════════════════════════════════════════════════════════
-# GLOBAL RULES FOR ALL CRAWLERS
-# ═══════════════════════════════════════════════════════════════════════
 User-agent: *
 Allow: /
 
-# ============================================================
-# PAGES TO CRAWL BUT NOT INDEX (Handled via X-Robots-Tag)
-# ============================================================
-# These are allowed to crawl for link indexing, but are marked noindex via headers
-# - /login, /signup, /logout - User-specific pages
-# - /profile, /student-dashboard - User account pages
-# - /onboarding - First-time setup
-# - /admin - Admin panel
-# These paths have X-Robots-Tag: noindex headers set in app.py
-
-# ============================================================
-# PRIVATE FILES - EXPLICITLY BLOCKED
-# ============================================================
-# Uploaded user files - Private and should not be indexed
-Disallow: /static/uploads/
-Disallow: /api/serve-upload/
-
-# API endpoints - Should use noindex headers, but block crawl to be safe
-Disallow: /api/
+# Block private/auth/account areas from crawl budget usage.
+Disallow: /login
+Disallow: /signup
+Disallow: /logout
+Disallow: /profile
+Disallow: /onboarding
+Disallow: /student-dashboard
 Disallow: /admin/
 
-# Temporary and cache files
+# Block technical/private endpoints and generated internals.
+Disallow: /api/
+Disallow: /api/serve-upload/
+Disallow: /static/uploads/
 Disallow: /_next/
 Disallow: /__pycache__/
 Disallow: /.vercel/
 
-# Search parameters that create duplicate content
-# Don't block in robots.txt - use X-Robots-Tag headers instead for canonical control
-# Pagination and sorting are allowed to be crawled; noindex headers handle indexing control
-# Disallow: /*?*sort=*
-# Disallow: /*?*page=*
-
-# ============================================================
-# CRAWLER RATE LIMITING
-# ============================================================
-# Googlebot - Standard crawl rate (adjust if needed)
-User-agent: Googlebot
-Crawl-delay: 0
-Request-rate: 1/0.5s
-
-# Bingbot
+# Slow down selected crawlers that support Crawl-delay.
 User-agent: Bingbot
-Crawl-delay: 0
-Request-rate: 1/0.5s
+Crawl-delay: 1
 
-# Slow crawlers - Reduce load
 User-agent: Slurp
-Request-rate: 1/1s
+Crawl-delay: 2
 
 User-agent: DuckDuckBot
-Request-rate: 1/1s
+Crawl-delay: 2
 
-# ============================================================
-# BAD BOTS - BLOCK COMPLETELY
-# ============================================================
-User-agent: Scrapy
-Disallow: /
-
+# Block known aggressive SEO/bulk crawlers.
 User-agent: AhrefsBot
 Disallow: /
 
@@ -78,24 +44,4 @@ Disallow: /
 User-agent: DotBot
 Disallow: /
 
-# ============================================================
-# SITEMAP
-# ============================================================
-# Primary sitemap
 Sitemap: https://careerguidance.me/sitemap.xml
-
-# Alternate sitemaps (if used in future)
-# Sitemap: https://careerguidance.me/sitemap-static.xml
-# Sitemap: https://careerguidance.me/sitemap-jobs-main.xml
-# Sitemap: https://careerguidance.me/sitemap-jobs-india.xml
-# Sitemap: https://careerguidance.me/sitemap-jobs-tamilnadu.xml
-
-# ============================================================
-# NOTES FOR SEARCH CONSOLE
-# ============================================================
-# If you see "indexed, though blocked by robots.txt" in GSC:
-# 1. URL may have been indexed before this rule was added
-# 2. Check Google Search Console > Coverage > Excluded
-# 3. Request removal via GSC > Removed URLs
-# 4. Alternative: Remove URL from sitemap.xml
-# 5. Add explicit noindex meta tag in template (already done in base.html)
