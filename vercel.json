@@ -24,12 +24,12 @@
   ],
   "routes": [
     {
-      "src": "/sitemap\\.xml/",
+      "src": "^/(sitemap\\.xml/|sitemap_index\\.xml)$",
       "status": 308,
       "dest": "/sitemap.xml"
     },
     {
-      "src": "/robots\\.txt/",
+      "src": "^/robots\\.txt/$",
       "status": 308,
       "dest": "/robots.txt"
     },

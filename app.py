@@ -57,6 +57,18 @@ DEFAULT_THEME_SETTINGS = {
     "layout_style": "grid"
 }
 PUBLIC_FILTER_PATHS = {"/jobs", "/jobs/india", "/jobs/tamilnadu"}
+CANONICAL_EXCLUDE_PARAMS = {
+    "utm_source",
+    "utm_medium",
+    "utm_campaign",
+    "utm_content",
+    "utm_term",
+    "fbclid",
+    "gclid",
+    "msclkid",
+    "sort",
+    "page",
+}
 PRIVATE_NOINDEX_PREFIXES = (
     "/login",
     "/signup",
@@ -218,6 +230,52 @@ def _normalize_path(path):
 def _is_private_noindex_path(path):
     path = _normalize_path(path)
     return any(path == prefix or path.startswith(prefix + "/") for prefix in PRIVATE_NOINDEX_PREFIXES)
+
+
+def _canonical_target_for_request():
+    """
+    Build the canonical absolute URL for the current request.
+    Used for both <link rel="canonical"> and redirect enforcement.
+    """
+    seo = getattr(g, "seo", {}) or {}
+    canonical_cfg = seo.get("canonical_rules", {}) if isinstance(seo, dict) else {}
+
+    # Host normalization
+    host = request.host.split(":")[0].lower()
+    enforce_www = bool(canonical_cfg.get("enforce_www", False))
+    if enforce_www and not host.startswith("www."):
+        host = f"www.{host}"
+    elif not enforce_www and host.startswith("www."):
+        host = host[4:]
+
+    # Scheme normalization
+    enforce_https = bool(canonical_cfg.get("enforce_https", True))
+    if enforce_https and (request.is_secure or IS_VERCEL):
+        scheme = "https"
+    else:
+        scheme = request.scheme
+
+    # Path normalization
+    path = request.path or "/"
+    if path != "/" and path.endswith("/"):
+        path = path.rstrip("/")
+    if canonical_cfg.get("lowercase_urls", True) and not path.startswith("/static/"):
+        path = path.lower()
+
+    # Legacy sitemap endpoints should canonicalize to /sitemap.xml
+    if path == "/sitemap_index.xml":
+        path = "/sitemap.xml"
+
+    # Query normalization
+    clean_query_params = {}
+    for key, value in request.args.items():
+        if key.lower() not in CANONICAL_EXCLUDE_PARAMS:
+            clean_query_params[key] = value
+
+    query = urllib.parse.urlencode(sorted(clean_query_params.items()))
+    if query:
+        return f"{scheme}://{host}{path}?{query}"
+    return f"{scheme}://{host}{path}"
 
 
 def _read_json_file(path):
@@ -1894,30 +1952,7 @@ def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
     path = _normalize_path(request.path)
-    
-    # Build canonical URL with proper normalization
-    scheme = "https" if request.is_secure or IS_VERCEL else request.scheme
-    host = request.host.split(':')[0]  # Remove port for canonical
-    
-    # Enforce no trailing slashes except for root
-    clean_path = path.rstrip('/') if path != '/' else '/'
-    
-    # Remove SEO-negative query parameters from canonical URL
-    clean_query_params = {}
-    canonical_exclude_params = {'utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 
-                                'utm_term', 'fbclid', 'gclid', 'msclkid', 'sort', 'page'}
-    
-    for key, value in request.args.items():
-        if key.lower() not in canonical_exclude_params:
-            clean_query_params[key] = value
-    
-    # Build canonical URL
-    canonical_base = f"{scheme}://{host}{clean_path}"
-    if clean_query_params:
-        clean_query_string = urllib.parse.urlencode(sorted(clean_query_params.items()))
-        g.canonical_url = f"{canonical_base}?{clean_query_string}"
-    else:
-        g.canonical_url = canonical_base
+    g.canonical_url = _canonical_target_for_request()
     
     # Set default robots meta tag
     g.robots_meta = "index, follow, max-image-preview:large"
@@ -1931,6 +1966,25 @@ def inject_seo_globals():
     # Apply noindex for API endpoints
     elif path.startswith("/api/"):
         g.robots_meta = "noindex, nofollow, noarchive"
+
+
+@app.before_request
+def enforce_canonical_redirects():
+    """Redirect duplicate URL variants to one canonical URL for crawl consistency."""
+    if request.method not in ("GET", "HEAD"):
+        return None
+
+    # Keep API and health-like endpoints untouched.
+    if request.path.startswith("/api/"):
+        return None
+
+    current_host = request.host.split(":")[0].lower()
+    current_url = f"{request.scheme}://{current_host}{request.full_path}".rstrip("?")
+    target_url = _canonical_target_for_request()
+
+    if current_url != target_url:
+        return redirect(target_url, code=308)
+    return None
 
 import time
 _jobs_last_updated_cache = {"time": "2026-03-15 06:56:04", "checked_at": 0}
