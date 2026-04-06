@@ -4,26 +4,55 @@
 {% block extra_head %}
 <!-- JobPosting Structured Data -->
 <script type="application/ld+json">
+{% set raw_employment_type = (job.type or '')|lower %}
+{% if 'intern' in raw_employment_type %}
+{% set schema_employment_type = 'INTERN' %}
+{% elif 'part' in raw_employment_type %}
+{% set schema_employment_type = 'PART_TIME' %}
+{% elif 'contract' in raw_employment_type %}
+{% set schema_employment_type = 'CONTRACTOR' %}
+{% elif 'temp' in raw_employment_type %}
+{% set schema_employment_type = 'TEMPORARY' %}
+{% elif 'volunteer' in raw_employment_type %}
+{% set schema_employment_type = 'VOLUNTEER' %}
+{% elif 'per diem' in raw_employment_type %}
+{% set schema_employment_type = 'PER_DIEM' %}
+{% elif raw_employment_type %}
+{% set schema_employment_type = 'FULL_TIME' %}
+{% else %}
+{% set schema_employment_type = 'OTHER' %}
+{% endif %}
+{% set schema_description = (job.description|striptags|replace('\n', ' ')|trim) %}
+{% if not schema_description %}
+{% set schema_description = 'Apply for ' ~ (job.title or 'this role') ~ ' at ' ~ (job.company or 'a leading company') ~ ' in ' ~ (job.location or 'India') ~ '.' %}
+{% endif %}
+{% set org_same_as = job.apply_url if (job.apply_url and (job.apply_url.startswith('http://') or job.apply_url.startswith('https://'))) else 'https://careerguidance.me/' %}
+{% set org_logo = job.company_logo if (job.company_logo and (job.company_logo.startswith('http://') or job.company_logo.startswith('https://'))) else url_for('static', filename='favicon.ico', _external=True) %}
 {
   "@context": "https://schema.org",
   "@type": "JobPosting",
-  "title": "{{ job.title }}",
-  "description": "{{ job.description|striptags|replace('\n', ' ')|truncate(5000) }}",
-  "datePosted": "{{ job.posted_date }}",
+  "title": {{ (job.title or 'Job Opportunity')|tojson }},
+  "description": {{ schema_description|truncate(5000)|tojson }},
+  "datePosted": {{ (job.posted_date or '2026-01-01')|tojson }},
   "validThrough": "2026-12-31T23:59:59Z",
-  "employmentType": "{{ job.type|upper }}",
+  "employmentType": {{ schema_employment_type|tojson }},
+  "identifier": {
+    "@type": "PropertyValue",
+    "name": {{ (job.company or 'Career Guidance')|tojson }},
+    "value": {{ (job.id ~ '')|tojson }}
+  },
   "hiringOrganization": {
     "@type": "Organization",
-    "name": "{{ job.company }}",
-    "sameAs": "{{ job.apply_url }}",
-    "logo": "{{ job.company_logo }}"
+    "name": {{ (job.company or 'Career Guidance')|tojson }},
+    "sameAs": {{ org_same_as|tojson }},
+    "logo": {{ org_logo|tojson }}
   },
   "jobLocation": {
     "@type": "Place",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": "{{ job.location.split(',')[0] if ',' in job.location else job.location }}",
-      "addressRegion": "{{ job.location.split(',')[1].strip() if ',' in job.location else '' }}",
+      "addressLocality": {{ (job.location.split(',')[0] if ',' in job.location else job.location)|default('India')|tojson }},
+      "addressRegion": {{ (job.location.split(',')[1].strip() if ',' in job.location else '')|tojson }},
       "addressCountry": "IN"
     }
   },
