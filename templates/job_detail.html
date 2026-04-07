@@ -28,6 +28,9 @@
 {% endif %}
 {% set org_same_as = job.apply_url if (job.apply_url and (job.apply_url.startswith('http://') or job.apply_url.startswith('https://'))) else 'https://careerguidance.me/' %}
 {% set org_logo = job.company_logo if (job.company_logo and (job.company_logo.startswith('http://') or job.company_logo.startswith('https://'))) else url_for('static', filename='favicon.ico', _external=True) %}
+{% set city = job.location_city or (job.location.split(',')[0] if ',' in (job.location or '') else (job.location or 'India')) %}
+{% set state = job.location_state or (job.location.split(',')[1].strip() if ',' in (job.location or '') and (job.location or '').count(',') >= 1 else '') %}
+{% set country = job.location_country or 'India' %}
 {
   "@context": "https://schema.org",
   "@type": "JobPosting",
@@ -51,8 +54,10 @@
     "@type": "Place",
     "address": {
       "@type": "PostalAddress",
-      "addressLocality": {{ (job.location.split(',')[0] if ',' in job.location else job.location)|default('India')|tojson }},
-      "addressRegion": {{ (job.location.split(',')[1].strip() if ',' in job.location else '')|tojson }},
+      "streetAddress": {{ (job.street_address or '')|tojson }},
+      "addressLocality": {{ city|tojson }},
+      "addressRegion": {{ state|tojson }},
+      "postalCode": {{ (job.postal_code or '')|tojson }},
       "addressCountry": "IN"
     }
   },
