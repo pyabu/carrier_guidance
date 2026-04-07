@@ -846,8 +846,14 @@ def job_detail_canonical(source, job_id):
     job = _resolve_job_detail(job_id, source_hint=normalized_source)
     if not job:
         abort(404)
-    if job["_source_db"] != normalized_source:
-        return redirect(job["detail_path"], code=301)
+    
+    # Redirect if URL source doesn't match actual job source
+    actual_source = job.get("_source_db")
+    if actual_source and actual_source != normalized_source:
+        logger.info(f"Redirecting /job/{source}/{job_id} to /job/{actual_source}/{job_id}")
+        response = redirect(job["detail_path"], code=301)
+        response.headers["X-Robots-Tag"] = "noindex, nofollow"
+        return response
 
     return _render_job_detail(job)
 
