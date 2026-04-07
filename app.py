@@ -197,6 +197,11 @@ def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # For API endpoints, return 401 with noindex header instead of redirect
+            if request.path.startswith('/api/'):
+                resp = jsonify({"error": "Authentication required"})
+                resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+                return resp, 401
             return redirect(url_for('login', next=request.url))
         return f(*args, **kwargs)
     return decorated_function
@@ -205,8 +210,18 @@ def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
         if 'user_id' not in session:
+            # For API endpoints, return 401 with noindex header
+            if request.path.startswith('/api/'):
+                resp = jsonify({"error": "Authentication required"})
+                resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+                return resp, 401
             return redirect(url_for('login', next=request.url))
         if not session.get('is_admin'):
+            # For API endpoints, return 403 with noindex header
+            if request.path.startswith('/api/'):
+                resp = jsonify({"error": "Admin access required"})
+                resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+                return resp, 403
             abort(403) # Forbidden
         return f(*args, **kwargs)
     return decorated_function
@@ -4411,16 +4426,22 @@ def get_saved_jobs():
         saved_job_ids = [row['job_id'] for row in response.data]
         
         if not saved_job_ids:
-            return jsonify({"jobs": []})
+            resp = jsonify({"jobs": []})
+            resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+            return resp
         
         all_jobs = _load_all_jobs()
         saved_set = set(saved_job_ids)
         saved_jobs_data = [j for j in all_jobs if str(j.get('id')) in saved_set]
         
-        return jsonify({"jobs": saved_jobs_data})
+        resp = jsonify({"jobs": saved_jobs_data})
+        resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+        return resp
     except Exception as e:
         logger.error(f"Error fetching saved jobs: {e}")
-        return jsonify({"error": str(e)}), 500
+        resp = jsonify({"error": str(e)})
+        resp.headers["X-Robots-Tag"] = "noindex, nofollow, noarchive"
+        return resp, 500
 
 
 def _get_user_applications(uid):
