@@ -858,7 +858,11 @@ def job_detail(job_id):
     job = _resolve_job_detail(job_id, source_hint=request.args.get("source", ""))
     if not job:
         abort(404)
-    return redirect(job["detail_path"], code=301)
+    
+    # Create redirect response with noindex header to prevent indexing of legacy URLs
+    response = redirect(job["detail_path"], code=301)
+    response.headers["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 @app.route("/career-guidance")
