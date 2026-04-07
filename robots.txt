@@ -15,7 +15,6 @@ Disallow: /admin/
 
 # Block technical/private endpoints and generated internals.
 Disallow: /api/
-Disallow: /api/serve-upload/
 Disallow: /static/uploads/
 Disallow: /_next/
 Disallow: /__pycache__/
