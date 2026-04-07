@@ -2032,8 +2032,18 @@ def inject_globals():
 def apply_indexing_headers(response):
     """Add robots headers so private/API URLs can be crawled but not indexed."""
     header_value = None
+    
+    # Block all API endpoints from indexing
     if request.path.startswith("/api/"):
         header_value = "noindex, nofollow, noarchive"
+        # Also add Cache-Control to prevent caching of API responses by crawlers
+        response.headers["Cache-Control"] = "private, no-cache, no-store, must-revalidate"
+    
+    # Block private/auth pages from indexing
+    elif _is_private_noindex_path(request.path):
+        header_value = "noindex, follow, max-image-preview:large"
+    
+    # Apply custom robots meta from g.robots_meta if set
     elif getattr(g, "robots_meta", None) and "noindex" in g.robots_meta:
         header_value = g.robots_meta
 
