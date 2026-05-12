@@ -4601,6 +4601,10 @@ def favicon():
 def google_verification():
     return send_from_directory(app.root_path, 'googled8e4a208a1e8c152.html', mimetype='text/html')
 
+@app.route("/google25c1f4c7795c1819.html")
+def google_verification_2():
+    return send_from_directory(app.root_path, 'google25c1f4c7795c1819.html', mimetype='text/html')
+
 @app.route("/robots.txt")
 @app.route("/robots.txt/")
 def robots():
