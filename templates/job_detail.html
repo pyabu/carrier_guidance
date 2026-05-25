@@ -1,7 +1,11 @@
 {% extends "base.html" %}
-{% block meta_desc %}{{ g.seo.meta_description }}{% endblock %}
+{% block title %}{{ job.title }} at {{ job.company }} | {{ job.location }} | CareerGuidance{% endblock %}
+{% block meta_desc %}Apply for {{ job.title }} at {{ job.company }} in {{ job.location }}. {{ job.type }} role. Skills: {{ job.skills[:3]|join(', ') }}. Posted {{ job.posted_date }}. Apply now on CareerGuidance.{% endblock %}
+{% block meta_keywords %}{{ job.title }}, {{ job.company }} jobs, {{ job.location }} jobs, {{ job.type }} jobs India, {{ job.category }} jobs{% endblock %}
 
 {% block extra_head %}
+<!-- Override og:type for job pages -->
+<meta property="og:type" content="article">
 <!-- JobPosting Structured Data -->
 <script type="application/ld+json">
 {% set raw_employment_type = (job.type or '')|lower %}
@@ -37,7 +41,7 @@
   "title": {{ (job.title or 'Job Opportunity')|tojson }},
   "description": {{ schema_description|truncate(5000)|tojson }},
   "datePosted": {{ (job.posted_date or '2026-01-01')|tojson }},
-  "validThrough": "2026-12-31T23:59:59Z",
+  "validThrough": {{ (job.valid_through or '2027-03-31T23:59:59Z')|tojson }},
   "employmentType": {{ schema_employment_type|tojson }},
   "identifier": {
     "@type": "PropertyValue",

@@ -833,6 +833,16 @@ def _render_job_detail(job):
     g.seo['meta_title'] = f"{job.get('title')} at {job.get('company')} | Career Guidance"
     g.seo['meta_description'] = f"Apply for {job.get('title')} position at {job.get('company')} in {job.get('location')}. {job.get('description', '')[:150]}..."
 
+    # Compute validThrough: 90 days from posted_date (or from today)
+    from datetime import timedelta
+    posted_str = job.get("posted_date", "")
+    try:
+        posted_dt = datetime.strptime(posted_str[:10], "%Y-%m-%d")
+    except Exception:
+        posted_dt = datetime.now()
+    valid_through = (posted_dt + timedelta(days=90)).strftime("%Y-%m-%dT23:59:59Z")
+    job["valid_through"] = valid_through
+
     return render_template("job_detail.html", job=job)
 
 

@@ -1,5 +1,5 @@
 # robots.txt for careerguidance.me
-# Last Updated: 2026-04-06
+# Last Updated: 2026-05-25
 
 User-agent: *
 Allow: /
