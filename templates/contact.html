@@ -3,6 +3,62 @@
 {% block meta_desc %}Have questions or need support? Contact the CareerGuidance team for inquiries about job listings, career roadmaps, or technical assistance.{% endblock %}
 {% block meta_keywords %}Contact CareerGuidance, Support, Help India Jobs, Career Inquiry{% endblock %}
 
+{% block extra_head %}
+<!-- ContactPage Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact CareerGuidance",
+  "url": "https://careerguidance.me/contact",
+  "description": "Contact CareerGuidance for support, job listing inquiries, career guidance help, or partnership opportunities.",
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://careerguidance.me/"
+    },{
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Contact",
+      "item": "https://careerguidance.me/contact"
+    }]
+  }
+}
+</script>
+<!-- LocalBusiness Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "name": "CareerGuidance",
+  "url": "https://careerguidance.me",
+  "logo": "https://careerguidance.me/static/favicon.ico",
+  "description": "India's leading AI-powered career guidance and job search platform.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Tech Hub",
+    "addressLocality": "Bangalore",
+    "addressRegion": "Karnataka",
+    "postalCode": "560001",
+    "addressCountry": "IN"
+  },
+  "email": "support@careerguidance.com",
+  "telephone": "+91-98765-43210",
+  "openingHoursSpecification": [
+    {
+      "@type": "OpeningHoursSpecification",
+      "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+      "opens": "09:00",
+      "closes": "18:00"
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">

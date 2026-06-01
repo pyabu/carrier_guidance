@@ -1,12 +1,12 @@
 # robots.txt for careerguidance.me
-# Last Updated: 2026-05-25
+# Last Updated: 2026-06-01
 
 User-agent: *
 Allow: /
 
-# Block private/auth/account areas from crawl budget usage.
-Disallow: /login
-Disallow: /signup
+# Block purely private/backend areas (use meta noindex in HTML for auth pages).
+# NOTE: /login and /signup are CRAWLABLE — noindex meta tag in the HTML
+#       prevents indexing while avoiding "indexed though blocked by robots.txt" GSC warnings.
 Disallow: /logout
 Disallow: /profile
 Disallow: /onboarding
@@ -19,8 +19,13 @@ Disallow: /static/uploads/
 Disallow: /_next/
 Disallow: /__pycache__/
 Disallow: /.vercel/
+Disallow: /static/js/
+Disallow: /static/css/
 
 # Slow down selected crawlers that support Crawl-delay.
+User-agent: Googlebot
+Crawl-delay: 0
+
 User-agent: Bingbot
 Crawl-delay: 1
 
@@ -41,6 +46,12 @@ User-agent: MJ12bot
 Disallow: /
 
 User-agent: DotBot
+Disallow: /
+
+User-agent: PetalBot
+Disallow: /
+
+User-agent: Scrapy
 Disallow: /
 
 Sitemap: https://careerguidance.me/sitemap.xml

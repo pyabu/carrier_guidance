@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f4c75">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
-    <meta name="google-site-verification" content="25c1f4c7795c1819" />
     <meta name="google-site-verification" content="hUVRsV36_wcv4EiKvE4QpRBIHKlG0Z5xDZKojB-HepE" />
     <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
     <link rel="canonical" href="{{ g.canonical_url }}">
@@ -21,14 +20,19 @@
     <meta property="og:url" content="{{ g.canonical_url }}">
     <meta property="og:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
     <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
-    <meta property="og:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+    <meta property="og:image" content="https://careerguidance.me/static/Sindhu.jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:site_name" content="CareerGuidance">
+    <meta property="og:locale" content="en_IN">
 
     <!-- Twitter -->
-    <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:url" content="{{ g.canonical_url }}">
-    <meta property="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
-    <meta property="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
-    <meta property="twitter:image" content="{{ url_for('static', filename='Sindhu.jpeg', _external=True) }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:url" content="{{ g.canonical_url }}">
+    <meta name="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
+    <meta name="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
+    <meta name="twitter:image" content="https://careerguidance.me/static/Sindhu.jpeg">
+    <meta name="twitter:site" content="@careerguidance">
 
     <!-- JSON-LD WebSite Schema -->
     <script type="application/ld+json">

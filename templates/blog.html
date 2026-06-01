@@ -3,6 +3,100 @@
 {% block meta_desc %}Explore the latest career insights, IT trends in India, resume writing tips, and interview preparation guides on the CareerGuidance blog.{% endblock %}
 {% block meta_keywords %}Career Blog India, IT Trends 2026, Job Search Tips, Resume Advice India, FAANG Preparation{% endblock %}
 
+{% block extra_head %}
+<!-- BreadcrumbList Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "Blog",
+    "item": "https://careerguidance.me/blog"
+  }]
+}
+</script>
+<!-- Blog ItemList Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "CareerGuidance Blog",
+  "url": "https://careerguidance.me/blog",
+  "description": "Career insights, IT trends, resume writing tips, and interview preparation guides for Indian students and professionals.",
+  "publisher": {
+    "@type": "Organization",
+    "name": "CareerGuidance",
+    "url": "https://careerguidance.me"
+  },
+  "blogPost": [
+    {
+      "@type": "BlogPosting",
+      "headline": "Top 10 Highest Paying Tech Skills in India for 2026",
+      "url": "https://careerguidance.me/blog#top-tech-skills-2026",
+      "datePublished": "2026-03-05",
+      "image": "https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&h=500&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "How to Write an ATS-Friendly Resume for Indian Companies",
+      "url": "https://careerguidance.me/blog#ats-resume-india",
+      "datePublished": "2026-03-03",
+      "image": "https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Cracking Campus Placements: FAANG India & Service Companies",
+      "url": "https://careerguidance.me/blog#campus-placements",
+      "datePublished": "2026-03-01",
+      "image": "https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Remote Work in India: Trends, Companies & Salary Guide 2026",
+      "url": "https://careerguidance.me/blog#remote-work-india",
+      "datePublished": "2026-02-28",
+      "image": "https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "AI/ML Career in India: From B.Tech to ₹30 LPA+",
+      "url": "https://careerguidance.me/blog#aiml-career-india",
+      "datePublished": "2026-02-25",
+      "image": "https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Campus to Corporate: Guide for Indian Engineering Graduates",
+      "url": "https://careerguidance.me/blog#campus-to-corporate",
+      "datePublished": "2026-02-22",
+      "image": "https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    },
+    {
+      "@type": "BlogPosting",
+      "headline": "Indian Tech Salary Guide 2026: Startup vs Service vs MNC",
+      "url": "https://careerguidance.me/blog#tech-salary-guide",
+      "datePublished": "2026-02-20",
+      "image": "https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=340&fit=crop",
+      "author": {"@type": "Organization", "name": "CareerGuidance"}
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">
@@ -15,9 +109,9 @@
 <section>
     <div class="container">
         <!-- Featured Article -->
-        <div class="guidance-card mb-4" data-aos="fade-up" style="display:grid;grid-template-columns:1fr 1fr;overflow:hidden;">
+        <div id="top-tech-skills-2026" class="guidance-card mb-4" data-aos="fade-up" style="display:grid;grid-template-columns:1fr 1fr;overflow:hidden;">
             <div class="guidance-card-img" style="height:100%;min-height:300px;overflow:hidden;">
-                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&h=500&fit=crop" alt="Top Tech Skills 2026" style="width:100%;height:100%;object-fit:cover;">
+                <img src="https://images.unsplash.com/photo-1498050108023-c5249f4df085?w=700&h=500&fit=crop" alt="Top Tech Skills 2026 - Highest Paying Skills in India" style="width:100%;height:100%;object-fit:cover;">
             </div>
             <div style="padding:40px;">
                 <span class="section-badge">⭐ Featured</span>
@@ -27,14 +121,15 @@
                     <span><i class="fas fa-calendar"></i> Mar 5, 2026</span>
                     <span><i class="fas fa-clock"></i> 8 min read</span>
                 </div>
-                <a href="#" class="btn btn-primary"><i class="fas fa-book-open"></i> Read Article</a>
+                <a href="#top-tech-skills-2026" class="btn btn-primary"><i class="fas fa-book-open"></i> Read Article</a>
             </div>
         </div>
 
         <div class="blog-grid">
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="100">
+            <div id="ats-resume-india" class="blog-card" data-aos="fade-up" data-aos-delay="100">
+                <a href="#ats-resume-india" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&h=340&fit=crop" alt="ATS Resume Tips" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1586281380349-632531db7ed4?w=600&h=340&fit=crop" alt="ATS-Friendly Resume Tips for Indian Companies" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">Resume Tips</span>
                 </div>
                 <div class="blog-card-body">
@@ -45,11 +140,13 @@
                         <span>5 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
 
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="200">
+            <div id="campus-placements" class="blog-card" data-aos="fade-up" data-aos-delay="200">
+                <a href="#campus-placements" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=340&fit=crop" alt="Campus Placements" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=600&h=340&fit=crop" alt="Cracking Campus Placements FAANG India" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">Interview</span>
                 </div>
                 <div class="blog-card-body">
@@ -60,11 +157,13 @@
                         <span>12 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
 
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="300">
+            <div id="remote-work-india" class="blog-card" data-aos="fade-up" data-aos-delay="300">
+                <a href="#remote-work-india" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&h=340&fit=crop" alt="Remote Work India" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1593642632559-0c6d3fc62b89?w=600&h=340&fit=crop" alt="Remote Work in India Trends 2026" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">Remote Work</span>
                 </div>
                 <div class="blog-card-body">
@@ -75,11 +174,13 @@
                         <span>6 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
 
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="100">
+            <div id="aiml-career-india" class="blog-card" data-aos="fade-up" data-aos-delay="100">
+                <a href="#aiml-career-india" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=340&fit=crop" alt="AI ML Career" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1677442136019-21780ecad995?w=600&h=340&fit=crop" alt="AI ML Career India B.Tech to 30 LPA" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">AI Careers</span>
                 </div>
                 <div class="blog-card-body">
@@ -90,11 +191,13 @@
                         <span>10 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
 
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="200">
+            <div id="campus-to-corporate" class="blog-card" data-aos="fade-up" data-aos-delay="200">
+                <a href="#campus-to-corporate" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&h=340&fit=crop" alt="Campus to Corporate" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1627556704302-624286467c65?w=600&h=340&fit=crop" alt="Campus to Corporate Guide Indian Engineering Graduates" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">Students</span>
                 </div>
                 <div class="blog-card-body">
@@ -105,11 +208,13 @@
                         <span>7 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
 
-            <div class="blog-card" data-aos="fade-up" data-aos-delay="300">
+            <div id="tech-salary-guide" class="blog-card" data-aos="fade-up" data-aos-delay="300">
+                <a href="#tech-salary-guide" style="text-decoration:none;color:inherit;display:block;">
                 <div class="blog-card-image" style="position:relative;overflow:hidden;">
-                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=340&fit=crop" alt="Tech Salary Guide" style="width:100%;height:100%;object-fit:cover;">
+                    <img src="https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&h=340&fit=crop" alt="Indian Tech Salary Guide 2026 Startup Service MNC" style="width:100%;height:100%;object-fit:cover;">
                     <span class="blog-category">Career Growth</span>
                 </div>
                 <div class="blog-card-body">
@@ -120,6 +225,7 @@
                         <span>6 min read</span>
                     </div>
                 </div>
+                </a>
             </div>
         </div>
     </div>

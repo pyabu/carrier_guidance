@@ -3,6 +3,100 @@
 {% block meta_desc %}Find answers to common questions about Indian job listings, career roadmaps, resume building, and how to use CareerGuidance effectively.{% endblock %}
 {% block meta_keywords %}CareerGuidance FAQ, Job Search Help, Career Roadmap Questions, Resume Builder Help{% endblock %}
 
+{% block extra_head %}
+<!-- FAQPage Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is Careerguidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance is India's all-in-one career guidance and job portal that helps Indian students, freshers, and professionals. We provide job listings from top Indian & global companies (scraped daily), career roadmaps for B.Tech/MCA/BCA graduates, resume building tools tailored for the Indian market, campus placement preparation guides, and AI-powered career recommendations — all completely free."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is Careerguidance free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! All core features including job browsing, career guidance, resume builder, and career roadmaps are completely free for Indian students and professionals. We plan to offer premium features like AI resume analysis and advanced analytics in the future."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often are job listings updated?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our AI-powered job scraper runs every 24 hours, pulling fresh job listings from multiple sources including Indian company career pages, global job boards, LinkedIn, and API feeds. Jobs are available across 14+ Indian cities including Bangalore, Mumbai, Delhi NCR, Hyderabad, Pune, Chennai, and more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I apply for a job?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "When you find a job you're interested in, click the 'Apply Now' button on the job card or detail page. This will redirect you to the company's official application page where you can submit your application directly. We recommend using our Resume Builder to create an ATS-friendly resume first!"
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What career roadmaps are available?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "We offer detailed career roadmaps for: AI/Machine Learning, Full Stack Web Development, Data Science & Analytics, Cloud & DevOps, Mobile App Development, and Cybersecurity. Each roadmap includes step-by-step learning paths with Indian platforms like NPTEL, GeeksforGeeks, CodeChef & Internshala, recommended resources, tips for campus placements, and related job opportunities in India."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How does the AI Career Suggestion feature work?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Our AI analyzes your skills, interests, and current market trends to provide personalized career recommendations. It matches your profile against thousands of job roles to show you career paths with the highest compatibility scores."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is my data safe and private?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes, we take data privacy seriously. Your personal information is encrypted and never shared with third parties without your consent. You can read our full Privacy Policy at https://careerguidance.me/privacy for detailed information about how we handle your data."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How can I contact support?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "You can reach us through our Contact page at https://careerguidance.me/contact, email us at support@careerguidance.com, or call us at +91 98765 43210. We respond to all inquiries within 24 hours during business hours (Mon-Fri, 9AM-6PM IST)."
+      }
+    }
+  ]
+}
+</script>
+<!-- BreadcrumbList Structured Data -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "Home",
+    "item": "https://careerguidance.me/"
+  },{
+    "@type": "ListItem",
+    "position": 2,
+    "name": "FAQ",
+    "item": "https://careerguidance.me/faq"
+  }]
+}
+</script>
+{% endblock %}
+
 {% block content %}
 <div class="page-header">
     <div class="container">
