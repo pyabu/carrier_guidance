@@ -93,5 +93,43 @@
       "Eleventh Hour Games"
     ],
     "remote_percentage": 27.6
+  },
+  {
+    "date": "2026-05-25",
+    "total_jobs": 962,
+    "top_5_skills": [
+      "TypeScript",
+      "Communication",
+      "Problem Solving",
+      "Terraform",
+      "Go"
+    ],
+    "top_5_companies": [
+      "MY Humancapital GmbH",
+      "Walmart",
+      "Taxtalente.de",
+      "Speechify",
+      "think about IT GmbH"
+    ],
+    "remote_percentage": 21.8
+  },
+  {
+    "date": "2026-05-26",
+    "total_jobs": 942,
+    "top_5_skills": [
+      "TypeScript",
+      "Communication",
+      "Problem Solving",
+      "Terraform",
+      "Go"
+    ],
+    "top_5_companies": [
+      "MY Humancapital GmbH",
+      "Walmart",
+      "Taxtalente.de",
+      "Speechify",
+      "think about IT GmbH"
+    ],
+    "remote_percentage": 22.9
   }
 ]
