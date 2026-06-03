@@ -1,5 +1,5 @@
 # robots.txt for careerguidance.me
-# Last Updated: 2026-06-01
+# Last Updated: 2026-06-03
 
 User-agent: *
 Allow: /
@@ -13,27 +13,13 @@ Disallow: /onboarding
 Disallow: /student-dashboard
 Disallow: /admin/
 
-# Block technical/private endpoints and generated internals.
+# Block private API and upload endpoints only.
+# DO NOT block /static/js/ or /static/css/ — Google needs these to render pages.
 Disallow: /api/
 Disallow: /static/uploads/
 Disallow: /_next/
 Disallow: /__pycache__/
 Disallow: /.vercel/
-Disallow: /static/js/
-Disallow: /static/css/
-
-# Slow down selected crawlers that support Crawl-delay.
-User-agent: Googlebot
-Crawl-delay: 0
-
-User-agent: Bingbot
-Crawl-delay: 1
-
-User-agent: Slurp
-Crawl-delay: 2
-
-User-agent: DuckDuckBot
-Crawl-delay: 2
 
 # Block known aggressive SEO/bulk crawlers.
 User-agent: AhrefsBot
@@ -53,5 +39,15 @@ Disallow: /
 
 User-agent: Scrapy
 Disallow: /
+
+# Bingbot rate limiting (Googlebot ignores Crawl-delay, so no Googlebot block needed).
+User-agent: Bingbot
+Crawl-delay: 1
+
+User-agent: Slurp
+Crawl-delay: 2
+
+User-agent: DuckDuckBot
+Crawl-delay: 2
 
 Sitemap: https://careerguidance.me/sitemap.xml
