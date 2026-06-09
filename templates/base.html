@@ -49,6 +49,39 @@
     }
     </script>
 
+    <!-- JSON-LD Organization Schema -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "CareerGuidance",
+      "alternateName": "careerguidance.me",
+      "url": "https://careerguidance.me",
+      "logo": {
+        "@type": "ImageObject",
+        "url": "https://careerguidance.me/static/favicon.ico",
+        "width": 512,
+        "height": 512
+      },
+      "description": "India's leading career guidance and job portal for freshers, IT professionals, and students across Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR and all of India.",
+      "foundingDate": "2025",
+      "areaServed": {
+        "@type": "Country",
+        "name": "India"
+      },
+      "contactPoint": {
+        "@type": "ContactPoint",
+        "contactType": "customer support",
+        "url": "https://careerguidance.me/contact",
+        "availableLanguage": ["English", "Tamil"]
+      },
+      "sameAs": [
+        "https://www.linkedin.com/company/careerguidance",
+        "https://twitter.com/careerguidance"
+      ]
+    }
+    </script>
+
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{{ url_for('static', filename='favicon.ico') }}">
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
