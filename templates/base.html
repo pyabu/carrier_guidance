@@ -5,9 +5,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="theme-color" content="#0f4c75">
+    <meta name="application-name" content="CareerGuidance">
+    <meta name="rating" content="general">
+    <meta name="language" content="en-IN">
+    <meta http-equiv="content-language" content="en-IN">
+    <meta name="geo.region" content="IN">
+    <meta name="geo.placename" content="India">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
     <meta name="google-site-verification" content="hUVRsV36_wcv4EiKvE4QpRBIHKlG0Z5xDZKojB-HepE" />
-    <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}{% endblock %}</title>
+    <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'CareerGuidance') }}{% endblock %}</title>
     <link rel="canonical" href="{{ g.canonical_url }}">
     <meta name="robots" content="{{ g.get('robots_meta', 'index, follow, max-image-preview:large') }}">
     <meta name="description"
@@ -34,16 +40,27 @@
     <meta name="twitter:image" content="https://careerguidance.me/static/Sindhu.jpeg">
     <meta name="twitter:site" content="@careerguidance">
 
-    <!-- JSON-LD WebSite Schema -->
+    <!-- JSON-LD WebSite Schema with Sitelinks Searchbox -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "WebSite",
-      "name": "{{ g.get('seo', {}).get('meta_title', 'Career Guidance').split(' – ')[0].split(' | ')[0] }}",
+      "@id": "https://careerguidance.me/#website",
+      "name": "CareerGuidance",
+      "alternateName": ["careerguidance.me", "Career Guidance India", "CareerGuidance.me"],
       "url": "https://careerguidance.me/",
+      "inLanguage": "en-IN",
+      "publisher": {
+        "@type": "Organization",
+        "name": "CareerGuidance",
+        "url": "https://careerguidance.me"
+      },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": "https://careerguidance.me/jobs?q={search_term_string}",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "https://careerguidance.me/jobs?q={search_term_string}"
+        },
         "query-input": "required name=search_term_string"
       }
     }
@@ -54,7 +71,9 @@
     {
       "@context": "https://schema.org",
       "@type": "Organization",
+      "@id": "https://careerguidance.me/#organization",
       "name": "CareerGuidance",
+      "legalName": "CareerGuidance",
       "alternateName": "careerguidance.me",
       "url": "https://careerguidance.me",
       "logo": {
@@ -63,8 +82,10 @@
         "width": 512,
         "height": 512
       },
-      "description": "India's leading career guidance and job portal for freshers, IT professionals, and students across Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR and all of India.",
+      "image": "https://careerguidance.me/static/Sindhu.jpeg",
+      "description": "CareerGuidance is India's #1 career guidance and job portal for freshers, IT professionals, and students across Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR and all of India.",
       "foundingDate": "2025",
+      "keywords": "career guidance, job portal India, fresher jobs, IT jobs India, career roadmaps, resume builder, AI job search",
       "areaServed": {
         "@type": "Country",
         "name": "India"
@@ -73,7 +94,7 @@
         "@type": "ContactPoint",
         "contactType": "customer support",
         "url": "https://careerguidance.me/contact",
-        "availableLanguage": ["English", "Tamil"]
+        "availableLanguage": ["English", "Tamil", "Hindi"]
       },
       "sameAs": [
         "https://www.linkedin.com/company/careerguidance",

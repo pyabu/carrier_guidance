@@ -1,7 +1,69 @@
 {% extends "base.html" %}
-{% block title %}CareerGuidance – Find Jobs in India | Fresher Jobs, IT Jobs, Remote Work 2026{% endblock %}
-{% block meta_desc %}India's #1 career platform. Discover 10,000+ verified fresher jobs, IT roles, remote work, Tamil Nadu & All India jobs. AI-powered job search, resume builder & career roadmaps for 2026.{% endblock %}
-{% block meta_keywords %}fresher jobs India 2026, IT jobs India, remote jobs India, jobs in Bangalore, jobs in Chennai, jobs in Hyderabad, career guidance India, AI job search, job portal India{% endblock %}
+{% block title %}CareerGuidance – India's #1 Job Portal | Fresher Jobs, IT Jobs & Career Guidance 2026{% endblock %}
+{% block meta_desc %}CareerGuidance is India's #1 career platform. Find 10,000+ fresher jobs, IT roles, remote work, Tamil Nadu & all-India jobs. AI-powered job search, resume builder & career roadmaps. Visit careerguidance.me{% endblock %}
+{% block meta_keywords %}careerguidance, career guidance India, careerguidance.me, fresher jobs India 2026, IT jobs India, remote jobs India, jobs in Bangalore, jobs in Chennai, career guidance India, AI job search, job portal India{% endblock %}
+
+{% block extra_head %}
+<!-- Brand & Local Business Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "JobPosting",
+  "@id": "https://careerguidance.me/#website",
+  "name": "CareerGuidance",
+  "alternateName": ["careerguidance.me", "Career Guidance India"],
+  "url": "https://careerguidance.me/",
+  "description": "India's #1 career guidance and job portal. Find fresher jobs, IT roles, remote jobs, and career roadmaps powered by AI.",
+  "image": "https://careerguidance.me/static/Sindhu.jpeg"
+}
+</script>
+<!-- BreadcrumbList for Homepage -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [{
+    "@type": "ListItem",
+    "position": 1,
+    "name": "CareerGuidance – Home",
+    "item": "https://careerguidance.me/"
+  }]
+}
+</script>
+<!-- FAQ Schema for homepage common questions -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "What is CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance (careerguidance.me) is India's #1 free career platform offering fresher jobs, IT jobs, remote work, AI-powered career roadmaps, resume builder, and career guidance for Indian students and professionals."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I find fresher jobs on CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Visit careerguidance.me/jobs and filter by 'Fresher' type to see thousands of entry-level jobs across Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR and all of India."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Is CareerGuidance free to use?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! CareerGuidance is completely free. Browse jobs, get career guidance, build your resume, and access AI-powered career tools at no cost at careerguidance.me."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 

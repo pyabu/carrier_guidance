@@ -57,6 +57,8 @@ DEFAULT_THEME_SETTINGS = {
     "layout_style": "grid"
 }
 PUBLIC_FILTER_PATHS = {"/jobs", "/jobs/india", "/jobs/tamilnadu"}
+# Query-param values for 'type' that are valuable SEO landing pages and should be indexed
+INDEXABLE_JOB_TYPES = {"fresher", "remote", "internship"}
 CANONICAL_EXCLUDE_PARAMS = {
     "utm_source",
     "utm_medium",
@@ -763,8 +765,8 @@ def home():
     cities = set(j.get("location_city", "") for j in jobs if j.get("location_city"))
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "Career Guidance – Find Jobs in India & Tamil Nadu"
-    g.seo['meta_description'] = "Discover thousands of job opportunities across India. Get career guidance, build your resume, and connect with top employers — all in one place."
+    g.seo['meta_title'] = "CareerGuidance – India's #1 Job Portal | Fresher Jobs, IT & Remote Jobs 2026"
+    g.seo['meta_description'] = "CareerGuidance (careerguidance.me) — India's #1 free career platform. Find 10,000+ fresher jobs, IT roles & remote work in Bangalore, Chennai, Hyderabad, Mumbai & Delhi. AI-powered career roadmaps & resume builder."
     
     return render_template(
         "index.html",
@@ -1013,7 +1015,7 @@ def login_google():
         return redirect(url_for('login', error=error_msg))
         
     redirect_uri = url_for('auth_google_callback', _external=True)
-    resp = google.authorize_redirect(redirect_uri, prompt='consent select_account')
+    resp = google.authorize_redirect(redirect_uri, authorize_params={'prompt': 'consent'})
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
@@ -1021,11 +1023,42 @@ def login_google():
 def auth_google_callback():
     """Handle callback from Google OAuth."""
     try:
+        # Get the authorization token
         token = google.authorize_access_token()
+        if not token:
+            logger.error("No token received from Google")
+            return redirect(url_for('login', error="Failed to authenticate with Google. Please try again."))
+        
+        # Extract user info from token or fetch it
         if 'userinfo' in token:
             user_info = token['userinfo']
         else:
-            user_info = google.userinfo(token=token)
+            # Try to fetch user info using the access token
+            try:
+                user_info = google.get('userinfo', token=token).json()
+            except Exception as e:
+                logger.error(f"Failed to fetch userinfo from Google: {e}")
+                # Fallback: try to parse token if it's a JWT
+                try:
+                    import json
+                    import base64
+                    if 'id_token' in token:
+                        # Decode JWT (ignoring signature verification for now)
+                        parts = token['id_token'].split('.')
+                        if len(parts) >= 2:
+                            payload = parts[1]
+                            # Add padding if needed
+                            padding = 4 - (len(payload) % 4)
+                            if padding != 4:
+                                payload += '=' * padding
+                            user_info = json.loads(base64.urlsafe_b64decode(payload))
+                        else:
+                            raise ValueError("Invalid token format")
+                    else:
+                        raise ValueError("No id_token in response")
+                except Exception as jwt_error:
+                    logger.error(f"Failed to decode JWT: {jwt_error}")
+                    return redirect(url_for('login', error="Could not retrieve user information from Google. Please try again."))
     except Exception as e:
         logger.error(f"Google auth error: {e}")
         return redirect(url_for('login', error="Google sign-in failed/cancelled. Please try again."))
@@ -1035,13 +1068,14 @@ def auth_google_callback():
     
     # If name is missing, derive it from the email ID (e.g., 'john.doe@gmail.com' -> 'John doe')
     if not name and email:
-        name = email.split('@')[0].replace('.', ' ').capitalize()
+        name = email.split('@')[0].replace('.', ' ').title()
     
     if not name:
         name = 'Google User'
     
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
+    
     source = session.pop('oauth_source', 'login')
     return _handle_oauth_callback_logic(email, name, "Google", source)
 
@@ -1993,8 +2027,15 @@ def inject_seo_globals():
     g.robots_meta = "index, follow, max-image-preview:large"
 
     # Apply noindex for filter parameters (query strings on public paths)
+    # Exception: /jobs?type=fresher|remote|internship are valuable SEO pages — allow indexing
     if path in PUBLIC_FILTER_PATHS and request.args:
-        g.robots_meta = "noindex, follow, max-image-preview:large"
+        job_type = request.args.get("type", "").lower().strip()
+        if job_type in INDEXABLE_JOB_TYPES and len(request.args) == 1:
+            # Single clean 'type' param — let Google index this as a landing page
+            g.robots_meta = "index, follow, max-image-preview:large"
+        else:
+            # Multi-param or non-indexable filter (search queries, etc.) — noindex
+            g.robots_meta = "noindex, follow, max-image-preview:large"
     # Apply noindex for private paths
     elif _is_private_noindex_path(path):
         g.robots_meta = "noindex, nofollow"

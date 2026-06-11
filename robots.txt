@@ -1,15 +1,23 @@
 # robots.txt for careerguidance.me
-# Last Updated: 2026-06-03
+# Last Updated: 2026-06-11
+#
+# Strategy:
+#   - /login and /signup: crawlable, noindex via meta tag (avoids "indexed though blocked" GSC warning)
+#   - /logout, /profile, /student-dashboard, /admin: blocked here (genuinely private, never need crawling)
+#   - /api/: blocked (machine endpoints, not for humans or search)
+#   - /static/uploads/: blocked (user-uploaded files, not for indexing)
+#
+# IMPORTANT: Do NOT block pages that already have a <meta name="robots" content="noindex"> tag.
+# Doing so causes the "Indexed, though blocked by robots.txt" GSC warning.
 
 User-agent: *
 Allow: /
 
-# Block purely private/backend areas (use meta noindex in HTML for auth pages).
-# NOTE: /login and /signup are CRAWLABLE — noindex meta tag in the HTML
-#       prevents indexing while avoiding "indexed though blocked by robots.txt" GSC warnings.
+# Block strictly private/backend areas that should never be crawled.
+# Auth pages (/login, /signup, /onboarding) are NOT blocked here —
+# they use <meta name="robots" content="noindex, nofollow"> in HTML instead.
 Disallow: /logout
 Disallow: /profile
-Disallow: /onboarding
 Disallow: /student-dashboard
 Disallow: /admin/
 
@@ -17,7 +25,6 @@ Disallow: /admin/
 # DO NOT block /static/js/ or /static/css/ — Google needs these to render pages.
 Disallow: /api/
 Disallow: /static/uploads/
-Disallow: /_next/
 Disallow: /__pycache__/
 Disallow: /.vercel/
 
