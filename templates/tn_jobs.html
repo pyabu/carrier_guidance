@@ -745,8 +745,8 @@ function tnLoadMore() {
    JOB CARD
    ================================================================ */
 function renderTNJobCard(job) {
-    var logo = job.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company||'?') + '&background=667eea&color=fff&size=50');
-    var fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company||'?') + '&background=667eea&color=fff&size=50';
+    var logo = job.company_logo || ('/company-logo/' + encodeURIComponent(job.company||'?'));
+    var fallback = '/company-logo/' + encodeURIComponent(job.company||'?');
     var colors = {
         'LinkedIn':'#0A66C2','Indeed':'#2557A7','Naukri.com':'#2196F3','Foundit':'#FF5722',
         'Internshala':'#00BCD4','TimesJobs':'#9C27B0','Freshersworld':'#FF9800',

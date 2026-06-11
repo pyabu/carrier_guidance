@@ -560,7 +560,7 @@ function jobCardHTML(j) {
     return `
     <div class="india-job-card${trendClass}" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/india/${j.id}'">
         <div class="india-job-header">
-            <img class="india-job-logo" src="${j.company_logo||'https://ui-avatars.com/api/?name='+encodeURIComponent(j.company)+'&background=ff9933&color=fff&size=50'}" alt="${j.company}" loading="lazy" onerror="this.src='https://ui-avatars.com/api/?name='+encodeURIComponent('${j.company}')+'&background=ff9933&color=fff&size=50'">
+            <img class="india-job-logo" src="${j.company_logo||'/company-logo/'+encodeURIComponent(j.company)}" alt="${j.company}" loading="lazy" onerror="this.src='/company-logo/'+encodeURIComponent(j.company)">
             <div class="india-job-info">
                 <h3>${j.title||'Untitled'}</h3>
                 <div class="company">${j.company||'Company'}</div>

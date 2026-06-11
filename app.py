@@ -397,6 +397,7 @@ def preload_all_jobs_concurrently():
     os.makedirs(DATA_DIR, exist_ok=True)
     for kind, data in results.items():
         if data:
+            data = _process_company_logos(data)
             _jobs_memory_cache[kind] = data
             file_path = {
                 "jobs": JOBS_FILE,
@@ -406,6 +407,29 @@ def preload_all_jobs_concurrently():
             with open(file_path, "w") as f:
                 json.dump(data, f)
             logger.info(f"☁️  Loaded {kind} from Supabase → /tmp & MemCache")
+
+def _process_company_logos(data):
+    """Rewrite clearbit, ui-avatars, placeholder logos to use local /company-logo endpoint."""
+    if not data or "jobs" not in data:
+        return data
+    for j in data["jobs"]:
+        company = j.get("company", "").strip()
+        logo = j.get("company_logo") or ""
+        # If the logo is empty, or uses clearbit, ui-avatars, or placeholder, point it to local endpoint
+        if not logo or "clearbit.com" in logo or "ui-avatars.com" in logo or "placeholder.com" in logo:
+            identifier = ""
+            if logo and "clearbit.com" in logo:
+                parts = logo.split("clearbit.com/")
+                if len(parts) > 1:
+                    identifier = parts[1].strip()
+            if not identifier and company:
+                identifier = company
+            if not identifier:
+                identifier = "unknown"
+            
+            # Use relative path in database/cache, converted to absolute in details schema if needed
+            j["company_logo"] = f"/company-logo/{identifier}"
+    return data
 
 def load_jobs():
     """Load cached jobs from JSON file, falling back to Supabase then seed on Vercel."""
@@ -418,6 +442,7 @@ def load_jobs():
             if "last_updated" not in data:
                 mtime = os.path.getmtime(JOBS_FILE)
                 data["last_updated"] = datetime.fromtimestamp(mtime).strftime("%Y-%m-%d %H:%M:%S")
+            data = _process_company_logos(data)
             _jobs_memory_cache["jobs"] = data
             return data
 
@@ -425,6 +450,7 @@ def load_jobs():
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("jobs")
         if sb_data:
+            sb_data = _process_company_logos(sb_data)
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
@@ -438,6 +464,7 @@ def load_jobs():
             logger.info("📦 Copied main jobs seed to /tmp")
             data = _read_json_file(JOBS_FILE)
             if data is not None:
+                data = _process_company_logos(data)
                 _jobs_memory_cache["jobs"] = data
                 return data
 
@@ -453,11 +480,13 @@ def load_tn_jobs():
     if os.path.exists(TN_JOBS_FILE):
         data = _read_json_file(TN_JOBS_FILE)
         if data is not None:
+            data = _process_company_logos(data)
             _jobs_memory_cache["tn_jobs"] = data
             return data
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("tn_jobs")
         if sb_data:
+            sb_data = _process_company_logos(sb_data)
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(TN_JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
@@ -470,6 +499,7 @@ def load_tn_jobs():
             logger.info("📦 Copied TN seed to /tmp")
             data = _read_json_file(TN_JOBS_FILE)
             if data is not None:
+                data = _process_company_logos(data)
                 _jobs_memory_cache["tn_jobs"] = data
                 return data
     return {"jobs": [], "last_updated": None, "region": "Tamil Nadu & Pondicherry"}
@@ -496,11 +526,13 @@ def load_india_jobs():
     if os.path.exists(INDIA_JOBS_FILE):
         data = _read_json_file(INDIA_JOBS_FILE)
         if data is not None:
+            data = _process_company_logos(data)
             _jobs_memory_cache["india_jobs"] = data
             return data
     if IS_VERCEL:
         sb_data = _supabase_load_jobs("india_jobs")
         if sb_data:
+            sb_data = _process_company_logos(sb_data)
             os.makedirs(DATA_DIR, exist_ok=True)
             with open(INDIA_JOBS_FILE, "w") as f:
                 json.dump(sb_data, f)
@@ -513,6 +545,7 @@ def load_india_jobs():
             logger.info("📦 Copied India seed to /tmp")
             data = _read_json_file(INDIA_JOBS_FILE)
             if data is not None:
+                data = _process_company_logos(data)
                 _jobs_memory_cache["india_jobs"] = data
                 return data
     return {"jobs": [], "last_updated": None, "region": "India"}
@@ -3135,6 +3168,111 @@ def api_cron_india():
     except Exception as e:
         logger.error(f"❌ India cron failed: {e}")
         return jsonify({"status": "error", "error": str(e)}), 500
+
+
+@app.route("/company-logo/<path:identifier>")
+def company_logo(identifier):
+    """
+    Generates a beautiful, local SVG logo for a company.
+    Avoids external HTTP requests (Googlebot friendly).
+    """
+    import hashlib
+    # Clean the identifier (e.g. "google.com" -> "Google", "Infosys" -> "Infosys")
+    name = identifier
+    if "?" in name:
+        name = name.split("?")[0]
+    if "/" in name:
+        name = name.split("/")[-1]
+    
+    # Check if it has a file extension or domain extension
+    for ext in [".com", ".in", ".org", ".net", ".co.in", ".co", ".io", ".xyz"]:
+        if name.lower().endswith(ext):
+            name = name[:-len(ext)]
+            break
+            
+    # Normalize name (replace hyphens/underscores with spaces)
+    name = name.replace("-", " ").replace("_", " ").strip()
+    
+    # Brand mapping for well-known domains or names
+    lower_id = identifier.lower()
+    
+    # A mapping of company names/domains to standard brand colors
+    COMPANY_COLORS = {
+        "tcs": ("#004B87", "#002F54", "#ffffff"),
+        "infosys": ("#007CC3", "#005587", "#ffffff"),
+        "wipro": ("#3F1D8E", "#220F52", "#ffffff"),
+        "flipkart": ("#F7C948", "#C79D1A", "#000000"),
+        "razorpay": ("#0A62C9", "#063B7A", "#ffffff"),
+        "google": ("#4285F4", "#2B60B3", "#ffffff"),
+        "microsoft": ("#00A4EF", "#0070A3", "#ffffff"),
+        "amazon": ("#FF9900", "#B86E00", "#ffffff"),
+        "swiggy": ("#FC8019", "#B55307", "#ffffff"),
+        "zomato": ("#E23744", "#9E1C27", "#ffffff"),
+        "freshworks": ("#16C172", "#0C7A45", "#ffffff"),
+        "phonepe": ("#5F259F", "#3B1469", "#ffffff"),
+        "accenture": ("#A100FF", "#6600A3", "#ffffff"),
+        "capgemini": ("#0070AD", "#004B75", "#ffffff"),
+        "cognizant": ("#0033A0", "#001F61", "#ffffff"),
+        "tvsnext": ("#1A365D", "#0A192F", "#ffffff"),
+        "virtusa": ("#E31B23", "#A11015", "#ffffff"),
+        "hcl": ("#005691", "#003254", "#ffffff"),
+        "paytm": ("#00b9f5", "#007299", "#ffffff"),
+        "cred": ("#000000", "#111111", "#ffffff"),
+        "ola": ("#A3D133", "#74971E", "#000000"),
+        "meesho": ("#F43F5E", "#BE123C", "#ffffff"),
+        "zoho": ("#E31B23", "#A11015", "#ffffff"),
+        "baselayer": ("#2563EB", "#1D4ED8", "#ffffff"),
+    }
+    
+    # Try to match well-known key
+    color_start, color_end, text_color = None, None, "#ffffff"
+    matched_key = None
+    for key in COMPANY_COLORS:
+        if key in lower_id:
+            matched_key = key
+            break
+            
+    if matched_key:
+        color_start, color_end, text_color = COMPANY_COLORS[matched_key]
+        if matched_key == "tcs":
+            display_name = "TCS"
+        elif matched_key == "tvsnext":
+            display_name = "TVS"
+        elif matched_key == "hcl":
+            display_name = "HCL"
+        else:
+            display_name = name.title()
+    else:
+        # Generate stable gradient colors using md5 hash of the name
+        hash_val = int(hashlib.md5(name.encode("utf-8")).hexdigest(), 16)
+        hue = hash_val % 360
+        color_start = f"hsl({hue}, 65%, 48%)"
+        color_end = f"hsl({hue}, 65%, 35%)"
+        display_name = name
+        
+    # Extract initials
+    words = [w for w in display_name.split() if w]
+    if len(words) >= 2:
+        initials = "".join([w[0] for w in words[:3]]).upper()
+    else:
+        initials = display_name[:3].upper() if display_name else "?"
+        
+    # SVG string
+    svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+  <defs>
+    <linearGradient id="logo-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:{color_start};stop-opacity:1" />
+      <stop offset="100%" style="stop-color:{color_end};stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  <rect width="100" height="100" rx="24" fill="url(#logo-grad)" />
+  <text x="50%" y="54%" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" font-weight="700" font-size="{34 if len(initials) > 2 else 38}" fill="{text_color}" dominant-baseline="middle" text-anchor="middle" letter-spacing="-0.5">{initials}</text>
+</svg>"""
+
+    response = make_response(svg)
+    response.headers["Content-Type"] = "image/svg+xml"
+    response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    return response
 
 
 @app.route("/api/stats")

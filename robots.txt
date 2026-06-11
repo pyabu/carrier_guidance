@@ -23,6 +23,7 @@ Disallow: /admin/
 
 # Block private API and upload endpoints only.
 # DO NOT block /static/js/ or /static/css/ — Google needs these to render pages.
+Allow: /api/stats
 Disallow: /api/
 Disallow: /static/uploads/
 Disallow: /__pycache__/

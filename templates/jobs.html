@@ -750,8 +750,8 @@
        JOB CARD RENDERER
        ================================================================ */
     function renderJobCard(job) {
-        var logo = job.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company || '?') + '&background=667eea&color=fff&size=50');
-        var fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(job.company || '?') + '&background=667eea&color=fff&size=50';
+        var logo = job.company_logo || ('/company-logo/' + encodeURIComponent(job.company || '?'));
+        var fallback = '/company-logo/' + encodeURIComponent(job.company || '?');
         var colors = {
             'LinkedIn': '#0A66C2', 'Indeed': '#2557A7', 'Remotive': '#00D4AA', 'RemoteOK': '#00D4AA', 'Arbeitnow': '#FF6B35',
             'The Muse': '#7B68EE', 'FindWork': '#20C997', 'Jobicy': '#FF4081', 'Naukri.com': '#2196F3', 'Foundit': '#FF5722',

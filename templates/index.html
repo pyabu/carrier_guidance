@@ -170,7 +170,7 @@
                 {% for job in featured_jobs %}
                 <div class="job-card fade-in" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}" onclick="window.location='{{ job_detail_path(job.id, 'main') }}'">
                     <div class="job-card-header">
-                        <img src="{{ job.company_logo or 'https://via.placeholder.com/50' }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=50'">
+                        <img src="{{ job.company_logo or '/company-logo/' ~ (job.company|urlencode if job.company else 'unknown') }}" alt="{{ job.company }}" class="job-card-logo" onerror="this.src='/company-logo/{{ job.company|urlencode }}'">
                         <div class="job-card-info">
                             <h3>{{ job.title }}</h3>
                             <span class="job-card-company">{{ job.company }}</span>
@@ -354,62 +354,62 @@
         </div>
         <div class="companies-grid" data-aos="fade-up" data-aos-delay="200">
             <div class="company-card">
-                <img src="https://logo.clearbit.com/tcs.com" alt="TCS" onerror="this.src='https://ui-avatars.com/api/?name=TCS&background=2B6CB0&color=fff'">
+                <img src="/company-logo/tcs.com" alt="TCS" loading="lazy">
                 <h4>TCS</h4>
                 <p>250+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/infosys.com" alt="Infosys" onerror="this.src='https://ui-avatars.com/api/?name=I&background=007CC3&color=fff'">
+                <img src="/company-logo/infosys.com" alt="Infosys" loading="lazy">
                 <h4>Infosys</h4>
                 <p>200+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/wipro.com" alt="Wipro" onerror="this.src='https://ui-avatars.com/api/?name=W&background=3F1D8E&color=fff'">
+                <img src="/company-logo/wipro.com" alt="Wipro" loading="lazy">
                 <h4>Wipro</h4>
                 <p>150+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/flipkart.com" alt="Flipkart" onerror="this.src='https://ui-avatars.com/api/?name=F&background=F7C948&color=000'">
+                <img src="/company-logo/flipkart.com" alt="Flipkart" loading="lazy">
                 <h4>Flipkart</h4>
                 <p>80+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/razorpay.com" alt="Razorpay" onerror="this.src='https://ui-avatars.com/api/?name=R&background=0A62C9&color=fff'">
+                <img src="/company-logo/razorpay.com" alt="Razorpay" loading="lazy">
                 <h4>Razorpay</h4>
                 <p>60+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/google.com" alt="Google India" onerror="this.src='https://ui-avatars.com/api/?name=G&background=4285F4&color=fff'">
+                <img src="/company-logo/google.com" alt="Google India" loading="lazy">
                 <h4>Google India</h4>
                 <p>120+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/microsoft.com" alt="Microsoft India" onerror="this.src='https://ui-avatars.com/api/?name=M&background=00A4EF&color=fff'">
+                <img src="/company-logo/microsoft.com" alt="Microsoft India" loading="lazy">
                 <h4>Microsoft India</h4>
                 <p>95+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/amazon.com" alt="Amazon India" onerror="this.src='https://ui-avatars.com/api/?name=A&background=FF9900&color=fff'">
+                <img src="/company-logo/amazon.com" alt="Amazon India" loading="lazy">
                 <h4>Amazon India</h4>
                 <p>180+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/swiggy.com" alt="Swiggy" onerror="this.src='https://ui-avatars.com/api/?name=S&background=FC8019&color=fff'">
+                <img src="/company-logo/swiggy.com" alt="Swiggy" loading="lazy">
                 <h4>Swiggy</h4>
                 <p>50+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/zomato.com" alt="Zomato" onerror="this.src='https://ui-avatars.com/api/?name=Z&background=E23744&color=fff'">
+                <img src="/company-logo/zomato.com" alt="Zomato" loading="lazy">
                 <h4>Zomato</h4>
                 <p>45+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/freshworks.com" alt="Freshworks" onerror="this.src='https://ui-avatars.com/api/?name=FW&background=16C172&color=fff'">
+                <img src="/company-logo/freshworks.com" alt="Freshworks" loading="lazy">
                 <h4>Freshworks</h4>
                 <p>70+ openings</p>
             </div>
             <div class="company-card">
-                <img src="https://logo.clearbit.com/phonepe.com" alt="PhonePe" onerror="this.src='https://ui-avatars.com/api/?name=P&background=5F259F&color=fff'">
+                <img src="/company-logo/phonepe.com" alt="PhonePe" loading="lazy">
                 <h4>PhonePe</h4>
                 <p>40+ openings</p>
             </div>
@@ -583,8 +583,8 @@ function showSearchResults(data, keyword, location) {
 }
 
 function searchJobCard(j) {
-    const logo = j.company_logo || ('https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50');
-    const fallback = 'https://ui-avatars.com/api/?name=' + encodeURIComponent(j.company||'?') + '&background=667eea&color=fff&size=50';
+    const logo = j.company_logo || ('/company-logo/' + encodeURIComponent(j.company||'?'));
+    const fallback = '/company-logo/' + encodeURIComponent(j.company||'?');
     const skills = (j.skills||[]).slice(0,4).map(function(s){return '<span class="skill-tag">'+escH(s)+'</span>';}).join('');
     const salary = j.salary_min ? (escH(j.salary_min) + (j.salary_max ? ' – ' + escH(j.salary_max) : '')) : '';
     const loc = j.location_city ? escH(j.location_city) + (j.location_state ? ', ' + escH(j.location_state) : '') : escH(j.location||'India');

@@ -31,7 +31,8 @@
 {% set schema_description = 'Apply for ' ~ (job.title or 'this role') ~ ' at ' ~ (job.company or 'a leading company') ~ ' in ' ~ (job.location or 'India') ~ '.' %}
 {% endif %}
 {% set org_same_as = job.apply_url if (job.apply_url and (job.apply_url.startswith('http://') or job.apply_url.startswith('https://'))) else 'https://careerguidance.me/' %}
-{% set org_logo = job.company_logo if (job.company_logo and (job.company_logo.startswith('http://') or job.company_logo.startswith('https://'))) else url_for('static', filename='favicon.ico', _external=True) %}
+{% set raw_logo = job.company_logo or '' %}
+{% set org_logo = (request.host_url.rstrip('/') + raw_logo) if raw_logo.startswith('/') else (raw_logo if (raw_logo.startswith('http://') or raw_logo.startswith('https://')) else url_for('static', filename='favicon.ico', _external=True)) %}
 {% set city = job.location_city or (job.location.split(',')[0] if ',' in (job.location or '') else (job.location or 'India')) %}
 {% set state = job.location_state or (job.location.split(',')[1].strip() if ',' in (job.location or '') and (job.location or '').count(',') >= 1 else '') %}
 {% set country = job.location_country or 'India' %}
@@ -122,7 +123,7 @@
             <span>{{ job.title }}</span>
         </div>
         <div class="d-flex align-center gap-2" style="gap:16px;">
-            <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:60px;height:60px;border-radius:12px;background:white;padding:8px;object-fit:contain;" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff&size=60'">
+            <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:60px;height:60px;border-radius:12px;background:white;padding:8px;object-fit:contain;" onerror="this.src='/company-logo/{{ job.company|urlencode }}'">
             <div>
                 <h1 style="font-size:clamp(1.5rem,3vw,2.2rem)">{{ job.title }}</h1>
                 <p style="font-size:1.1rem;opacity:0.9;">{{ job.company }} &bull; {{ job.location }}</p>
@@ -241,7 +242,7 @@
                 <div class="sidebar-card">
                     <h4>Company Info</h4>
                     <div class="d-flex align-center gap-2" style="gap:12px;margin-bottom:12px;">
-                        <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:var(--bg-tertiary);padding:4px;" onerror="this.src='https://ui-avatars.com/api/?name={{ job.company }}&background=667eea&color=fff'">
+                        <img src="{{ job.company_logo }}" alt="{{ job.company }}" style="width:40px;height:40px;border-radius:8px;object-fit:contain;background:var(--bg-tertiary);padding:4px;" onerror="this.src='/company-logo/{{ job.company|urlencode }}'">
                         <div>
                             <h4 style="font-size:0.95rem;">{{ job.company }}</h4>
                             <span class="text-muted" style="font-size:0.82rem;">{{ job.get('industry', 'Technology') }}</span>
@@ -354,7 +355,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         grid.innerHTML = similar.map(j => `
             <div class="job-card" onclick="if(!__isLoggedIn){event.stopPropagation();requireLogin('Login Required','Please login to continue and view job details.');return;}window.location='/job/{{ job['_source_db'] }}/${j.id}'" style="margin-bottom:12px;">
                 <div class="job-card-header">
-                    <img src="${j.company_logo || ''}" class="job-card-logo" onerror="this.src='https://ui-avatars.com/api/?name=${j.company}&background=667eea&color=fff&size=50'" alt="${j.company}">
+                    <img src="${j.company_logo || '/company-logo/'+encodeURIComponent(j.company)}" class="job-card-logo" onerror="this.src='/company-logo/'+encodeURIComponent(j.company)" alt="${j.company}">
                     <div class="job-card-info">
                         <h3>${j.title}</h3>
                         <span class="job-card-company">${j.company}</span>
