@@ -47,20 +47,13 @@
       "@type": "WebSite",
       "@id": "https://careerguidance.me/#website",
       "name": "CareerGuidance",
-      "alternateName": ["careerguidance.me", "Career Guidance India", "CareerGuidance.me"],
+      "alternateName": ["careerguidance.me", "Career Guidance India"],
       "url": "https://careerguidance.me/",
       "inLanguage": "en-IN",
-      "publisher": {
-        "@type": "Organization",
-        "name": "CareerGuidance",
-        "url": "https://careerguidance.me"
-      },
+      "publisher": { "@id": "https://careerguidance.me/#organization" },
       "potentialAction": {
         "@type": "SearchAction",
-        "target": {
-          "@type": "EntryPoint",
-          "urlTemplate": "https://careerguidance.me/jobs?q={search_term_string}"
-        },
+        "target": "https://careerguidance.me/jobs?q={search_term_string}",
         "query-input": "required name=search_term_string"
       }
     }
@@ -85,7 +78,6 @@
       "image": "https://careerguidance.me/static/Sindhu.jpeg",
       "description": "CareerGuidance is India's #1 career guidance and job portal for freshers, IT professionals, and students across Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR and all of India.",
       "foundingDate": "2025",
-      "keywords": "career guidance, job portal India, fresher jobs, IT jobs India, career roadmaps, resume builder, AI job search",
       "areaServed": {
         "@type": "Country",
         "name": "India"

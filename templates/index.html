@@ -4,33 +4,34 @@
 {% block meta_keywords %}careerguidance, career guidance India, careerguidance.me, fresher jobs India 2026, IT jobs India, remote jobs India, jobs in Bangalore, jobs in Chennai, career guidance India, AI job search, job portal India{% endblock %}
 
 {% block extra_head %}
-<!-- Brand & Local Business Schema -->
+<!-- WebPage Schema (homepage) -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
-  "@type": "JobPosting",
-  "@id": "https://careerguidance.me/#website",
-  "name": "CareerGuidance",
-  "alternateName": ["careerguidance.me", "Career Guidance India"],
+  "@type": "WebPage",
+  "@id": "https://careerguidance.me/#webpage",
   "url": "https://careerguidance.me/",
-  "description": "India's #1 career guidance and job portal. Find fresher jobs, IT roles, remote jobs, and career roadmaps powered by AI.",
-  "image": "https://careerguidance.me/static/Sindhu.jpeg"
+  "name": "CareerGuidance – India's #1 Job Portal | Fresher Jobs, IT Jobs & Career Guidance 2026",
+  "description": "CareerGuidance is India's #1 free career platform. Find 10,000+ fresher jobs, IT roles, remote work, Tamil Nadu & all-India jobs. AI-powered job search, resume builder & career roadmaps.",
+  "inLanguage": "en-IN",
+  "isPartOf": { "@id": "https://careerguidance.me/#website" },
+  "about": { "@id": "https://careerguidance.me/#organization" },
+  "primaryImageOfPage": {
+    "@type": "ImageObject",
+    "url": "https://careerguidance.me/static/Sindhu.jpeg"
+  },
+  "breadcrumb": {
+    "@type": "BreadcrumbList",
+    "itemListElement": [{
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "https://careerguidance.me/"
+    }]
+  }
 }
 </script>
-<!-- BreadcrumbList for Homepage -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [{
-    "@type": "ListItem",
-    "position": 1,
-    "name": "CareerGuidance – Home",
-    "item": "https://careerguidance.me/"
-  }]
-}
-</script>
-<!-- FAQ Schema for homepage common questions -->
+<!-- FAQ Schema – enables FAQ rich results in Google Search -->
 <script type="application/ld+json">
 {
   "@context": "https://schema.org",
@@ -59,11 +60,20 @@
         "@type": "Answer",
         "text": "Yes! CareerGuidance is completely free. Browse jobs, get career guidance, build your resume, and access AI-powered career tools at no cost at careerguidance.me."
       }
+    },
+    {
+      "@type": "Question",
+      "name": "What cities does CareerGuidance cover in India?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance covers jobs in Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR, Pune, Kolkata, Tamil Nadu, Pondicherry, and remote positions across all of India."
+      }
     }
   ]
 }
 </script>
 {% endblock %}
+
 
 {% block content %}
 
