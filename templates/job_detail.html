@@ -35,6 +35,7 @@
 {% set city = job.location_city or (job.location.split(',')[0] if ',' in (job.location or '') else (job.location or 'India')) %}
 {% set state = job.location_state or (job.location.split(',')[1].strip() if ',' in (job.location or '') and (job.location or '').count(',') >= 1 else '') %}
 {% set country = job.location_country or 'India' %}
+{% set is_remote = 'remote' in (job.type or '')|lower or 'remote' in (job.location or '')|lower %}
 {
   "@context": "https://schema.org",
   "@type": "JobPosting",
@@ -43,17 +44,25 @@
   "datePosted": {{ (job.posted_date or '2026-01-01')|tojson }},
   "validThrough": {{ (job.valid_through or '2027-03-31T23:59:59Z')|tojson }},
   "employmentType": {{ schema_employment_type|tojson }},
+  "directApply": true,
   "identifier": {
     "@type": "PropertyValue",
-    "name": {{ (job.company or 'Career Guidance')|tojson }},
+    "name": {{ (job.company or 'CareerGuidance')|tojson }},
     "value": {{ (job.id ~ '')|tojson }}
   },
   "hiringOrganization": {
     "@type": "Organization",
-    "name": {{ (job.company or 'Career Guidance')|tojson }},
+    "name": {{ (job.company or 'CareerGuidance')|tojson }},
     "sameAs": {{ org_same_as|tojson }},
     "logo": {{ org_logo|tojson }}
   },
+  {% if is_remote %}
+  "jobLocationType": "TELECOMMUTE",
+  "applicantLocationRequirements": {
+    "@type": "Country",
+    "name": "India"
+  },
+  {% endif %}
   "jobLocation": {
     "@type": "Place",
     "address": {
@@ -64,17 +73,17 @@
       "postalCode": {{ (job.postal_code or '')|tojson }},
       "addressCountry": "IN"
     }
-  },
+  }{% if job.salary_min is number and job.salary_min > 0 %},
   "baseSalary": {
     "@type": "MonetaryAmount",
     "currency": "INR",
     "value": {
       "@type": "QuantitativeValue",
-      "minValue": {{ job.salary_min if job.salary_min is number else 0 }},
-      "maxValue": {{ job.salary_max if job.salary_max is number else 0 }},
+      "minValue": {{ job.salary_min }},
+      "maxValue": {{ job.salary_max if job.salary_max is number and job.salary_max > 0 else job.salary_min }},
       "unitText": "MONTH"
     }
-  }
+  }{% endif %}
 }
 </script>
 
