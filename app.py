@@ -798,8 +798,8 @@ def home():
     cities = set(j.get("location_city", "") for j in jobs if j.get("location_city"))
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "CareerGuidance – India's #1 Job Portal | Fresher Jobs, IT & Remote Jobs 2026"
-    g.seo['meta_description'] = "CareerGuidance (careerguidance.me) — India's #1 free career platform. Find 10,000+ fresher jobs, IT roles & remote work in Bangalore, Chennai, Hyderabad, Mumbai & Delhi. AI-powered career roadmaps & resume builder."
+    g.seo['meta_title'] = "CareerGuidance | Fresher Jobs & Career Guidance India"
+    g.seo['meta_description'] = "India's #1 career platform. Find 10,000+ fresher jobs, IT roles & remote work in Bangalore, Chennai, Hyderabad, Mumbai & Delhi. Free AI-powered resume builder & career roadmaps."
     
     return render_template(
         "index.html",
@@ -815,8 +815,8 @@ def home():
 def jobs_page():
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "Browse Jobs | AI-Powered Job Search | Career Guidance"
-    g.seo['meta_description'] = "Search for jobs across India and globally. AI-powered search for software, data science, design, marketing, and more. Real-time listings from LinkedIn, Indeed, and Naukri."
+    g.seo['meta_title'] = "Browse Jobs India 2026 | IT, Fresher & Remote Jobs"
+    g.seo['meta_description'] = "Search 10,000+ jobs in India updated daily. Filter by location, type, salary & experience. Find IT, fresher, remote & internship jobs. Live listings from LinkedIn, Indeed & Naukri."
     return render_template("jobs.html")
 
 
@@ -920,8 +920,8 @@ def job_detail(job_id):
 def career_guidance():
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "Career Guidance & Roadmaps | AI-Powered Career Planning"
-    g.seo['meta_description'] = "Get expert career guidance and detailed roadmaps for AI, Web Development, Data Science, and more. Plan your career path with Career Guidance."
+    g.seo['meta_title'] = "Career Guidance India | Roadmaps & Interview Tips"
+    g.seo['meta_description'] = "Expert career roadmaps for AI/ML, Full Stack, Data Science & Cloud. Interview prep tips, skill resources & salary guides for Indian freshers & professionals."
     return render_template("career_guidance.html")
 
 
@@ -929,8 +929,8 @@ def career_guidance():
 def resume_builder():
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "AI Resume Builder | Create ATS-Friendly Resumes"
-    g.seo['meta_description'] = "Build a professional, ATS-friendly resume in minutes with our AI-powered builder. Get expert tips to stand out to employers and land your dream job."
+    g.seo['meta_title'] = "Free Resume Builder India | ATS-Friendly CV Maker"
+    g.seo['meta_description'] = "Build a professional ATS-friendly resume in minutes. AI-powered CV maker with templates for freshers, IT pros & experienced candidates. Free & instant download."
     return render_template("resume_builder.html")
 
 
@@ -1719,6 +1719,10 @@ def onboarding():
 
 @app.route("/about")
 def about():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "About CareerGuidance | India's Career Platform"
+    g.seo['meta_description'] = "Learn about CareerGuidance — India's leading job portal and career guidance platform built for freshers, IT professionals & students across all Indian cities."
     return render_template("about.html")
 
 @app.route("/developer")
@@ -1728,16 +1732,28 @@ def developer():
 
 @app.route("/contact")
 def contact():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Contact CareerGuidance | Get Support & Help"
+    g.seo['meta_description'] = "Contact the CareerGuidance team for support with job listings, career roadmaps, resume builder or account issues. We're here to help Indian job seekers."
     return render_template("contact.html")
 
 
 @app.route("/blog")
 def blog():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Career Blog India | Job Tips & Tech Trends 2026"
+    g.seo['meta_description'] = "Read the latest career advice, resume tips, interview preparation guides & IT industry trends in India. Practical insights for freshers & professionals."
     return render_template("blog.html")
 
 
 @app.route("/faq")
 def faq():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "FAQ | CareerGuidance — Common Questions Answered"
+    g.seo['meta_description'] = "Answers to common questions about CareerGuidance — job listings, career roadmaps, resume builder, account setup & how to find jobs in India."
     return render_template("faq.html")
 
 
@@ -1753,6 +1769,10 @@ def terms():
 
 @app.route("/job-trends")
 def job_trends():
+    if 'seo' not in g:
+        g.seo = {}
+    g.seo['meta_title'] = "Job Trends India 2026 | In-Demand Skills & Salaries"
+    g.seo['meta_description'] = "Explore live India job market trends: top in-demand skills, highest paying roles, top hiring companies & salary insights for IT, fresher & remote jobs in 2026."
     return render_template("job_trends.html")
 
 
@@ -3764,8 +3784,8 @@ def tn_jobs_page():
     """Dedicated Tamil Nadu & Pondicherry jobs page."""
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "Tamil Nadu & Pondicherry Jobs | Career Guidance"
-    g.seo['meta_description'] = "Browse latest job openings across all cities in Tamil Nadu & Pondicherry. Find jobs in Chennai, Coimbatore, Madurai, Trichy, Salem, Puducherry & 50+ cities."
+    g.seo['meta_title'] = "Tamil Nadu Jobs 2026 | Chennai, Coimbatore, Madurai"
+    g.seo['meta_description'] = "Browse latest job openings across Tamil Nadu & Pondicherry. Find jobs in Chennai, Coimbatore, Madurai, Trichy, Salem, Puducherry & 50+ cities. Updated daily."
     return render_template("tn_jobs.html")
 
 
@@ -4013,8 +4033,8 @@ def india_jobs_page():
     """Dedicated All-India jobs page with AI-powered organization."""
     if 'seo' not in g:
         g.seo = {}
-    g.seo['meta_title'] = "All India Jobs – AI-Powered Job Portal | Career Guidance"
-    g.seo['meta_description'] = "Browse 500+ AI-organized job listings across all 28 states and 8 union territories of India. Powered by real-time scraping from Naukri, LinkedIn, Indeed, and more."
+    g.seo['meta_title'] = "All India Jobs 2026 | Browse Jobs Across Every State"
+    g.seo['meta_description'] = "Browse 500+ AI-curated job listings across all 28 states of India. Real-time jobs from Naukri, LinkedIn & Indeed for IT, fresher, remote & government roles."
     return render_template("india_jobs.html")
 
 
