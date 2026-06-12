@@ -1041,24 +1041,22 @@ def login_google():
     """Trigger Google OAuth login flow."""
     source = request.args.get('source', 'login')
 
-    # Check if credentials are actually configured
+    # Check credentials
     if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
-        error_msg = "Google Sign-In is not fully configured yet. Please contact the administrator."
-        return redirect(url_for('login', error=error_msg))
+        return redirect(url_for('login', error="Google Sign-In is not configured yet."))
 
-    # Force HTTPS on production (Vercel); _external=True gives full URL
     redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
 
-    # IMPORTANT: On Vercel serverless, different Lambda instances handle /login/google
-    # and /auth/google/callback — so Flask session is lost between requests.
-    # We use nonce=False and state=False to avoid the state mismatch error.
-    resp = google.authorize_redirect(
-        redirect_uri,
-        prompt='select_account',
-        nonce=False,
-    )
-    # Store oauth_source in a cookie (survives across Lambda instances, session does not)
-    resp.set_cookie('oauth_source', source, max_age=300, secure=True, httponly=True, samesite='Lax')
+    # Generate redirect and capture the state authlib puts in the session
+    resp = google.authorize_redirect(redirect_uri, prompt='select_account')
+
+    # On Vercel serverless, the session is lost between Lambda invocations.
+    # Save the OAuth state in a cookie so the callback can restore it.
+    state = session.get('_google_authlib_state_', '')
+    resp.set_cookie('_google_authlib_state_', state,
+                    max_age=300, secure=True, httponly=True, samesite='None')
+    resp.set_cookie('oauth_source', source,
+                    max_age=300, secure=True, httponly=True, samesite='None')
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
@@ -1066,27 +1064,31 @@ def login_google():
 def auth_google_callback():
     """Handle callback from Google OAuth."""
     try:
-        # authorize_access_token() exchanges the code for tokens.
-        # On Vercel serverless the session is NOT shared across Lambda instances,
-        # so we skip state verification using state=False.
+        # VERCEL FIX: Restore the OAuth state from cookie back into the session.
+        # Vercel serverless may use a different Lambda for callback than for login,
+        # so the Flask session (which stores _google_authlib_state_) is empty here.
+        saved_state = request.cookies.get('_google_authlib_state_', '')
+        if saved_state:
+            session['_google_authlib_state_'] = saved_state
+
+        # Exchange the authorization code for tokens
         token = google.authorize_access_token()
         if not token:
             logger.error("No token received from Google")
             return redirect(url_for('login', error="Failed to authenticate with Google. Please try again."))
 
-        # Extract user info — it comes inside the token for openid scope
+        # Extract user info — comes inside the token for openid scope
         user_info = token.get('userinfo')
         if not user_info:
-            # Fallback: parse the id_token JWT manually
+            # Fallback: decode id_token JWT manually
             try:
-                import json as _json
-                import base64 as _base64
+                import json as _json, base64 as _base64
                 id_token = token.get('id_token', '')
                 if id_token:
                     parts = id_token.split('.')
                     if len(parts) >= 2:
                         payload = parts[1]
-                        payload += '=' * (4 - len(payload) % 4)  # fix padding
+                        payload += '=' * (4 - len(payload) % 4)
                         user_info = _json.loads(_base64.urlsafe_b64decode(payload))
             except Exception as jwt_err:
                 logger.error(f"JWT decode failed: {jwt_err}")
@@ -1101,8 +1103,6 @@ def auth_google_callback():
 
     email = user_info.get('email')
     name = user_info.get('name')
-
-    # Derive name from email if missing
     if not name and email:
         name = email.split('@')[0].replace('.', ' ').title()
     if not name:
@@ -1110,12 +1110,13 @@ def auth_google_callback():
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
 
-    # Read oauth_source from cookie (survives across Lambda instances)
+    # Read oauth_source from cookie
     source = request.cookies.get('oauth_source', 'login')
     resp = _handle_oauth_callback_logic(email, name, "Google", source)
-    # Clear the cookie
+    # Clear cookies
     if hasattr(resp, 'delete_cookie'):
         resp.delete_cookie('oauth_source')
+        resp.delete_cookie('_google_authlib_state_')
     return resp
 
 @app.route("/login", methods=["GET", "POST"])
