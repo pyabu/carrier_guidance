@@ -979,7 +979,6 @@ google = oauth.register(
     client_id=os.environ.get('GOOGLE_CLIENT_ID', ''),
     client_secret=os.environ.get('GOOGLE_CLIENT_SECRET', ''),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    authorize_params={'prompt': 'select_account'},
     client_kwargs={
         'scope': 'openid email profile'
     }
@@ -1041,14 +1040,16 @@ def login_google():
     """Trigger Google OAuth login flow."""
     source = request.args.get('source', 'login')
     session['oauth_source'] = source
-    
+
     # Check if credentials are actually configured
     if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
         error_msg = "Google Sign-In is not fully configured yet. Please contact the administrator."
         return redirect(url_for('login', error=error_msg))
-        
-    redirect_uri = url_for('auth_google_callback', _external=True)
-    resp = google.authorize_redirect(redirect_uri, authorize_params={'prompt': 'consent'})
+
+    # Force HTTPS on production (Vercel); _external=True gives full URL
+    redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
+    # Pass prompt as a direct kwarg (authlib 1.3+ API — NOT authorize_params={})
+    resp = google.authorize_redirect(redirect_uri, prompt='select_account')
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
