@@ -1047,13 +1047,14 @@ def login_google():
 
     redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
 
-    # Generate redirect and capture the state authlib puts in the session
+    # Generate redirect — authlib auto-generates state and stores in session
     resp = google.authorize_redirect(redirect_uri, prompt='select_account')
 
-    # On Vercel serverless, the session is lost between Lambda invocations.
-    # Save the OAuth state in a cookie so the callback can restore it.
-    state = session.get('_google_authlib_state_', '')
-    resp.set_cookie('_google_authlib_state_', state,
+    # On Vercel serverless, session is lost between Lambda invocations.
+    # Save the OAuth state cookie so the callback can restore it.
+    # authlib stores state under key: '{name}_authlib_state_' = 'google_authlib_state_'
+    state = session.get('google_authlib_state_', '')
+    resp.set_cookie('google_authlib_state_', state,
                     max_age=300, secure=True, httponly=True, samesite='None')
     resp.set_cookie('oauth_source', source,
                     max_age=300, secure=True, httponly=True, samesite='None')
@@ -1065,11 +1066,10 @@ def auth_google_callback():
     """Handle callback from Google OAuth."""
     try:
         # VERCEL FIX: Restore the OAuth state from cookie back into the session.
-        # Vercel serverless may use a different Lambda for callback than for login,
-        # so the Flask session (which stores _google_authlib_state_) is empty here.
-        saved_state = request.cookies.get('_google_authlib_state_', '')
+        # authlib uses key 'google_authlib_state_' (no leading underscore)
+        saved_state = request.cookies.get('google_authlib_state_', '')
         if saved_state:
-            session['_google_authlib_state_'] = saved_state
+            session['google_authlib_state_'] = saved_state
 
         # Exchange the authorization code for tokens
         token = google.authorize_access_token()
@@ -1116,7 +1116,7 @@ def auth_google_callback():
     # Clear cookies
     if hasattr(resp, 'delete_cookie'):
         resp.delete_cookie('oauth_source')
-        resp.delete_cookie('_google_authlib_state_')
+        resp.delete_cookie('google_authlib_state_')
     return resp
 
 @app.route("/login", methods=["GET", "POST"])
