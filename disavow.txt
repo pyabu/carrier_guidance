@@ -1,0 +1,12 @@
+# Google Disavow File for careerguidance.me
+# Generated: 2026-06-12
+#
+# These domains are spammy/low-quality sites that linked to careerguidance.me
+# without authorization. We disavow them to prevent negative SEO impact.
+#
+# HOW TO USE:
+# Go to: https://search.google.com/search-console/disavow-links
+# Select careerguidance.me → Upload this file
+
+# Spam domain: expired domain listing site, toxic backlink
+domain:full-expired-domain-lists.us
