@@ -972,18 +972,16 @@ def student_dashboard():
 # AUTHENTICATION ROUTES (Including Google OAuth)
 # ═══════════════════════════════════════════════════════════════════════
 
-from authlib.integrations.flask_client import OAuth
-oauth = OAuth(app)
-google = oauth.register(
-    name='google',
-    client_id=os.environ.get('GOOGLE_CLIENT_ID', ''),
-    client_secret=os.environ.get('GOOGLE_CLIENT_SECRET', ''),
-    server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
-    client_kwargs={
-        'scope': 'openid email profile',
-        'code_challenge_method': None,  # disable PKCE
-    }
-)
+# Google OAuth — using direct HTTP (no authlib session dependency)
+# authlib's session-based state management breaks on Vercel serverless
+import secrets as _secrets
+import urllib.parse as _urlparse
+import urllib.request as _urlreq
+import json as _json
+
+GOOGLE_AUTH_URL = 'https://accounts.google.com/o/oauth2/v2/auth'
+GOOGLE_TOKEN_URL = 'https://oauth2.googleapis.com/token'
+GOOGLE_USERINFO_URL = 'https://www.googleapis.com/oauth2/v3/userinfo'
 
 def _handle_oauth_callback_logic(email, name, provider_name, source):
     """Handles the callback securely, ensuring users are logged in regardless of the source button."""
@@ -1014,7 +1012,6 @@ def _handle_oauth_callback_logic(email, name, provider_name, source):
         import secrets
         random_pw = secrets.token_urlsafe(16)
         hashed_pw = generate_password_hash(random_pw, method="pbkdf2:sha256")
-        
         try:
             new_user = supabase.table("users").insert({
                 "name": name,
@@ -1024,7 +1021,6 @@ def _handle_oauth_callback_logic(email, name, provider_name, source):
                 "interests": "",
                 "experience_level": ""
             }).execute()
-            
             if new_user.data:
                 user = new_user.data[0]
                 session['user_id'] = user['id']
@@ -1036,73 +1032,94 @@ def _handle_oauth_callback_logic(email, name, provider_name, source):
         except Exception as e:
             return redirect(url_for('signup', error=f"Database error: {str(e)}"))
 
+
 @app.route("/login/google")
 def login_google():
     """Trigger Google OAuth login flow."""
     source = request.args.get('source', 'login')
 
-    # Check credentials
-    if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
+    client_id = os.environ.get('GOOGLE_CLIENT_ID', '')
+    if not client_id or not os.environ.get('GOOGLE_CLIENT_SECRET', ''):
         return redirect(url_for('login', error="Google Sign-In is not configured yet."))
+
+    # Generate a random state and store it in a cookie (no session needed)
+    state = _secrets.token_urlsafe(32)
+    redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
+
+    params = {
+        'client_id': client_id,
+        'redirect_uri': redirect_uri,
+        'response_type': 'code',
+        'scope': 'openid email profile',
+        'state': state,
+        'prompt': 'select_account',
+        'access_type': 'online',
+    }
+    auth_url = GOOGLE_AUTH_URL + '?' + _urlparse.urlencode(params)
+
+    resp = redirect(auth_url)
+    # Store state + source in cookies (survive cross-site redirect, no session needed)
+    resp.set_cookie('g_oauth_state', state, max_age=300, secure=True, httponly=True, samesite='None')
+    resp.set_cookie('g_oauth_src', source, max_age=300, secure=True, httponly=True, samesite='None')
+    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
+    return resp
+
+
+@app.route("/auth/google/callback")
+def auth_google_callback():
+    """Handle Google OAuth callback — direct HTTP, no authlib session."""
+    error = request.args.get('error')
+    if error:
+        logger.error(f"Google OAuth error param: {error}")
+        return redirect(url_for('login', error="Google sign-in was cancelled or denied."))
+
+    code = request.args.get('code', '')
+    state = request.args.get('state', '')
+    saved_state = request.cookies.get('g_oauth_state', '')
+
+    # Verify state to prevent CSRF
+    if not code:
+        return redirect(url_for('login', error="No authorization code from Google."))
+    if not saved_state or saved_state != state:
+        logger.error(f"OAuth state mismatch: expected={saved_state!r} got={state!r}")
+        return redirect(url_for('login', error="Authentication state mismatch. Please try again."))
 
     redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
 
-    # Generate redirect — authlib auto-generates state and stores in session
-    resp = google.authorize_redirect(redirect_uri, prompt='select_account')
-
-    # On Vercel serverless, session is lost between Lambda invocations.
-    # Save the OAuth state cookie so the callback can restore it.
-    # authlib stores state under key: '{name}_authlib_state_' = 'google_authlib_state_'
-    state = session.get('google_authlib_state_', '')
-    resp.set_cookie('google_authlib_state_', state,
-                    max_age=300, secure=True, httponly=True, samesite='None')
-    resp.set_cookie('oauth_source', source,
-                    max_age=300, secure=True, httponly=True, samesite='None')
-    resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
-    resp.headers['Pragma'] = 'no-cache'
-    return resp
-@app.route("/auth/google/callback")
-def auth_google_callback():
-    """Handle callback from Google OAuth."""
+    # Exchange the authorization code for tokens
     try:
-        # VERCEL FIX: Restore the OAuth state from cookie back into the session.
-        # authlib uses key 'google_authlib_state_' (no leading underscore)
-        saved_state = request.cookies.get('google_authlib_state_', '')
-        if saved_state:
-            session['google_authlib_state_'] = saved_state
-
-        # Exchange the authorization code for tokens
-        token = google.authorize_access_token()
-        if not token:
-            logger.error("No token received from Google")
-            return redirect(url_for('login', error="Failed to authenticate with Google. Please try again."))
-
-        # Extract user info — comes inside the token for openid scope
-        user_info = token.get('userinfo')
-        if not user_info:
-            # Fallback: decode id_token JWT manually
-            try:
-                import json as _json, base64 as _base64
-                id_token = token.get('id_token', '')
-                if id_token:
-                    parts = id_token.split('.')
-                    if len(parts) >= 2:
-                        payload = parts[1]
-                        payload += '=' * (4 - len(payload) % 4)
-                        user_info = _json.loads(_base64.urlsafe_b64decode(payload))
-            except Exception as jwt_err:
-                logger.error(f"JWT decode failed: {jwt_err}")
-
-        if not user_info:
-            logger.error("No user_info from Google token")
-            return redirect(url_for('login', error="Could not get user info from Google. Please try again."))
-
+        token_data = _urlparse.urlencode({
+            'code': code,
+            'client_id': os.environ.get('GOOGLE_CLIENT_ID', ''),
+            'client_secret': os.environ.get('GOOGLE_CLIENT_SECRET', ''),
+            'redirect_uri': redirect_uri,
+            'grant_type': 'authorization_code',
+        }).encode('utf-8')
+        token_req = _urlreq.Request(GOOGLE_TOKEN_URL, data=token_data,
+                                    headers={'Content-Type': 'application/x-www-form-urlencoded'})
+        with _urlreq.urlopen(token_req, timeout=10) as r:
+            token = _json.loads(r.read().decode('utf-8'))
     except Exception as e:
-        logger.error(f"Google auth callback error: {e}", exc_info=True)
-        return redirect(url_for('login', error="Google sign-in failed. Please try again."))
+        logger.error(f"Google token exchange failed: {e}", exc_info=True)
+        return redirect(url_for('login', error="Failed to exchange code with Google. Please try again."))
 
-    email = user_info.get('email')
-    name = user_info.get('name')
+    access_token = token.get('access_token', '')
+    if not access_token:
+        logger.error(f"No access_token in Google response: {token}")
+        return redirect(url_for('login', error="No access token from Google. Please try again."))
+
+    # Fetch user info
+    try:
+        info_req = _urlreq.Request(GOOGLE_USERINFO_URL,
+                                   headers={'Authorization': f'Bearer {access_token}'})
+        with _urlreq.urlopen(info_req, timeout=10) as r:
+            user_info = _json.loads(r.read().decode('utf-8'))
+    except Exception as e:
+        logger.error(f"Google userinfo fetch failed: {e}", exc_info=True)
+        return redirect(url_for('login', error="Could not get user info from Google. Please try again."))
+
+    email = user_info.get('email', '')
+    name = user_info.get('name', '')
     if not name and email:
         name = email.split('@')[0].replace('.', ' ').title()
     if not name:
@@ -1110,13 +1127,12 @@ def auth_google_callback():
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
 
-    # Read oauth_source from cookie
-    source = request.cookies.get('oauth_source', 'login')
+    source = request.cookies.get('g_oauth_src', 'login')
     resp = _handle_oauth_callback_logic(email, name, "Google", source)
-    # Clear cookies
+    # Clear OAuth cookies
     if hasattr(resp, 'delete_cookie'):
-        resp.delete_cookie('oauth_source')
-        resp.delete_cookie('google_authlib_state_')
+        resp.delete_cookie('g_oauth_state')
+        resp.delete_cookie('g_oauth_src')
     return resp
 
 @app.route("/login", methods=["GET", "POST"])
