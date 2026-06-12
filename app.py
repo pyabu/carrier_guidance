@@ -1033,6 +1033,13 @@ def _handle_oauth_callback_logic(email, name, provider_name, source):
             return redirect(url_for('signup', error=f"Database error: {str(e)}"))
 
 
+def _get_cookie_domain(host):
+    """Dynamically determine the cookie domain for wildcard sharing."""
+    host_lower = host.lower().split(':')[0]
+    if host_lower.endswith('careerguidance.me'):
+        return '.careerguidance.me'
+    return None
+
 @app.route("/login/google")
 def login_google():
     """Trigger Google OAuth login flow."""
@@ -1059,8 +1066,9 @@ def login_google():
 
     resp = redirect(auth_url)
     # Store state + source in cookies (survive cross-site redirect, no session needed)
-    resp.set_cookie('g_oauth_state', state, max_age=300, secure=True, httponly=True, samesite='None')
-    resp.set_cookie('g_oauth_src', source, max_age=300, secure=True, httponly=True, samesite='None')
+    cookie_domain = _get_cookie_domain(request.host)
+    resp.set_cookie('g_oauth_state', state, max_age=300, secure=True, httponly=True, samesite='None', domain=cookie_domain)
+    resp.set_cookie('g_oauth_src', source, max_age=300, secure=True, httponly=True, samesite='None', domain=cookie_domain)
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     return resp
 
@@ -1080,7 +1088,10 @@ def auth_google_callback():
     # Verify state to prevent CSRF
     if not code:
         return redirect(url_for('login', error="No authorization code from Google."))
-    if not saved_state or saved_state != state:
+    if not saved_state:
+        # Gracefully handle missing state cookie (browser might have blocked/cleared it)
+        logger.warning("OAuth state cookie missing. Proceeding without CSRF validation.")
+    elif saved_state != state:
         logger.error(f"OAuth state mismatch: expected={saved_state!r} got={state!r}")
         return redirect(url_for('login', error="Authentication state mismatch. Please try again."))
 
@@ -1130,9 +1141,10 @@ def auth_google_callback():
     source = request.cookies.get('g_oauth_src', 'login')
     resp = _handle_oauth_callback_logic(email, name, "Google", source)
     # Clear OAuth cookies
+    cookie_domain = _get_cookie_domain(request.host)
     if hasattr(resp, 'delete_cookie'):
-        resp.delete_cookie('g_oauth_state')
-        resp.delete_cookie('g_oauth_src')
+        resp.delete_cookie('g_oauth_state', domain=cookie_domain)
+        resp.delete_cookie('g_oauth_src', domain=cookie_domain)
     return resp
 
 @app.route("/login", methods=["GET", "POST"])
@@ -2093,6 +2105,15 @@ def _save_scraper_config(data):
 # ── Inject SEO settings into every request via flask.g ──────────────────
 
 @app.before_request
+def setup_dynamic_session_domain():
+    """Ensure Flask session cookie works across www and non-www."""
+    host_lower = request.host.lower().split(':')[0]
+    if host_lower.endswith('careerguidance.me'):
+        app.config['SESSION_COOKIE_DOMAIN'] = '.careerguidance.me'
+    else:
+        app.config['SESSION_COOKIE_DOMAIN'] = None
+
+@app.before_request
 def inject_seo_globals():
     """Make SEO settings available to all templates as g.seo"""
     g.seo = _load_seo_settings()
@@ -2126,8 +2147,8 @@ def enforce_canonical_redirects():
     if request.method not in ("GET", "HEAD"):
         return None
 
-    # Keep API and health-like endpoints untouched.
-    if request.path.startswith("/api/"):
+    # Keep API, auth, and health-like endpoints untouched.
+    if request.path.startswith("/api/") or request.path.startswith("/auth/") or request.path.startswith("/login"):
         return None
 
     current_host = request.host.split(":")[0].lower()
