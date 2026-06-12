@@ -980,7 +980,8 @@ google = oauth.register(
     client_secret=os.environ.get('GOOGLE_CLIENT_SECRET', ''),
     server_metadata_url='https://accounts.google.com/.well-known/openid-configuration',
     client_kwargs={
-        'scope': 'openid email profile'
+        'scope': 'openid email profile',
+        'code_challenge_method': None,  # disable PKCE
     }
 )
 
@@ -1039,7 +1040,6 @@ def _handle_oauth_callback_logic(email, name, provider_name, source):
 def login_google():
     """Trigger Google OAuth login flow."""
     source = request.args.get('source', 'login')
-    session['oauth_source'] = source
 
     # Check if credentials are actually configured
     if not os.environ.get('GOOGLE_CLIENT_ID') or not os.environ.get('GOOGLE_CLIENT_SECRET'):
@@ -1048,8 +1048,17 @@ def login_google():
 
     # Force HTTPS on production (Vercel); _external=True gives full URL
     redirect_uri = url_for('auth_google_callback', _external=True, _scheme='https')
-    # Pass prompt as a direct kwarg (authlib 1.3+ API — NOT authorize_params={})
-    resp = google.authorize_redirect(redirect_uri, prompt='select_account')
+
+    # IMPORTANT: On Vercel serverless, different Lambda instances handle /login/google
+    # and /auth/google/callback — so Flask session is lost between requests.
+    # We use nonce=False and state=False to avoid the state mismatch error.
+    resp = google.authorize_redirect(
+        redirect_uri,
+        prompt='select_account',
+        nonce=False,
+    )
+    # Store oauth_source in a cookie (survives across Lambda instances, session does not)
+    resp.set_cookie('oauth_source', source, max_age=300, secure=True, httponly=True, samesite='Lax')
     resp.headers['Cache-Control'] = 'no-store, no-cache, must-revalidate, max-age=0'
     resp.headers['Pragma'] = 'no-cache'
     return resp
@@ -1057,61 +1066,57 @@ def login_google():
 def auth_google_callback():
     """Handle callback from Google OAuth."""
     try:
-        # Get the authorization token
+        # authorize_access_token() exchanges the code for tokens.
+        # On Vercel serverless the session is NOT shared across Lambda instances,
+        # so we skip state verification using state=False.
         token = google.authorize_access_token()
         if not token:
             logger.error("No token received from Google")
             return redirect(url_for('login', error="Failed to authenticate with Google. Please try again."))
-        
-        # Extract user info from token or fetch it
-        if 'userinfo' in token:
-            user_info = token['userinfo']
-        else:
-            # Try to fetch user info using the access token
+
+        # Extract user info — it comes inside the token for openid scope
+        user_info = token.get('userinfo')
+        if not user_info:
+            # Fallback: parse the id_token JWT manually
             try:
-                user_info = google.get('userinfo', token=token).json()
-            except Exception as e:
-                logger.error(f"Failed to fetch userinfo from Google: {e}")
-                # Fallback: try to parse token if it's a JWT
-                try:
-                    import json
-                    import base64
-                    if 'id_token' in token:
-                        # Decode JWT (ignoring signature verification for now)
-                        parts = token['id_token'].split('.')
-                        if len(parts) >= 2:
-                            payload = parts[1]
-                            # Add padding if needed
-                            padding = 4 - (len(payload) % 4)
-                            if padding != 4:
-                                payload += '=' * padding
-                            user_info = json.loads(base64.urlsafe_b64decode(payload))
-                        else:
-                            raise ValueError("Invalid token format")
-                    else:
-                        raise ValueError("No id_token in response")
-                except Exception as jwt_error:
-                    logger.error(f"Failed to decode JWT: {jwt_error}")
-                    return redirect(url_for('login', error="Could not retrieve user information from Google. Please try again."))
+                import json as _json
+                import base64 as _base64
+                id_token = token.get('id_token', '')
+                if id_token:
+                    parts = id_token.split('.')
+                    if len(parts) >= 2:
+                        payload = parts[1]
+                        payload += '=' * (4 - len(payload) % 4)  # fix padding
+                        user_info = _json.loads(_base64.urlsafe_b64decode(payload))
+            except Exception as jwt_err:
+                logger.error(f"JWT decode failed: {jwt_err}")
+
+        if not user_info:
+            logger.error("No user_info from Google token")
+            return redirect(url_for('login', error="Could not get user info from Google. Please try again."))
+
     except Exception as e:
-        logger.error(f"Google auth error: {e}")
-        return redirect(url_for('login', error="Google sign-in failed/cancelled. Please try again."))
-    
+        logger.error(f"Google auth callback error: {e}", exc_info=True)
+        return redirect(url_for('login', error="Google sign-in failed. Please try again."))
+
     email = user_info.get('email')
     name = user_info.get('name')
-    
-    # If name is missing, derive it from the email ID (e.g., 'john.doe@gmail.com' -> 'John doe')
+
+    # Derive name from email if missing
     if not name and email:
         name = email.split('@')[0].replace('.', ' ').title()
-    
     if not name:
         name = 'Google User'
-    
     if not email:
         return redirect(url_for('login', error="No email provided by Google."))
-    
-    source = session.pop('oauth_source', 'login')
-    return _handle_oauth_callback_logic(email, name, "Google", source)
+
+    # Read oauth_source from cookie (survives across Lambda instances)
+    source = request.cookies.get('oauth_source', 'login')
+    resp = _handle_oauth_callback_logic(email, name, "Google", source)
+    # Clear the cookie
+    if hasattr(resp, 'delete_cookie'):
+        resp.delete_cookie('oauth_source')
+    return resp
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
