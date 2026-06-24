@@ -151,7 +151,7 @@ def _run_ai_batch_enrichment(data_dir, spider_name):
         enriched = ai.enrich_batch_with_ai(jobs)
         data["jobs"] = enriched
         data["ai_enrichment"] = {
-            "model": "gemini-1.5-flash",
+            "model": "gemini-2.0-flash",
             "enriched_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
             "total_enriched": len(enriched),
         }

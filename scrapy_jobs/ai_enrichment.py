@@ -178,8 +178,8 @@ class AIEnrichment:
 
         return enriched
 
-    # Models to try (with fallback)
-    GEMINI_MODELS = ["gemini-2.0-flash-lite", "gemini-2.0-flash"]
+    # Models to try (with fallback). Prefer a known-working Gemini model first.
+    GEMINI_MODELS = ["gemini-2.0-flash", "gemini-2.0-flash-lite"]
 
     def _gemini_enrich_batch(self, batch):
         """Send a batch of jobs to Gemini for enrichment with model fallback."""

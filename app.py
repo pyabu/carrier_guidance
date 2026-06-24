@@ -60,6 +60,7 @@ PUBLIC_FILTER_PATHS = {"/jobs", "/jobs/india", "/jobs/tamilnadu"}
 # Query-param values for 'type' that are valuable SEO landing pages and should be indexed
 INDEXABLE_JOB_TYPES = {"fresher", "remote", "internship"}
 CANONICAL_EXCLUDE_PARAMS = {
+    # UTM / ad-click tracking params — never part of canonical
     "utm_source",
     "utm_medium",
     "utm_campaign",
@@ -68,8 +69,23 @@ CANONICAL_EXCLUDE_PARAMS = {
     "fbclid",
     "gclid",
     "msclkid",
+    # Pagination & sorting — search engines should index one page, not every page variant
     "sort",
     "page",
+    "per_page",
+    # Search / filter params — these create duplicate content; canonical should be the base URL
+    "q",
+    "keyword",
+    "search",
+    "city",
+    "state",
+    "experience",
+    "category",
+    "source",
+    "salary",
+    "company",
+    # Filter param 'type' is intentionally NOT excluded for /jobs?type=fresher|remote|internship
+    # because those are designated SEO landing pages with unique content
 }
 PRIVATE_NOINDEX_PREFIXES = (
     "/login",
@@ -253,41 +269,54 @@ def _canonical_target_for_request():
     """
     Build the canonical absolute URL for the current request.
     Used for both <link rel="canonical"> and redirect enforcement.
+
+    Always uses the production BASE_URL (https://careerguidance.me) as the
+    scheme+host so canonicals never accidentally point to http:// or www.
+    variants regardless of how the request arrived (proxy, CDN, etc.).
     """
-    seo = getattr(g, "seo", {}) or {}
-    canonical_cfg = seo.get("canonical_rules", {}) if isinstance(seo, dict) else {}
+    # ── Always use the configured production base (scheme + host) ──────
+    # This is the most important rule: canonical URLs must always resolve to
+    # the same authoritative origin. Using BASE_URL guarantees this even when
+    # the request arrives via HTTP or through a reverse proxy.
+    base_scheme, _, base_host = BASE_URL.partition("://")
+    scheme = base_scheme  # always "https" from SITE_URL env var default
+    host = base_host      # always "careerguidance.me"
 
-    # Host normalization
-    host = request.host.split(":")[0].lower()
-    enforce_www = bool(canonical_cfg.get("enforce_www", False))
-    if enforce_www and not host.startswith("www."):
-        host = f"www.{host}"
-    elif not enforce_www and host.startswith("www."):
-        host = host[4:]
-
-    # Scheme normalization
-    enforce_https = bool(canonical_cfg.get("enforce_https", True))
-    if enforce_https and (request.is_secure or IS_VERCEL):
-        scheme = "https"
-    else:
-        scheme = request.scheme
-
-    # Path normalization
+    # ── Path normalization ─────────────────────────────────────────────
     path = request.path or "/"
+    # Strip trailing slash (except for root)
     if path != "/" and path.endswith("/"):
         path = path.rstrip("/")
-    if canonical_cfg.get("lowercase_urls", True) and not path.startswith("/static/"):
+    # Always lowercase URLs (URLs are case-sensitive per spec, use one form)
+    if not path.startswith("/static/"):
         path = path.lower()
 
     # Legacy sitemap endpoints should canonicalize to /sitemap.xml
     if path == "/sitemap_index.xml":
         path = "/sitemap.xml"
 
-    # Query normalization
+    # ── Query normalization ────────────────────────────────────────────
+    # For public job-listing paths, only keep the 'type' param when it's one
+    # of the designated SEO landing pages (fresher, remote, internship).
+    # All other query params (search, filter, pagination) are stripped so
+    # canonical always points to the clean base path — preventing duplicate
+    # content warnings for search-result variants of the same page.
     clean_query_params = {}
+    is_public_listing = path in PUBLIC_FILTER_PATHS
     for key, value in request.args.items():
-        if key.lower() not in CANONICAL_EXCLUDE_PARAMS:
-            clean_query_params[key] = value
+        key_lower = key.lower()
+        if key_lower in CANONICAL_EXCLUDE_PARAMS:
+            continue  # always strip excluded params
+        if is_public_listing and key_lower == "type":
+            # Only keep 'type' for the known SEO landing pages
+            if value.lower().strip() in INDEXABLE_JOB_TYPES:
+                clean_query_params[key] = value
+            # else: strip non-indexable type values too
+            continue
+        if is_public_listing:
+            # All other query params on listing pages are stripped
+            continue
+        clean_query_params[key] = value
 
     query = urllib.parse.urlencode(sorted(clean_query_params.items()))
     if query:
@@ -1228,7 +1257,7 @@ def ai_sync_profile():
         return jsonify({"error": "No text provided"}), 400
         
     try:
-        model = genai.GenerativeModel('gemini-1.5-flash')
+        model = genai.GenerativeModel('gemini-2.0-flash')
         prompt = f"""
         Analyze the following text (from a resume or bio) and extract the profile information strictly in JSON format.
         Do not include any markdown formatting or backticks in your response. Only return raw JSON.
@@ -2143,16 +2172,29 @@ def inject_seo_globals():
 
 @app.before_request
 def enforce_canonical_redirects():
-    """Redirect duplicate URL variants to one canonical URL for crawl consistency."""
+    """Redirect duplicate URL variants to one canonical URL for crawl consistency.
+
+    Compares the request against the canonical target computed by
+    _canonical_target_for_request().  Since that function always uses
+    BASE_URL (https://careerguidance.me), we must build current_url in
+    the same way so that requests arriving over HTTP or via www. are
+    correctly detected as non-canonical and redirected.
+    """
     if request.method not in ("GET", "HEAD"):
         return None
 
-    # Keep API, auth, and health-like endpoints untouched.
-    if request.path.startswith("/api/") or request.path.startswith("/auth/") or request.path.startswith("/login"):
+    # Keep API, auth, static, and health-like endpoints untouched.
+    if (request.path.startswith("/api/")
+            or request.path.startswith("/auth/")
+            or request.path.startswith("/login")
+            or request.path.startswith("/static/")):
         return None
 
+    # Build current URL from the request (ProxyFix ensures scheme is correct on Vercel)
     current_host = request.host.split(":")[0].lower()
-    current_url = f"{request.scheme}://{current_host}{request.full_path}".rstrip("?")
+    full_path_qs = request.full_path.rstrip("?")
+    current_url = f"{request.scheme}://{current_host}{full_path_qs}"
+
     target_url = _canonical_target_for_request()
 
     if current_url != target_url:
