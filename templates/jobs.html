@@ -1,9 +1,60 @@
 {% extends "base.html" %}
 {% block title %}Browse Jobs in India 2026 | IT, Fresher, Remote & Internship Jobs | CareerGuidance{% endblock %}
-{% block meta_desc %}Search 10,000+ jobs in India updated daily. Filter by location, type, salary & experience. Find IT, fresher, remote, internship & MNC jobs across Bangalore, Chennai, Hyderabad, Mumbai & more.{% endblock %}
+{% block meta_desc %}🔍 Search 10,000+ India jobs updated daily — IT, fresher, remote & MNC jobs in Bangalore, Chennai, Hyderabad, Mumbai. Filter by salary, location & company. Apply directly on CareerGuidance.me{% endblock %}
 {% block meta_keywords %}browse jobs India, job search India 2026, IT jobs Bangalore, fresher jobs India, remote jobs India, internship India, jobs in Hyderabad, jobs in Mumbai, MNC jobs India{% endblock %}
 
-{% block content %}
+{% block extra_head %}
+<!-- FAQ Schema for Jobs page — triggers rich results in Google Search -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "How do I find fresher jobs in India on CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Visit careerguidance.me/jobs and filter by Job Type → 'Fresher'. You'll see entry-level jobs from Naukri, LinkedIn, Internshala, Freshersworld and 8+ portals across Bangalore, Chennai, Hyderabad and all of India."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which cities does CareerGuidance cover for job search in India?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance covers jobs in Bangalore, Mumbai, Delhi NCR, Hyderabad, Chennai, Pune, Kolkata, Ahmedabad, Noida, Gurgaon and 200+ cities across all 28 states of India including Tamil Nadu, Maharashtra, Karnataka, Telangana and more."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "What job portals does CareerGuidance scrape?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance auto-scrapes jobs from Naukri.com, LinkedIn, Indeed India, Foundit (Monster), Internshala, TimesJobs, Freshersworld, Himalayas, Remotive, RemoteOK and more — updated every 12 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Are the jobs on CareerGuidance free to apply?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! All job listings on CareerGuidance.me are free to browse and apply. Create a free account to save jobs, track applications, get job alerts, and access AI career tools."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How do I find remote jobs in India on CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Filter by Job Type → 'Remote' on careerguidance.me/jobs, or visit careerguidance.me/jobs?type=remote to see all remote and work-from-home jobs available across India."
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
+
 <!-- Page Header -->
 <div class="page-header">
     <div class="container">

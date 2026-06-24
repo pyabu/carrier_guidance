@@ -11,34 +11,39 @@
     <meta http-equiv="content-language" content="en-IN">
     <meta name="geo.region" content="IN">
     <meta name="geo.placename" content="India">
+    <meta name="author" content="CareerGuidance.me">
+    <meta name="copyright" content="CareerGuidance.me 2026">
+    <meta name="category" content="Jobs, Career, Employment India">
     <meta name="google-site-verification" content="ek-HJUiDXlWf9f5BxFPpCg3UzexWGdZGkXzs-H8qcGg" />
     <meta name="google-site-verification" content="hUVRsV36_wcv4EiKvE4QpRBIHKlG0Z5xDZKojB-HepE" />
     <title>{% block title %}{{ g.get('seo', {}).get('meta_title', 'CareerGuidance') }}{% endblock %}</title>
     <link rel="canonical" href="{{ g.canonical_url }}">
-    <meta name="robots" content="{{ g.get('robots_meta', 'index, follow, max-image-preview:large') }}">
+    <meta name="robots" content="{{ g.get('robots_meta', 'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1') }}">
     <meta name="description"
-        content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance. Discover the best fresher jobs, IT roles, and remote work in Bangalore, Chennai, Hyderabad, Mumbai, Delhi NCR, and across India.') }}{% endblock %}">
+        content="{% block meta_desc %}{{ g.get('seo', {}).get('meta_description', 'India\'s #1 free job portal — 10,000+ fresher, IT & remote jobs from Naukri, LinkedIn & more. AI-powered career guidance, resume builder & interview prep for Indian students 2026.') }}{% endblock %}">
     <meta name="keywords"
-        content="{% block meta_keywords %}{{ g.get('seo', {}).get('keywords', []) | join(', ') }}{% endblock %}, Career Guidance, Job Portal India, Fresher Jobs 2026, IT Jobs India, Remote Work, Tamil Nadu Jobs, Resume Builder, Career Roadmaps, AI Job Search, Abu Saleem, Sindhu Bharathi">
+        content="{% block meta_keywords %}{{ g.get('seo', {}).get('keywords', []) | join(', ') }}{% endblock %}, Career Guidance, Job Portal India, Fresher Jobs 2026, IT Jobs India, Remote Work, Tamil Nadu Jobs, Resume Builder, Career Roadmaps, AI Job Search">
 
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ g.canonical_url }}">
-    <meta property="og:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
-    <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
-    <meta property="og:image" content="https://careerguidance.me/static/Sindhu.jpeg">
+    <meta property="og:title" content="{% block og_title %}{% block og_title_inner %}{{ self.title() }}{% endblock %}{% endblock %}">
+    <meta property="og:description" content="{{ g.get('seo', {}).get('meta_description', 'India\'s #1 free job portal for freshers, IT & remote jobs.') }}">
+    <meta property="og:image" content="https://careerguidance.me/static/og-banner.jpg">
     <meta property="og:image:width" content="1200">
     <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="CareerGuidance — India\'s #1 Job Portal for Freshers & IT Professionals">
     <meta property="og:site_name" content="CareerGuidance">
     <meta property="og:locale" content="en_IN">
 
     <!-- Twitter -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:url" content="{{ g.canonical_url }}">
-    <meta name="twitter:title" content="{{ g.get('seo', {}).get('meta_title', 'Career Guidance') }}">
-    <meta name="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'Unlock your potential with Career Guidance.') }}">
-    <meta name="twitter:image" content="https://careerguidance.me/static/Sindhu.jpeg">
-    <meta name="twitter:site" content="@careerguidance">
+    <meta name="twitter:title" content="{% block tw_title %}{{ self.title() }}{% endblock %}">
+    <meta name="twitter:description" content="{{ g.get('seo', {}).get('meta_description', 'India\'s #1 free job portal — 10,000+ fresher, IT & remote jobs.') }}">
+    <meta name="twitter:image" content="https://careerguidance.me/static/og-banner.jpg">
+    <meta name="twitter:site" content="@careerguidancme">
+    <meta name="twitter:creator" content="@careerguidancme">
 
     <!-- JSON-LD WebSite Schema with Sitelinks Searchbox -->
     <script type="application/ld+json">

@@ -1,9 +1,51 @@
 {% extends "base.html" %}
-{% block title %}All India Jobs 2026 | Naukri, LinkedIn, Indeed Jobs | CareerGuidance{% endblock %}
-{% block meta_desc %}Browse 500+ AI-organized job listings across all 28 states and 8 union territories of India. Powered by real-time scraping from Naukri, LinkedIn, Indeed, and more.{% endblock %}
-{% block meta_keywords %}All India jobs 2026, Naukri jobs, LinkedIn jobs India, Indeed India, jobs in Bangalore, jobs in Mumbai, jobs in Delhi, jobs in Hyderabad, IT jobs India, MNC jobs, fresher jobs all India{% endblock %}
+{% block title %}All India Jobs 2026 | 10,000+ Fresher, IT & Remote Jobs | CareerGuidance{% endblock %}
+{% block meta_desc %}🇮🇳 10,000+ All India Jobs 2026 — Naukri, LinkedIn & Indeed listings across all 28 states. IT, fresher, remote & MNC jobs in Bangalore, Mumbai, Delhi, Hyderabad & Chennai. Updated every 12 hours.{% endblock %}
+{% block meta_keywords %}All India jobs 2026, Naukri jobs, LinkedIn jobs India, Indeed India, jobs in Bangalore, jobs in Mumbai, jobs in Delhi, jobs in Hyderabad, IT jobs India, MNC jobs, fresher jobs all India, remote jobs India{% endblock %}
 
 {% block extra_head %}
+<!-- FAQ Schema — triggers Google rich results for india_jobs page -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {
+      "@type": "Question",
+      "name": "Where can I find All India jobs 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "CareerGuidance.me/jobs/india lists 10,000+ jobs across all 28 states and 8 union territories of India. Jobs are auto-scraped from Naukri, LinkedIn, Indeed, Internshala, Freshersworld and 8+ portals every 12 hours."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Which states in India have the most IT jobs in 2026?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Karnataka (Bangalore), Maharashtra (Mumbai & Pune), Telangana (Hyderabad), Tamil Nadu (Chennai) and Delhi NCR have the most IT jobs. CareerGuidance covers all 28 states including emerging tech hubs like Ahmedabad, Kochi and Jaipur."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "How often are All India job listings updated on CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Jobs are updated every 12 hours via automated scraping from Naukri.com, LinkedIn, Indeed India, Foundit, Internshala, TimesJobs, Freshersworld and Himalayas. A full daily refresh runs at 6 AM IST."
+      }
+    },
+    {
+      "@type": "Question",
+      "name": "Can freshers find jobs across all of India on CareerGuidance?",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "Yes! CareerGuidance has a dedicated fresher jobs section covering all Indian cities. Filter by Experience → Entry Level or Job Type → Fresher on careerguidance.me/jobs/india to find hundreds of fresher-friendly openings."
+      }
+    }
+  ]
+}
+</script>
+
 <style>
 /* ═══════════ INDIA HERO ═══════════ */
 .india-hero{background:linear-gradient(135deg,#0c0c1d 0%,#1a1a40 40%,#270082 80%,#7a00cc 100%);padding:48px 0 32px;position:relative;overflow:hidden}
