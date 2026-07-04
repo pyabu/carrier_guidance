@@ -1016,20 +1016,33 @@
     // ── Score jobs against extracted profile ──
     function _scoreJobs(jobs, profile) {
         const skillsSet = new Set(profile.skills);
-        const loc = profile.location.toLowerCase();
-        const expLevel = profile.experience_level.toLowerCase();
-        const titles = profile.job_titles.map(t => t.toLowerCase());
+        const loc = (profile.location || '').toLowerCase();
+        const expLevel = (profile.experience_level || '').toLowerCase();
+        const titles = (profile.job_titles || []).map(t => t.toLowerCase());
+
         const scored = [];
         for (const job of jobs) {
-            const desc = ((job.title||'') + ' ' + (job.skills||'') + ' ' + (job.category||'')).toLowerCase();
+            // Skills can be array OR string — join arrays with SPACE so multi-word keywords work
+            const skillsStr = Array.isArray(job.skills)
+                ? job.skills.join(' ')
+                : (job.skills || '');
+            // Build searchable text: title + skills + category + first 300 chars of description
+            const desc = (
+                (job.title || '') + ' ' +
+                skillsStr + ' ' +
+                (job.category || '') + ' ' +
+                ((job.description || '').slice(0, 300))
+            ).toLowerCase();
+
             const matched = [...skillsSet].filter(s => desc.includes(s));
             if (!matched.length) continue;
+
             let score = Math.min(matched.length * 8, 50);
-            const reasons = [`Skills: ${matched.slice(0,3).join(', ')}`];
-            const jloc = (job.location||'').toLowerCase();
+            const reasons = [`Skills: ${matched.slice(0, 3).join(', ')}`];
+            const jloc = (job.location || '').toLowerCase();
             if (loc && jloc.includes(loc)) { score += 25; reasons.push('Location match'); }
-            if (expLevel && (job.experience||'').toLowerCase().includes(expLevel)) { score += 15; reasons.push('Experience match'); }
-            if (titles.some(t => (job.title||'').toLowerCase().includes(t))) { score += 10; reasons.push('Role match'); }
+            if (expLevel && (job.experience || '').toLowerCase().includes(expLevel)) { score += 15; reasons.push('Experience match'); }
+            if (titles.some(t => (job.title || '').toLowerCase().includes(t))) { score += 10; reasons.push('Role match'); }
             scored.push({ ...job, match_score: score, match_reasons: reasons });
         }
         scored.sort((a, b) => b.match_score - a.match_score);
