@@ -1677,6 +1677,79 @@ def career_copilot():
                 "What's your background and career goal? I'll give you a personalized roadmap! 🚀")
 
     # ── Gemini AI Logic ──────────────────────────────────────────────
+    or_key = os.environ.get("OPENROUTER_API_KEY", "")
+
+    # ── OpenRouter (Primary AI — free, no quota issues) ──────────────
+    if or_key:
+        try:
+            import urllib.request as _ur
+            trends = {}
+            trends_path = os.path.join(os.path.dirname(__file__), "data", "trends.json")
+            if os.path.exists(trends_path):
+                with open(trends_path) as f:
+                    trends = json.load(f)
+            top_skills = [s['skill'] for s in trends.get("skills", {}).get("top_25", [])[:8]]
+            top_roles  = [r['role']  for r in trends.get("roles",  {}).get("top_20", [])[:8]]
+
+            system_msg = (
+                "You are the 'AI Career Copilot' for CareerGuidance.me — an expert career advisor for Indian students and professionals.\n"
+                f"MARKET DATA: Trending Skills: {', '.join(top_skills)}. High-Demand Roles: {', '.join(top_roles)}.\n"
+                "TONE: Professional, encouraging, like a senior mentor.\n"
+                "FORMAT: Use Markdown + emojis. For career advice include: 📈 Career Options, 🔥 Demand Level, 🛠️ Required Skills, 🗺️ Roadmap.\n"
+                "Keep responses helpful and focused on Indian career topics."
+            )
+            messages = [{"role": "system", "content": system_msg}]
+            for h in history[-6:]:
+                messages.append({"role": h["role"] if h["role"] == "user" else "assistant", "content": h["content"]})
+            messages.append({"role": "user", "content": user_msg})
+
+            # Try models in order — first working one wins
+            or_models = [
+                "google/gemma-4-31b-it:free",
+                "meta-llama/llama-3.3-70b-instruct:free",
+                "qwen/qwen3-next-80b-a3b-instruct:free",
+                "liquid/lfm-2.5-1.2b-instruct:free",
+            ]
+            ai_response = None
+            for or_model in or_models:
+                try:
+                    payload = json.dumps({
+                        "model": or_model,
+                        "messages": messages,
+                        "max_tokens": 600,
+                        "temperature": 0.7,
+                    }).encode()
+                    req = _ur.Request(
+                        "https://openrouter.ai/api/v1/chat/completions",
+                        data=payload,
+                        headers={
+                            "Authorization": f"Bearer {or_key}",
+                            "Content-Type": "application/json",
+                            "HTTP-Referer": "https://careerguidance.me",
+                            "X-Title": "CareerGuidance AI Copilot",
+                        },
+                    )
+                    with _ur.urlopen(req, timeout=12) as resp:
+                        result = json.loads(resp.read())
+                        choices = result.get("choices", [])
+                        if choices and choices[0].get("message", {}).get("content"):
+                            ai_response = choices[0]["message"]["content"].strip()
+                            break
+                except Exception as model_err:
+                    logger.warning(f"OpenRouter model {or_model} failed: {model_err}")
+                    continue
+
+            if ai_response:
+                history.append({"role": "user",      "content": user_msg})
+                history.append({"role": "assistant", "content": ai_response})
+                session['chat_history'] = _compact_chat_history(history)
+                session.modified = True
+                return jsonify({"response": ai_response, "status": "success"})
+            # All OR models failed — fall through to Gemini/fallback
+        except Exception as e:
+            logger.warning(f"OpenRouter failed: {e}")
+
+    # ── Gemini (Secondary AI) ─────────────────────────────────────────
     if api_key:
         try:
             import google.genai as genai_new
