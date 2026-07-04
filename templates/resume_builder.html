@@ -39,6 +39,55 @@
         <div class="resume-grid">
             <!-- Form -->
             <div class="resume-form">
+                <!-- ✨ AI Auto-Fill from Uploaded Resume -->
+                <div id="rbUploadSection" style="
+                    background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.07));
+                    border:1.5px dashed rgba(102,126,234,.5);border-radius:14px;padding:20px;margin-bottom:28px;
+                ">
+                    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+                        <div style="width:36px;height:36px;border-radius:10px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 12px rgba(102,126,234,0.4);">
+                            <i class="fas fa-magic" style="color:#fff;"></i>
+                        </div>
+                        <div>
+                            <div style="font-weight:700;font-size:.92rem;">Upload Resume → AI Auto-Fill</div>
+                            <div style="font-size:.75rem;color:var(--text-secondary);">Upload your existing resume and AI will fill the form for you</div>
+                        </div>
+                    </div>
+                    <div id="rbDropZone" style="
+                        border:2px dashed rgba(102,126,234,.4);border-radius:10px;padding:20px;text-align:center;cursor:pointer;
+                        transition:all .2s;background:rgba(102,126,234,.04);
+                    "
+                    onclick="document.getElementById('rbFileInput').click()"
+                    ondragover="event.preventDefault();this.style.borderColor='#667eea'"
+                    ondragleave="this.style.borderColor='rgba(102,126,234,.4)'"
+                    ondrop="handleRBDrop(event)">
+                        <input type="file" id="rbFileInput" accept=".pdf,.doc,.docx" style="display:none" onchange="handleRBFileSelect(this)">
+                        <div id="rbDropIcon" style="font-size:1.8rem;margin-bottom:6px;"><i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i></div>
+                        <div style="font-weight:600;font-size:.85rem;">Drop resume here or click to browse</div>
+                        <div style="font-size:.73rem;color:var(--text-secondary);">PDF, DOC, DOCX — AI extracts & fills all fields</div>
+                        <div id="rbProgress" style="display:none;margin-top:12px;">
+                            <div style="height:5px;background:rgba(102,126,234,.15);border-radius:10px;overflow:hidden;">
+                                <div id="rbProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);transition:width 0.4s;border-radius:10px;"></div>
+                            </div>
+                            <div id="rbProgressLabel" style="font-size:.78rem;color:#667eea;margin-top:6px;">Analysing with AI...</div>
+                        </div>
+                    </div>
+                    <div id="rbError" style="display:none;background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);border-radius:8px;padding:8px 12px;margin-top:10px;font-size:.8rem;color:#dc3545;"></div>
+                    <div id="rbSuccess" style="display:none;margin-top:10px;">
+                        <div style="background:rgba(17,153,142,.1);border:1px solid rgba(17,153,142,.3);border-radius:8px;padding:10px 14px;font-size:.82rem;color:#11998e;margin-bottom:10px;">
+                            <i class="fas fa-check-circle"></i> Resume parsed! Form fields have been auto-filled.
+                        </div>
+                        <a href="/jobs" style="
+                            display:inline-flex;align-items:center;gap:6px;
+                            background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;
+                            padding:9px 20px;border-radius:10px;font-weight:600;font-size:.85rem;
+                            text-decoration:none;box-shadow:0 4px 14px rgba(102,126,234,0.4);
+                        ">
+                            <i class="fas fa-rocket"></i> Find Matching Jobs
+                        </a>
+                    </div>
+                </div>
+
                 <h3 style="margin-bottom:24px;"><i class="fas fa-edit text-accent"></i> Enter Your Details</h3>
 
                 <div class="form-group">
@@ -317,6 +366,79 @@ function resetForm() {
     const eduFields = document.getElementById('educationFields');
     expFields.innerHTML = expFields.children[0]?.outerHTML || '';
     eduFields.innerHTML = eduFields.children[0]?.outerHTML || '';
+    updatePreview();
+}
+
+/* ── Resume Builder Upload & Auto-fill ─────────────────────────── */
+function handleRBDrop(e) {
+    e.preventDefault();
+    document.getElementById('rbDropZone').style.borderColor = 'rgba(102,126,234,.4)';
+    var file = e.dataTransfer.files[0];
+    if (file) uploadRBResume(file);
+}
+function handleRBFileSelect(input) {
+    if (input.files[0]) uploadRBResume(input.files[0]);
+}
+function uploadRBResume(file) {
+    var icon = document.getElementById('rbDropIcon');
+    var prog = document.getElementById('rbProgress');
+    var bar = document.getElementById('rbProgressBar');
+    var label = document.getElementById('rbProgressLabel');
+    var err = document.getElementById('rbError');
+    var succ = document.getElementById('rbSuccess');
+
+    err.style.display = 'none';
+    succ.style.display = 'none';
+    icon.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#667eea;"></i>';
+    prog.style.display = 'block';
+
+    var pct = 0;
+    var tick = setInterval(function() {
+        pct = Math.min(pct + Math.random() * 18, 85);
+        bar.style.width = pct + '%';
+    }, 180);
+
+    label.textContent = 'Uploading & parsing with AI...';
+    var fd = new FormData();
+    fd.append('resume', file);
+
+    fetch('/api/parse-resume', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        clearInterval(tick);
+        bar.style.width = '100%';
+        if (data.error) {
+            err.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + data.error;
+            err.style.display = 'block';
+            icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+            prog.style.display = 'none';
+            return;
+        }
+        setTimeout(function() {
+            prog.style.display = 'none';
+            bar.style.width = '0%';
+            icon.innerHTML = '<i class="fas fa-check-circle" style="color:#11998e;font-size:2rem;"></i>';
+            autoFillFromProfile(data.profile);
+            succ.style.display = 'block';
+        }, 500);
+    })
+    .catch(function() {
+        clearInterval(tick);
+        prog.style.display = 'none';
+        bar.style.width = '0%';
+        icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+        err.innerHTML = '<i class="fas fa-exclamation-circle"></i> Upload failed. Please try again.';
+        err.style.display = 'block';
+    });
+}
+
+function autoFillFromProfile(profile) {
+    if (!profile) return;
+    if (profile.name) { var el = document.getElementById('rName'); if (el) { el.value = profile.name; } }
+    if (profile.job_titles && profile.job_titles[0]) { var t = document.getElementById('rTitle'); if (t) t.value = profile.job_titles[0]; }
+    if (profile.location) { var loc = document.getElementById('rLocation'); if (loc) loc.value = profile.location + (profile.state ? ', ' + profile.state : ''); }
+    if (profile.skills && profile.skills.length) { var sk = document.getElementById('rSkills'); if (sk) sk.value = profile.skills.join(', '); }
+    if (profile.summary) { var sum = document.getElementById('rSummary'); if (sum) sum.value = profile.summary; }
     updatePreview();
 }
 </script>

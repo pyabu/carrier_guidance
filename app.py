@@ -2875,6 +2875,203 @@ def delete_resume():
         return jsonify({"error": str(e)}), 500
 
 
+# ── AI Resume Parsing & Job Recommendation ─────────────────────────────
+
+def _extract_resume_text(filepath):
+    """Extract plain text from PDF or DOCX resume file."""
+    ext = filepath.rsplit(".", 1)[-1].lower()
+    text = ""
+    try:
+        if ext == "pdf":
+            import pdfplumber
+            with pdfplumber.open(filepath) as pdf:
+                text = "\n".join(page.extract_text() or "" for page in pdf.pages)
+        elif ext in ("doc", "docx"):
+            from docx import Document as DocxDocument
+            doc = DocxDocument(filepath)
+            text = "\n".join(p.text for p in doc.paragraphs)
+    except Exception as e:
+        logger.warning(f"Resume text extraction failed ({ext}): {e}")
+    return text.strip()
+
+
+def _parse_resume_with_ai(text):
+    """Send resume text to Gemini and return a structured profile dict."""
+    try:
+        import google.generativeai as genai
+        genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
+        model = genai.GenerativeModel("gemini-2.0-flash")
+        prompt = f"""You are an expert resume parser. Analyze the resume text below and extract the candidate profile.
+Return ONLY a valid JSON object (no markdown, no backticks, no extra text).
+
+JSON format:
+{{
+  "name": "Full name or empty string",
+  "skills": ["list", "of", "technical", "skills"],
+  "experience_years": 0,
+  "experience_level": "one of: Fresher, Junior, Mid-Level, Senior, Lead",
+  "location": "city name or empty string",
+  "state": "state name or empty string",
+  "job_titles": ["current or target job titles"],
+  "summary": "1-2 sentence professional summary"
+}}
+
+Resume text:
+{text[:4000]}
+"""
+        response = model.generate_content(prompt)
+        raw = response.text.strip()
+        if raw.startswith("```"):
+            raw = raw.split("```")[1]
+            if raw.startswith("json"):
+                raw = raw[4:]
+        raw = raw.strip().rstrip("```").strip()
+        result = json.loads(raw)
+        if isinstance(result.get("skills"), str):
+            result["skills"] = [s.strip() for s in result["skills"].split(",") if s.strip()]
+        return result
+    except Exception as e:
+        logger.error(f"AI resume parse error: {e}")
+        return None
+
+
+@app.route("/api/parse-resume", methods=["POST"])
+def parse_resume_api():
+    """Parse an uploaded resume (PDF/DOCX) using Gemini AI. Works for anonymous users (session only)."""
+    if "resume" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+    f = request.files["resume"]
+    if f.filename == "":
+        return jsonify({"error": "No file selected"}), 400
+    if not allowed_file(f.filename):
+        return jsonify({"error": "Only PDF, DOC, DOCX files allowed"}), 400
+
+    import tempfile
+    ext = f.filename.rsplit(".", 1)[-1].lower()
+    try:
+        with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp:
+            f.save(tmp.name)
+            tmp_path = tmp.name
+    except Exception as e:
+        return jsonify({"error": f"File save failed: {e}"}), 500
+
+    text = _extract_resume_text(tmp_path)
+    try:
+        os.unlink(tmp_path)
+    except Exception:
+        pass
+
+    if not text or len(text) < 50:
+        return jsonify({"error": "Could not extract text from this file. Please try a different format."}), 422
+
+    profile = _parse_resume_with_ai(text)
+    if not profile:
+        return jsonify({"error": "AI could not parse this resume. Please try again."}), 500
+
+    session["resume_profile"] = profile
+    session.modified = True
+
+    uid = session.get("user_id")
+    if uid:
+        try:
+            supabase.table("scraped_data").upsert({
+                "kind": f"user_resume_profile_{uid}",
+                "data": profile,
+                "updated_at": datetime.now().isoformat(),
+            }).execute()
+        except Exception as e:
+            logger.warning(f"Resume profile Supabase save failed: {e}")
+
+    return jsonify({"status": "success", "profile": profile})
+
+
+@app.route("/api/resume-profile", methods=["GET"])
+def get_resume_profile():
+    """Return stored resume profile (session first, then Supabase for logged-in users)."""
+    profile = session.get("resume_profile")
+    if not profile:
+        uid = session.get("user_id")
+        if uid:
+            try:
+                resp = supabase.table("scraped_data").select("data").eq("kind", f"user_resume_profile_{uid}").execute()
+                if resp.data:
+                    profile = resp.data[0]["data"]
+                    session["resume_profile"] = profile
+                    session.modified = True
+            except Exception as e:
+                logger.warning(f"Resume profile load failed: {e}")
+    if profile:
+        return jsonify({"status": "ok", "profile": profile})
+    return jsonify({"status": "none", "profile": None})
+
+
+@app.route("/api/resume-recommendations", methods=["GET"])
+def resume_recommendations():
+    """Return top-matched jobs scored against the stored resume profile."""
+    profile = session.get("resume_profile")
+    if not profile:
+        uid = session.get("user_id")
+        if uid:
+            try:
+                resp = supabase.table("scraped_data").select("data").eq("kind", f"user_resume_profile_{uid}").execute()
+                if resp.data:
+                    profile = resp.data[0]["data"]
+            except Exception:
+                pass
+    if not profile:
+        return jsonify({"status": "no_profile", "results": []}), 200
+
+    skills = [s.lower() for s in (profile.get("skills") or [])]
+    location = (profile.get("location") or "").lower()
+    state = (profile.get("state") or "").lower()
+    exp_level = (profile.get("experience_level") or "").lower()
+    job_titles = [t.lower() for t in (profile.get("job_titles") or [])]
+
+    def score_job(job):
+        score = 0
+        reasons = []
+        desc = ((job.get("title") or "") + " " + (job.get("description") or "") + " " +
+                (job.get("skills") or "") + " " + (job.get("category") or "")).lower()
+        matched_skills = [s for s in skills if s in desc]
+        skill_pts = min(len(matched_skills) * 8, 50)
+        score += skill_pts
+        if matched_skills:
+            reasons.append(f"Skills: {', '.join(matched_skills[:3])}")
+        job_loc = (job.get("location") or "").lower()
+        if location and location in job_loc:
+            score += 25
+            reasons.append("Location match")
+        elif state and state in job_loc:
+            score += 10
+            reasons.append("State match")
+        job_exp = (job.get("experience") or "").lower()
+        if exp_level and exp_level in job_exp:
+            score += 15
+            reasons.append("Experience match")
+        job_title_low = (job.get("title") or "").lower()
+        if any(t in job_title_low or job_title_low in t for t in job_titles):
+            score += 10
+            reasons.append("Role match")
+        return score, reasons
+
+    all_jobs = []
+    for loader in [load_jobs, load_india_jobs, load_tn_jobs]:
+        try:
+            data = loader()
+            all_jobs.extend(data.get("jobs", []) or [])
+        except Exception:
+            pass
+
+    scored = []
+    for job in all_jobs:
+        sc, reasons = score_job(job)
+        if sc > 0:
+            scored.append({**job, "match_score": sc, "match_reasons": reasons})
+    scored.sort(key=lambda j: j["match_score"], reverse=True)
+
+    return jsonify({"status": "ok", "results": scored[:10], "profile": profile})
+
+
 @app.route("/api/serve-upload/<path:filename>")
 @login_required
 def serve_upload(filename):

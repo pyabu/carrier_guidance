@@ -1,0 +1,501 @@
+{# 
+  resume_match_widget.html — AI Resume Upload & Smart Job Matching Banner
+  Include this partial in any jobs page with:  {% include "resume_match_widget.html" %}
+  Requires: Font Awesome, the /api/parse-resume and /api/resume-recommendations endpoints
+#}
+
+<!-- ╔══════════════════════════════════════════════════════════════════╗
+     ║   AI RESUME MATCH BANNER                                        ║
+     ╚══════════════════════════════════════════════════════════════════╝ -->
+<div id="resumeMatchBanner" style="
+    background: linear-gradient(135deg, rgba(102,126,234,0.12) 0%, rgba(118,75,162,0.12) 100%);
+    border: 1.5px solid rgba(102,126,234,0.35);
+    border-radius: 16px;
+    margin-bottom: 20px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+">
+    <!-- Collapsed Header (always visible) -->
+    <div id="resumeBannerHeader" onclick="toggleResumeBanner()" style="
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 14px 20px; cursor: pointer;
+        background: linear-gradient(135deg, rgba(102,126,234,0.08), rgba(118,75,162,0.06));
+    ">
+        <div style="display:flex;align-items:center;gap:10px;">
+            <div style="
+                width:36px;height:36px;border-radius:10px;
+                background: linear-gradient(135deg,#667eea,#764ba2);
+                display:flex;align-items:center;justify-content:center;
+                box-shadow: 0 4px 12px rgba(102,126,234,0.4);
+            ">
+                <i class="fas fa-file-upload" style="color:#fff;font-size:.9rem;"></i>
+            </div>
+            <div>
+                <div style="font-weight:700;font-size:.92rem;color:var(--text-primary);">
+                    <i class="fas fa-magic" style="color:#667eea;"></i>
+                    AI Resume Match
+                    <span id="resumeActiveBadge" style="
+                        display:none;background:linear-gradient(135deg,#667eea,#764ba2);
+                        color:#fff;font-size:.7rem;padding:2px 8px;border-radius:20px;margin-left:6px;
+                        animation: pulse-badge 2s infinite;
+                    ">Active ✓</span>
+                </div>
+                <div style="font-size:.78rem;color:var(--text-secondary);">
+                    Upload your resume — AI extracts skills, experience & location to find perfect jobs
+                </div>
+            </div>
+        </div>
+        <i id="resumeBannerChevron" class="fas fa-chevron-down" style="
+            color:var(--text-secondary);transition:transform 0.3s;
+        "></i>
+    </div>
+
+    <!-- Expanded Body -->
+    <div id="resumeBannerBody" style="display:none;">
+        <div style="padding:0 20px 20px;">
+
+            <!-- Uploaded Profile Display (shown after parse) -->
+            <div id="resumeProfileCard" style="display:none;
+                background: linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.07));
+                border:1px solid rgba(102,126,234,.3);border-radius:12px;padding:14px;margin-bottom:14px;
+            ">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+                    <div style="font-weight:700;font-size:.88rem;color:var(--text-primary);">
+                        <i class="fas fa-user-check" style="color:#667eea;"></i>
+                        Resume Parsed Successfully
+                    </div>
+                    <button onclick="clearResumeProfile()" style="
+                        background:none;border:none;cursor:pointer;font-size:.75rem;
+                        color:var(--text-secondary);padding:4px 8px;border-radius:6px;
+                        transition:background .2s;
+                    " onmouseover="this.style.background='rgba(255,100,100,.1)'"
+                      onmouseout="this.style.background='none'">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;align-items:flex-start;">
+                    <div id="resumeNameBadge" style="display:none;font-size:.82rem;font-weight:600;color:var(--text-primary);margin-right:4px;align-self:center;"></div>
+                    <div id="resumeLocationBadge" style="display:none;"></div>
+                    <div id="resumeExpBadge" style="display:none;"></div>
+                    <div id="resumeSkillsBadges" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+                </div>
+                <div id="resumeSummaryText" style="
+                    font-size:.78rem;color:var(--text-secondary);margin-top:8px;
+                    font-style:italic;display:none;
+                "></div>
+            </div>
+
+            <!-- Upload Zone -->
+            <div id="resumeUploadZone" style="
+                border: 2px dashed rgba(102,126,234,0.5);
+                border-radius: 12px;
+                padding: 28px 20px;
+                text-align: center;
+                cursor: pointer;
+                transition: all 0.25s;
+                background: rgba(102,126,234,0.04);
+                margin-bottom: 14px;
+            "
+            onmouseover="this.style.borderColor='#667eea';this.style.background='rgba(102,126,234,0.09)'"
+            onmouseout="this.style.borderColor='rgba(102,126,234,0.5)';this.style.background='rgba(102,126,234,0.04)'"
+            ondragover="event.preventDefault();this.style.borderColor='#667eea';this.style.background='rgba(102,126,234,0.12)'"
+            ondragleave="this.style.borderColor='rgba(102,126,234,0.5)';this.style.background='rgba(102,126,234,0.04)'"
+            ondrop="handleResumeDrop(event)"
+            onclick="document.getElementById('resumeFileInput').click()">
+                <input type="file" id="resumeFileInput" accept=".pdf,.doc,.docx"
+                    style="display:none" onchange="handleResumeFileSelect(this)">
+                <div id="resumeUploadIcon" style="font-size:2rem;margin-bottom:8px;">
+                    <i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>
+                </div>
+                <div style="font-weight:600;font-size:.9rem;color:var(--text-primary);">
+                    Drag & drop your resume here
+                </div>
+                <div style="font-size:.78rem;color:var(--text-secondary);margin-top:4px;">
+                    or click to browse — PDF, DOC, DOCX supported
+                </div>
+                <!-- Upload Progress -->
+                <div id="resumeUploadProgress" style="display:none;margin-top:14px;">
+                    <div style="
+                        height:6px;background:rgba(102,126,234,.15);border-radius:10px;overflow:hidden;margin-bottom:8px;
+                    ">
+                        <div id="resumeProgressBar" style="
+                            height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);
+                            border-radius:10px;transition:width 0.4s;
+                        "></div>
+                    </div>
+                    <div id="resumeProgressLabel" style="font-size:.8rem;color:#667eea;font-weight:500;">
+                        Uploading...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <button id="resumeFindJobsBtn" onclick="applyResumeFilters()" style="display:none;
+                    background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;
+                    padding:10px 22px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.88rem;
+                    box-shadow:0 4px 14px rgba(102,126,234,0.4);transition:all .2s;
+                "
+                onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 6px 20px rgba(102,126,234,0.5)'"
+                onmouseout="this.style.transform='';this.style.boxShadow='0 4px 14px rgba(102,126,234,0.4)'">
+                    <i class="fas fa-rocket"></i> Find My Matching Jobs
+                </button>
+                <button id="resumeViewMatchesBtn" onclick="loadResumeRecommendations()" style="display:none;
+                    background:rgba(102,126,234,.12);color:#667eea;border:1.5px solid rgba(102,126,234,.4);
+                    padding:10px 22px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.88rem;
+                    transition:all .2s;
+                "
+                onmouseover="this.style.background='rgba(102,126,234,.2)'"
+                onmouseout="this.style.background='rgba(102,126,234,.12)'">
+                    <i class="fas fa-star"></i> View Top Matches
+                </button>
+            </div>
+
+            <!-- Error Display -->
+            <div id="resumeParseError" style="display:none;
+                background:rgba(255,80,80,.1);border:1px solid rgba(255,80,80,.3);
+                border-radius:8px;padding:10px 14px;margin-top:10px;
+                font-size:.82rem;color:#dc3545;
+            "></div>
+        </div>
+    </div>
+</div>
+
+<!-- Resume Recommendations Panel -->
+<div id="resumeRecommendationsPanel" style="display:none;margin-bottom:20px;">
+    <div style="
+        display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;
+    ">
+        <h4 style="margin:0;font-size:.95rem;font-weight:700;">
+            <span style="
+                background:linear-gradient(135deg,#667eea,#764ba2);
+                -webkit-background-clip:text;-webkit-text-fill-color:transparent;
+            ">✨ Resume-Matched Jobs</span>
+            <span id="resumeMatchCount" style="
+                font-size:.75rem;color:var(--text-secondary);margin-left:6px;
+                -webkit-text-fill-color:var(--text-secondary);
+            "></span>
+        </h4>
+        <button onclick="document.getElementById('resumeRecommendationsPanel').style.display='none'" style="
+            background:none;border:none;cursor:pointer;color:var(--text-secondary);font-size:.82rem;
+        "><i class="fas fa-times"></i></button>
+    </div>
+    <div id="resumeRecommendationsGrid" style="
+        display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px;
+    "></div>
+</div>
+
+<style>
+@keyframes pulse-badge {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.7; }
+}
+@keyframes shimmer-card {
+    0% { background-position: -400px 0; }
+    100% { background-position: 400px 0; }
+}
+.resume-match-card {
+    background: var(--bg-card);
+    border: 1.5px solid rgba(102,126,234,0.25);
+    border-radius: 12px;
+    padding: 14px;
+    position: relative;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+.resume-match-card:hover {
+    border-color: #667eea;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 24px rgba(102,126,234,0.18);
+}
+.match-score-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg,#667eea,#764ba2);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.3px;
+}
+.match-score-badge.high { background: linear-gradient(135deg,#11998e,#38ef7d); }
+.match-score-badge.med  { background: linear-gradient(135deg,#f7971e,#ffd200); color:#333; }
+</style>
+
+<script>
+/* ═══════════════════════════════════════════════════════════════════
+   RESUME MATCH WIDGET — shared logic for all jobs pages
+   ═══════════════════════════════════════════════════════════════════ */
+
+var _resumeProfile = null;  // cached profile after parse
+
+// ── Banner toggle ─────────────────────────────────────────
+function toggleResumeBanner() {
+    var body = document.getElementById('resumeBannerBody');
+    var chevron = document.getElementById('resumeBannerChevron');
+    var open = body.style.display !== 'none';
+    body.style.display = open ? 'none' : 'block';
+    chevron.style.transform = open ? '' : 'rotate(180deg)';
+}
+
+// ── File handlers ─────────────────────────────────────────
+function handleResumeDrop(e) {
+    e.preventDefault();
+    var file = e.dataTransfer.files[0];
+    if (file) uploadResumeFile(file);
+}
+
+function handleResumeFileSelect(input) {
+    if (input.files[0]) uploadResumeFile(input.files[0]);
+}
+
+// ── Upload & parse ────────────────────────────────────────
+function uploadResumeFile(file) {
+    var allowed = ['application/pdf', 'application/msword',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (!allowed.includes(file.type) && !file.name.match(/\.(pdf|doc|docx)$/i)) {
+        showResumeError('Please upload a PDF, DOC, or DOCX file.');
+        return;
+    }
+
+    // Show progress
+    var zone = document.getElementById('resumeUploadZone');
+    var progress = document.getElementById('resumeUploadProgress');
+    var bar = document.getElementById('resumeProgressBar');
+    var label = document.getElementById('resumeProgressLabel');
+    var icon = document.getElementById('resumeUploadIcon');
+
+    zone.style.cursor = 'default';
+    icon.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#667eea;"></i>';
+    progress.style.display = 'block';
+    hideResumeError();
+
+    // Animate progress bar
+    var pct = 0;
+    var tick = setInterval(function() {
+        pct = Math.min(pct + Math.random() * 15, 85);
+        bar.style.width = pct + '%';
+    }, 200);
+
+    label.textContent = 'Uploading & analysing with AI...';
+
+    var fd = new FormData();
+    fd.append('resume', file);
+
+    fetch('/api/parse-resume', { method: 'POST', body: fd })
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        clearInterval(tick);
+        bar.style.width = '100%';
+        label.textContent = 'Analysis complete!';
+        setTimeout(function() {
+            progress.style.display = 'none';
+            bar.style.width = '0%';
+            icon.innerHTML = '<i class="fas fa-check-circle" style="color:#11998e;font-size:2rem;"></i>';
+            zone.style.cursor = 'pointer';
+            if (data.error) {
+                showResumeError(data.error);
+                icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+                return;
+            }
+            _resumeProfile = data.profile;
+            renderResumeProfile(data.profile);
+        }, 600);
+    })
+    .catch(function(err) {
+        clearInterval(tick);
+        progress.style.display = 'none';
+        bar.style.width = '0%';
+        icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+        zone.style.cursor = 'pointer';
+        showResumeError('Upload failed. Please try again.');
+    });
+}
+
+// ── Render extracted profile pills ───────────────────────
+function renderResumeProfile(profile) {
+    if (!profile) return;
+
+    var card = document.getElementById('resumeProfileCard');
+    var nameBadge = document.getElementById('resumeNameBadge');
+    var locBadge = document.getElementById('resumeLocationBadge');
+    var expBadge = document.getElementById('resumeExpBadge');
+    var skillsDiv = document.getElementById('resumeSkillsBadges');
+    var summaryDiv = document.getElementById('resumeSummaryText');
+    var activeBadge = document.getElementById('resumeActiveBadge');
+
+    card.style.display = 'block';
+
+    if (profile.name) {
+        nameBadge.textContent = '👤 ' + profile.name;
+        nameBadge.style.display = 'inline-block';
+    }
+
+    if (profile.location || profile.state) {
+        var loc = [profile.location, profile.state].filter(Boolean).join(', ');
+        locBadge.innerHTML = '<span style="background:rgba(17,153,142,.15);color:#11998e;padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;"><i class="fas fa-map-marker-alt"></i> ' + loc + '</span>';
+        locBadge.style.display = 'inline-block';
+    }
+
+    if (profile.experience_level) {
+        var expColors = {
+            'fresher': 'rgba(52,168,235,.15);color:#34a8eb',
+            'junior': 'rgba(52,168,235,.15);color:#34a8eb',
+            'mid-level': 'rgba(247,151,30,.15);color:#f7971e',
+            'senior': 'rgba(255,80,80,.15);color:#e74c3c',
+            'lead': 'rgba(118,75,162,.15);color:#764ba2',
+        };
+        var expStyle = expColors[(profile.experience_level || '').toLowerCase()] || 'rgba(102,126,234,.15);color:#667eea';
+        var expYrs = profile.experience_years ? ' (' + profile.experience_years + ' yrs)' : '';
+        expBadge.innerHTML = '<span style="background:' + expStyle + ';padding:3px 10px;border-radius:20px;font-size:.75rem;font-weight:600;"><i class="fas fa-layer-group"></i> ' + profile.experience_level + expYrs + '</span>';
+        expBadge.style.display = 'inline-block';
+    }
+
+    var skills = profile.skills || [];
+    skillsDiv.innerHTML = skills.slice(0, 12).map(function(s) {
+        return '<span style="background:linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.1));color:#667eea;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:600;border:1px solid rgba(102,126,234,.2);">' + s + '</span>';
+    }).join('');
+    if (skills.length > 12) {
+        skillsDiv.innerHTML += '<span style="color:var(--text-secondary);font-size:.73rem;align-self:center;">+' + (skills.length - 12) + ' more</span>';
+    }
+
+    if (profile.summary) {
+        summaryDiv.textContent = '"' + profile.summary + '"';
+        summaryDiv.style.display = 'block';
+    }
+
+    // Show action buttons & active badge
+    document.getElementById('resumeFindJobsBtn').style.display = 'inline-flex';
+    document.getElementById('resumeViewMatchesBtn').style.display = 'inline-flex';
+    activeBadge.style.display = 'inline';
+}
+
+// ── Apply resume filters to search ───────────────────────
+function applyResumeFilters() {
+    if (!_resumeProfile) return;
+
+    // Set keyword to primary job title or top skill
+    var keyword = (_resumeProfile.job_titles && _resumeProfile.job_titles[0])
+        || (_resumeProfile.skills && _resumeProfile.skills[0])
+        || '';
+    if (keyword && document.getElementById('searchKeyword')) {
+        document.getElementById('searchKeyword').value = keyword;
+    }
+
+    // Set location
+    if (_resumeProfile.location && document.getElementById('searchLocation')) {
+        document.getElementById('searchLocation').value = _resumeProfile.location;
+    }
+
+    // Check experience checkbox if it matches
+    if (_resumeProfile.experience_level) {
+        var expLow = _resumeProfile.experience_level.toLowerCase();
+        document.querySelectorAll('input[name="exp"]').forEach(function(cb) {
+            if (cb.value.toLowerCase().indexOf(expLow) !== -1 || expLow.indexOf(cb.value.toLowerCase()) !== -1) {
+                cb.checked = true;
+            }
+        });
+    }
+
+    // Reset fetch cache and trigger search
+    if (typeof lastFetchParams !== 'undefined') lastFetchParams = '';
+    if (typeof searchJobs === 'function') searchJobs();
+
+    // Load recommendations too
+    loadResumeRecommendations();
+
+    // Scroll to results
+    var section = document.querySelector('section');
+    if (section) section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// ── Load & render top matched jobs ───────────────────────
+function loadResumeRecommendations() {
+    var panel = document.getElementById('resumeRecommendationsPanel');
+    var grid = document.getElementById('resumeRecommendationsGrid');
+    var countEl = document.getElementById('resumeMatchCount');
+
+    panel.style.display = 'block';
+    grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-secondary);"><i class="fas fa-spinner fa-spin"></i> Loading matches...</div>';
+
+    fetch('/api/resume-recommendations')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (!data.results || data.results.length === 0) {
+            grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-secondary);"><i class="fas fa-search"></i> No strong matches yet. Try uploading a clearer resume.</div>';
+            countEl.textContent = '';
+            return;
+        }
+        countEl.textContent = '(' + data.results.length + ' matches)';
+        grid.innerHTML = '';
+        data.results.forEach(function(job) {
+            var scoreClass = job.match_score >= 60 ? 'high' : (job.match_score >= 35 ? 'med' : '');
+            var reasons = (job.match_reasons || []).join(' · ');
+            var detailUrl = '/job/' + (job.source_key || 'main') + '/' + (job.id || '');
+            var applyUrl = job.apply_url || '#';
+            var card = document.createElement('div');
+            card.className = 'resume-match-card';
+            card.innerHTML =
+                '<div class="match-score-badge ' + scoreClass + '">' + Math.min(job.match_score, 99) + '% match</div>' +
+                '<div style="font-weight:700;font-size:.88rem;color:var(--text-primary);margin-bottom:4px;padding-right:70px;">' + (job.title || 'Untitled') + '</div>' +
+                '<div style="font-size:.8rem;color:#667eea;font-weight:600;margin-bottom:6px;">' +
+                    '<i class="fas fa-building" style="font-size:.72rem;"></i> ' + (job.company || 'Company') +
+                '</div>' +
+                (job.location ? '<div style="font-size:.75rem;color:var(--text-secondary);margin-bottom:6px;"><i class="fas fa-map-marker-alt"></i> ' + job.location + '</div>' : '') +
+                (reasons ? '<div style="font-size:.72rem;color:#11998e;background:rgba(17,153,142,.1);padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;"><i class="fas fa-check-circle"></i> ' + reasons + '</div>' : '') +
+                '<div style="display:flex;gap:6px;margin-top:8px;">' +
+                    '<a href="' + applyUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="flex:1;text-align:center;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;padding:6px 0;border-radius:8px;font-size:.78rem;font-weight:600;text-decoration:none;">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem;"></i></a>' +
+                '</div>';
+            grid.appendChild(card);
+        });
+    })
+    .catch(function() {
+        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-secondary);">Failed to load recommendations.</div>';
+    });
+}
+
+// ── Clear profile ─────────────────────────────────────────
+function clearResumeProfile() {
+    _resumeProfile = null;
+    document.getElementById('resumeProfileCard').style.display = 'none';
+    document.getElementById('resumeNameBadge').style.display = 'none';
+    document.getElementById('resumeLocationBadge').style.display = 'none';
+    document.getElementById('resumeExpBadge').style.display = 'none';
+    document.getElementById('resumeSkillsBadges').innerHTML = '';
+    document.getElementById('resumeSummaryText').style.display = 'none';
+    document.getElementById('resumeFindJobsBtn').style.display = 'none';
+    document.getElementById('resumeViewMatchesBtn').style.display = 'none';
+    document.getElementById('resumeActiveBadge').style.display = 'none';
+    document.getElementById('resumeRecommendationsPanel').style.display = 'none';
+    document.getElementById('resumeUploadIcon').innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+    document.getElementById('resumeFileInput').value = '';
+}
+
+function showResumeError(msg) {
+    var el = document.getElementById('resumeParseError');
+    el.innerHTML = '<i class="fas fa-exclamation-circle"></i> ' + msg;
+    el.style.display = 'block';
+}
+function hideResumeError() {
+    document.getElementById('resumeParseError').style.display = 'none';
+}
+
+// ── Auto-restore session profile on page load ─────────────
+document.addEventListener('DOMContentLoaded', function() {
+    fetch('/api/resume-profile')
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+        if (data.status === 'ok' && data.profile) {
+            _resumeProfile = data.profile;
+            // Auto-expand banner and show profile
+            var body = document.getElementById('resumeBannerBody');
+            var chevron = document.getElementById('resumeBannerChevron');
+            if (body) { body.style.display = 'block'; chevron.style.transform = 'rotate(180deg)'; }
+            renderResumeProfile(data.profile);
+        }
+    })
+    .catch(function() {});
+});
+</script>

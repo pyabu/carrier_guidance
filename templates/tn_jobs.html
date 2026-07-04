@@ -223,6 +223,36 @@
 <!-- ═══════════ MAIN CONTENT ═══════════ -->
 <section style="padding:28px 0 60px;">
     <div class="container">
+        <!-- AI Resume Match Widget -->
+        {% include "resume_match_widget.html" %}
+        <script>
+        /* Override applyResumeFilters for TN Jobs page (uses tnSearchKeyword / tnSearchCity) */
+        function applyResumeFilters() {
+            if (!_resumeProfile) return;
+            var keyword = (_resumeProfile.job_titles && _resumeProfile.job_titles[0])
+                || (_resumeProfile.skills && _resumeProfile.skills[0]) || '';
+            if (keyword) {
+                var kw = document.getElementById('tnSearchKeyword');
+                if (kw) kw.value = keyword;
+            }
+            if (_resumeProfile.location) {
+                var loc = document.getElementById('tnSearchCity');
+                var fCity = document.getElementById('tnFilterCity');
+                if (loc) loc.value = _resumeProfile.location;
+                if (fCity) fCity.value = _resumeProfile.location;
+            }
+            if (_resumeProfile.experience_level) {
+                var expL = _resumeProfile.experience_level.toLowerCase();
+                document.querySelectorAll('input[name="tn_exp"]').forEach(function(cb) {
+                    if (cb.value.toLowerCase().indexOf(expL) !== -1 || expL.indexOf(cb.value.toLowerCase()) !== -1) cb.checked = true;
+                });
+            }
+            if (typeof tnLastFetch !== 'undefined') tnLastFetch = '';
+            if (typeof searchTNJobs === 'function') searchTNJobs();
+            loadResumeRecommendations();
+        }
+        </script>
+
         <!-- Search Bar -->
         <div class="hero-search mb-4" style="max-width:100%;">
             <div class="search-field">

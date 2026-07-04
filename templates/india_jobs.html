@@ -334,6 +334,32 @@
         <main>
             <button class="india-mobile-filter-btn" onclick="toggleSidebar()"><i class="fas fa-sliders-h"></i> Filters</button>
 
+            <!-- AI Resume Match Widget -->
+            {% include "resume_match_widget.html" %}
+            <script>
+            /* Override applyResumeFilters for India Jobs page (uses activeFilters object + fetchJobs) */
+            function applyResumeFilters() {
+                if (!_resumeProfile) return;
+                var keyword = (_resumeProfile.job_titles && _resumeProfile.job_titles[0])
+                    || (_resumeProfile.skills && _resumeProfile.skills[0]) || '';
+                if (keyword) {
+                    var inp = document.getElementById('searchInput');
+                    if (inp) inp.value = keyword;
+                    if (typeof activeFilters !== 'undefined') activeFilters.keyword = keyword;
+                }
+                if (_resumeProfile.location && typeof activeFilters !== 'undefined') {
+                    activeFilters.city = _resumeProfile.location;
+                }
+                if (_resumeProfile.experience_level && typeof activeFilters !== 'undefined') {
+                    activeFilters.experience = _resumeProfile.experience_level;
+                }
+                if (typeof currentPage !== 'undefined') currentPage = 1;
+                if (typeof allJobs !== 'undefined') allJobs = [];
+                if (typeof fetchJobs === 'function') fetchJobs();
+                loadResumeRecommendations();
+            }
+            </script>
+
             <!-- Active Filters -->
             <div class="india-active-filters" id="activeFilters" style="display:none"></div>
 
