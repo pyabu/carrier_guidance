@@ -1661,78 +1661,75 @@ def career_copilot():
                     "• Your background (BCA/BCom/Any degree)\n"
                     "• Your interest area\n"
                     "• Experience level (fresher/experienced)")
+        # ── Default catch-all: always return something useful ──
+        return ("That's a great career question! 🤔 Let me help you.\n\n"
+                "I specialize in **Indian career guidance**. Here are the most popular topics I can help with:\n\n"
+                "📈 **Career Paths**: Software Dev, Data Science, MBA, Government Jobs\n"
+                "💰 **Salary Insights**: Know what to expect by role and city\n"
+                "🛠️ **Skills to Learn**: Which tech skills are in demand in 2026\n"
+                "🗺️ **Roadmaps**: Month-by-month plan to land your dream job\n"
+                "📄 **Resume & Interview**: Tips to crack interviews and write standout CVs\n\n"
+                "💬 **Try asking me**:\n"
+                "• *'I'm a BCom graduate, what should I do?'*\n"
+                "• *'How do I become a software engineer?'*\n"
+                "• *'What are top skills to learn in 2026?'*\n"
+                "• *'How to crack a tech interview?'*\n\n"
+                "What's your background and career goal? I'll give you a personalized roadmap! 🚀")
 
     # ── Gemini AI Logic ──────────────────────────────────────────────
     if api_key:
         try:
-            import google.generativeai as genai
-            genai.configure(api_key=api_key)
-            
+            import google.genai as genai_new
+            client = genai_new.Client(api_key=api_key)
+
             # Load trends for grounding
             trends = {}
             trends_path = os.path.join(os.path.dirname(__file__), "data", "trends.json")
             if os.path.exists(trends_path):
                 with open(trends_path, "r") as f:
                     trends = json.load(f)
-            
+
             # Extract trend info
             top_skills = [s['skill'] for s in trends.get("skills", {}).get("top_25", [])[:8]]
-            top_roles = [r['role'] for r in trends.get("roles", {}).get("top_20", [])[:8]]
-            
-            # Initialize model
-            model = genai.GenerativeModel('gemini-2.0-flash')
-            
-            # Construct context
-            system_prompt = f"""
-            You are the "AI Career Copilot" for CareerGuidance.me, an expert career advisor for Indian students and professionals.
-            
-            CONVERSATION GOAL: Provide helpful, accurate, and conversational career advice.
-            
-            CURRENT INDIAN MARKET DATA (Use this for grounding):
-            - Trending Skills: {', '.join(top_skills)}
-            - High Demand Roles: {', '.join(top_roles)}
-            - Total Jobs Analyzed: {trends.get("total_jobs", "700+")}
-            
-            TONE: Professional, encouraging, and highly conversational (like a senior mentor).
-            
-            FORMATTING: Use clear Markdown. Include emojis to make it engaging.
-            For career recommendations, always try to include:
-            - 📈 Career Options
-            - 🔥 Demand Level
-            - 🛠️ Required Skills
-            - 🗺️ Personalized Roadmap
-            
-            Keep your responses concise but comprehensive. If the user asks something unrelated to careers, politely bring them back to career topics.
-            """
-            
-            # Build history for Gemini
-            chat_session = model.start_chat(history=[])
-            
-            # Pre-pend system instructions for the first message or every message
-            prompt = f"{system_prompt}\n\nUSER HISTORY: {json.dumps(history)}\n\nUSER QUESTION: {user_msg}"
-            
-            # Try to get response
+            top_roles  = [r['role']  for r in trends.get("roles",  {}).get("top_20", [])[:8]]
+
+            system_prompt = f"""You are the 'AI Career Copilot' for CareerGuidance.me, an expert career advisor for Indian students and professionals.
+
+CONVERSATION GOAL: Provide helpful, accurate, and conversational career advice.
+
+CURRENT INDIAN MARKET DATA (Use for grounding):
+- Trending Skills: {', '.join(top_skills)}
+- High Demand Roles: {', '.join(top_roles)}
+- Total Jobs Analyzed: {trends.get('total_jobs', '700+')}
+
+TONE: Professional, encouraging, conversational (like a senior mentor).
+FORMATTING: Use Markdown with emojis. For career recs include: 📈 Career Options, 🔥 Demand Level, 🛠️ Required Skills, 🗺️ Personalized Roadmap.
+Keep responses concise but comprehensive. If the user asks something unrelated to careers, politely bring them back to career topics."""
+
+            full_prompt = f"{system_prompt}\n\nUSER HISTORY: {json.dumps(history[-6:])}\n\nUSER QUESTION: {user_msg}"
+
             try:
-                response = chat_session.send_message(prompt)
+                response = client.models.generate_content(
+                    model='gemini-2.0-flash',
+                    contents=full_prompt
+                )
                 ai_response = response.text.strip()
             except Exception as e:
-                if "429" in str(e) or "quota" in str(e).lower():
-                    logger.warning("Gemini Quota Exceeded. Using smart fallback.")
-                    ai_response = _fallback_response(user_msg) + "\n\n*(Note: I'm currently in high-demand mode, but still here to help!)*"
+                err_str = str(e)
+                if "429" in err_str or "quota" in err_str.lower() or "RESOURCE_EXHAUSTED" in err_str:
+                    logger.warning("Gemini quota exceeded — using smart fallback.")
+                    ai_response = _fallback_response(user_msg)
+                    ai_response += "\n\n*(Note: AI is in high-demand mode — showing curated response)*"
                 else:
                     raise e
-            
+
             # Update history
-            history.append({"role": "user", "content": user_msg})
+            history.append({"role": "user",      "content": user_msg})
             history.append({"role": "assistant", "content": ai_response})
             session['chat_history'] = _compact_chat_history(history)
             session.modified = True
-            
-            return jsonify({
-                "response": ai_response,
-                "status": "success"
-            })
-            
+            return jsonify({"response": ai_response, "status": "success"})
+
         except Exception as e:
             logger.warning(f"Gemini SDK failed: {e}")
     
