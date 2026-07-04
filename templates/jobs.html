@@ -171,299 +171,296 @@
                 style="font-size:.8rem;padding:4px 10px;">Clear All</button>
         </div>
 
-        <div class="jobs-layout">
-            <!-- Filter Toggle Button (mobile) -->
-            <button id="filterToggleBtn" onclick="toggleFilters()" class="btn btn-outline"
-                style="display:none;width:100%;margin-bottom:12px;">
-                <i class="fas fa-sliders-h"></i> Show Filters
-                <span id="filterCountBadge"
-                    style="background:#667eea;color:#fff;padding:1px 8px;border-radius:10px;font-size:.75rem;margin-left:6px;display:none;">0</span>
+        <!-- LinkedIn-Style Filter Pills Bar -->
+        <div id="liFilterBar" style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+
+            <!-- Job Type pill -->
+            <div class="li-pill-wrap" id="pillWrap_type">
+                <button class="li-pill" id="pill_type" onclick="togglePill('type')">
+                    <span id="pillLabel_type">Job Type</span>
+                    <i class="fas fa-chevron-down li-pill-arrow" id="pillArrow_type"></i>
+                </button>
+                <div class="li-dropdown" id="liDrop_type">
+                    <label class="li-opt"><input type="checkbox" name="type" value="Full-time" onchange="applyPill('type')"> Full-time</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Remote" onchange="applyPill('type')"> Remote</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Hybrid" onchange="applyPill('type')"> Hybrid</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Part-time" onchange="applyPill('type')"> Part-time</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Contract" onchange="applyPill('type')"> Contract</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Internship" onchange="applyPill('type')"> Internship</label>
+                    <label class="li-opt"><input type="checkbox" name="type" value="Fresher" onchange="applyPill('type')"> Fresher</label>
+                </div>
+            </div>
+
+            <!-- Experience pill -->
+            <div class="li-pill-wrap" id="pillWrap_exp">
+                <button class="li-pill" id="pill_exp" onclick="togglePill('exp')">
+                    <span id="pillLabel_exp">Experience Level</span>
+                    <i class="fas fa-chevron-down li-pill-arrow" id="pillArrow_exp"></i>
+                </button>
+                <div class="li-dropdown" id="liDrop_exp">
+                    <label class="li-opt"><input type="checkbox" name="exp" value="Entry Level" onchange="applyPill('exp')"> Entry Level</label>
+                    <label class="li-opt"><input type="checkbox" name="exp" value="Junior" onchange="applyPill('exp')"> Junior</label>
+                    <label class="li-opt"><input type="checkbox" name="exp" value="Mid Level" onchange="applyPill('exp')"> Mid Level</label>
+                    <label class="li-opt"><input type="checkbox" name="exp" value="Senior" onchange="applyPill('exp')"> Senior</label>
+                    <label class="li-opt"><input type="checkbox" name="exp" value="Lead" onchange="applyPill('exp')"> Lead</label>
+                </div>
+            </div>
+
+            <!-- Date Posted pill -->
+            <div class="li-pill-wrap" id="pillWrap_posted">
+                <button class="li-pill" id="pill_posted" onclick="togglePill('posted')">
+                    <span id="pillLabel_posted">Date Posted</span>
+                    <i class="fas fa-chevron-down li-pill-arrow" id="pillArrow_posted"></i>
+                </button>
+                <div class="li-dropdown" id="liDrop_posted" style="min-width:180px;">
+                    <label class="li-opt"><input type="radio" name="posted" value="" checked onchange="applyPill('posted')"> Any time</label>
+                    <label class="li-opt"><input type="radio" name="posted" value="1" onchange="applyPill('posted')"> Last 24 hours</label>
+                    <label class="li-opt"><input type="radio" name="posted" value="3" onchange="applyPill('posted')"> Last 3 days</label>
+                    <label class="li-opt"><input type="radio" name="posted" value="7" onchange="applyPill('posted')"> Last week</label>
+                    <label class="li-opt"><input type="radio" name="posted" value="30" onchange="applyPill('posted')"> Last month</label>
+                </div>
+            </div>
+
+            <!-- Salary pill -->
+            <div class="li-pill-wrap" id="pillWrap_salary">
+                <button class="li-pill" id="pill_salary" onclick="togglePill('salary')">
+                    <span id="pillLabel_salary">Salary</span>
+                    <i class="fas fa-chevron-down li-pill-arrow" id="pillArrow_salary"></i>
+                </button>
+                <div class="li-dropdown" id="liDrop_salary" style="min-width:200px;">
+                    <label class="li-opt"><input type="radio" name="salary" value="" checked onchange="applyPill('salary')"> Any salary</label>
+                    <label class="li-opt"><input type="radio" name="salary" value="paid" onchange="applyPill('salary')"> Has salary info</label>
+                    <label class="li-opt"><input type="radio" name="salary" value="50000" onchange="applyPill('salary')"> ₹5L+ / $50k+</label>
+                    <label class="li-opt"><input type="radio" name="salary" value="100000" onchange="applyPill('salary')"> ₹10L+ / $100k+</label>
+                </div>
+            </div>
+
+            <!-- Category pill -->
+            <div class="li-pill-wrap" id="pillWrap_cat">
+                <button class="li-pill" id="pill_cat" onclick="togglePill('cat')">
+                    <span id="pillLabel_cat">Category</span>
+                    <i class="fas fa-chevron-down li-pill-arrow" id="pillArrow_cat"></i>
+                </button>
+                <div class="li-dropdown" id="liDrop_cat">
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Technology" onchange="applyPill('cat')"> Technology</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Data Science" onchange="applyPill('cat')"> Data Science</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Design" onchange="applyPill('cat')"> Design</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Marketing" onchange="applyPill('cat')"> Marketing</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Finance" onchange="applyPill('cat')"> Finance</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Sales" onchange="applyPill('cat')"> Sales</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Management" onchange="applyPill('cat')"> Management</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Human Resources" onchange="applyPill('cat')"> Human Resources</label>
+                    <label class="li-opt"><input type="checkbox" name="cat" value="Customer Service" onchange="applyPill('cat')"> Customer Service</label>
+                </div>
+            </div>
+
+            <!-- All Filters button -->
+            <button class="li-pill li-pill-all" onclick="openAllFilters()" id="allFiltersBtn">
+                <i class="fas fa-sliders-h"></i> All Filters
+                <span id="allFiltersBadge" style="display:none;background:#667eea;color:#fff;font-size:.65rem;padding:1px 7px;border-radius:10px;margin-left:4px;">0</span>
             </button>
 
-            <!-- Filters Sidebar -->
-            <aside class="filter-sidebar" id="filterSidebar">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <h3 style="margin-bottom:0;"><i class="fas fa-sliders-h"></i> Filters</h3>
-                    <button id="filterCloseBtn" onclick="toggleFilters()"
-                        style="display:none;background:none;border:none;font-size:1.2rem;cursor:pointer;color:var(--text-secondary);"><i
-                            class="fas fa-times"></i></button>
-                </div>
+            <!-- Clear all (shown when any filter active) -->
+            <button id="liClearBtn" onclick="clearFilters()" style="display:none;background:none;border:none;color:#667eea;font-size:.82rem;cursor:pointer;padding:4px 8px;border-radius:6px;">
+                <i class="fas fa-times"></i> Clear all
+            </button>
+        </div>
 
-                <!-- Country -->
-                <div class="filter-group" style="margin-top:16px;">
-                    <h4><i class="fas fa-globe"></i> Country</h4>
-                    <select class="form-control" id="filterCountry" onchange="onCountryChange(); searchJobs();">
-                        <option value="">All Countries</option>
-                    </select>
-                </div>
+        <!-- Active filter tags row -->
+        <div id="activeFilters" class="active-filters mb-3" style="display:none;">
+            <span class="text-muted" style="font-size:.85rem;"><i class="fas fa-filter"></i> Active:</span>
+            <div id="filterTags"></div>
+        </div>
 
-                <!-- City -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-city"></i> City</h4>
-                    <select class="form-control" id="filterCity" onchange="searchJobs();">
-                        <option value="">All Cities</option>
-                    </select>
+        <!-- Full-width job grid -->
+        <div>
+            <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3" style="gap:12px;">
+                <div>
+                    <p id="resultsCount" class="text-muted" style="margin-bottom:2px;">Loading jobs...</p>
+                    <p id="sourceInfo" class="text-muted" style="font-size:.78rem;opacity:0.7;margin:0;"></p>
                 </div>
-
-                <!-- Source -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-rss"></i> Source</h4>
-                    <label class="filter-option"><input type="checkbox" name="source" value="LinkedIn"
-                            onchange="applyFiltersAndRender()"> LinkedIn <span class="fc"
-                            data-fc="source:LinkedIn"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Indeed"
-                            onchange="applyFiltersAndRender()"> Indeed <span class="fc"
-                            data-fc="source:Indeed"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Naukri.com"
-                            onchange="applyFiltersAndRender()"> Naukri.com <span class="fc"
-                            data-fc="source:Naukri.com"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Internshala"
-                            onchange="applyFiltersAndRender()"> Internshala <span class="fc"
-                            data-fc="source:Internshala"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="TimesJobs"
-                            onchange="applyFiltersAndRender()"> TimesJobs <span class="fc"
-                            data-fc="source:TimesJobs"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Foundit"
-                            onchange="applyFiltersAndRender()"> Foundit <span class="fc"
-                            data-fc="source:Foundit"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Remotive"
-                            onchange="applyFiltersAndRender()"> Remotive <span class="fc"
-                            data-fc="source:Remotive"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="RemoteOK"
-                            onchange="applyFiltersAndRender()"> RemoteOK <span class="fc"
-                            data-fc="source:RemoteOK"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Arbeitnow"
-                            onchange="applyFiltersAndRender()"> Arbeitnow <span class="fc"
-                            data-fc="source:Arbeitnow"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="The Muse"
-                            onchange="applyFiltersAndRender()"> The Muse <span class="fc"
-                            data-fc="source:The Muse"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Himalayas"
-                            onchange="applyFiltersAndRender()"> Himalayas <span class="fc"
-                            data-fc="source:Himalayas"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="We Work Remotely"
-                            onchange="applyFiltersAndRender()"> We Work Remotely <span class="fc"
-                            data-fc="source:We Work Remotely"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Freshersworld"
-                            onchange="applyFiltersAndRender()"> Freshersworld <span class="fc"
-                            data-fc="source:Freshersworld"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="FindWork"
-                            onchange="applyFiltersAndRender()"> FindWork <span class="fc"
-                            data-fc="source:FindWork"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="source" value="Jobicy"
-                            onchange="applyFiltersAndRender()"> Jobicy <span class="fc"
-                            data-fc="source:Jobicy"></span></label>
+                <select class="form-control" id="sortBy" onchange="applyFiltersAndRender()"
+                    style="width:auto;min-width:180px;">
+                    <option value="newest">Sort: Newest First</option>
+                    <option value="oldest">Sort: Oldest First</option>
+                    <option value="quality">Sort: AI Quality &#11088;</option>
+                    <option value="title">Sort: Title A-Z</option>
+                    <option value="company">Sort: Company A-Z</option>
+                </select>
+            </div>
+            <div class="jobs-grid {% if theme_settings and theme_settings.get('layout_style') == 'list' %}list-layout{% endif %}" id="jobsGrid">
+                <div class="loading-spinner">
+                    <div class="spinner"></div>
                 </div>
-
-                <!-- Job Type -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-briefcase"></i> Job Type</h4>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Full-time"
-                            onchange="applyFiltersAndRender()"> Full-time <span class="fc"
-                            data-fc="type:Full-time"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Remote"
-                            onchange="applyFiltersAndRender()"> Remote <span class="fc"
-                            data-fc="type:Remote"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Part-time"
-                            onchange="applyFiltersAndRender()"> Part-time <span class="fc"
-                            data-fc="type:Part-time"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Internship"
-                            onchange="applyFiltersAndRender()"> Internship <span class="fc"
-                            data-fc="type:Internship"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Contract"
-                            onchange="applyFiltersAndRender()"> Contract <span class="fc"
-                            data-fc="type:Contract"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Hybrid"
-                            onchange="applyFiltersAndRender()"> Hybrid <span class="fc"
-                            data-fc="type:Hybrid"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="type" value="Fresher"
-                            onchange="applyFiltersAndRender()"> Fresher <span class="fc"
-                            data-fc="type:Fresher"></span></label>
-                </div>
-
-                <!-- Experience -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-layer-group"></i> Experience Level</h4>
-                    <label class="filter-option"><input type="checkbox" name="exp" value="Entry Level"
-                            onchange="applyFiltersAndRender()"> Entry Level <span class="fc"
-                            data-fc="exp:Entry Level"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="exp" value="Junior"
-                            onchange="applyFiltersAndRender()"> Junior <span class="fc"
-                            data-fc="exp:Junior"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="exp" value="Mid Level"
-                            onchange="applyFiltersAndRender()"> Mid Level <span class="fc"
-                            data-fc="exp:Mid Level"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="exp" value="Senior"
-                            onchange="applyFiltersAndRender()"> Senior <span class="fc"
-                            data-fc="exp:Senior"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="exp" value="Lead"
-                            onchange="applyFiltersAndRender()"> Lead <span class="fc" data-fc="exp:Lead"></span></label>
-                </div>
-
-                <!-- Category -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-th-large"></i> Category</h4>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Technology"
-                            onchange="applyFiltersAndRender()"> Technology <span class="fc"
-                            data-fc="cat:Technology"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Data Science"
-                            onchange="applyFiltersAndRender()"> Data Science <span class="fc"
-                            data-fc="cat:Data Science"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Design"
-                            onchange="applyFiltersAndRender()"> Design <span class="fc"
-                            data-fc="cat:Design"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Marketing"
-                            onchange="applyFiltersAndRender()"> Marketing <span class="fc"
-                            data-fc="cat:Marketing"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Sales"
-                            onchange="applyFiltersAndRender()"> Sales <span class="fc"
-                            data-fc="cat:Sales"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Customer Service"
-                            onchange="applyFiltersAndRender()"> Customer Service <span class="fc"
-                            data-fc="cat:Customer Service"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Management"
-                            onchange="applyFiltersAndRender()"> Management <span class="fc"
-                            data-fc="cat:Management"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Human Resources"
-                            onchange="applyFiltersAndRender()"> Human Resources <span class="fc"
-                            data-fc="cat:Human Resources"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Finance"
-                            onchange="applyFiltersAndRender()"> Finance <span class="fc"
-                            data-fc="cat:Finance"></span></label>
-                    <label class="filter-option"><input type="checkbox" name="cat" value="Internship"
-                            onchange="applyFiltersAndRender()"> Internship <span class="fc"
-                            data-fc="cat:Internship"></span></label>
-                </div>
-
-                <!-- Salary -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-money-bill-wave"></i> Salary</h4>
-                    <label class="filter-option"><input type="radio" name="salary" value=""
-                            onchange="applyFiltersAndRender()" checked> Any salary</label>
-                    <label class="filter-option"><input type="radio" name="salary" value="paid"
-                            onchange="applyFiltersAndRender()"> Has salary info</label>
-                    <label class="filter-option"><input type="radio" name="salary" value="50000"
-                            onchange="applyFiltersAndRender()"> $50k+ / &#8377;5L+</label>
-                    <label class="filter-option"><input type="radio" name="salary" value="100000"
-                            onchange="applyFiltersAndRender()"> $100k+ / &#8377;10L+</label>
-                </div>
-
-                <!-- Posted -->
-                <div class="filter-group">
-                    <h4><i class="fas fa-calendar-alt"></i> Posted</h4>
-                    <label class="filter-option"><input type="radio" name="posted" value=""
-                            onchange="applyFiltersAndRender()" checked> Any time</label>
-                    <label class="filter-option"><input type="radio" name="posted" value="1"
-                            onchange="applyFiltersAndRender()"> Last 24 hours</label>
-                    <label class="filter-option"><input type="radio" name="posted" value="3"
-                            onchange="applyFiltersAndRender()"> Last 3 days</label>
-                    <label class="filter-option"><input type="radio" name="posted" value="7"
-                            onchange="applyFiltersAndRender()"> Last week</label>
-                    <label class="filter-option"><input type="radio" name="posted" value="30"
-                            onchange="applyFiltersAndRender()"> Last month</label>
-                </div>
-
-                <button class="btn btn-ghost" onclick="clearFilters()" style="width:100%;"><i class="fas fa-times"></i>
-                    Clear All Filters</button>
-            </aside>
-
-            <!-- Job Results -->
-            <div>
-                <div class="d-flex align-center justify-between flex-wrap gap-2 mb-3" style="gap:12px;">
-                    <div>
-                        <p id="resultsCount" class="text-muted" style="margin-bottom:2px;">Loading jobs...</p>
-                        <p id="sourceInfo" class="text-muted" style="font-size:.78rem;opacity:0.7;margin:0;"></p>
-                    </div>
-                    <select class="form-control" id="sortBy" onchange="applyFiltersAndRender()"
-                        style="width:auto;min-width:180px;">
-                        <option value="newest">Sort: Newest First</option>
-                        <option value="oldest">Sort: Oldest First</option>
-                        <option value="quality">Sort: AI Quality &#11088;</option>
-                        <option value="title">Sort: Title A-Z</option>
-                        <option value="company">Sort: Company A-Z</option>
-                    </select>
-                </div>
-                <div class="jobs-grid {% if theme_settings and theme_settings.get('layout_style') == 'list' %}list-layout{% endif %}" id="jobsGrid">
-                    <div class="loading-spinner">
-                        <div class="spinner"></div>
-                    </div>
-                </div>
-                <div id="loadMoreWrap" class="text-center mt-4" style="display:none;">
-                    <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()"><i class="fas fa-plus"></i>
-                        Load More Jobs</button>
-                </div>
+            </div>
+            <div id="loadMoreWrap" class="text-center mt-4" style="display:none;">
+                <button class="btn btn-outline" id="loadMoreBtn" onclick="loadMore()"><i class="fas fa-plus"></i>
+                    Load More Jobs</button>
             </div>
         </div>
     </div>
 </section>
 
+<!-- All Filters Right Drawer -->
+<div id="allFiltersOverlay" onclick="closeAllFilters()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:1200;backdrop-filter:blur(2px);"></div>
+<div id="allFiltersDrawer" style="display:none;position:fixed;top:0;right:0;bottom:0;width:min(420px,100vw);background:var(--bg-card,#fff);z-index:1201;box-shadow:-8px 0 40px rgba(0,0,0,.18);overflow-y:auto;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 24px 16px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--bg-card,#fff);z-index:1;">
+        <h3 style="margin:0;font-size:1.05rem;"><i class="fas fa-sliders-h" style="color:#667eea;"></i> All Filters</h3>
+        <button onclick="closeAllFilters()" style="background:none;border:none;font-size:1.3rem;cursor:pointer;color:var(--text-secondary);line-height:1;"><i class="fas fa-times"></i></button>
+    </div>
+    <div style="padding:20px 24px;">
+
+        <!-- Job Type -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-briefcase"></i> Job Type</h4>
+            <label class="li-opt"><input type="checkbox" name="type" value="Full-time" onchange="applyFiltersAndRender()"> Full-time <span class="fc" data-fc="type:Full-time"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Remote" onchange="applyFiltersAndRender()"> Remote <span class="fc" data-fc="type:Remote"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Hybrid" onchange="applyFiltersAndRender()"> Hybrid <span class="fc" data-fc="type:Hybrid"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Part-time" onchange="applyFiltersAndRender()"> Part-time <span class="fc" data-fc="type:Part-time"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Contract" onchange="applyFiltersAndRender()"> Contract <span class="fc" data-fc="type:Contract"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Internship" onchange="applyFiltersAndRender()"> Internship <span class="fc" data-fc="type:Internship"></span></label>
+            <label class="li-opt"><input type="checkbox" name="type" value="Fresher" onchange="applyFiltersAndRender()"> Fresher <span class="fc" data-fc="type:Fresher"></span></label>
+        </div>
+
+        <!-- Experience Level -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-layer-group"></i> Experience Level</h4>
+            <label class="li-opt"><input type="checkbox" name="exp" value="Entry Level" onchange="applyFiltersAndRender()"> Entry Level <span class="fc" data-fc="exp:Entry Level"></span></label>
+            <label class="li-opt"><input type="checkbox" name="exp" value="Junior" onchange="applyFiltersAndRender()"> Junior <span class="fc" data-fc="exp:Junior"></span></label>
+            <label class="li-opt"><input type="checkbox" name="exp" value="Mid Level" onchange="applyFiltersAndRender()"> Mid Level <span class="fc" data-fc="exp:Mid Level"></span></label>
+            <label class="li-opt"><input type="checkbox" name="exp" value="Senior" onchange="applyFiltersAndRender()"> Senior <span class="fc" data-fc="exp:Senior"></span></label>
+            <label class="li-opt"><input type="checkbox" name="exp" value="Lead" onchange="applyFiltersAndRender()"> Lead <span class="fc" data-fc="exp:Lead"></span></label>
+        </div>
+
+        <!-- Category -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-th-large"></i> Category</h4>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Technology" onchange="applyFiltersAndRender()"> Technology <span class="fc" data-fc="cat:Technology"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Data Science" onchange="applyFiltersAndRender()"> Data Science <span class="fc" data-fc="cat:Data Science"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Design" onchange="applyFiltersAndRender()"> Design <span class="fc" data-fc="cat:Design"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Marketing" onchange="applyFiltersAndRender()"> Marketing <span class="fc" data-fc="cat:Marketing"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Finance" onchange="applyFiltersAndRender()"> Finance <span class="fc" data-fc="cat:Finance"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Sales" onchange="applyFiltersAndRender()"> Sales <span class="fc" data-fc="cat:Sales"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Management" onchange="applyFiltersAndRender()"> Management <span class="fc" data-fc="cat:Management"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Human Resources" onchange="applyFiltersAndRender()"> Human Resources <span class="fc" data-fc="cat:Human Resources"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Customer Service" onchange="applyFiltersAndRender()"> Customer Service <span class="fc" data-fc="cat:Customer Service"></span></label>
+            <label class="li-opt"><input type="checkbox" name="cat" value="Internship" onchange="applyFiltersAndRender()"> Internship <span class="fc" data-fc="cat:Internship"></span></label>
+        </div>
+
+        <!-- Source -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-rss"></i> Job Portal / Source</h4>
+            <label class="li-opt"><input type="checkbox" name="source" value="LinkedIn" onchange="applyFiltersAndRender()"> LinkedIn <span class="fc" data-fc="source:LinkedIn"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Indeed" onchange="applyFiltersAndRender()"> Indeed <span class="fc" data-fc="source:Indeed"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Naukri.com" onchange="applyFiltersAndRender()"> Naukri.com <span class="fc" data-fc="source:Naukri.com"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Internshala" onchange="applyFiltersAndRender()"> Internshala <span class="fc" data-fc="source:Internshala"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="TimesJobs" onchange="applyFiltersAndRender()"> TimesJobs <span class="fc" data-fc="source:TimesJobs"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Foundit" onchange="applyFiltersAndRender()"> Foundit <span class="fc" data-fc="source:Foundit"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Remotive" onchange="applyFiltersAndRender()"> Remotive <span class="fc" data-fc="source:Remotive"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="RemoteOK" onchange="applyFiltersAndRender()"> RemoteOK <span class="fc" data-fc="source:RemoteOK"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Himalayas" onchange="applyFiltersAndRender()"> Himalayas <span class="fc" data-fc="source:Himalayas"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Freshersworld" onchange="applyFiltersAndRender()"> Freshersworld <span class="fc" data-fc="source:Freshersworld"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="We Work Remotely" onchange="applyFiltersAndRender()"> We Work Remotely <span class="fc" data-fc="source:We Work Remotely"></span></label>
+            <label class="li-opt"><input type="checkbox" name="source" value="Arbeitnow" onchange="applyFiltersAndRender()"> Arbeitnow <span class="fc" data-fc="source:Arbeitnow"></span></label>
+        </div>
+
+        <!-- Date Posted -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-calendar-alt"></i> Date Posted</h4>
+            <label class="li-opt"><input type="radio" name="posted" value="" checked onchange="applyFiltersAndRender()"> Any time</label>
+            <label class="li-opt"><input type="radio" name="posted" value="1" onchange="applyFiltersAndRender()"> Last 24 hours</label>
+            <label class="li-opt"><input type="radio" name="posted" value="3" onchange="applyFiltersAndRender()"> Last 3 days</label>
+            <label class="li-opt"><input type="radio" name="posted" value="7" onchange="applyFiltersAndRender()"> Last week</label>
+            <label class="li-opt"><input type="radio" name="posted" value="30" onchange="applyFiltersAndRender()"> Last month</label>
+        </div>
+
+        <!-- Salary -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-money-bill-wave"></i> Salary</h4>
+            <label class="li-opt"><input type="radio" name="salary" value="" checked onchange="applyFiltersAndRender()"> Any salary</label>
+            <label class="li-opt"><input type="radio" name="salary" value="paid" onchange="applyFiltersAndRender()"> Has salary info</label>
+            <label class="li-opt"><input type="radio" name="salary" value="50000" onchange="applyFiltersAndRender()"> ₹5L+ / $50k+</label>
+            <label class="li-opt"><input type="radio" name="salary" value="100000" onchange="applyFiltersAndRender()"> ₹10L+ / $100k+</label>
+        </div>
+
+        <!-- Location -->
+        <div class="li-drawer-group">
+            <h4 class="li-drawer-title"><i class="fas fa-globe"></i> Location</h4>
+            <select class="form-control" id="filterCountry" onchange="onCountryChange(); searchJobs();" style="margin-bottom:8px;">
+                <option value="">All Countries</option>
+            </select>
+            <select class="form-control" id="filterCity" onchange="searchJobs();">
+                <option value="">All Cities</option>
+            </select>
+        </div>
+    </div>
+    <div style="position:sticky;bottom:0;background:var(--bg-card,#fff);border-top:1px solid var(--border);padding:16px 24px;display:flex;gap:10px;">
+        <button onclick="clearFilters()" class="btn btn-ghost" style="flex:1;"><i class="fas fa-times"></i> Clear All</button>
+        <button onclick="closeAllFilters()" class="btn btn-primary" style="flex:2;"><i class="fas fa-check"></i> Done</button>
+    </div>
+</div>
+
 <style>
-    .fc {
-        color: var(--text-tertiary);
-        font-size: .75rem;
-        margin-left: auto
+    /* ───── LinkedIn-style filter pills ───── */
+    .li-pill-wrap { position: relative; display: inline-block; }
+    .li-pill {
+        display: inline-flex; align-items: center; gap: 6px;
+        border: 1.5px solid var(--border, #d1d5db);
+        border-radius: 24px; padding: 7px 14px;
+        background: var(--bg-card, #fff); color: var(--text-primary);
+        font-size: .82rem; font-weight: 500; cursor: pointer;
+        transition: all .18s; white-space: nowrap;
     }
-
-    #jobsGrid.is-loading {
-        opacity: .5;
-        pointer-events: none;
-        position: relative;
-        min-height: 200px
+    .li-pill:hover { border-color: #667eea; background: rgba(102,126,234,.06); }
+    .li-pill.active {
+        background: #667eea; color: #fff; border-color: #667eea;
     }
-
+    .li-pill.active .li-pill-arrow { color: #fff; }
+    .li-pill-arrow { font-size: .65rem; transition: transform .2s; }
+    .li-pill.open .li-pill-arrow { transform: rotate(180deg); }
+    .li-pill-all {
+        background: var(--bg-card,#fff); border: 1.5px solid var(--border,#d1d5db);
+        gap: 6px; font-weight: 600;
+    }
+    .li-pill-all:hover { border-color: #667eea; background: rgba(102,126,234,.06); }
+    .li-dropdown {
+        display: none; position: absolute; top: calc(100% + 6px); left: 0;
+        background: var(--bg-card, #fff); border: 1px solid var(--border, #e5e7eb);
+        border-radius: 12px; padding: 10px 0; min-width: 200px; z-index: 500;
+        box-shadow: 0 8px 32px rgba(0,0,0,.14);
+        animation: liDropIn .15s ease;
+    }
+    .li-dropdown.open { display: block; }
+    @keyframes liDropIn { from { opacity:0; transform:translateY(-6px); } to { opacity:1; transform:none; } }
+    .li-opt {
+        display: flex; align-items: center; gap: 10px;
+        padding: 9px 18px; font-size: .85rem; cursor: pointer;
+        transition: background .12s;
+    }
+    .li-opt:hover { background: rgba(102,126,234,.07); }
+    .li-opt input { accent-color: #667eea; width: 16px; height: 16px; flex-shrink:0; }
+    /* Drawer groups */
+    .li-drawer-group { margin-bottom: 24px; }
+    .li-drawer-title {
+        font-size: .82rem; font-weight: 700; text-transform: uppercase;
+        letter-spacing: .05em; color: var(--text-secondary);
+        margin: 0 0 10px; display: flex; align-items: center; gap: 7px;
+    }
+    .li-drawer-title i { color: #667eea; }
+    /* drawer slide-in animation */
+    #allFiltersDrawer.open { transform: translateX(0) !important; }
+    .fc { color: var(--text-tertiary); font-size: .75rem; margin-left: auto; }
+    #jobsGrid.is-loading { opacity: .5; pointer-events: none; position: relative; min-height: 200px; }
     #jobsGrid.is-loading::after {
-        content: '';
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        width: 36px;
-        height: 36px;
-        margin: -18px 0 0 -18px;
-        border: 3px solid var(--border, #ddd);
-        border-top-color: #667eea;
-        border-radius: 50%;
-        animation: spin .6s linear infinite
+        content: ''; position: absolute; top: 50%; left: 50%;
+        width: 36px; height: 36px; margin: -18px 0 0 -18px;
+        border: 3px solid var(--border, #ddd); border-top-color: #667eea;
+        border-radius: 50%; animation: spin .6s linear infinite;
     }
-
-    @keyframes spin {
-        to {
-            transform: rotate(360deg)
-        }
-    }
-
-    @media(max-width:768px) {
-        #filterToggleBtn {
-            display: flex !important;
-            align-items: center;
-            justify-content: center
-        }
-
-        #filterCloseBtn {
-            display: inline-block !important
-        }
-
-        .filter-sidebar {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            z-index: 999;
-            overflow-y: auto;
-            border-radius: 0;
-            padding: 20px;
-            background: var(--bg-card, #fff)
-        }
-
-        .filter-sidebar.open {
-            display: block
-        }
-    }
-
-    .filter-option input:checked~.fc {
-        font-weight: 600;
-        color: var(--accent, #667eea)
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @media(max-width:600px) {
+        .li-pill { padding: 6px 10px; font-size: .76rem; }
+        #liFilterBar { gap: 6px; }
     }
 </style>
 
@@ -495,12 +492,99 @@
     })();
 
     /* ================================================================
-       MOBILE FILTER TOGGLE
+       PILL FILTER LOGIC
        ================================================================ */
-    function toggleFilters() {
-        var sidebar = document.getElementById('filterSidebar');
-        sidebar.classList.toggle('open');
-        document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+    var _openPill = null;
+
+    function togglePill(name) {
+        var drop = document.getElementById('liDrop_' + name);
+        var btn  = document.getElementById('pill_' + name);
+        if (_openPill && _openPill !== name) {
+            document.getElementById('liDrop_' + _openPill).classList.remove('open');
+            document.getElementById('pill_'  + _openPill).classList.remove('open');
+        }
+        var isOpen = drop.classList.toggle('open');
+        btn.classList.toggle('open', isOpen);
+        _openPill = isOpen ? name : null;
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', function(e) {
+        if (_openPill && !e.target.closest('#pillWrap_' + _openPill)) {
+            document.getElementById('liDrop_' + _openPill).classList.remove('open');
+            document.getElementById('pill_'  + _openPill).classList.remove('open');
+            _openPill = null;
+        }
+    });
+
+    // After checkbox/radio change inside a pill, update pill label & active state
+    function applyPill(name) {
+        applyFiltersAndRender();
+        updatePillLabel(name);
+    }
+
+    function updatePillLabel(name) {
+        var LABELS = { type:'Job Type', exp:'Experience Level', posted:'Date Posted', salary:'Salary', cat:'Category' };
+        var pill = document.getElementById('pill_' + name);
+        var label = document.getElementById('pillLabel_' + name);
+        if (!pill || !label) return;
+        var inputs = document.querySelectorAll('#liDrop_' + name + ' input');
+        var checked = [];
+        inputs.forEach(function(inp) {
+            // For radio: skip the "any" value
+            if (inp.type === 'radio' && inp.checked && inp.value !== '') checked.push(inp.parentElement.textContent.trim());
+            if (inp.type === 'checkbox' && inp.checked) checked.push(inp.parentElement.textContent.trim());
+        });
+        if (checked.length) {
+            label.textContent = checked.length === 1 ? checked[0] : (LABELS[name] + ' (' + checked.length + ')'  );
+            pill.classList.add('active');
+        } else {
+            label.textContent = LABELS[name];
+            pill.classList.remove('active');
+        }
+    }
+
+    function updateAllFiltersBadge() {
+        var total = getChecked('type').length + getChecked('exp').length + getChecked('cat').length +
+            getChecked('source').length +
+            (getRadioVal('salary') ? 1 : 0) + (getRadioVal('posted') ? 1 : 0);
+        var badge = document.getElementById('allFiltersBadge');
+        var clearBtn = document.getElementById('liClearBtn');
+        badge.textContent = total;
+        badge.style.display = total > 0 ? 'inline' : 'none';
+        if (clearBtn) clearBtn.style.display = total > 0 ? 'inline-block' : 'none';
+    }
+
+    /* All Filters drawer */
+    function openAllFilters() {
+        var overlay = document.getElementById('allFiltersOverlay');
+        var drawer  = document.getElementById('allFiltersDrawer');
+        overlay.style.display = 'block';
+        drawer.style.display  = 'block';
+        requestAnimationFrame(function() { drawer.classList.add('open'); });
+        document.body.style.overflow = 'hidden';
+    }
+    function closeAllFilters() {
+        var overlay = document.getElementById('allFiltersOverlay');
+        var drawer  = document.getElementById('allFiltersDrawer');
+        drawer.classList.remove('open');
+        setTimeout(function() {
+            overlay.style.display = 'none';
+            drawer.style.display  = 'none';
+        }, 300);
+        document.body.style.overflow = '';
+    }
+
+    /* ================================================================
+       MOBILE FILTER TOGGLE (kept for compatibility)
+       ================================================================ */
+    function toggleFilters() {}
+
+    /* helpers */
+    function getChecked(name) {
+        var vals = [];
+        document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function (cb) { vals.push(cb.value.toLowerCase()); });
+        return vals;
     }
 
     /* ================================================================
@@ -702,20 +786,9 @@
 
         computeFilterCounts();
         updateActiveFilters();
+        updateAllFiltersBadge();
         renderResults();
-
-        // Mobile active-filter badge
-        var activeCount = typeFilters.length + expFilters.length + catFilters.length + srcFilters.length + (salaryVal ? 1 : 0) + (postedDays ? 1 : 0);
-        var badge = document.getElementById('filterCountBadge');
-        badge.textContent = activeCount;
-        badge.style.display = activeCount > 0 ? 'inline' : 'none';
-    }
-
-    /* helpers */
-    function getChecked(name) {
-        var vals = [];
-        document.querySelectorAll('input[name="' + name + '"]:checked').forEach(function (cb) { vals.push(cb.value.toLowerCase()); });
-        return vals;
+        ['type','exp','posted','salary','cat'].forEach(updatePillLabel);
     }
     function getRadioVal(name) {
         var el = document.querySelector('input[name="' + name + '"]:checked');
@@ -954,14 +1027,16 @@
     }
 
     function clearFilters() {
-        document.querySelectorAll('.filter-sidebar input[type="checkbox"]').forEach(function (c) { c.checked = false; });
-        document.querySelectorAll('.filter-sidebar input[type="radio"][value=""]').forEach(function (r) { r.checked = true; });
+        document.querySelectorAll('input[type="checkbox"][name="type"], input[type="checkbox"][name="exp"], input[type="checkbox"][name="cat"], input[type="checkbox"][name="source"]').forEach(function (c) { c.checked = false; });
+        document.querySelectorAll('input[type="radio"][name="salary"][value=""], input[type="radio"][name="posted"][value=""]').forEach(function (r) { r.checked = true; });
         document.getElementById('searchKeyword').value = '';
         document.getElementById('searchLocation').value = '';
         document.getElementById('filterCountry').value = '';
         document.getElementById('filterCity').value = '';
         document.getElementById('sortBy').value = 'newest';
         document.getElementById('aiInsightsPanel').style.display = 'none';
+        ['type','exp','posted','salary','cat'].forEach(updatePillLabel);
+        updateAllFiltersBadge();
         onCountryChange();
         lastFetchParams = '';
         searchJobs();
