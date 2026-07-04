@@ -346,8 +346,9 @@
                         <div class="dash-profile-actions">
                             <button type="button" class="btn btn-primary"><i class="fas fa-save"></i> Save
                                 Profile</button>
-                            <button type="button" class="btn btn-ghost"><i class="fas fa-upload"></i> Upload
-                                Resume</button>
+                            <button type="button" class="btn btn-ghost" onclick="triggerResumeUpload()">
+                                <i class="fas fa-upload"></i> Upload Resume
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -531,6 +532,29 @@
 </section>
 
 <script>
+    // ── Trigger resume upload from Profile section button ──
+    function triggerResumeUpload() {
+        // Scroll to the AI Resume Match section smoothly
+        const resumeSection = document.getElementById('dashResumeUpload');
+        if (resumeSection) {
+            resumeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            // Brief pulse to draw attention
+            resumeSection.style.transition = 'all .3s';
+            resumeSection.style.borderColor = '#667eea';
+            resumeSection.style.background = 'rgba(102,126,234,.12)';
+            resumeSection.style.boxShadow = '0 0 0 4px rgba(102,126,234,.18)';
+            setTimeout(() => {
+                resumeSection.style.borderColor = '';
+                resumeSection.style.background = '';
+                resumeSection.style.boxShadow = '';
+            }, 800);
+        }
+        // Trigger the hidden file input
+        setTimeout(() => {
+            document.getElementById('dashResumeInput').click();
+        }, 300);
+    }
+
     function uploadProfilePic(input) {
         if (!input.files || !input.files[0]) return;
         const file = input.files[0];
@@ -940,12 +964,28 @@
                 info.style.display = 'flex';
                 document.getElementById('dashResumeName').textContent = file.name;
                 document.getElementById('dashResumeDate').textContent = 'Just uploaded & parsed';
-                statusEl.innerHTML = '<span style="color:#059669;"><i class="fas fa-check-circle"></i> Resume parsed successfully!</span>';
+                statusEl.innerHTML = '<span style="color:#059669;"><i class="fas fa-check-circle"></i> Resume parsed successfully! Filtering jobs for you...</span>';
                 // Render extracted profile
                 dashRenderProfile(data.profile);
                 // Refresh recommended jobs with AI matches
                 document.getElementById('recommendedTitle').textContent = 'Resume-Matched Jobs';
-                loadRecommended();
+                loadRecommended().then(() => {
+                    // After jobs load, scroll to Recommended section and highlight it
+                    setTimeout(() => {
+                        const recSection = document.getElementById('recommendedJobsGrid');
+                        if (recSection) {
+                            recSection.closest('.dashboard-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
+                            // Pulse highlight on the section
+                            const sec = recSection.closest('.dashboard-section');
+                            if (sec) {
+                                sec.style.transition = 'box-shadow .4s, border .4s';
+                                sec.style.boxShadow = '0 0 0 3px rgba(102,126,234,.45)';
+                                sec.style.borderRadius = '14px';
+                                setTimeout(() => { sec.style.boxShadow = ''; }, 1800);
+                            }
+                        }
+                    }, 600);
+                });
             }, 500);
         })
         .catch(() => {
