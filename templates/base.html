@@ -142,6 +142,128 @@
         }
     </style>
 
+    <!-- ═══ GPU / Mobile Optimizations ═══ -->
+    <style>
+        /* ── 1. Promote scrolling containers to GPU compositor layer ── */
+        html {
+            -webkit-overflow-scrolling: touch;   /* iOS momentum scrolling */
+            scroll-behavior: smooth;
+        }
+        body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeSpeed;
+        }
+
+        /* ── 2. GPU-accelerate every interactive element ── */
+        .job-card,
+        .category-card,
+        .btn,
+        .btn-primary,
+        .btn-outline,
+        .btn-apply,
+        .nav-link,
+        .navbar,
+        .dropdown-menu,
+        .chatbot-window,
+        .chatbot-toggle,
+        .li-pill,
+        .li-dropdown,
+        #allFiltersDrawer,
+        .filter-sidebar,
+        .dashboard-section,
+        .skill-tag,
+        .source-badge,
+        .fade-in {
+            will-change: transform;
+            transform: translateZ(0);
+            -webkit-transform: translateZ(0);
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        /* ── 3. Composited transitions (only transform & opacity — avoids layout thrashing) ── */
+        .job-card {
+            transition: transform 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                        box-shadow 0.18s cubic-bezier(0.4, 0, 0.2, 1),
+                        opacity 0.18s ease;
+        }
+        .job-card:hover {
+            transform: translateY(-3px) translateZ(0);
+        }
+        .btn, .btn-primary, .btn-outline, .btn-apply, .li-pill {
+            transition: transform 0.12s ease, opacity 0.12s ease, background 0.15s ease, box-shadow 0.15s ease;
+        }
+        .btn:active, .btn-apply:active, .li-pill:active {
+            transform: scale(0.97) translateZ(0);
+        }
+        .navbar {
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        #allFiltersDrawer {
+            transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── 4. Mobile touch targets — minimum 44×44px (Apple HIG / WCAG) ── */
+        @media (max-width: 768px) {
+            .btn, .btn-sm, .li-pill, .filter-option label,
+            .li-opt, .nav-link, .chatbot-send, .chatbot-toggle {
+                min-height: 44px;
+                min-width: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            /* Prevent 300ms tap delay on all interactive elements */
+            a, button, input, select, label {
+                touch-action: manipulation;
+            }
+            /* Pill bar — horizontal scroll on small screens */
+            #liFilterBar {
+                overflow-x: auto;
+                flex-wrap: nowrap;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+                padding-bottom: 4px;
+                -webkit-overflow-scrolling: touch;
+            }
+            #liFilterBar::-webkit-scrollbar { display: none; }
+            /* Jobs grid single column on mobile */
+            .jobs-grid { grid-template-columns: 1fr !important; }
+            /* Bigger job card padding for thumb-friendly tap */
+            .job-card { padding: 16px !important; }
+            .job-card-actions { gap: 10px; }
+            .btn-apply { padding: 10px 20px !important; font-size: .88rem !important; }
+            /* All Filters drawer full-width on small phones */
+            #allFiltersDrawer { width: 100vw !important; }
+            /* Search bar stacked on mobile */
+            .hero-search { flex-direction: column !important; }
+            .hero-search .search-field { width: 100% !important; }
+        }
+
+        /* ── 5. Reduce motion for users who prefer it ── */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                will-change: auto !important;
+            }
+        }
+
+        /* ── 6. Optimise image rendering on mobile ── */
+        img {
+            content-visibility: auto;
+            image-rendering: -webkit-optimize-contrast;
+        }
+
+        /* ── 7. Contain paint for off-screen sections ── */
+        .dashboard-section,
+        .jobs-grid,
+        section {
+            contain: layout style;
+        }
+    </style>
+
     <!-- Theme Settings Injection -->
     {% if theme_settings %}
         {% if theme_settings.get('font_family') and theme_settings.font_family != 'Inter' %}
