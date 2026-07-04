@@ -120,7 +120,8 @@ TN_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "tn_jobs.json")
 INDIA_SEED_FILE = os.path.join(os.path.dirname(__file__), "data", "india_jobs.json")
 
 # Upload folder for resumes
-UPLOAD_DIR = os.path.join(BASE_DIR, "static", "uploads")
+# Vercel filesystem is read-only except for /tmp — use it there
+UPLOAD_DIR = "/tmp/uploads" if IS_VERCEL else os.path.join(BASE_DIR, "static", "uploads")
 
 # Create directories safely
 for d in [DATA_DIR, UPLOAD_DIR]:
