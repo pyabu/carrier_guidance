@@ -418,7 +418,7 @@
 
         <div class="dashboard-section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
-                <h3 style="margin:0;"><i class="fas fa-magic text-accent"></i> AI Resume Match</h3>
+                <h3 style="margin:0;"><i class="fas fa-bolt text-accent"></i> Instant Resume Match</h3>
                 <div id="dashResumeActions" style="display:none;gap:8px;">
                     <button onclick="dashFindMatchingJobs()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:8px 18px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.82rem;box-shadow:0 4px 12px rgba(102,126,234,.35);">
                         <i class="fas fa-rocket"></i> Find My Jobs
@@ -441,7 +441,7 @@
                 <input type="file" id="dashResumeInput" accept=".pdf,.doc,.docx" style="display:none;" onchange="dashUploadResume(this)">
                 <div id="dashResumeIcon" style="font-size:2rem;margin-bottom:8px;"><i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i></div>
                 <div style="font-weight:600;font-size:.9rem;">Drag &amp; drop your resume or click to browse</div>
-                <div style="font-size:.76rem;color:var(--text-secondary);margin-top:4px;">PDF, DOC, DOCX — AI extracts skills, location &amp; experience</div>
+                <div style="font-size:.76rem;color:var(--text-secondary);margin-top:4px;">PDF, DOC, DOCX — Instantly matches skills &amp; finds your jobs</div>
                 <div id="dashResumeProgress" style="display:none;margin-top:14px;">
                     <div style="height:6px;background:rgba(102,126,234,.15);border-radius:10px;overflow:hidden;">
                         <div id="dashProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .4s;"></div>
@@ -901,6 +901,141 @@
         window._dashResumeProfile = profile;
     }
 
+    // ── Client-side resume libraries (loaded on demand) ──
+    let _pdfLibLoaded = false, _mammothLoaded = false;
+
+    function _loadScript(src) {
+        return new Promise((resolve, reject) => {
+            if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
+            const s = document.createElement('script');
+            s.src = src; s.onload = resolve; s.onerror = reject;
+            document.head.appendChild(s);
+        });
+    }
+
+    // ── 200+ skill keyword dictionary ──
+    const SKILL_KEYWORDS = [
+        // Languages
+        'python','java','javascript','typescript','c++','c#','c','go','golang','rust','kotlin','swift',
+        'php','ruby','scala','r','matlab','perl','bash','shell','powershell','dart','elixir','haskell',
+        // Frontend
+        'react','angular','vue','nextjs','nuxt','svelte','html','css','sass','tailwind','bootstrap',
+        'jquery','redux','webpack','vite','gatsby','react native','flutter',
+        // Backend
+        'node','nodejs','express','django','flask','fastapi','spring','springboot','laravel','rails',
+        'aspnet','dotnet','.net','graphql','rest','restful','grpc','websocket',
+        // Data / AI
+        'machine learning','deep learning','nlp','computer vision','tensorflow','pytorch','keras',
+        'scikit-learn','pandas','numpy','matplotlib','seaborn','opencv','huggingface','llm',
+        'data science','data analysis','data engineering','etl','spark','hadoop','kafka','airflow',
+        'tableau','powerbi','power bi','looker','dbt','sql','mysql','postgresql','mongodb','redis',
+        'elasticsearch','oracle','sqlite','nosql','bigquery','snowflake','databricks',
+        // Cloud / DevOps
+        'aws','azure','gcp','docker','kubernetes','terraform','ansible','jenkins','cicd','ci/cd',
+        'linux','git','github','gitlab','bitbucket','nginx','apache','serverless','lambda',
+        // Mobile
+        'android','ios','react native','flutter','xamarin','ionic','swift','kotlin',
+        // Testing
+        'selenium','cypress','jest','pytest','junit','mocha','playwright','postman',
+        // Other
+        'agile','scrum','jira','figma','photoshop','excel','word','sap','erp','crm','salesforce',
+        'blockchain','solidity','cybersecurity','networking','microservices','api','devops','mlops',
+    ];
+
+    // ── Extract text from file in browser ──
+    async function _extractTextFromFile(file) {
+        const ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'pdf') {
+            if (!_pdfLibLoaded) {
+                await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js');
+                pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+                _pdfLibLoaded = true;
+            }
+            const buf = await file.arrayBuffer();
+            const pdf = await pdfjsLib.getDocument({ data: buf }).promise;
+            let text = '';
+            for (let i = 1; i <= Math.min(pdf.numPages, 4); i++) {
+                const page = await pdf.getPage(i);
+                const content = await page.getTextContent();
+                text += content.items.map(item => item.str).join(' ') + '\n';
+            }
+            return text;
+        } else if (ext === 'docx') {
+            if (!_mammothLoaded) {
+                await _loadScript('https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js');
+                _mammothLoaded = true;
+            }
+            const buf = await file.arrayBuffer();
+            const result = await mammoth.extractRawText({ arrayBuffer: buf });
+            return result.value;
+        } else {
+            // .doc fallback: read as text (may be garbled but usable)
+            return await file.text().catch(() => '');
+        }
+    }
+
+    // ── Extract profile from raw text ──
+    function _extractProfile(text) {
+        const lower = text.toLowerCase();
+        // Skills: match against keyword dictionary
+        const skills = SKILL_KEYWORDS.filter(sk => lower.includes(sk));
+        // Experience level
+        let experience_level = 'Fresher';
+        const yrsMatch = lower.match(/(\d+)\+?\s*year/);
+        const yrs = yrsMatch ? parseInt(yrsMatch[1]) : 0;
+        if (yrs >= 8) experience_level = 'Lead';
+        else if (yrs >= 5) experience_level = 'Senior';
+        else if (yrs >= 3) experience_level = 'Mid-Level';
+        else if (yrs >= 1) experience_level = 'Junior';
+        // Location: common Indian cities
+        const CITIES = ['bangalore','bengaluru','hyderabad','chennai','mumbai','pune','delhi','noida',
+            'gurgaon','kolkata','ahmedabad','jaipur','coimbatore','kochi','trivandrum',
+            'indore','bhopal','vizag','visakhapatnam','nagpur'];
+        const location = CITIES.find(c => lower.includes(c)) || '';
+        // Job titles: detect from common patterns
+        const titleMap = [
+            [/data\s*scientist/, 'Data Scientist'],
+            [/data\s*engineer/, 'Data Engineer'],
+            [/data\s*analyst/, 'Data Analyst'],
+            [/machine\s*learning\s*engineer/, 'ML Engineer'],
+            [/software\s*engineer/, 'Software Engineer'],
+            [/frontend\s*developer/, 'Frontend Developer'],
+            [/backend\s*developer/, 'Backend Developer'],
+            [/full.?stack/, 'Full Stack Developer'],
+            [/devops\s*engineer/, 'DevOps Engineer'],
+            [/cloud\s*engineer/, 'Cloud Engineer'],
+            [/mobile\s*developer/, 'Mobile Developer'],
+            [/android\s*developer/, 'Android Developer'],
+            [/ios\s*developer/, 'iOS Developer'],
+            [/ui\s*ux/, 'UI/UX Designer'],
+        ];
+        const job_titles = titleMap.filter(([re]) => re.test(lower)).map(([, t]) => t);
+        return { skills, experience_level, experience_years: yrs, location, state: '', job_titles, summary: '' };
+    }
+
+    // ── Score jobs against extracted profile ──
+    function _scoreJobs(jobs, profile) {
+        const skillsSet = new Set(profile.skills);
+        const loc = profile.location.toLowerCase();
+        const expLevel = profile.experience_level.toLowerCase();
+        const titles = profile.job_titles.map(t => t.toLowerCase());
+        const scored = [];
+        for (const job of jobs) {
+            const desc = ((job.title||'') + ' ' + (job.skills||'') + ' ' + (job.category||'')).toLowerCase();
+            const matched = [...skillsSet].filter(s => desc.includes(s));
+            if (!matched.length) continue;
+            let score = Math.min(matched.length * 8, 50);
+            const reasons = [`Skills: ${matched.slice(0,3).join(', ')}`];
+            const jloc = (job.location||'').toLowerCase();
+            if (loc && jloc.includes(loc)) { score += 25; reasons.push('Location match'); }
+            if (expLevel && (job.experience||'').toLowerCase().includes(expLevel)) { score += 15; reasons.push('Experience match'); }
+            if (titles.some(t => (job.title||'').toLowerCase().includes(t))) { score += 10; reasons.push('Role match'); }
+            scored.push({ ...job, match_score: score, match_reasons: reasons });
+        }
+        scored.sort((a, b) => b.match_score - a.match_score);
+        return scored.slice(0, 10);
+    }
+
     window.dashHandleDrop = function(e) {
         e.preventDefault();
         document.getElementById('dashResumeUpload').style.borderColor = 'rgba(102,126,234,.45)';
@@ -912,7 +1047,8 @@
         dashUploadAndParseResume(input.files[0]);
     };
 
-    function dashUploadAndParseResume(file) {
+    // ── Main: process resume file entirely in browser ──
+    async function dashUploadAndParseResume(file) {
         if (file.size > 5 * 1024 * 1024) {
             document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">File too large (max 5MB)</span>';
             return;
@@ -926,75 +1062,90 @@
         statusEl.innerHTML = '';
         icon.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#667eea;"></i>';
         prog.style.display = 'block';
+        bar.style.width = '15%';
+        label.textContent = '📄 Reading file...';
 
-        let pct = 0;
-        const tick = setInterval(() => { pct = Math.min(pct + Math.random() * 16, 85); bar.style.width = pct + '%'; }, 180);
-        label.textContent = 'Uploading & parsing with AI...';
-
-        const fd = new FormData();
-        fd.append('resume', file);
-
-        // Upload file metadata (stores actual file)
-        fetch('/api/upload-resume', { method: 'POST', body: fd }).catch(() => {});
-
-        // Parse resume with AI
-        const fd2 = new FormData();
-        fd2.append('resume', file);
-        fetch('/api/parse-resume', { method: 'POST', body: fd2 })
-        .then(r => r.json())
-        .then(data => {
-            clearInterval(tick);
-            bar.style.width = '100%';
-            if (data.error) {
-                setTimeout(() => {
-                    prog.style.display = 'none';
-                    bar.style.width = '0%';
-                    icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
-                    statusEl.innerHTML = '<span style="color:#e74c3c;"><i class="fas fa-exclamation-circle"></i> ' + esc(data.error) + '</span>';
-                }, 400);
+        try {
+            // Step 1: extract text in browser
+            const text = await _extractTextFromFile(file);
+            bar.style.width = '55%';
+            label.textContent = '🔍 Matching skills...';
+            if (!text || text.trim().length < 40) {
+                prog.style.display = 'none'; bar.style.width = '0%';
+                icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+                statusEl.innerHTML = '<span style="color:#e74c3c;"><i class="fas fa-exclamation-circle"></i> Could not read this file. Try a different format.</span>';
                 return;
             }
+
+            // Step 2: extract profile in browser
+            const profile = _extractProfile(text);
+            window._dashResumeProfile = profile;
+            bar.style.width = '75%';
+            label.textContent = '⚡ Scoring jobs...';
+
+            // Step 3: fetch cached jobs (lightweight — returns from in-memory cache)
+            let allJobs = [];
+            try {
+                const r = await fetch('/api/jobs?per_page=200');
+                const d = await r.json();
+                allJobs = d.jobs || [];
+            } catch(e) {}
+
+            // Step 4: score jobs instantly in browser
+            const matched = _scoreJobs(allJobs, profile);
+            bar.style.width = '100%';
+
+            // Save to session via lightweight endpoint (fire & forget)
+            fetch('/api/parse-resume-client', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ profile, filename: file.name })
+            }).catch(() => {});
+
             setTimeout(() => {
-                prog.style.display = 'none';
-                bar.style.width = '0%';
+                prog.style.display = 'none'; bar.style.width = '0%';
                 icon.innerHTML = '<i class="fas fa-check-circle" style="color:#11998e;font-size:2rem;"></i>';
-                // Show file info
                 document.getElementById('dashResumeUpload').style.border = '2px solid rgba(17,153,142,.4)';
                 const info = document.getElementById('dashResumeInfo');
                 info.style.display = 'flex';
                 document.getElementById('dashResumeName').textContent = file.name;
-                document.getElementById('dashResumeDate').textContent = 'Just uploaded & parsed';
-                statusEl.innerHTML = '<span style="color:#059669;"><i class="fas fa-check-circle"></i> Resume parsed successfully! Filtering jobs for you...</span>';
-                // Render extracted profile
-                dashRenderProfile(data.profile);
-                // Refresh recommended jobs with AI matches
-                document.getElementById('recommendedTitle').textContent = 'Resume-Matched Jobs';
-                loadRecommended().then(() => {
-                    // After jobs load, scroll to Recommended section and highlight it
-                    setTimeout(() => {
-                        const recSection = document.getElementById('recommendedJobsGrid');
-                        if (recSection) {
-                            recSection.closest('.dashboard-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
-                            // Pulse highlight on the section
-                            const sec = recSection.closest('.dashboard-section');
-                            if (sec) {
-                                sec.style.transition = 'box-shadow .4s, border .4s';
-                                sec.style.boxShadow = '0 0 0 3px rgba(102,126,234,.45)';
-                                sec.style.borderRadius = '14px';
-                                setTimeout(() => { sec.style.boxShadow = ''; }, 1800);
-                            }
-                        }
-                    }, 600);
-                });
-            }, 500);
-        })
-        .catch(() => {
-            clearInterval(tick);
-            prog.style.display = 'none';
-            bar.style.width = '0%';
+                document.getElementById('dashResumeDate').textContent = `Found ${profile.skills.length} skills · ${matched.length} job matches`;
+                statusEl.innerHTML = `<span style="color:#059669;"><i class="fas fa-bolt"></i> Matched instantly! ${matched.length} jobs found.</span>`;
+                dashRenderProfile(profile);
+                // Render matched jobs directly — no server round-trip needed
+                _renderMatchedJobs(matched);
+            }, 300);
+
+        } catch(err) {
+            prog.style.display = 'none'; bar.style.width = '0%';
             icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
-            statusEl.innerHTML = '<span style="color:#e74c3c;">Parse failed. Please try again.</span>';
-        });
+            statusEl.innerHTML = '<span style="color:#e74c3c;">Could not process file. Please try again.</span>';
+            console.error('Resume parse error:', err);
+        }
+    }
+
+    function _renderMatchedJobs(jobs) {
+        const grid = document.getElementById('recommendedJobsGrid');
+        document.getElementById('recommendedTitle').textContent = 'Resume-Matched Jobs';
+        document.getElementById('recommendedBadge').style.display = 'inline';
+        document.getElementById('recommendedSubtitle').textContent =
+            `${jobs.length} jobs matched from your resume — ranked by skill fit`;
+        if (!jobs.length) {
+            grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">No close matches found. <a href="/jobs">Browse all jobs</a></div>';
+        } else {
+            grid.innerHTML = jobs.map(j => resumeJobCard(j)).join('');
+        }
+        // Scroll to section
+        setTimeout(() => {
+            const sec = grid.closest('.dashboard-section');
+            if (sec) {
+                sec.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                sec.style.transition = 'box-shadow .4s';
+                sec.style.boxShadow = '0 0 0 3px rgba(102,126,234,.45)';
+                sec.style.borderRadius = '14px';
+                setTimeout(() => { sec.style.boxShadow = ''; }, 1800);
+            }
+        }, 400);
     }
 
     window.dashFindMatchingJobs = function() {

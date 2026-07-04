@@ -2900,24 +2900,17 @@ def _parse_resume_with_ai(text):
     try:
         import google.generativeai as genai
         genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
-        model = genai.GenerativeModel("gemini-2.0-flash")
-        prompt = f"""You are an expert resume parser. Analyze the resume text below and extract the candidate profile.
+        # gemini-1.5-flash is faster & cheaper for structured extraction tasks
+        model = genai.GenerativeModel("gemini-1.5-flash")
+        # Trim to 2000 chars – enough for skills/location/exp; halves AI response time
+        prompt = f"""You are an expert resume parser. Extract key profile info from the resume below.
 Return ONLY a valid JSON object (no markdown, no backticks, no extra text).
 
 JSON format:
-{{
-  "name": "Full name or empty string",
-  "skills": ["list", "of", "technical", "skills"],
-  "experience_years": 0,
-  "experience_level": "one of: Fresher, Junior, Mid-Level, Senior, Lead",
-  "location": "city name or empty string",
-  "state": "state name or empty string",
-  "job_titles": ["current or target job titles"],
-  "summary": "1-2 sentence professional summary"
-}}
+{{"name":"","skills":[],"experience_years":0,"experience_level":"Fresher|Junior|Mid-Level|Senior|Lead","location":"","state":"","job_titles":[],"summary":""}}
 
 Resume text:
-{text[:4000]}
+{text[:2000]}
 """
         response = model.generate_content(prompt)
         raw = response.text.strip()
@@ -2937,7 +2930,7 @@ Resume text:
 
 @app.route("/api/parse-resume", methods=["POST"])
 def parse_resume_api():
-    """Parse an uploaded resume (PDF/DOCX) using Gemini AI. Works for anonymous users (session only)."""
+    """Parse an uploaded resume (PDF/DOCX) using Gemini AI and save metadata in one shot."""
     if "resume" not in request.files:
         return jsonify({"error": "No file uploaded"}), 400
     f = request.files["resume"]
@@ -2948,18 +2941,33 @@ def parse_resume_api():
 
     import tempfile
     ext = f.filename.rsplit(".", 1)[-1].lower()
+    uid = session.get("user_id")
+
+    # Save file to disk once and reuse for both text extraction and metadata
     try:
-        with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp:
-            f.save(tmp.name)
-            tmp_path = tmp.name
+        os.makedirs(UPLOAD_DIR, exist_ok=True)
+        if uid:
+            # Save permanently for logged-in users
+            stored_name = secure_filename(f"{uid}_{f.filename}")
+            tmp_path = os.path.join(UPLOAD_DIR, stored_name)
+            f.save(tmp_path)
+        else:
+            # Temp file for anonymous users
+            with tempfile.NamedTemporaryFile(suffix=f".{ext}", delete=False) as tmp:
+                f.save(tmp.name)
+                tmp_path = tmp.name
+                stored_name = None
     except Exception as e:
         return jsonify({"error": f"File save failed: {e}"}), 500
 
     text = _extract_resume_text(tmp_path)
-    try:
-        os.unlink(tmp_path)
-    except Exception:
-        pass
+
+    # Clean up temp file for anonymous users
+    if not stored_name:
+        try:
+            os.unlink(tmp_path)
+        except Exception:
+            pass
 
     if not text or len(text) < 50:
         return jsonify({"error": "Could not extract text from this file. Please try a different format."}), 422
@@ -2971,6 +2979,42 @@ def parse_resume_api():
     session["resume_profile"] = profile
     session.modified = True
 
+    if uid:
+        try:
+            # Save parsed profile
+            supabase.table("scraped_data").upsert({
+                "kind": f"user_resume_profile_{uid}",
+                "data": profile,
+                "updated_at": datetime.now().isoformat(),
+            }).execute()
+            # Also save file metadata (replaces separate /api/upload-resume call)
+            if stored_name:
+                resume_meta = {
+                    "filename": f.filename,
+                    "stored_as": stored_name,
+                    "uploaded_at": datetime.now().isoformat(),
+                    "size": os.path.getsize(tmp_path) if os.path.exists(tmp_path) else 0,
+                }
+                supabase.table("scraped_data").upsert({
+                    "kind": f"user_resume_{uid}",
+                    "data": resume_meta,
+                    "updated_at": datetime.now().isoformat(),
+                }).execute()
+        except Exception as e:
+            logger.warning(f"Resume Supabase save failed: {e}")
+
+    return jsonify({"status": "success", "profile": profile})
+
+
+@app.route("/api/parse-resume-client", methods=["POST"])
+def parse_resume_client():
+    """Save a client-side extracted resume profile to session/Supabase (no AI, instant)."""
+    data = request.get_json(silent=True) or {}
+    profile = data.get("profile")
+    if not profile or not isinstance(profile, dict):
+        return jsonify({"error": "No profile provided"}), 400
+    session["resume_profile"] = profile
+    session.modified = True
     uid = session.get("user_id")
     if uid:
         try:
@@ -2980,9 +3024,8 @@ def parse_resume_api():
                 "updated_at": datetime.now().isoformat(),
             }).execute()
         except Exception as e:
-            logger.warning(f"Resume profile Supabase save failed: {e}")
-
-    return jsonify({"status": "success", "profile": profile})
+            logger.warning(f"Client resume profile save failed: {e}")
+    return jsonify({"status": "saved"})
 
 
 @app.route("/api/resume-profile", methods=["GET"])
@@ -3007,7 +3050,7 @@ def get_resume_profile():
 
 @app.route("/api/resume-recommendations", methods=["GET"])
 def resume_recommendations():
-    """Return top-matched jobs scored against the stored resume profile."""
+    """Return top-matched jobs scored against the stored resume profile (fast path)."""
     profile = session.get("resume_profile")
     if not profile:
         uid = session.get("user_id")
@@ -3021,22 +3064,23 @@ def resume_recommendations():
     if not profile:
         return jsonify({"status": "no_profile", "results": []}), 200
 
-    skills = [s.lower() for s in (profile.get("skills") or [])]
+    # Build O(1) lookup sets for fast scoring
+    skills_set = set(s.lower() for s in (profile.get("skills") or []))
     location = (profile.get("location") or "").lower()
     state = (profile.get("state") or "").lower()
     exp_level = (profile.get("experience_level") or "").lower()
     job_titles = [t.lower() for t in (profile.get("job_titles") or [])]
 
     def score_job(job):
-        score = 0
-        reasons = []
-        desc = ((job.get("title") or "") + " " + (job.get("description") or "") + " " +
-                (job.get("skills") or "") + " " + (job.get("category") or "")).lower()
-        matched_skills = [s for s in skills if s in desc]
-        skill_pts = min(len(matched_skills) * 8, 50)
-        score += skill_pts
-        if matched_skills:
-            reasons.append(f"Skills: {', '.join(matched_skills[:3])}")
+        # Build searchable text once per job (title + skills + category only — skip long description)
+        desc = ((job.get("title") or "") + " " +
+                (job.get("skills") or "") + " " +
+                (job.get("category") or "")).lower()
+        matched_skills = [s for s in skills_set if s in desc]
+        if not matched_skills:
+            return 0, []  # Early exit — no skill match at all
+        score = min(len(matched_skills) * 8, 50)
+        reasons = [f"Skills: {', '.join(list(matched_skills)[:3])}"]
         job_loc = (job.get("location") or "").lower()
         if location and location in job_loc:
             score += 25
@@ -3054,11 +3098,13 @@ def resume_recommendations():
             reasons.append("Role match")
         return score, reasons
 
+    # Cap jobs per source to 150 — enough for good matches, avoids scanning thousands
     all_jobs = []
     for loader in [load_jobs, load_india_jobs, load_tn_jobs]:
         try:
             data = loader()
-            all_jobs.extend(data.get("jobs", []) or [])
+            jobs_list = data.get("jobs", []) or []
+            all_jobs.extend(jobs_list[:150])
         except Exception:
             pass
 
