@@ -419,7 +419,7 @@
         <div class="dashboard-section">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
                 <h3 style="margin:0;"><i class="fas fa-magic text-accent"></i> AI Resume Match</h3>
-                <div id="dashResumeActions" style="display:none;gap:8px;display:flex;">
+                <div id="dashResumeActions" style="display:none;gap:8px;">
                     <button onclick="dashFindMatchingJobs()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:8px 18px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.82rem;box-shadow:0 4px 12px rgba(102,126,234,.35);">
                         <i class="fas fa-rocket"></i> Find My Jobs
                     </button>
@@ -534,25 +534,25 @@
 <script>
     // ── Trigger resume upload from Profile section button ──
     function triggerResumeUpload() {
-        // Scroll to the AI Resume Match section smoothly
+        // Must click SYNCHRONOUSLY inside the user gesture — browsers block delayed .click() on file inputs
+        const input = document.getElementById('dashResumeInput');
+        if (input) input.click();
+        // Scroll & highlight the AI Resume Match section AFTER opening the dialog
         const resumeSection = document.getElementById('dashResumeUpload');
         if (resumeSection) {
-            resumeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            // Brief pulse to draw attention
-            resumeSection.style.transition = 'all .3s';
-            resumeSection.style.borderColor = '#667eea';
-            resumeSection.style.background = 'rgba(102,126,234,.12)';
-            resumeSection.style.boxShadow = '0 0 0 4px rgba(102,126,234,.18)';
             setTimeout(() => {
-                resumeSection.style.borderColor = '';
-                resumeSection.style.background = '';
-                resumeSection.style.boxShadow = '';
-            }, 800);
+                resumeSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                resumeSection.style.transition = 'all .35s';
+                resumeSection.style.borderColor = '#667eea';
+                resumeSection.style.background = 'rgba(102,126,234,.12)';
+                resumeSection.style.boxShadow = '0 0 0 4px rgba(102,126,234,.18)';
+                setTimeout(() => {
+                    resumeSection.style.borderColor = '';
+                    resumeSection.style.background = '';
+                    resumeSection.style.boxShadow = '';
+                }, 900);
+            }, 150);
         }
-        // Trigger the hidden file input
-        setTimeout(() => {
-            document.getElementById('dashResumeInput').click();
-        }, 300);
     }
 
     function uploadProfilePic(input) {
