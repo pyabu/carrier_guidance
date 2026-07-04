@@ -387,7 +387,11 @@
 
         <!-- Recommended Jobs -->
         <div class="dashboard-section">
-            <h3><i class="fas fa-star text-accent"></i> Recommended for You</h3>
+            <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:4px;">
+                <h3 style="margin:0;"><i class="fas fa-star text-accent"></i> <span id="recommendedTitle">Recommended for You</span></h3>
+                <span id="recommendedBadge" style="display:none;background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;font-size:.7rem;padding:2px 10px;border-radius:20px;font-weight:700;">✨ Resume Matched</span>
+            </div>
+            <p id="recommendedSubtitle" class="text-muted" style="font-size:.8rem;margin:4px 0 16px;">Based on your interests &amp; skills</p>
             <div class="dash-jobs-grid" id="recommendedJobsGrid">
                 <div class="dash-empty"><i class="fas fa-spinner fa-spin"></i> Loading recommendations...</div>
             </div>
@@ -412,24 +416,63 @@
         </div>
 
         <div class="dashboard-section">
-            <h3><i class="fas fa-file-alt text-accent"></i> Quick Resume</h3>
-            <div id="dashResumeArea" style="display:flex;align-items:stretch;gap:16px;flex-wrap:wrap;">
-                <div id="dashResumeInfo"
-                    style="display:none;flex:1;display:flex;align-items:center;gap:12px;padding:16px;background:var(--bg);border-radius:10px;">
-                    <i class="fas fa-file-pdf" style="font-size:1.5rem;color:#e74c3c;"></i>
-                    <div><strong id="dashResumeName"></strong><br><small id="dashResumeDate"
-                            style="color:var(--text-secondary);"></small></div>
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:10px;">
+                <h3 style="margin:0;"><i class="fas fa-magic text-accent"></i> AI Resume Match</h3>
+                <div id="dashResumeActions" style="display:none;gap:8px;display:flex;">
+                    <button onclick="dashFindMatchingJobs()" style="background:linear-gradient(135deg,#667eea,#764ba2);color:#fff;border:none;padding:8px 18px;border-radius:10px;font-weight:600;cursor:pointer;font-size:.82rem;box-shadow:0 4px 12px rgba(102,126,234,.35);">
+                        <i class="fas fa-rocket"></i> Find My Jobs
+                    </button>
+                    <button onclick="dashClearResume()" style="background:none;border:1px solid var(--border);border-radius:10px;padding:8px 14px;cursor:pointer;color:var(--text-secondary);font-size:.82rem;">
+                        <i class="fas fa-times"></i> Clear
+                    </button>
                 </div>
-                <div id="dashResumeUpload"
-                    style="flex:1;border:2px dashed var(--border);border-radius:12px;padding:24px;text-align:center;cursor:pointer;"
-                    onclick="document.getElementById('dashResumeInput').click()">
-                    <i class="fas fa-cloud-upload-alt" style="font-size:1.5rem;color:var(--accent);"></i>
-                    <p style="margin:4px 0 0;font-size:0.9rem;">Click to upload resume (PDF, DOC, DOCX)</p>
-                    <input type="file" id="dashResumeInput" accept=".pdf,.doc,.docx" style="display:none;"
-                        onchange="dashUploadResume(this)">
-                </div>
-                <div id="dashResumeStatus" style="font-size:0.85rem;"></div>
             </div>
+
+            <!-- Upload Zone -->
+            <div id="dashResumeUpload" style="
+                border:2px dashed rgba(102,126,234,.45);border-radius:14px;padding:28px;text-align:center;
+                cursor:pointer;transition:all .25s;background:rgba(102,126,234,.04);
+            "
+            onclick="document.getElementById('dashResumeInput').click()"
+            ondragover="event.preventDefault();this.style.borderColor='#667eea';this.style.background='rgba(102,126,234,.09)'"
+            ondragleave="this.style.borderColor='rgba(102,126,234,.45)';this.style.background='rgba(102,126,234,.04)'"
+            ondrop="dashHandleDrop(event)">
+                <input type="file" id="dashResumeInput" accept=".pdf,.doc,.docx" style="display:none;" onchange="dashUploadResume(this)">
+                <div id="dashResumeIcon" style="font-size:2rem;margin-bottom:8px;"><i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i></div>
+                <div style="font-weight:600;font-size:.9rem;">Drag &amp; drop your resume or click to browse</div>
+                <div style="font-size:.76rem;color:var(--text-secondary);margin-top:4px;">PDF, DOC, DOCX — AI extracts skills, location &amp; experience</div>
+                <div id="dashResumeProgress" style="display:none;margin-top:14px;">
+                    <div style="height:6px;background:rgba(102,126,234,.15);border-radius:10px;overflow:hidden;">
+                        <div id="dashProgressBar" style="height:100%;width:0%;background:linear-gradient(90deg,#667eea,#764ba2);border-radius:10px;transition:width .4s;"></div>
+                    </div>
+                    <div id="dashProgressLabel" style="font-size:.78rem;color:#667eea;margin-top:6px;font-weight:500;">Analysing with AI...</div>
+                </div>
+            </div>
+
+            <!-- Existing file info bar -->
+            <div id="dashResumeInfo" style="display:none;align-items:center;gap:12px;padding:12px 16px;background:var(--bg);border-radius:10px;margin-top:10px;">
+                <i class="fas fa-file-pdf" style="font-size:1.4rem;color:#e74c3c;"></i>
+                <div><strong id="dashResumeName"></strong><br><small id="dashResumeDate" style="color:var(--text-secondary);"></small></div>
+                <a id="dashResumeViewLink" href="#" target="_blank" style="margin-left:auto;font-size:.78rem;color:#667eea;"><i class="fas fa-eye"></i> View</a>
+            </div>
+
+            <!-- Extracted Profile Card -->
+            <div id="dashProfileCard" style="display:none;margin-top:14px;
+                background:linear-gradient(135deg,rgba(102,126,234,.1),rgba(118,75,162,.07));
+                border:1px solid rgba(102,126,234,.3);border-radius:12px;padding:14px;
+            ">
+                <div style="font-weight:700;font-size:.85rem;color:var(--text-primary);margin-bottom:10px;">
+                    <i class="fas fa-user-check" style="color:#667eea;"></i> Profile Extracted from Resume
+                </div>
+                <div style="display:flex;flex-wrap:wrap;gap:8px;">
+                    <div id="dashLocBadge" style="display:none;"></div>
+                    <div id="dashExpBadge" style="display:none;"></div>
+                    <div id="dashSkillBadges" style="display:flex;flex-wrap:wrap;gap:6px;"></div>
+                </div>
+                <div id="dashSummaryText" style="font-size:.76rem;color:var(--text-secondary);margin-top:8px;font-style:italic;display:none;"></div>
+            </div>
+
+            <div id="dashResumeStatus" style="font-size:.85rem;margin-top:8px;"></div>
         </div>
 
         <!-- AI Course Recommendations -->
@@ -619,9 +662,23 @@
         }
     }
 
-    // ── Load Recommended Jobs ──
+    // ── Load Recommended Jobs (resume-aware) ──
     async function loadRecommended() {
         const grid = document.getElementById('recommendedJobsGrid');
+        // Try resume-based recommendations first
+        try {
+            const rr = await fetch('/api/resume-recommendations');
+            const rd = await rr.json();
+            if (rd.status === 'ok' && rd.results && rd.results.length > 0) {
+                document.getElementById('recommendedBadge').style.display = 'inline';
+                document.getElementById('recommendedSubtitle').textContent = 'Top ' + rd.results.length + ' jobs matched from your resume — ranked by AI';
+                grid.innerHTML = rd.results.map(j => resumeJobCard(j)).join('');
+                return;
+            }
+        } catch (e) { /* fall through */ }
+        // Fallback: interest-based
+        document.getElementById('recommendedBadge').style.display = 'none';
+        document.getElementById('recommendedSubtitle').textContent = 'Based on your interests & skills';
         let keywords = [];
         if (interestsList.length > 0) keywords.push(interestsList[0]);
         if (skillsList.length > 0) keywords.push(skillsList[0]);
@@ -638,6 +695,21 @@
         } catch (e) {
             grid.innerHTML = '<div class="dash-empty" style="grid-column:1/-1;">Could not load recommendations.</div>';
         }
+    }
+
+    function resumeJobCard(j) {
+        const scoreClass = j.match_score >= 60 ? 'background:linear-gradient(135deg,#11998e,#38ef7d)' : (j.match_score >= 35 ? 'background:linear-gradient(135deg,#f7971e,#ffd200);color:#333' : 'background:linear-gradient(135deg,#667eea,#764ba2)');
+        const reasons = (j.match_reasons || []).join(' · ');
+        const logo = j.company_logo || '/company-logo/' + encodeURIComponent(j.company || '?');
+        return '<div class="dash-job-card" style="position:relative;" onclick="window.location=\'/job/' + (j.id||'') + '\'">' +
+            '<span style="position:absolute;top:10px;right:10px;' + scoreClass + ';color:#fff;font-size:.68rem;font-weight:700;padding:2px 8px;border-radius:20px;">' + Math.min(j.match_score||0,99) + '% match</span>' +
+            '<div class="dash-job-card-head">' +
+            '<img src="' + logo + '" alt="" onerror="this.src=\'/company-logo/' + encodeURIComponent(j.company||'') + '\'">' +
+            '<div><h4 style="padding-right:70px;">' + esc(j.title||'Untitled') + '</h4><small>' + esc(j.company||'') + '</small></div></div>' +
+            '<div class="dash-job-meta"><span><i class="fas fa-map-marker-alt"></i> ' + esc(j.location||'Remote') + '</span><span><i class="fas fa-briefcase"></i> ' + esc(j.type||'Full-time') + '</span></div>' +
+            (reasons ? '<div style="font-size:.72rem;color:#11998e;background:rgba(17,153,142,.1);padding:3px 8px;border-radius:6px;display:inline-block;"><i class="fas fa-check-circle"></i> ' + esc(reasons) + '</div>' : '') +
+            '<div class="dash-job-foot"><span></span><div style="display:flex;gap:6px;"><a href="' + (j.apply_url||'#') + '" target="_blank" class="btn btn-primary btn-sm" onclick="event.stopPropagation()">Apply</a><a href="/job/' + (j.id||'') + '" class="btn btn-outline btn-sm" onclick="event.stopPropagation()">View</a></div></div>' +
+            '</div>';
     }
 
     // ── Save Job (no page reload) ──
@@ -749,6 +821,15 @@
 
     // ── Dashboard Resume ──
     async function loadDashResume() {
+        // Restore parsed profile from session/Supabase
+        try {
+            const rp = await fetch('/api/resume-profile');
+            const rpd = await rp.json();
+            if (rpd.status === 'ok' && rpd.profile) {
+                dashRenderProfile(rpd.profile);
+            }
+        } catch(e) { /* no profile yet */ }
+        // Restore file metadata
         try {
             const res = await fetch('/api/dashboard-stats');
             const d = await res.json();
@@ -756,38 +837,154 @@
                 document.getElementById('dashResumeUpload').style.display = 'none';
                 const info = document.getElementById('dashResumeInfo');
                 info.style.display = 'flex';
-                // Make it a link
-                info.outerHTML = '<a href="/api/serve-upload/' + d.resume.stored_as + '" target="_blank" style="text-decoration:none; color:inherit; flex:1;">' + info.outerHTML + '</a>';
                 document.getElementById('dashResumeName').textContent = d.resume.filename;
-                document.getElementById('dashResumeDate').textContent = 'Uploaded ' + (d.resume.uploaded_at ? d.resume.uploaded_at.split("T")[0] : "");
+                document.getElementById('dashResumeDate').textContent = 'Uploaded ' + (d.resume.uploaded_at ? d.resume.uploaded_at.split('T')[0] : '');
+                const link = document.getElementById('dashResumeViewLink');
+                if (link) link.href = '/api/serve-upload/' + d.resume.stored_as;
             }
-        } catch (e) { console.error("Resume load error", e); }
+        } catch (e) { console.error('Resume load error', e); }
     }
-    window.dashUploadResume = function (input) {
+
+    function dashRenderProfile(profile) {
+        const card = document.getElementById('dashProfileCard');
+        const locBadge = document.getElementById('dashLocBadge');
+        const expBadge = document.getElementById('dashExpBadge');
+        const skillsDiv = document.getElementById('dashSkillBadges');
+        const summaryDiv = document.getElementById('dashSummaryText');
+        const actions = document.getElementById('dashResumeActions');
+        card.style.display = 'block';
+        actions.style.display = 'flex';
+        if (profile.location || profile.state) {
+            const loc = [profile.location, profile.state].filter(Boolean).join(', ');
+            locBadge.innerHTML = '<span style="background:rgba(17,153,142,.15);color:#11998e;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:600;"><i class="fas fa-map-marker-alt"></i> ' + esc(loc) + '</span>';
+            locBadge.style.display = 'inline-block';
+        }
+        if (profile.experience_level) {
+            const expYrs = profile.experience_years ? ' (' + profile.experience_years + ' yrs)' : '';
+            expBadge.innerHTML = '<span style="background:rgba(102,126,234,.15);color:#667eea;padding:3px 10px;border-radius:20px;font-size:.73rem;font-weight:600;"><i class="fas fa-layer-group"></i> ' + esc(profile.experience_level) + expYrs + '</span>';
+            expBadge.style.display = 'inline-block';
+        }
+        const skills = profile.skills || [];
+        skillsDiv.innerHTML = skills.slice(0, 10).map(s =>
+            '<span style="background:linear-gradient(135deg,rgba(102,126,234,.15),rgba(118,75,162,.1));color:#667eea;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;border:1px solid rgba(102,126,234,.2);">' + esc(s) + '</span>'
+        ).join('');
+        if (skills.length > 10) skillsDiv.innerHTML += '<span style="color:var(--text-secondary);font-size:.72rem;align-self:center;">+' + (skills.length - 10) + ' more</span>';
+        if (profile.summary) {
+            summaryDiv.textContent = '"' + profile.summary + '"';
+            summaryDiv.style.display = 'block';
+        }
+        // Store globally for filter button
+        window._dashResumeProfile = profile;
+    }
+
+    window.dashHandleDrop = function(e) {
+        e.preventDefault();
+        document.getElementById('dashResumeUpload').style.borderColor = 'rgba(102,126,234,.45)';
+        if (e.dataTransfer.files[0]) dashUploadAndParseResume(e.dataTransfer.files[0]);
+    };
+
+    window.dashUploadResume = function(input) {
         if (!input.files.length) return;
-        const file = input.files[0];
+        dashUploadAndParseResume(input.files[0]);
+    };
+
+    function dashUploadAndParseResume(file) {
         if (file.size > 5 * 1024 * 1024) {
             document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">File too large (max 5MB)</span>';
             return;
         }
+        const icon = document.getElementById('dashResumeIcon');
+        const prog = document.getElementById('dashResumeProgress');
+        const bar = document.getElementById('dashProgressBar');
+        const label = document.getElementById('dashProgressLabel');
+        const statusEl = document.getElementById('dashResumeStatus');
+
+        statusEl.innerHTML = '';
+        icon.innerHTML = '<i class="fas fa-spinner fa-spin" style="color:#667eea;"></i>';
+        prog.style.display = 'block';
+
+        let pct = 0;
+        const tick = setInterval(() => { pct = Math.min(pct + Math.random() * 16, 85); bar.style.width = pct + '%'; }, 180);
+        label.textContent = 'Uploading & parsing with AI...';
+
         const fd = new FormData();
         fd.append('resume', file);
-        document.getElementById('dashResumeStatus').innerHTML = '<i class="fas fa-spinner fa-spin"></i> Uploading...';
-        fetch('/api/upload-resume', { method: 'POST', body: fd })
-            .then(r => r.json()).then(d => {
-                if (d.error) {
-                    document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">' + d.error + '</span>';
-                } else {
-                    document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#059669;">✓ Uploaded!</span>';
-                    document.getElementById('dashResumeUpload').style.display = 'none';
-                    const info = document.getElementById('dashResumeInfo');
-                    info.style.display = 'flex';
-                    document.getElementById('dashResumeName').textContent = d.filename;
-                    document.getElementById('dashResumeDate').textContent = 'Just uploaded';
-                }
-            }).catch(() => {
-                document.getElementById('dashResumeStatus').innerHTML = '<span style="color:#e74c3c;">Upload failed</span>';
-            });
+
+        // Upload file metadata (stores actual file)
+        fetch('/api/upload-resume', { method: 'POST', body: fd }).catch(() => {});
+
+        // Parse resume with AI
+        const fd2 = new FormData();
+        fd2.append('resume', file);
+        fetch('/api/parse-resume', { method: 'POST', body: fd2 })
+        .then(r => r.json())
+        .then(data => {
+            clearInterval(tick);
+            bar.style.width = '100%';
+            if (data.error) {
+                setTimeout(() => {
+                    prog.style.display = 'none';
+                    bar.style.width = '0%';
+                    icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+                    statusEl.innerHTML = '<span style="color:#e74c3c;"><i class="fas fa-exclamation-circle"></i> ' + esc(data.error) + '</span>';
+                }, 400);
+                return;
+            }
+            setTimeout(() => {
+                prog.style.display = 'none';
+                bar.style.width = '0%';
+                icon.innerHTML = '<i class="fas fa-check-circle" style="color:#11998e;font-size:2rem;"></i>';
+                // Show file info
+                document.getElementById('dashResumeUpload').style.border = '2px solid rgba(17,153,142,.4)';
+                const info = document.getElementById('dashResumeInfo');
+                info.style.display = 'flex';
+                document.getElementById('dashResumeName').textContent = file.name;
+                document.getElementById('dashResumeDate').textContent = 'Just uploaded & parsed';
+                statusEl.innerHTML = '<span style="color:#059669;"><i class="fas fa-check-circle"></i> Resume parsed successfully!</span>';
+                // Render extracted profile
+                dashRenderProfile(data.profile);
+                // Refresh recommended jobs with AI matches
+                document.getElementById('recommendedTitle').textContent = 'Resume-Matched Jobs';
+                loadRecommended();
+            }, 500);
+        })
+        .catch(() => {
+            clearInterval(tick);
+            prog.style.display = 'none';
+            bar.style.width = '0%';
+            icon.innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+            statusEl.innerHTML = '<span style="color:#e74c3c;">Parse failed. Please try again.</span>';
+        });
+    }
+
+    window.dashFindMatchingJobs = function() {
+        const p = window._dashResumeProfile;
+        if (!p) return;
+        const keyword = (p.job_titles && p.job_titles[0]) || (p.skills && p.skills[0]) || '';
+        const loc = p.location || '';
+        const params = new URLSearchParams();
+        if (keyword) params.set('keyword', keyword);
+        if (loc) params.set('location', loc);
+        window.location.href = '/jobs?' + params.toString();
+    };
+
+    window.dashClearResume = function() {
+        window._dashResumeProfile = null;
+        document.getElementById('dashProfileCard').style.display = 'none';
+        document.getElementById('dashResumeActions').style.display = 'none';
+        document.getElementById('dashLocBadge').style.display = 'none';
+        document.getElementById('dashExpBadge').style.display = 'none';
+        document.getElementById('dashSkillBadges').innerHTML = '';
+        document.getElementById('dashSummaryText').style.display = 'none';
+        document.getElementById('dashResumeStatus').innerHTML = '';
+        document.getElementById('dashResumeIcon').innerHTML = '<i class="fas fa-cloud-upload-alt" style="color:#667eea;"></i>';
+        document.getElementById('dashResumeInfo').style.display = 'none';
+        document.getElementById('dashResumeUpload').style.border = '2px dashed rgba(102,126,234,.45)';
+        document.getElementById('dashResumeInput').value = '';
+        document.getElementById('recommendedTitle').textContent = 'Recommended for You';
+        document.getElementById('recommendedBadge').style.display = 'none';
+        document.getElementById('recommendedSubtitle').textContent = 'Based on your interests & skills';
+        loadRecommended();
     };
 }) ();
 </script>
