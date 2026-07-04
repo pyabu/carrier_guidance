@@ -149,9 +149,9 @@
             scrollToBottom();
         }
 
-        // Timeout controller — 30s for Gemini (it can take time to think)
+        // Timeout controller — 12s (backend Gemini times out at 8s, so we always get a response)
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 30000);
+        const timeoutId = setTimeout(() => controller.abort(), 12000);
 
         try {
             const response = await fetch('/api/career_copilot', {

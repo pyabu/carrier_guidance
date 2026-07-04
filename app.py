@@ -1680,7 +1680,12 @@ def career_copilot():
     if api_key:
         try:
             import google.genai as genai_new
-            client = genai_new.Client(api_key=api_key)
+            from google.genai import types as genai_types
+            # 8-second timeout — fails fast on 429 quota (tenacity retries for 50s otherwise)
+            client = genai_new.Client(
+                api_key=api_key,
+                http_options=genai_types.HttpOptions(timeout=8000)
+            )
 
             # Load trends for grounding
             trends = {}
@@ -1716,10 +1721,9 @@ Keep responses concise but comprehensive. If the user asks something unrelated t
                 ai_response = response.text.strip()
             except Exception as e:
                 err_str = str(e)
-                if "429" in err_str or "quota" in err_str.lower() or "RESOURCE_EXHAUSTED" in err_str:
-                    logger.warning("Gemini quota exceeded — using smart fallback.")
+                if "429" in err_str or "quota" in err_str.lower() or "RESOURCE_EXHAUSTED" in err_str or "timeout" in err_str.lower():
+                    logger.warning("Gemini quota/timeout — using smart fallback.")
                     ai_response = _fallback_response(user_msg)
-                    ai_response += "\n\n*(Note: AI is in high-demand mode — showing curated response)*"
                 else:
                     raise e
 
