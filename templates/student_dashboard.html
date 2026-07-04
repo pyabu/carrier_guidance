@@ -1083,12 +1083,23 @@
             bar.style.width = '75%';
             label.textContent = '⚡ Scoring jobs...';
 
-            // Step 3: fetch cached jobs (lightweight — returns from in-memory cache)
+            // Step 3: fetch all job sources in parallel (lightweight — from in-memory cache)
             let allJobs = [];
             try {
-                const r = await fetch('/api/jobs?per_page=200');
-                const d = await r.json();
-                allJobs = d.jobs || [];
+                const [r1, r2, r3] = await Promise.all([
+                    fetch('/api/jobs?per_page=200'),
+                    fetch('/api/jobs/india?per_page=200'),
+                    fetch('/api/jobs/tamilnadu?per_page=200'),
+                ]);
+                const [d1, d2, d3] = await Promise.all([r1.json(), r2.json(), r3.json()]);
+                // Merge all sources, deduplicate by title+company
+                const seen = new Set();
+                for (const d of [d1, d2, d3]) {
+                    for (const j of (d.jobs || [])) {
+                        const key = `${(j.title||'').toLowerCase()}-${(j.company||'').toLowerCase()}`;
+                        if (!seen.has(key)) { seen.add(key); allJobs.push(j); }
+                    }
+                }
             } catch(e) {}
 
             // Step 4: score jobs instantly in browser
