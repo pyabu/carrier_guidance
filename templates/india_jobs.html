@@ -337,26 +337,108 @@
             <!-- AI Resume Match Widget -->
             {% include "resume_match_widget.html" %}
             <script>
-            /* Override applyResumeFilters for India Jobs page (uses activeFilters object + fetchJobs) */
+            /* Override applyResumeFilters for India Jobs page — uses activeFilters + fetchJobs */
             function applyResumeFilters() {
                 if (!_resumeProfile) return;
+
+                var btn = document.getElementById('resumeFindJobsBtn');
+                var origHTML = btn.innerHTML;
+                btn.disabled = true;
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Finding matches...';
+
+                // Show recommendations panel with animated progress
+                var panel = document.getElementById('resumeRecommendationsPanel');
+                var grid  = document.getElementById('resumeRecommendationsGrid');
+                panel.style.display = 'block';
+                grid.innerHTML = [
+                    '<div style="grid-column:1/-1;padding:20px 0;">',
+                    '  <div style="display:flex;flex-direction:column;align-items:center;gap:12px;">',
+                    '    <div style="width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#ff9933,#ff6600);display:flex;align-items:center;justify-content:center;">',
+                    '      <i class="fas fa-magic" style="color:#fff;font-size:1.1rem;"></i>',
+                    '    </div>',
+                    '    <div style="font-weight:700;font-size:.95rem;color:var(--text-primary);">Scanning India jobs for your profile...</div>',
+                    '    <div id="resumeFilterSteps" style="font-size:.8rem;color:var(--text-secondary);text-align:center;"></div>',
+                    '    <div style="width:200px;height:6px;background:rgba(255,153,0,.15);border-radius:10px;overflow:hidden;">',
+                    '      <div id="resumeFilterBar" style="height:100%;width:0%;background:linear-gradient(90deg,#ff9933,#ff6600);border-radius:10px;transition:width .4s;"></div>',
+                    '    </div>',
+                    '  </div>',
+                    '</div>'
+                ].join('');
+                panel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+                // Animate steps
+                var steps = [
+                    [15, '🔍 Reading your skills...'],
+                    [40, '📍 Checking location preferences...'],
+                    [65, '🎯 Matching India job requirements...'],
+                    [85, '⭐ Ranking top matches...'],
+                ];
+                steps.forEach(function(s, i) {
+                    setTimeout(function() {
+                        var bar   = document.getElementById('resumeFilterBar');
+                        var label = document.getElementById('resumeFilterSteps');
+                        if (bar)   bar.style.width = s[0] + '%';
+                        if (label) label.textContent = s[1];
+                    }, i * 400);
+                });
+
+                // Apply to india-specific filters
                 var keyword = (_resumeProfile.job_titles && _resumeProfile.job_titles[0])
                     || (_resumeProfile.skills && _resumeProfile.skills[0]) || '';
                 if (keyword) {
                     var inp = document.getElementById('searchInput');
                     if (inp) inp.value = keyword;
-                    if (typeof activeFilters !== 'undefined') activeFilters.keyword = keyword;
+                    activeFilters.keyword = keyword;
                 }
-                if (_resumeProfile.location && typeof activeFilters !== 'undefined') {
-                    activeFilters.city = _resumeProfile.location;
-                }
-                if (_resumeProfile.experience_level && typeof activeFilters !== 'undefined') {
-                    activeFilters.experience = _resumeProfile.experience_level;
-                }
-                if (typeof currentPage !== 'undefined') currentPage = 1;
-                if (typeof allJobs !== 'undefined') allJobs = [];
-                if (typeof fetchJobs === 'function') fetchJobs();
-                loadResumeRecommendations();
+                if (_resumeProfile.location) activeFilters.city = _resumeProfile.location;
+                if (_resumeProfile.experience_level) activeFilters.experience = _resumeProfile.experience_level;
+                currentPage = 1;
+                allJobs = [];
+                fetchJobs(); // Refresh job list with resume filters
+
+                // Fetch matched jobs from API
+                setTimeout(function() {
+                    fetch('/api/resume-recommendations')
+                    .then(function(r) { return r.json(); })
+                    .then(function(data) {
+                        var bar = document.getElementById('resumeFilterBar');
+                        if (bar) bar.style.width = '100%';
+                        setTimeout(function() {
+                            btn.disabled = false;
+                            btn.innerHTML = origHTML;
+                            var countEl = document.getElementById('resumeMatchCount');
+                            if (!data.results || data.results.length === 0) {
+                                grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:24px;color:var(--text-secondary);"><i class="fas fa-search" style="font-size:1.5rem;margin-bottom:8px;display:block;"></i>No strong matches yet.<br><small>Try uploading a more detailed resume with specific skills.</small></div>';
+                                if (countEl) countEl.textContent = '';
+                                return;
+                            }
+                            if (countEl) countEl.textContent = '(' + data.results.length + ' matches)';
+                            grid.innerHTML = '';
+                            data.results.forEach(function(job) {
+                                var scoreClass = job.match_score >= 60 ? 'high' : (job.match_score >= 35 ? 'med' : '');
+                                var reasons = (job.match_reasons || []).join(' · ');
+                                var applyUrl = job.apply_url || '#';
+                                var card = document.createElement('div');
+                                card.className = 'resume-match-card';
+                                card.innerHTML =
+                                    '<div class="match-score-badge ' + scoreClass + '">' + Math.min(job.match_score, 99) + '% match</div>' +
+                                    '<div style="font-weight:700;font-size:.88rem;color:var(--text-primary);margin-bottom:4px;padding-right:70px;">' + (job.title || 'Untitled') + '</div>' +
+                                    '<div style="font-size:.8rem;color:#ff9933;font-weight:600;margin-bottom:6px;"><i class="fas fa-building" style="font-size:.72rem;"></i> ' + (job.company || 'Company') + '</div>' +
+                                    (job.location ? '<div style="font-size:.75rem;color:var(--text-secondary);margin-bottom:6px;"><i class="fas fa-map-marker-alt"></i> ' + job.location + '</div>' : '') +
+                                    (reasons ? '<div style="font-size:.72rem;color:#11998e;background:rgba(17,153,142,.1);padding:3px 8px;border-radius:6px;display:inline-block;margin-bottom:8px;"><i class="fas fa-check-circle"></i> ' + reasons + '</div>' : '') +
+                                    '<div style="display:flex;gap:6px;margin-top:8px;">' +
+                                        '<a href="' + applyUrl + '" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="flex:1;text-align:center;background:linear-gradient(135deg,#ff9933,#ff6600);color:#fff;padding:8px 0;border-radius:8px;font-size:.8rem;font-weight:600;text-decoration:none;">Apply <i class="fas fa-external-link-alt" style="font-size:.65rem;"></i></a>' +
+                                    '</div>';
+                                grid.appendChild(card);
+                            });
+                        }, 300);
+                    })
+                    .catch(function() {
+                        btn.disabled = false;
+                        btn.innerHTML = origHTML;
+                        grid.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:20px;color:var(--text-secondary);">Failed to load recommendations. Please try again.</div>';
+                    });
+                }, 1800);
             }
             </script>
 
