@@ -3147,10 +3147,13 @@ def resume_recommendations():
     job_titles = [t.lower() for t in (profile.get("job_titles") or [])]
 
     def score_job(job):
-        # Build searchable text once per job (title + skills + category only — skip long description)
-        desc = ((job.get("title") or "") + " " +
-                (job.get("skills") or "") + " " +
-                (job.get("category") or "")).lower()
+        # skills field may be a list or a string — normalise to string
+        raw_skills = job.get("skills") or ""
+        if isinstance(raw_skills, list):
+            raw_skills = " ".join(raw_skills)
+        desc = ((job.get("title") or "") + " " + raw_skills + " " +
+                (job.get("category") or "") + " " +
+                (job.get("description") or "")[:200]).lower()
         matched_skills = [s for s in skills_set if s in desc]
         if not matched_skills:
             return 0, []  # Early exit — no skill match at all
@@ -3164,7 +3167,7 @@ def resume_recommendations():
             score += 10
             reasons.append("State match")
         job_exp = (job.get("experience") or "").lower()
-        if exp_level and exp_level in job_exp:
+        if exp_level and (exp_level in job_exp or job_exp in exp_level):
             score += 15
             reasons.append("Experience match")
         job_title_low = (job.get("title") or "").lower()
