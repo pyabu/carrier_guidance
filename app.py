@@ -2971,24 +2971,79 @@ def _extract_resume_text(filepath):
 
 
 def _parse_resume_with_ai(text):
-    """Send resume text to Gemini and return a structured profile dict."""
-    try:
-        import google.generativeai as genai
-        genai.configure(api_key=os.environ.get("GEMINI_API_KEY", ""))
-        # gemini-1.5-flash is faster & cheaper for structured extraction tasks
-        model = genai.GenerativeModel("gemini-1.5-flash")
-        # Trim to 2000 chars – enough for skills/location/exp; halves AI response time
-        prompt = f"""You are an expert resume parser. Extract key profile info from the resume below.
+    """Send resume text to AI and return a structured profile dict."""
+    prompt = f"""You are an expert resume parser. Extract key profile info from the resume below.
 Return ONLY a valid JSON object (no markdown, no backticks, no extra text).
 
 JSON format:
 {{"name":"","skills":[],"experience_years":0,"experience_level":"Fresher|Junior|Mid-Level|Senior|Lead","location":"","state":"","job_titles":[],"summary":""}}
 
 Resume text:
-{text[:2000]}
+{text[:2500]}
 """
-        response = model.generate_content(prompt)
-        raw = response.text.strip()
+    raw = None
+
+    # 1. Try OpenRouter (loop through free models)
+    or_key = os.environ.get("OPENROUTER_API_KEY", "")
+    if or_key:
+        or_models = [
+            "google/gemma-4-31b-it:free",
+            "meta-llama/llama-3.3-70b-instruct:free",
+            "qwen/qwen3-next-80b-a3b-instruct:free",
+            "liquid/lfm-2.5-1.2b-instruct:free"
+        ]
+        import urllib.request as _ur
+        for or_model in or_models:
+            if raw: break
+            try:
+                payload = json.dumps({
+                    "model": or_model,
+                    "messages": [{"role": "user", "content": prompt}],
+                    "max_tokens": 500,
+                    "temperature": 0.1,
+                    # NOTE: not all free models support strict json_object format, so we just ask nicely in prompt
+                }).encode()
+                req = _ur.Request(
+                    "https://openrouter.ai/api/v1/chat/completions",
+                    data=payload,
+                    headers={
+                        "Authorization": f"Bearer {or_key}",
+                        "Content-Type": "application/json",
+                        "HTTP-Referer": "https://careerguidance.me",
+                        "X-Title": "CareerGuidance AI Parser",
+                    },
+                )
+                with _ur.urlopen(req, timeout=12) as resp:
+                    res = json.loads(resp.read())
+                    choices = res.get("choices", [])
+                    if choices and choices[0].get("message", {}).get("content"):
+                        raw = choices[0]["message"]["content"].strip()
+            except Exception as e:
+                logger.warning(f"OpenRouter model {or_model} parse failed: {e}")
+                continue
+
+    # 2. Try Gemini 2.0 via new SDK if OR failed
+    if not raw:
+        try:
+            gemini_key = os.environ.get("GEMINI_API_KEY", "")
+            if gemini_key:
+                import google.genai as genai_new
+                client = genai_new.Client(api_key=gemini_key)
+                response = client.models.generate_content(
+                    model='gemini-2.0-flash',
+                    contents=prompt
+                )
+                if response and response.text:
+                    raw = response.text.strip()
+        except Exception as e:
+            logger.warning(f"Gemini resume parse failed: {e}")
+
+    if not raw:
+        logger.error("AI resume parsing failed on all backends.")
+        return None
+
+    # Clean JSON markdown blocks if any
+    try:
         if raw.startswith("```"):
             raw = raw.split("```")[1]
             if raw.startswith("json"):
@@ -2999,7 +3054,7 @@ Resume text:
             result["skills"] = [s.strip() for s in result["skills"].split(",") if s.strip()]
         return result
     except Exception as e:
-        logger.error(f"AI resume parse error: {e}")
+        logger.error(f"Failed to decode AI resume JSON: {e} | Raw: {raw}")
         return None
 
 
