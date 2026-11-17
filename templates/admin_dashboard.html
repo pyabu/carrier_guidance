@@ -937,6 +937,12 @@
                             <tbody id="user-rows"></tbody>
                         </table>
                     </div>
+                    <!-- Bulk action bar -->
+                    <div id="bulk-bar" style="display:none; padding:10px 20px; background:rgba(99,102,241,0.12); border-top:1px solid var(--border-color); align-items:center; gap:14px;">
+                        <span id="bulk-count" style="font-size:12px; font-weight:700; color:var(--text-main);"></span>
+                        <button class="action-btn danger" style="padding:6px 14px; font-size:11px;" onclick="bulkDeleteUsers()"><i class="fas fa-trash"></i> Delete Selected</button>
+                        <button class="action-btn secondary" style="padding:6px 14px; font-size:11px;" onclick="unselectAll()"><i class="fas fa-times"></i> Clear</button>
+                    </div>
                 </div>
             </div>
 
@@ -1707,9 +1713,10 @@
         document.getElementById('view-' + viewId).classList.add('active');
         document.getElementById('view-title').innerText = el.innerText.trim();
         // Auto-load data for specific tabs
-        if (viewId === 'scraper') loadScraperStatus();
-        if (viewId === 'jobs')    { jobs.length === 0 && refreshDashboard(); }
-        if (viewId === 'seo')     { loadSeoSettings(); loadKeywords(); }
+        if (viewId === 'scraper')  loadScraperStatus();
+        if (viewId === 'jobs')     { jobs.length === 0 && refreshDashboard(); }
+        if (viewId === 'seo')      { loadSeoSettings(); loadKeywords(); }
+        if (viewId === 'analytics') initAnalyticsCharts(users.length || 0, jobs.length || 0);
     }
 
     // --- Backend Sync ---
@@ -1842,13 +1849,14 @@
     // --- Scraper Logic ---
     async function runScraperManually() {
         const btn = document.getElementById('trigger-btn');
-        const console = document.getElementById('scraper-console');
+        const consoleEl = document.getElementById('scraper-console');
         const newJobsContainer = document.getElementById('new-jobs-container');
         const newJobsList = document.getElementById('new-jobs-list');
 
+        if (!btn) return;
         btn.disabled = true;
         btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> SYNC IN PROGRESS...';
-        newJobsContainer.style.display = 'none';
+        if (newJobsContainer) newJobsContainer.style.display = 'none';
 
         logToConsole("Handshaking with backend scraping gateway...");
 
@@ -1862,7 +1870,7 @@
                 logToConsole(`SUCCESS: ${data.new_jobs.length} new job opportunities identified.`);
 
                 // Show new jobs
-                if (data.new_jobs && data.new_jobs.length > 0) {
+                if (data.new_jobs && data.new_jobs.length > 0 && newJobsList) {
                     newJobsList.innerHTML = data.new_jobs.map(j => `
                         <div style="background: rgba(52, 211, 153, 0.1); border: 1px solid rgba(52, 211, 153, 0.2); padding: 10px; border-radius: 8px; display: flex; justify-content: space-between; align-items: center;">
                             <div>
@@ -1872,11 +1880,11 @@
                             <a href="${j.apply_url}" target="_blank" class="mini-btn"><i class="fas fa-arrow-right"></i></a>
                         </div>
                     `).join('');
-                    newJobsContainer.style.display = 'block';
+                    if (newJobsContainer) newJobsContainer.style.display = 'block';
                 }
 
-                btn.disabled = false;
-                btn.innerHTML = '<i class="fas fa-play"></i> INITIATE FULL SYNC';
+                if (btn) { btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-play"></i> INITIATE FULL SYNC'; }
                 refreshDashboard();
             }, 2500);
         }
@@ -2281,6 +2289,8 @@
         document.getElementById('theme-secondary-val').textContent = sec;
         document.getElementById('theme-font').value = font;
         document.getElementById('theme-layout').value = layout;
+        syncLayoutCards(layout);
+        showToast('<i class="fas fa-paint-roller"></i> Preset applied!', 'info');
     }
 
     async function saveThemeSettings() {
@@ -2457,15 +2467,6 @@
         const card = document.querySelector(`.layout-card[data-layout="${value}"]`);
         if (card && nameEl) nameEl.textContent = card.querySelector('.layout-name').textContent;
         if (descEl) descEl.textContent = _layoutDescriptions[value] || '';
-    }
-
-    // Patch switchTab to load analytics charts on demand
-    const _origSwitchTab = switchTab;
-    function switchTab(viewId, el) {
-        _origSwitchTab(viewId, el);
-        if (viewId === 'analytics') {
-            initAnalyticsCharts(users.length || 0, jobs.length || 0);
-        }
     }
 
     loadAdminTheme();
