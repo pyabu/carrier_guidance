@@ -6,7 +6,6 @@ Anti-blocking, polite crawling, and pipeline configuration.
 BOT_NAME = "careerguidance"
 SPIDER_MODULES = ["scrapy_jobs.spiders"]
 NEWSPIDER_MODULE = "scrapy_jobs.spiders"
-
 # ── Crawl Responsibly ──────────────────────────────────────────────────
 ROBOTSTXT_OBEY = False          # Many job sites block bots via robots.txt
 CONCURRENT_REQUESTS = 4         # Reduced to avoid triggering rate limits
